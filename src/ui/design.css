@@ -72,6 +72,25 @@
   --shadow-3: 0 20px 60px rgba(0,0,0,.62);
   --glow-sea: 0 0 0 1px rgba(63,182,196,.35), 0 0 18px rgba(63,182,196,.18);
 
+  /* Screen furniture. Where the permanent panels live, in one place, so that two panels written
+     by two different hands never claim the same rectangle. Anything that docks itself reads these
+     rather than guessing. The bar across the top publishes --hud-height from src/ui/panels/hud.js.
+       gutter        the margin every docked panel keeps from the edge of the screen
+       insp-width    the right hand inspector column
+       bottom-chrome the camera modes, the place shortcuts and the place readout above them
+       map-right     puts the minimap clear to the left of the inspector column
+       board-inset   every full screen board sits this far in, so they all open in the same frame */
+  /* The bar across the top re-publishes this from src/ui/panels/hud.js, including its own
+     narrow-screen value. Declared here too so that anything docking under the bar still lands
+     somewhere sensible if the bar itself never mounts. */
+  --hud-height: 74px;
+  --gutter: 16px;
+  --insp-width: 376px;
+  --bottom-chrome: 96px;
+  --map-right: calc(var(--gutter) + var(--insp-width) + 12px);
+  --map-bottom: calc(var(--bottom-chrome) + 8px);
+  --board-inset: 2.6vh 2.2vw;
+
   --blur: blur(14px) saturate(1.15);
   --ease: cubic-bezier(.22,.61,.36,1);
   --ease-out: cubic-bezier(.16,1,.3,1);
@@ -215,6 +234,32 @@
 .anchor-br { position: absolute; bottom: var(--sp-4); right: var(--sp-4); }
 .anchor-tc { position: absolute; top: var(--sp-4); left: 50%; transform: translateX(-50%); }
 .anchor-bc { position: absolute; bottom: var(--sp-4); left: 50%; transform: translateX(-50%); }
+
+/* ---- The launcher rail -------------------------------------------------
+   The column of buttons that opens the full boards. Six panels each contain a rail() helper that
+   builds it if it does not exist yet, and each of them used to carry its own copy of this CSS: six
+   copies of one rule, guarded by a shared style id so that whichever panel loaded first silently
+   decided the layout for the other five. It lives here now, once.
+
+   Top left rather than vertically centred. Centred, it sat straight across the middle of the left
+   edge, which is where the info view legend and the island log both open, and the legend covered
+   the whole rail whenever a data layer was on. Top left it is a control cluster under the bar, and
+   the bottom left belongs to the log. */
+#twin-rail {
+  position: absolute; left: var(--sp-3); top: calc(var(--hud-height) + var(--sp-3));
+  display: flex; flex-direction: column; gap: var(--sp-2); z-index: 20;
+}
+.rail-btn {
+  position: relative; width: 116px; justify-content: flex-start; letter-spacing: .1em;
+  font-size: var(--fs-micro); text-transform: uppercase; padding: var(--sp-3) var(--sp-3);
+}
+.rail-btn .dot {
+  position: absolute; top: -5px; right: -5px; min-width: 17px; height: 17px; padding: 0 4px;
+  border-radius: var(--r-pill); background: var(--sun); color: var(--t-on-accent);
+  font: 700 10px/17px var(--f-num); text-align: center;
+}
+.rail-btn .dot:empty { display: none; }
+@media (max-width: 860px) { #twin-rail { left: var(--sp-2); gap: 4px; } .rail-btn { width: 96px; } }
 
 /* Small screens: panels dock instead of floating. */
 @media (max-width: 860px) {

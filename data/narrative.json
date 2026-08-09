@@ -1899,8 +1899,6 @@
       "register": "wry",
       "of_this_place": "The North Gorge Walk is the island's single most visited thing and it sits on a headland that takes the full east swell. It has been closed before for erosion under the boardwalk. A bus of thirty children does not un-book.",
       "season_bias": {
-        "gubinbara": 1.2,
-        "nunmatta": 1.1,
         "high_summer": 1.3
       },
       "trigger": {
@@ -2202,10 +2200,6 @@
       "base_weight": 0.5,
       "register": "quiet-worry",
       "of_this_place": "Amity Point is losing shoreline to episodic flow slides and the migration of the Rainbow Channel. It is a declared erosion prone area. Land that has gone includes public and private land and, historically, the old racecourse, which is now out under the channel.",
-      "season_bias": {
-        "nunmatta": 1.2,
-        "yalingbila": 1.3
-      },
       "trigger": {
         "mode": "all",
         "conditions": [
@@ -2521,8 +2515,6 @@
       "register": "slow-grief",
       "of_this_place": "This island's koalas have been genetically isolated for thousands of years and vehicle strike is the top recorded mortality cause. East Coast Road is the one road that connects everything, and its speed was cut from 100 to 80 to help.",
       "season_bias": {
-        "gubinbara": 1.8,
-        "nunmatta": 1.4,
         "note": "Spring breeding and dispersal is the road strike peak."
       },
       "trigger": {
@@ -2824,8 +2816,7 @@
       "of_this_place": "Everything drunk, eaten or built on this island came across on a boat. A missed freight sailing on a Thursday is invisible until Saturday night, when there is no second delivery and no shop on the mainland you can duck to.",
       "season_bias": {
         "long_weekends": 2.2,
-        "school_holidays": 1.4,
-        "nunmatta": 1.3
+        "school_holidays": 1.4
       },
       "trigger": {
         "mode": "all",
@@ -3119,7 +3110,6 @@
       "register": "slow-grief",
       "of_this_place": "Permanent rentals on this island have been drying up while short stay listings sit in the hundreds. A single sale is not a housing crisis, but on an island this size it is one house, one family, and about four per cent of that township's rental stock.",
       "season_bias": {
-        "gulayi": 1.2,
         "high_summer": 1.1,
         "note": "Winter listing, spring settlement, ready for summer letting."
       },
@@ -3435,8 +3425,6 @@
       "register": "held-breath",
       "of_this_place": "The humpback migration passes this headland twice a year and the southbound run comes close inshore with calves. The commuter boats cross the bay on a timetable that school students and shift workers depend on, and a calf inside the caution zone is a legal problem, a safety problem and a rostering problem at once.",
       "season_bias": {
-        "bujaboo": 1.4,
-        "gubinbara": 1.9,
         "note": "Southbound with calves peaks about October."
       },
       "trigger": {
@@ -3720,9 +3708,7 @@
       "register": "neighbourly-friction",
       "of_this_place": "Dog attack is the third recorded cause of koala death on this island, dogs are prohibited from the national park and from Brown Lake, and there is a small number of off lead areas. Everyone at the working bee agrees about weeds. Nobody agrees about dogs.",
       "season_bias": {
-        "gulayi": 1.2,
-        "high_summer": 1.2,
-        "gubinbara": 1.4
+        "high_summer": 1.2
       },
       "trigger": {
         "mode": "all",
@@ -4028,8 +4014,6 @@
       "register": "slow-grief",
       "of_this_place": "The secondary department at Dunwich State School closed in 2012 with six students, so every island teenager already crosses the bay every day. Leaving properly is a short trip and a permanent one, and it is the ordinary thing that happens, not a tragedy.",
       "season_bias": {
-        "nunmatta": 1.4,
-        "gubinbara": 1.2,
         "note": "End of the school year and the start of the university year."
       },
       "trigger": {
@@ -4330,7 +4314,6 @@
       "register": "homecoming",
       "of_this_place": "People come back to this island. That is not sentiment, it is the census: three generation households at Dunwich are one of the largest archetypes here. The complication is that the place they are coming back to has a housing market shaped by people who do not live here.",
       "season_bias": {
-        "gulayi": 1.2,
         "high_summer": 1.1
       },
       "trigger": {
@@ -4644,9 +4627,7 @@
       "register": "quiet-worry",
       "of_this_place": "This headland is one of the best land-based whale watching points on the east coast and half the winter economy is built on it. A quiet week off the point is a weather and distance story, not a population story: the east Australian humpback population has been increasing at about ten per cent a year for decades.",
       "season_bias": {
-        "high_summer": 1.6,
-        "bujaboo": 1.4,
-        "gubinbara": 1.3
+        "high_summer": 1.6
       },
       "trigger": {
         "mode": "all",
@@ -4928,8 +4909,6 @@
       "of_this_place": "Tailor in the gutters off Main Beach and Flinders Beach in winter is one of the few things on this island that still empties the pub. The beach is also a road with a tide window, a permit, a speed limit and shorebirds on it.",
       "season_bias": {
         "high_summer": 1.9,
-        "gulayi": 1.3,
-        "bujaboo": 1.5,
         "note": "The mullet run runs May to August and tailor are strong in August."
       },
       "trigger": {
@@ -5519,11 +5498,6 @@
       "base_weight": 0.3,
       "register": "held-breath",
       "of_this_place": "There is a small clinic, a community controlled health service and an ambulance station, and there is no hospital. When the weather stops the boats, the island's medical capacity is whatever is already standing on it, and the fallback is an aircraft into a small airfield or a helicopter onto an apron.",
-      "season_bias": {
-        "yalingbila": 1.3,
-        "nunmatta": 1.4,
-        "gulayi": 1.2
-      },
       "trigger": {
         "mode": "all",
         "conditions": [
@@ -5809,10 +5783,6 @@
       "base_weight": 0.4,
       "register": "slow-grief",
       "of_this_place": "In-home aged and disability support here is a handful of people driving between three townships. There is no depth in the roster. One person leaving is not a staffing problem, it is four people who do not get up on time.",
-      "season_bias": {
-        "gubinbara": 1.2,
-        "nunmatta": 1.2
-      },
       "trigger": {
         "mode": "all",
         "conditions": [
@@ -6374,9 +6344,7 @@
       "register": "civic-friction",
       "of_this_place": "In 2013 to 2014 a single lightning strike burned about 16,800 hectares, roughly seventy per cent of the island's bushland, over just over two weeks, and more than 900 campers were evacuated. Everyone here understands why the planned burns happen. That does not help if you have asthma and the wind is not moving.",
       "season_bias": {
-        "high_summer": 1.7,
-        "gulayi": 1.4,
-        "bujaboo": 1.2
+        "high_summer": 1.7
       },
       "trigger": {
         "mode": "all",
@@ -6671,7 +6639,6 @@
       "register": "neighbourly-friction",
       "of_this_place": "The coordinated fox program on this island is the clearest ecological win anyone has had here: about ninety per cent of foxes removed and no recorded turtle nest predation since late 2016. It is also a recurrent budget line and it puts bait in country where people walk dogs.",
       "season_bias": {
-        "gulayi": 1.8,
         "high_summer": 1.2,
         "note": "Fox control season begins about April."
       },
@@ -6946,10 +6913,6 @@
       "base_weight": 0.4,
       "register": "held-breath",
       "of_this_place": "Loggerheads nest on these ocean beaches from about late October, and Main Beach is a gazetted vehicle route with a 60 km/h limit and a tide window. Both of those things are true at the same time and both have been true for decades.",
-      "season_bias": {
-        "nunmatta": 1.8,
-        "yalingbila": 1.6
-      },
       "trigger": {
         "mode": "all",
         "conditions": [
@@ -7234,10 +7197,6 @@
       "base_weight": 0.35,
       "register": "steady-competence",
       "of_this_place": "Power comes to this island across the bay. When it stops, there is no other island grid to fall back on, and every business here holds a week of stock in a freezer because the next delivery is a boat away.",
-      "season_bias": {
-        "nunmatta": 1.6,
-        "yalingbila": 1.5
-      },
       "trigger": {
         "mode": "all",
         "conditions": [
@@ -7512,10 +7471,6 @@
       "base_weight": 0.35,
       "register": "wry",
       "of_this_place": "This island sits on a sand aquifer that supplies its own townships and exports water to the mainland grid. Having water underneath you is not the same as having water in the pipe, and the pipe was sized for the people who live here.",
-      "season_bias": {
-        "yalingbila": 1.6,
-        "nunmatta": 1.4
-      },
       "trigger": {
         "mode": "all",
         "conditions": [
@@ -8074,8 +8029,6 @@
       "register": "steady-competence",
       "of_this_place": "Marine Rescue Queensland North Stradbroke has been operating from Yabbie Street overlooking One Mile since 1977, crewed by volunteers. The water between Amity and Moreton is a real channel with real tide, and most callouts are not dramatic, they are a flat battery and a long tow.",
       "season_bias": {
-        "nunmatta": 1.4,
-        "yalingbila": 1.3,
         "school_holidays": 1.5
       },
       "trigger": {
@@ -8348,9 +8301,6 @@
       "register": "quiet-worry",
       "of_this_place": "The western flats here hold migratory shorebirds that fly to the northern hemisphere and back. Eastern curlew and bar-tailed godwit are both listed as critically endangered. Being flushed off a roost is not a scare, it is a fuel cost on a bird that has to cross the Pacific.",
       "season_bias": {
-        "yalingbila": 1.5,
-        "gulayi": 1.4,
-        "gubinbara": 1.3,
         "note": "Peak numbers in summer, departing about April, returning from about September."
       },
       "trigger": {
@@ -8898,7 +8848,6 @@
       "register": "civic-friction",
       "of_this_place": "The Gorge Walk is the free thing that everyone comes for, and it is a timber structure with foundations in rock on an exposed headland. It has been closed for repair before after rain washed out foundations on the southern side of the north gorge.",
       "season_bias": {
-        "gulayi": 1.3,
         "high_summer": 1.4
       },
       "trigger": {
@@ -9177,11 +9126,6 @@
       "base_weight": 0.45,
       "register": "quiet-worry",
       "of_this_place": "An exposed east coast sandy beach loses sand in storms and gets it back over months. The people who have been here longest know that. The people whose stairs are now hanging over a two metre drop know it too and it does not help.",
-      "season_bias": {
-        "gulayi": 1.4,
-        "nunmatta": 1.5,
-        "gubinbara": 1.3
-      },
       "trigger": {
         "mode": "all",
         "conditions": [
@@ -9473,8 +9417,6 @@
       "register": "quiet-worry",
       "of_this_place": "There is one primary school on this island and its secondary department closed in 2012 with six students. When the primary roll drops, the consequences arrive fast: a combined class, then a teacher not replaced, and every family does the arithmetic about whether to move before anyone says anything out loud.",
       "season_bias": {
-        "gubinbara": 1.4,
-        "nunmatta": 1.5,
         "note": "Enrolment planning for the next school year."
       },
       "trigger": {
@@ -10282,10 +10224,6 @@
       "base_weight": 0.45,
       "register": "held-breath",
       "of_this_place": "Koala breeding and dispersal peaks in spring and that is when young animals end up in township trees. Dog attack is the third recorded cause of koala death on this island. Nobody in this story has done anything wrong yet.",
-      "season_bias": {
-        "gubinbara": 2,
-        "nunmatta": 1.4
-      },
       "trigger": {
         "mode": "all",
         "conditions": [
@@ -10570,8 +10508,7 @@
       "register": "wry",
       "of_this_place": "People make films here. The headland at dawn is the shot everybody wants, it is also a public walk with four hundred people a day on it, a car park with no spare bays, and Country with its own permissions that are not a production company's to grant themselves.",
       "season_bias": {
-        "high_summer": 1.3,
-        "gubinbara": 1.2
+        "high_summer": 1.3
       },
       "trigger": {
         "mode": "all",
@@ -10834,8 +10771,7 @@
       "register": "slow-grief",
       "of_this_place": "Sand mining ended here and the ground it left is being rehabilitated. That is unambiguously good for the island and it was also several hundred people's jobs, some of them held by families who have been here for generations. Both of those are true and the second one is rarely said out loud.",
       "season_bias": {
-        "high_summer": 1.2,
-        "gulayi": 1.2
+        "high_summer": 1.2
       },
       "trigger": {
         "mode": "any",
@@ -11377,8 +11313,6 @@
       "register": "steady-competence",
       "of_this_place": "Point Lookout Surf Life Saving Club describes itself as the only surf life saving club in Australia to actively patrol two beaches and rove six others. That is a real operational fact and it is also a sentence about how much coastline a volunteer club is covering.",
       "season_bias": {
-        "yalingbila": 1.6,
-        "nunmatta": 1.5,
         "school_holidays": 1.8
       },
       "trigger": {
@@ -11669,11 +11603,6 @@
       "base_weight": 0.35,
       "register": "civic-friction",
       "of_this_place": "The island grows and eats Sydney rock oysters and runs a seafood festival. It also has wastewater infrastructure sized for a resident population, and heavy rain is when the two facts meet.",
-      "season_bias": {
-        "yalingbila": 1.5,
-        "nunmatta": 1.4,
-        "gulayi": 1.3
-      },
       "trigger": {
         "mode": "all",
         "conditions": [

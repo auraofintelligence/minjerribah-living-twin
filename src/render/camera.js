@@ -1034,7 +1034,25 @@ function attachRig(world, state, places, dwell) {
     return Math.sqrt(lo * hi);
   }
 
+  /**
+   * Fly the planner camera somewhere.
+   *
+   * Accepts `{x, z}` in local metres, `{lon, lat}`, or a place id string from `places()`, which is
+   * the shape everybody reaches for first: `TWIN.camera.places()` hands back a list of ids, so
+   * `TWIN.camera.flyTo('pointlookout')` looks like it should work and used to fly silently to the
+   * projection origin off the west coast instead. A name that is not a place now says so and stays
+   * where it is, rather than moving somewhere nobody asked for.
+   */
   function flyTo(o = {}) {
+    if (typeof o === 'string') o = { place: o };
+    if (o.place) {
+      const found = places.find((q) => q.id === o.place || q.label === o.place);
+      if (!found) {
+        console.warn('[camera] flyTo: no place "' + o.place + '". Try TWIN.camera.places().');
+        return;
+      }
+      o = Object.assign({}, o, { x: found.x, z: found.z });
+    }
     const p = Number.isFinite(o.x) && Number.isFinite(o.z)
       ? { x: o.x, z: o.z }
       : toLocal(Number.isFinite(o.lon) ? o.lon : ORIGIN.lon, Number.isFinite(o.lat) ? o.lat : ORIGIN.lat);

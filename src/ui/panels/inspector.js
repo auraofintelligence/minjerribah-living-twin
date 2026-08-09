@@ -102,9 +102,15 @@ Layout only. Every colour, radius, shadow, easing and space is a token from src/
 if this file ever needs a new one, it goes there, not here. */
 
 const CSS = `
+/* The right hand column. The bar at the top of the screen is permanent chrome that publishes
+   --hud-height, so this docks under it rather than over it: parked on top of the bar it used to
+   steal 376 px from a 1280 px readout and crush every conditions tile into its neighbour. The
+   minimap sits to the left of this column, not under it, because the island is 39 km by 15 km and
+   a minimap of it is inherently tall and thin. */
 .insp {
-  top: var(--sp-4); right: var(--sp-4); width: 376px;
-  max-height: calc(100% - var(--sp-6)); display: flex; flex-direction: column; z-index: 24;
+  top: calc(var(--hud-height) + var(--sp-2)); right: var(--sp-4); width: 376px;
+  max-height: calc(100% - var(--hud-height) - var(--sp-2) - var(--sp-4));
+  display: flex; flex-direction: column; z-index: 24;
 }
 .insp .panel-head { flex: none; }
 .insp-id { flex: none; padding: var(--sp-3) var(--sp-4) var(--sp-3); border-bottom: 1px solid var(--edge); }
@@ -1795,14 +1801,20 @@ function mount(root, world) {
     bodyEl.replaceChildren(...nodes.flat().filter(Boolean));
     bodyEl.scrollTop = 0;
 
-    // Footer: where it is right now. Bound, because most of what can be selected here moves.
+    // Footer: where it is right now, and how to let go of it. Bound, because most of what can be
+    // selected here moves.
+    //
+    // This used to end with the raw local frame pair, "-6657, 6750", which is metres east and
+    // north of the projection origin and means nothing to anybody reading a panel about a
+    // seventy-one year old in Dunwich. Every other number in this interface says what it is; that
+    // one was debug output that had been left on screen. The coordinates are still in
+    // TWIN.probe().state.selection for anyone driving the build.
     const footWhere = el('span', { class: 'grow' });
-    const footPos = el('span', {});
-    footEl.replaceChildren(footWhere, footPos);
+    const footHint = el('span', {}, 'Esc clears · double click flies');
+    footEl.replaceChildren(footWhere, footHint);
     bind(() => {
       const now = sel();
       footWhere.textContent = now.at || 'Minjerribah';
-      footPos.textContent = now.worldPos ? `${now.worldPos.x}, ${now.worldPos.z}` : '';
     });
     backBtn.disabled = !(s.history && s.history.length);
     focusBtn.disabled = false; followBtn.disabled = false; closeBtn.disabled = false;

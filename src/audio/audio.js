@@ -3324,14 +3324,7 @@ function mountMixerPanel(world, state, engine, soundPack) {
 function rail() {
   let r = document.getElementById('twin-rail');
   if (r) return r;
-  const s = document.createElement('style');
-  s.id = 'twin-rail-css-audio';
-  s.textContent = `
-#twin-rail { position: absolute; left: var(--sp-3); top: 50%; transform: translateY(-50%);
-  display: flex; flex-direction: column; gap: var(--sp-2); z-index: 20; }
-.rail-btn { position: relative; width: 116px; justify-content: flex-start; letter-spacing: .1em;
-  font-size: var(--fs-micro); text-transform: uppercase; padding: var(--sp-3) var(--sp-3); }`;
-  if (!document.getElementById('twin-rail-css')) document.head.append(s);
+  // The rail's look and position live in src/ui/design.css, once.
   r = document.createElement('div');
   r.id = 'twin-rail';
   (document.getElementById('ui-root') || document.body).append(r);
@@ -3393,11 +3386,17 @@ function injectCss() {
 .rail-btn.is-live .ar-ico { color: var(--leaf); }
 .ar-vu { margin-left: auto; font: 400 9px/1 var(--f-num); color: var(--t-faint); font-variant-numeric: tabular-nums; }
 
-.aud-prompt { position: absolute; left: 50%; bottom: 108px; transform: translateX(-50%);
+/* Bottom left, directly above the island log and in the same column as it. It used to be centred
+   across the bottom of the screen, where on the first ten seconds anyone ever sees it landed on
+   top of the first run hint and the log at once: three notices stacked in one corner. It is a
+   one-off question, so it belongs with the island's other messages rather than in the middle. */
+.aud-prompt { position: absolute; left: var(--gutter); bottom: 114px;
+  width: min(420px, calc(50vw - 40px));
   z-index: 30; transition: opacity var(--med) var(--ease), transform var(--med) var(--ease); }
-.aud-prompt.gone { opacity: 0; transform: translateX(-50%) translateY(8px); pointer-events: none; }
+.aud-prompt.gone { opacity: 0; transform: translateY(8px); pointer-events: none; }
 .aud-prompt.waiting { opacity: 0; pointer-events: none; }
 .aud-prompt-in { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4);
+  width: 100%;
   background: var(--s-2); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--edge-strong); border-radius: var(--r-3); box-shadow: var(--shadow-2);
   max-width: min(640px, 92vw); flex-wrap: wrap; }
@@ -3407,7 +3406,7 @@ function injectCss() {
   .aud-panel { left: var(--sp-2); right: var(--sp-2); width: auto; top: auto; bottom: var(--sp-2);
     transform: none; }
   .aud-panel.on { transform: none; }
-  .aud-prompt { bottom: 140px; }
+  .aud-prompt { bottom: 128px; width: auto; right: var(--sp-2); }
 }`;
   document.head.append(s);
 }

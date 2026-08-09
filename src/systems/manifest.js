@@ -1,6 +1,13 @@
 // System manifest. Each entry is a lazy import of a module exporting one or more `registerXxx(world)`
 // functions. A module that does not exist yet fails softly, so the island keeps running while it is
-// being built. Adding a system means creating the file: the line is already here.
+// being built.
+//
+// PLANNED, below, holds the modules that have been designed but not written. They live in their own
+// list rather than in MANIFEST because a lazy import of a file that is not there is a 404 on the
+// network panel and a red line in the console, and a build that opens with five red lines reads as
+// broken to anyone who has not been told otherwise. Nothing is hidden: main.js still reports them,
+// TWIN.missing still lists them, and adding a system is still one line, moved from one list to the
+// other.
 //
 // Simulation order comes from phase + order in world.register, never from this list.
 
@@ -13,9 +20,6 @@ export const MANIFEST = [
   () => import('./environment/tide.js'),
   () => import('./environment/daylight.js'),
   () => import('./environment/weather.js'),
-  () => import('./environment/fire.js'),
-  () => import('./environment/coast.js'),          // erosion, accretion, the Amity problem
-  () => import('./environment/groundwater.js'),    // the aquifer, the lakes, the borefield
 
   // --- ecology: the living island
   () => import('./ecology/vegetation.js'),
@@ -66,9 +70,6 @@ export const MANIFEST = [
   () => import('./narrative/storylines.js'),
   () => import('./narrative/chronicle.js'),
 
-  // --- presentation-side simulation helpers
-  () => import('./presentation/readmodels.js'),
-
   // --- render layers (each guards on world.stage and does nothing headless)
   () => import('../render/camera.js'),
   () => import('../render/layers/terrain.js'),
@@ -96,11 +97,20 @@ export const MANIFEST = [
   () => import('../ui/panels/inspector.js'),
   () => import('../ui/panels/civic.js'),
   () => import('../ui/panels/build.js'),
-  () => import('../ui/panels/ecology.js'),
   () => import('../ui/panels/events.js'),
   () => import('../ui/panels/subterranean.js'),
   () => import('../ui/panels/chronicle.js'),
   () => import('../ui/panels/map.js'),
   () => import('../ui/panels/onboarding.js'),
   () => import('../ui/panels/settings.js')
+];
+
+// Designed, not written. Reported at boot so the gap is visible without pretending to load it.
+// To build one: write the file, move the line up into MANIFEST.
+export const PLANNED = [
+  { path: './environment/fire.js', note: 'fire danger, ignition, spread and track closures' },
+  { path: './environment/coast.js', note: 'erosion, accretion, the Amity problem' },
+  { path: './environment/groundwater.js', note: 'the aquifer, the lakes, the borefield' },
+  { path: './presentation/readmodels.js', note: 'presentation-side simulation helpers' },
+  { path: '../ui/panels/ecology.js', note: 'a stewardship board beside the civic one' }
 ];

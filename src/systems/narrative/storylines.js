@@ -387,6 +387,7 @@ export function registerStorylines(world) {
     },
     relationships: [],      // the last 40 relationship movements, with the rule that caused each
     sentimentOwed: [],      // group mood deltas nothing consumes yet, kept honest and visible
+    unresolvedSets: [],     // pack sets this file cannot turn into a number, counted not swallowed
     metricNudges: 0,
     skipped: [],            // {path, seed, beat} for every beat that could not be verified
     bindings: [],
@@ -402,6 +403,8 @@ export function registerStorylines(world) {
   const pendingTies = [];       // relationship changes waiting on social.js to have a tie
   const skipIndex = new Map();  // path -> {path, seeds:[], beats:n}
   const sentimentOwed = new Map();
+  // Sets the pack asks for that this file cannot resolve, counted by group and raw value.
+  const unresolvedSets = new Map();
   const bindCache = new Map();  // thread id -> {day, bind}. Never stored on the thread: the director
                                 // serialises those wholesale and a cache does not belong in a save.
 
@@ -759,9 +762,27 @@ export function registerStorylines(world) {
     }
   }
 
-  /** A group mood delta. sentiment.js has no channel for the narrative yet, so it is kept here. */
+  /** A group mood delta. sentiment.js has no channel for the narrative yet, so it is kept here.
+   *
+   *  The delta is coerced rather than trusted. Five coda beats in data/narrative.json carry
+   *  `"delta": "computed"`, meaning the pack wanted the coda's mood shift derived from how the
+   *  thread actually went. Nothing derives it. Adding a string to a number here produced a string,
+   *  clamp compared it without complaint, and the first `.toFixed` on it threw: over a sim-year
+   *  that killed this whole system, and the world's own guard then disabled it for the rest of the
+   *  run, so a year had no storylines in it at all after roughly day 90. Unresolvable deltas are
+   *  now counted and named in describe() instead, so the gap stays visible without taking the
+   *  narrative down with it. */
   function noteSentiment(w, group, delta, cause) {
-    if (!group || !delta) return;
+    if (!group) return;
+    const d = typeof delta === 'number' ? delta : Number(delta);
+    if (!Number.isFinite(d) || d === 0) {
+      if (delta !== 0 && delta !== undefined && delta !== null) {
+        const k = String(group) + ':' + String(delta);
+        unresolvedSets.set(k, (unresolvedSets.get(k) || 0) + 1);
+      }
+      return;
+    }
+    delta = d;
     const key = group;
     const row = sentimentOwed.get(key) || { group, delta: 0, causes: [], since: w.clock.formatDate() };
     row.delta = clamp(row.delta + delta, -0.6, 0.6);
@@ -1220,7 +1241,10 @@ export function registerStorylines(world) {
     state.skipped = Array.from(skipIndex.values()).sort((a, b) => b.beats - a.beats).slice(0, 12);
     state.sentimentOwed = Array.from(sentimentOwed.values())
       .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta)).slice(0, 10)
-      .map((r) => ({ group: r.group, delta: +r.delta.toFixed(3), causes: r.causes.slice(0, 2), since: r.since }));
+      .map((r) => ({ group: r.group, delta: +Number(r.delta || 0).toFixed(3), causes: r.causes.slice(0, 2), since: r.since }));
+    state.unresolvedSets = Array.from(unresolvedSets.entries())
+      .sort((a, b) => b[1] - a[1]).slice(0, 8)
+      .map(([k, n]) => ({ set: k, times: n }));
   }
 
   /* -------------------------------------------------------------- registration */
@@ -1329,6 +1353,7 @@ export function registerStorylines(world) {
         relationshipsApplied: state.relationships.filter((r) => r.landed).length,
         relationshipsPending: pendingTies.length,
         sentimentOwed: state.sentimentOwed.length,
+        unresolvedSets: state.unresolvedSets.length,
         skippedPaths: state.skipped.map((s) => s.path),
         threads: state.running.map((r) => ({
           seed: r.seedId, beat: r.beat, next: r.next ? r.next.stage : 'done',

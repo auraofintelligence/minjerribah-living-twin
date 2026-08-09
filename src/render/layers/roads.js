@@ -1129,7 +1129,7 @@ export function registerRoads(world) {
       R.ready = true;
       R.buildMs = performance.now() - t0;
       console.info(`[roads] ${net.counts.edges} edges, ${net.counts.nodes} nodes, `
-        + `${R.sections} sections, ${Math.round(R.tris)} triangles in ${R.meshes.length} draw calls, `
+        + `${Math.round(R.sections)} sections, ${Math.round(R.tris)} triangles in ${R.meshes.length} draw calls, `
         + `${R.junctions} junction pads, ${R.culverts} culverts, ${R.causeways} causeways, `
         + `${Math.round(R.railM)} m of guard rail, built in ${R.buildMs.toFixed(0)} ms`);
     },

@@ -477,6 +477,8 @@ function mountOnboarding(root, world) {
 
   /* ---- step 4: the handover --------------------------------------------- */
 
+  // The whole map, in the order somebody meets it. It must agree with docs/KEYS.md, which is the
+  // record: a key that is bound and not on this screen is a key nobody finds.
   const KEYS = [
     ['Drag', 'hold the ground and move it'],
     ['Wheel', 'zoom, from the whole island to a street sign'],
@@ -484,16 +486,21 @@ function mountOnboarding(root, world) {
     ['W A S D', 'pan, walk or fly'],
     ['Tab', 'planner, street, follow, drone, cinematic'],
     ['Home', 'frame the whole island'],
+    ['F1 to F4', 'Dunwich, Amity Point, Point Lookout, North Gorge'],
     ['Space', 'pause, and 1 to 4 for speed'],
     ['V', 'info views: lay data over the ground'],
+    ['Alt and a letter', 'straight to one of the twenty-two views'],
     ['M', 'the map, shift and M for full screen'],
     ['G', 'the civic board'],
     ['E', 'the island calendar'],
     ['K', 'the siting bench'],
     ['J', 'the chronicle'],
+    ['I', 'the island log'],
     ['U', 'the works below the sand, proposed'],
     ['N', 'mute, and shift with it for the mixer'],
     ['O', 'settings'],
+    ['P', 'photo mode. L for labels, B for bars, H hides all of this'],
+    ['Esc', 'close whatever is open, or let go of what you picked'],
     ['?', 'this screen again']
   ];
 

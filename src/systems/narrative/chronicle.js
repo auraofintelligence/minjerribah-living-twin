@@ -65,6 +65,8 @@ const DAY_CAP = 5;        // ordinary items a day. A lead still gets through abo
 
 const GAP = {
   'ferry:rolled': 3,
+  'ferry:cancelled': 0,
+  'ferry:stranded': 7,
   'ferry:queue-spill': 6,
   'ferry:emergency-priority': 12,
   'navigation:beach-closed': 14,
@@ -114,10 +116,14 @@ function buildGuard(world) {
   const loreBanned = (((world.data && world.data.lore) || {}).language || {}).banned_tokens;
   const tokens = ((loreBanned && loreBanned.tokens) || []).map((t) => String(t.token).toLowerCase());
 
+  // The character itself is spelled by code point so that a repo-wide grep for the em dash comes
+  // back clean: the one place it was allowed to appear was the rule that forbids it.
+  const EM_DASH = String.fromCharCode(0x2014);
+
   return function vet(text) {
     if (typeof text !== 'string' || !text.trim()) return 'empty';
     const low = text.toLowerCase();
-    if (text.indexOf('—') >= 0) return 'em dash';
+    if (text.indexOf(EM_DASH) >= 0) return 'em dash';
     if (/["“”‘’]/.test(text)) return 'quotation mark: nobody speaks in this chronicle';
     for (const w of banned) if (low.indexOf(w) >= 0) return 'tone guide banned word: ' + w;
     for (const t of tokens) if (low.indexOf(t) >= 0) return 'lore banned token: ' + t;
@@ -132,6 +138,13 @@ function buildGuard(world) {
 /* ------------------------------------------------------------------ small helpers */
 
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
+/** A detail line, presented as its own sentence: leading capital, nothing else touched. */
+function sentence(s) {
+  if (typeof s !== 'string') return null;
+  const t = s.trim();
+  if (!t) return null;
+  return t[0].toUpperCase() + t.slice(1);
+}
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 
 /** "one", "two", ... up to twelve, then digits. A local paper does not write 3 vehicles. */
@@ -280,7 +293,10 @@ export function registerChronicle(world) {
       register: rec.register || null,
       weight: rec.weight || 2,             // 1 quiet, 2 ordinary, 3 the day's lead
       text: rec.text,
-      detail: rec.detail || null,
+      // Every detail line is displayed as its own sentence, so it starts like one. A writer
+      // composing one out of a counted noun ("three animals in the pod.") would otherwise publish
+      // a lower case sentence into a page of capitals.
+      detail: sentence(rec.detail),
       people: rec.people || [],
       householdId: rec.householdId || null,
       place: rec.place || null,
@@ -391,6 +407,43 @@ export function registerChronicle(world) {
             : ''),
         place: place('dunwich-ferry-terminal') || place('dunwich'),
         township: 'dunwich',
+        source: 'ferry'
+      });
+    });
+
+    // The barge cancelling is the biggest single thing that happens to this island's day, and
+    // until this pass it went to the notification bar and nowhere else: the chronicle carried the
+    // leftovers at the end of the day but never the reason for them. It happens about twice a
+    // sim-year, so it is a lead when it does.
+    bus.on('ferry:cancelled', (p) => {
+      if (!p) return;
+      write(w, {
+        key: 'ferry:cancelled',
+        theme: 'crossing', weight: 3,
+        text: 'The ' + (p.sailing || 'scheduled') + ' barge did not sail: ' + (p.why || 'no reason was given') + '.',
+        detail: [
+          isNum(p.slotsLost) && p.slotsLost > 0 ? count(p.slotsLost, 'car slot') + ' gone from the day.' : null,
+          isNum(p.vehiclesRolled) && p.vehiclesRolled > 0
+            ? count(p.vehiclesRolled, 'vehicle') + ' already in the yard rolled to the next one.' : null
+        ].filter(Boolean).join(' ') || null,
+        place: place('dunwich-ferry-terminal') || place('dunwich'),
+        township: 'dunwich',
+        source: 'ferry'
+      });
+    });
+
+    // The water taxi being called off, which happens on the windy days. Held for a week so a
+    // fortnight of southerlies does not become a fortnight of the same paragraph.
+    bus.on('ferry:stranded', (p) => {
+      if (!p || !isNum(p.people)) return;
+      write(w, {
+        key: 'ferry:stranded',
+        theme: 'crossing', weight: p.lastOfDay ? 3 : 2,
+        text: p.lastOfDay
+          ? 'The last water taxi was called off and ' + count(p.people, 'person', 'people') + ' did not get home tonight.'
+          : 'The ' + (p.sailing || 'scheduled') + ' water taxi was called off with ' + count(p.people, 'person', 'people') + ' waiting.',
+        detail: p.why ? p.why + '.' : null,
+        place: p.where === 'atOneMile' ? place('one-mile') : place('dunwich'),
         source: 'ferry'
       });
     });

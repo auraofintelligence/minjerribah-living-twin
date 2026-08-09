@@ -1,341 +1,125 @@
 {
   "project": "Minjerribah Living Twin",
   "engine": "Babylon.js 9.20 (vendored, no CDN, no build step)",
-  "updated": "wave 6 running",
-  "headline": "Seven UI panels are live and the island reads correctly from the air: the white sand strip, Eighteen Mile Swamp behind it, the bay shallows. My earlier report that the beaches rendered brown was wrong: the screenshot harness was the broken thing, not the build.",
-  "wave": 6,
-  "waveName": "Life on screen, the last panels, and the smoothing pass",
+  "updated": "9 August 2026, the smoothing pass",
+  "headline": "One agent played the whole thing end to end for the first time. A sim-year now completes with zero errors: it did not before, because a string where a number belonged killed the storyline engine ninety days in, every time. Nine of eleven sentiment channels had never fired, so a koala hit on the road never reached the conservation groups. The barge had never once cancelled in a year. All three are fixed, and the panels no longer sit on top of each other.",
+  "wave": 7,
+  "waveName": "The smoothing pass: playing it as one person, and joining it into one thing",
   "playUrl": "http://localhost:4271/",
+  "verdictNote": "Every status below was checked in this session by the agent writing it. Anything that says passed was driven, not read about. Anything that could not be verified in this environment says so.",
   "slices": [
     {
       "name": "Kernel: clock, store, bus, RNG, save",
       "status": "passed",
-      "reference": "determinism verified over 4320 ticks",
-      "verdict": "Two runs of 30 sim-days agree to the fingerprint."
+      "reference": "determinism verified this session",
+      "verdict": "node tools/headless.mjs --determinism: two runs of 1440 ticks agree, fingerprint e140a9fb."
     },
     {
       "name": "Build contract + critic protocol",
       "status": "passed",
-      "reference": "what keeps sixty agents coherent"
+      "reference": "what keeps sixty agents coherent",
+      "verdict": "Read in full at the start of this pass. CRITIC.md's warning that the pane may not composite was right, and cost this session its frame measurements."
     },
     {
       "name": "Interface design system",
       "status": "passed",
-      "reference": "one instrument, not fourteen panels"
+      "reference": "one instrument, not thirteen panels",
+      "verdict": "design.css now carries the screen furniture tokens and the launcher rail, which six panels each held a private copy of. Five boards share one --board-inset and open in the same frame."
+    },
+    {
+      "name": "Keyboard map",
+      "status": "passed",
+      "reference": "docs/KEYS.md, written this pass",
+      "verdict": "Every key in the map was pressed and checked: six boards open and close, the island log opens on I, Alt and a letter reaches all 22 info views, Shift+M expands the map, the speed keys and Space work. The collisions and how they were resolved are recorded."
     },
     {
       "name": "Offscreen shot + bench harness",
       "status": "passed",
       "reference": "so critics look at pixels",
-      "verdict": "TWIN.shot() writes real PNGs; TWIN.bench() measures frame cost with no compositor."
+      "verdict": "TWIN.shot() writes real PNGs and updates the camera state as a side effect, which is the only way to read a pose while the pane is hidden."
     },
     {
       "name": "Headless island (node)",
       "status": "passed",
       "reference": "sim runs with no browser at all",
-      "verdict": "Ten sim-days in 27 ms. --determinism diffs every system and names the one that drifted."
+      "verdict": "A full sim-year in 327 s, 55 registrations, zero runtime errors. Before this pass the same run killed the storyline engine on day ninety."
     },
-    {
-      "name": "Data: geography",
-      "status": "passed",
-      "reference": "8310 records",
-      "verdict": "Drives a heightfield that lands within a few percent of the real island."
-    },
-    {
-      "name": "Data: places",
-      "status": "passed",
-      "reference": "220 records, real coordinates"
-    },
-    {
-      "name": "Data: businesses",
-      "status": "passed",
-      "reference": "101 entries, 67 confirmed trading",
-      "verdict": "Caught Luke's own correction: Rufus King closed, Amity Point Progress Association wound up, Oceanic Gelati is now Whale Tail."
-    },
-    {
-      "name": "Data: ecology",
-      "status": "passed",
-      "reference": "822 records, EPBC and Qld status"
-    },
-    {
-      "name": "Data: residents",
-      "status": "passed",
-      "reference": "1597 records on ABS 4183 shape"
-    },
-    {
-      "name": "Data: civic levers",
-      "status": "passed",
-      "reference": "164 KB policy graph"
-    },
-    {
-      "name": "Data: transport",
-      "status": "passed",
-      "reference": "116 KB, barge and water taxi"
-    },
-    {
-      "name": "Data: events",
-      "status": "passed",
-      "reference": "132 KB island calendar"
-    },
-    {
-      "name": "Data: subterranean",
-      "status": "passed",
-      "reference": "200 KB production graph, all marked proposed"
-    },
+    { "name": "Data: geography", "status": "passed", "reference": "8310 records", "verdict": "Drives a heightfield that lands within a few per cent of the real island. It does not carry every street, which is why 16 per cent of route requests fail: the traffic system counts that rather than inventing a road." },
+    { "name": "Data: places", "status": "passed", "reference": "220 records, real coordinates" },
+    { "name": "Data: businesses", "status": "passed", "reference": "101 entries, 67 confirmed trading", "verdict": "Caught Luke's own corrections: Rufus King closed, Amity Point Progress Association wound up, Oceanic Gelati is now Whale Tail." },
+    { "name": "Data: ecology", "status": "passed", "reference": "822 records, EPBC and Qld status" },
+    { "name": "Data: residents", "status": "passed", "reference": "1597 records on ABS 4183 shape" },
+    { "name": "Data: civic levers", "status": "passed", "reference": "62 levers, 164 KB policy graph" },
+    { "name": "Data: transport", "status": "passed", "reference": "116 KB, barge and water taxi", "verdict": "The pack was right and the code reading it was wrong: three vehicle vessels are listed and two work the timetable, and the ferry system did not know the difference." },
+    { "name": "Data: events", "status": "passed", "reference": "132 KB island calendar" },
+    { "name": "Data: subterranean", "status": "passed", "reference": "200 KB production graph, all marked proposed" },
     {
       "name": "Data: narrative",
-      "status": "passed",
-      "reference": "436 KB of story seeds and beat grammar"
+      "status": "failed",
+      "reference": "436 KB of story seeds and beat grammar",
+      "verdict": "Two faults, both shipped. Five coda beats carry a string where a number belongs, which killed the storyline engine over a long run. And 28 seeds used five of the deleted invented season names as keys, including yalingbila, whose published meaning is whale, as the name of a season: the exact mistake wave 3 had already found and written up. Both fixed here, and the second is a blocking cultural rule that was violated after being recorded."
     },
     {
       "name": "Data: cultural protocol",
       "status": "passed",
       "reference": "citable sources only",
-      "verdict": "Found my invented season names were wrong: yalingbila is published as meaning whale, not a season. Removed and logged for QYAC."
+      "verdict": "The pack itself is sound. What failed was that nothing executes it: the first hand-run of no-banned-tokens in this session found a live violation in data/narrative.json. Written up as CULTURAL-REVIEW.md section D1."
     },
-    {
-      "name": "Island heightfield (world spine)",
-      "status": "passed",
-      "reference": "real geography",
-      "verdict": "271 km2, 233 m high point, 908x1314 grid at 32 m, built in 1281 ms."
-    },
+    { "name": "Island heightfield (world spine)", "status": "passed", "reference": "real geography", "verdict": "271 km2, 233 m high point, 908x1314 grid at 32 m, built in about 900 ms. Amity Point at 900 m reads as the real place." },
     {
       "name": "Terrain materials & fog",
-      "status": "passed",
+      "status": "review",
       "reference": "Cities: Skylines II terrain",
-      "verdict": "Corrected. Once the shot harness drove the exposure meter, the island reads properly: a bright white silica strip down the whole east coast, Eighteen Mile Swamp as a dark band behind it, green interior, pale bay shallows. Three critics had been judging a washed-out image no player would ever see."
+      "verdict": "From the air it reads correctly: white silica down the east coast, dark swamp behind it, green interior. Close in, the whole frame is hazed and washed out. The fog is another agent's this wave, so this pass measured it and left it."
     },
     {
-      "name": "Image quality: exposure bug",
-      "status": "passed",
+      "name": "Image quality: exposure",
+      "status": "review",
       "reference": "no longer blows out",
-      "verdict": "Exposure holds across the day. The image has different problems now, listed below."
+      "verdict": "Holds across the day. The bay side now renders a saturated fluorescent green rather than turquoise; the shader colours look plausible in linear space, which points at the tone mapper. Evidence in shots/smooth-05-amity.png. Left for the postfx pass rather than double corrected."
     },
-    {
-      "name": "Draw call budget",
-      "status": "passed",
-      "reference": "budget is 900",
-      "verdict": "103 draw calls measured, 370 fps. The 7735 was a lifetime accumulator being misread, now fixed in the bench harness."
-    },
-    {
-      "name": "Vegetation & flora",
-      "status": "building",
-      "reference": "No Man's Sky planet dressing"
-    },
-    {
-      "name": "Townships & buildings",
-      "status": "building",
-      "reference": "Cities: Skylines II"
-    },
-    {
-      "name": "Roads & tracks",
-      "status": "building",
-      "reference": "Cities: Skylines II"
-    },
-    {
-      "name": "Residents: needs, schedules, social",
-      "status": "passed",
-      "reference": "The Sims 4",
-      "verdict": "2,068 residents in 970 households fitted to the ABS 4183 census: 32.9 per cent lone person households exactly, 50.5 per cent of dwellings unoccupied against a published 50.3, median age 50 against 52. Nine needs, including island fatigue, driving utility-scored choice over fifty things you can do here, bent by swell, tide, temperature and the published ferry timetable. A full sim-year: 371,534 visitor arrivals against a measured 375,000, peaking at 8,685 people on the Australia Day long weekend and 107 on the quietest day, with 1,702 turned away when the boats ran out of seats. Zero errors, the resident population holds between 2,068 and 2,089, and the social graph covers 1.25 per cent of all possible pairs: bubbles, not a village."
-    },
-    {
-      "name": "Economy: businesses, tourism, housing",
-      "status": "passed",
-      "reference": "Cities: Skylines II economy",
-      "verdict": "65 businesses trading, 12 stockouts in 30 days, 443 short-stay lets against 21 advertised rentals, and the housing loop tightening on staffing."
-    },
-    {
-      "name": "Civic: policy, council, sentiment",
-      "status": "passed",
-      "reference": "Democracy 4",
-      "verdict": "61 levers, 21 in place. Angriest group is foreshore landowners at -0.40. Applications sit in council assessment because the player is not the one who decides."
-    },
-    {
-      "name": "Ecology: koalas, whales, dunes, lakes",
-      "status": "passed",
-      "reference": "Oxygen Not Included systems depth",
-      "verdict": "337 koalas with 34.4 per cent disease prevalence, 74 humpback pods, 1700 shorebirds by species, 19 dune reaches with South Gorge worst."
-    },
-    {
-      "name": "Infrastructure: power, water, waste",
-      "status": "passed",
-      "reference": "Oxygen Not Included",
-      "verdict": "Power importing 1055 kW on two circuits, water at 73.8 hours of supply, waste 10.4 days in backlog, two mobile dead spots."
-    },
-    {
-      "name": "Movement: pathing, traffic, ferry",
-      "status": "building",
-      "reference": "Cities: Skylines II",
-      "verdict": "Navigation and ferry are in. Traffic and crowds are this wave."
-    },
-    {
-      "name": "Narrative director",
-      "status": "building",
-      "reference": "The Sims 4 storytelling",
-      "verdict": "Director is watching 36 seeds and has opened 2. The beats and the chronicle are this wave."
-    },
-    {
-      "name": "Subterranean production graph",
-      "status": "passed",
-      "reference": "Satisfactory / Dyson Sphere Program",
-      "verdict": "5 built, 7 running, 6 stalled, 1605 kg orphan mass. All marked proposed."
-    },
-    {
-      "name": "HUD & notifications",
-      "status": "passed",
-      "reference": "Cities: Skylines II HUD",
-      "verdict": "Live and dense: air, wind with gust, swell with period, tide with time to the next turn, fire danger index, crossing with the next barge time, a 24-hour tide sparkline reading 1.71 m range and springs, plus budget, mood and health. An island log with severity filters and search."
-    },
-    {
-      "name": "Generative audio",
-      "status": "building",
-      "reference": "wave 6"
-    },
-    {
-      "name": "Inspector: click anything",
-      "status": "review",
-      "reference": "The Sims 4 sim inspector",
-      "verdict": "Panel and picking layer both mounted. Not yet judged: there are still no people or vehicles drawn to click on."
-    },
-    {
-      "name": "Civic board",
-      "status": "review",
-      "reference": "Democracy 4",
-      "verdict": "Mounted, and it opens with the honest line: you hold the civic desk, you have a budget line, a mailing list, and no vote in anybody chamber."
-    },
-    {
-      "name": "Map & info views",
-      "status": "review",
-      "reference": "Cities: Skylines II info views",
-      "verdict": "Mounted with a searchable info view dialog and keyboard shortcuts."
-    },
-    {
-      "name": "Chronicle reader",
-      "status": "building",
-      "reference": "wave 5"
-    },
-    {
-      "name": "Underground cutaway",
-      "status": "building",
-      "reference": "wave 5"
-    },
-    {
-      "name": "Onboarding & settings",
-      "status": "building",
-      "reference": "wave 5"
-    },
-    {
-      "name": "People & vehicles on screen",
-      "status": "building",
-      "reference": "wave 6"
-    },
-    {
-      "name": "Wildlife & weather effects",
-      "status": "building",
-      "reference": "wave 6"
-    },
-    {
-      "name": "Fire, coast, groundwater",
-      "status": "building",
-      "reference": "wave 6"
-    },
-    {
-      "name": "Atmosphere & sea fix",
-      "status": "building",
-      "reference": "wave 5"
-    },
-    {
-      "name": "Playthrough & smoothing pass",
-      "status": "building",
-      "reference": "wave 6"
-    },
-    {
-      "name": "Critic infrastructure: UI was invisible",
-      "status": "failed",
-      "reference": "a hole I had left open",
-      "verdict": "TWIN.shot captures the WebGL canvas only, so DOM panels never appeared in any screenshot. Every UI critic would have judged a blank island. Fixed by documenting read_page as the way to inspect and operate panels."
-    },
-    {
-      "name": "Critic infrastructure: exposure meter",
-      "status": "failed",
-      "reference": "a second hole",
-      "verdict": "The postfx exposure meter is GPU-only and on demand, so nothing drove it during a screenshot and every shot came out a pale wash. Fixed in the shot harness. This cost three critic rounds."
-    },
-    {
-      "name": "Onboarding, settings, build, chronicle, subterranean panels",
-      "status": "building",
-      "reference": "wave 6"
-    },
-    {
-      "name": "Sea & sky finish",
-      "status": "building",
-      "reference": "wave 6"
-    }
+    { "name": "Draw call budget", "status": "passed", "reference": "budget is 900", "verdict": "115 over the whole island, 133 over a township at 600 m, 179 at street level. Comfortable." },
+    { "name": "Frame rate", "status": "review", "reference": "60 fps on integrated graphics", "verdict": "NOT MEASURED. The browser pane stopped compositing part way through this session and every reading after that is throttled: the same view returned 56.8, then 26.6, then 20.1, then 7.7 fps. Quoting any of them would be dishonest. The performance pass owns it." },
+    { "name": "Tick budget", "status": "failed", "reference": "4 ms in the contract", "verdict": "6.23 ms/tick over a full sim-year. Over by about 55 per cent. Draw calls have 720 of headroom, so this is CPU." },
+    { "name": "Vegetation & flora", "status": "passed", "reference": "No Man's Sky planet dressing", "verdict": "33.1M modelled stems across 11 communities and 23 species, flowering by season, and the pack's own low-confidence note about littoral rainforest carried through to the boot log rather than hidden." },
+    { "name": "Townships & buildings", "status": "passed", "reference": "Cities: Skylines II", "verdict": "1922 buildings from 3819 lots in 160 meshes, and it says out loud that 47 census dwellings are not placed because the streets that would hold them are not in the pack, rather than inventing a street." },
+    { "name": "Roads & tracks", "status": "passed", "reference": "Cities: Skylines II", "verdict": "81 edges in 4 draw calls with junction pads, culverts, a causeway and guard rail. The roads read model reports 0 culverts and 0 causeways while the layer draws 3 and 1, which is a small disagreement worth closing." },
+    { "name": "Residents: needs, schedules, social", "status": "passed", "reference": "The Sims 4", "verdict": "Followed one 71 year old through a whole day: breakfast, a lap of Adams Beach, the yard, the toilet, bed, each with a plain reason. Across the island the day has a shape: surf at dawn, the yard mid-morning, a swim at midday, bins out at 5:20pm on bin night. Nine needs, and island fatigue runs the other way and says so." },
+    { "name": "Economy: businesses, tourism, housing", "status": "passed", "reference": "Cities: Skylines II economy", "verdict": "65 businesses trading, 28 stockouts in 30 days at one year, 458 short-stay lets against 21 advertised rentals, 123 people left for want of a room in a year." },
+    { "name": "Civic: policy, council, sentiment", "status": "passed", "reference": "Democracy 4", "verdict": "Drove it: picked a lever, read who decides it, opened a file, and got an in tray with five commissionable studies at real prices and real week counts, a lodge-it-anyway path and a petition that needs a consultation behind it. Sentiment was the weak half and is fixed: 18 of 22 lived-event channels now fire over a year against 2 of 11 before." },
+    { "name": "Ecology: koalas, whales, dunes, lakes", "status": "passed", "reference": "Oxygen Not Included systems depth", "verdict": "Over a sim-year: 337 koalas with 78 births and 65 deaths including 5 vehicle and 3 dog, 1241 turtle hatchlings, 8.2 m of dune cut with the worst reach moving to northern Main Beach. Whales visible from the headland in daylight, 1 to 7 pods in sight, and none at night." },
+    { "name": "Infrastructure: power, water, waste", "status": "review", "reference": "Oxygen Not Included", "verdict": "Power sheds six times a year and comes back; waste closes the transfer station 21 times. But water storage is pinned at 100 per cent all year and telecoms does not move at all, so two of the four are not binding on anything." },
+    { "name": "Movement: pathing, traffic, ferry", "status": "review", "reference": "Cities: Skylines II", "verdict": "Buses run to the published Translink times, the barge queue spills onto Middle Street 148 times a year, and the ferry chain now reaches its consequences. But 16 per cent of route requests fail for want of streets the geography pack does not carry, and the ferry describes itself as a dead system at 5:20am because its counters reset at midnight." },
+    { "name": "Narrative director", "status": "review", "reference": "The Sims 4 storytelling, Disco Elysium writing bar", "verdict": "It no longer dies mid-year, which is the fix that mattered. It is still thin: 12 threads opened and 35 beats fired against 514 cast failures over a sim-year, and 30 quiet days out of the last 30." },
+    { "name": "Chronicle reader", "status": "passed", "reference": "the island's written record", "verdict": "639 lines written over a sim-year and 3,623 held back, every one vetted against the tone guide and the cultural prohibitions before publication, with the rejection reasons in describe(). The cancelled barge and the called-off water taxi now reach it; before this pass they reached only the notification bar." },
+    { "name": "Subterranean production graph", "status": "passed", "reference": "Satisfactory / Dyson Sphere Program", "verdict": "Opened all seven tabs. Every one leads with the same paragraph: nothing below the sand is built, approved, funded, sited or consented. The consent tab models the process shape and says it does not model the decision. As a play system it is static: generationKw stays 0 all year." },
+    { "name": "HUD & notifications", "status": "passed", "reference": "Cities: Skylines II HUD", "verdict": "Air, wind with gust, swell with period, tide with time to the next turn, UV, fire danger index, crossing with the next barge, budget, mood and health with trend arrows. It was unreadable at 1280 because the inspector docked on top of it and stole 376 px; the inspector moved and the tiles fit. The log now opens on I." },
+    { "name": "Generative audio", "status": "passed", "reference": "no recordings, Web Audio built at runtime", "verdict": "Six voices and three beds, surf on the real swell period, wind through whatever cover you are standing in, and a mixer with per-bus levels. Muted until you answer the prompt, which is right. Not listened to in this environment." },
+    { "name": "Inspector: click anything", "status": "passed", "reference": "The Sims 4 sim inspector", "verdict": "Clicked a resident and read four tabs: what she is doing and why, nine needs in words as well as numbers, who she knows with familiarity and trust, and a tally. Every panel names what its numbers are modelled from. The footer used to end with raw local-frame metres; it does not now." },
+    { "name": "Civic board", "status": "passed", "reference": "Democracy 4", "verdict": "Seven tabs, all driven, no NaN or undefined in 14,000 characters of text. It opens with the honest line about holding a desk and no vote in anybody's chamber. One broken template, 'adoption is due now away', fixed." },
+    { "name": "Map & info views", "status": "passed", "reference": "Cities: Skylines II info views", "verdict": "All 22 views set cleanly with legends, none reporting an error. The legend used to cover the whole launcher rail, so six panels could not be reached with the mouse while a data layer was on; it has moved and is height capped." },
+    { "name": "Underground cutaway", "status": "review", "reference": "wave 5", "verdict": "Mounted and marked proposed. Not judged against its reference game in this pass." },
+    { "name": "Onboarding & settings", "status": "passed", "reference": "the first ninety seconds", "verdict": "Four screens: the acknowledgement with its sources, the island with live figures from the running sim, three places to stand, and the keyboard. The key card now matches docs/KEYS.md. The acknowledgement is a full screen, not a menu item, which is what the lore pack requires." },
+    { "name": "People & vehicles on screen", "status": "passed", "reference": "wave 6", "verdict": "About 2,300 people drawn at a township in four draw calls: figures close in, billboards at range, dots beyond that, and what they are carrying. Vehicles in six." },
+    { "name": "Wildlife & weather effects", "status": "review", "reference": "wave 6", "verdict": "Fauna draws whales, koalas and birds and responds to the flush event. Weather effects were not judged: the fog is another agent's this wave and this pass stayed off it." },
+    { "name": "Fire, coast, groundwater", "status": "building", "reference": "designed, not written", "verdict": "Three of the five files in PLANNED. Their absence is visible: ecology:burn only ever fires as a planned burn, and two sentiment channels have nothing to listen to." },
+    { "name": "Seams between systems", "status": "passed", "reference": "the difference between a world and a pile of panels", "verdict": "Five chains traced end to end. Koala death reaches the rescue call, the log, the chronicle and the conservation groups. A cancelled barge rolls vehicles, moves the commuters and gets written up. A shorebird flush costs feeding time and fat and is legible in its own info view. Two of the five were broken and are wired now." },
+    { "name": "Playthrough & smoothing pass", "status": "passed", "reference": "this pass", "verdict": "Played from the acknowledgement screen through every panel and every key, then a sim-year headless. Zero console errors, zero TWIN.errors(), zero overlaps between permanent panels in every state tested." },
+    { "name": "Critic infrastructure: UI was invisible", "status": "failed", "reference": "a hole left open in wave 5", "verdict": "TWIN.shot captures the WebGL canvas only, so DOM panels never appeared in any screenshot. Still true, and still the reason read_page is the way to judge the interface." },
+    { "name": "Critic infrastructure: the pane stops compositing", "status": "failed", "reference": "a third hole, found this session", "verdict": "The pane composited for the first part of this session and then stopped. When it does, animations sit at currentTime 0 forever, so any script filtering on opacity misses a panel that is actually there, and camera.state.position reads 0,0,0. Both traps are written into STATE-OF-PLAY section 5." },
+    { "name": "Prohibitions check harness", "status": "failed", "reference": "thirteen machine-checkable rules, none of them executed", "verdict": "Not written. The first hand-run of one rule this session found a live blocking violation in a shipped pack. This is now the top item on the next-five list." }
   ],
   "log": [
-    {
-      "at": "wave 0",
-      "text": "Deterministic kernel: clock, entity store, event bus, seeded RNG pool, telemetry, save and load. Two runs of thirty sim-days agree exactly."
-    },
-    {
-      "at": "wave 1",
-      "text": "Data agents grepped Luke's own repos and found his corrections. Rufus King Seafoods stays in the file marked closed so a future agent does not re-add it from a stale tourism listing."
-    },
-    {
-      "at": "wave 3",
-      "text": "The lore agent audited my Quandamooka season names and found no published source for any of them. Worse, yalingbila is published as meaning whale, in QYAC and University of Queensland's own Yalingbila Bibula project, and I had used it as the name of a hot wet season. All six removed, replaced with plain English, logged in CULTURAL-REVIEW.md with a banned-token list so it cannot happen again."
-    },
-    {
-      "at": "wave 3",
-      "text": "The island spine landed: a 908 by 1314 heightfield at 32 m resolution built from the geography pack in 1281 ms. 271 km2 of land against a real 275, high point 233 m against a real 239, 39 km north to south. The interior dune ridges, the low western shore at Dunwich, and the rock at Point Lookout are all where they should be."
-    },
-    {
-      "at": "wave 4",
-      "text": "Looked at the actual pixels before dispatching. Two hard failures the builders had not reported: the auto-exposure blows the whole frame to pure white at 8:30am, and the default view costs 7735 draw calls against a budget of 900."
-    },
-    {
-      "at": "wave 4",
-      "text": "Thirteen agents dispatched. The visual slices get the full blind comparison against their reference game. The simulation slices are judged headless over a full sim-year, because a population that looks fine for a day and collapses in a year is not done."
-    },
-    {
-      "at": "wave 4",
-      "text": "Residents landed. The census and the pack's own household archetypes disagree about this island: the archetype mix implies 2.59 people per household and the census publishes 2.1 to 2.3, and following the archetypes alone gives a median age of 43 against a published 52. Published beats estimate, so the household draw is fitted to the census composition split, the township age quotas and the dwelling counts, with a floor and a ceiling on every archetype so the fit cannot empty one out. It caught itself doing exactly that: an early run put ninety-five artist households at Point Lookout against a two per cent share and left the three-generation Dunwich household at zero against a five per cent share."
-    },
-    {
-      "at": "wave 4",
-      "text": "The brief asked for a connection to Country need. It was not built, and the gap is logged in CULTURAL-REVIEW.md as item R1. data/lore.json carries a blocking rule against assigning cultural obligation to a simulated resident, and a need only some agents carry, keyed to who they are, is exactly that. What is there instead is attachment to place, which every resident carries."
-    },
-    {
-      "at": "wave 4",
-      "text": "Thirteen builders landed 47,476 lines. The simulation is genuinely deep now: 337 koalas with real disease prevalence, 74 humpback pods on migration, 1700 shorebirds by species, 2069 residents in 970 households with 13,677 social ties across 1,306 bubbles, 1,922 buildings, 33 million modelled plant stems, 61 civic levers."
-    },
-    {
-      "at": "wave 5",
-      "text": "Looked at the pixels again before dispatching. Draw calls were never the problem: 103 measured, and the 7735 was a lifetime counter being misread. The real problems are that the haze eats the entire frame, the ocean mesh has a hard rectangular seam, and the white silica beaches render brown."
-    },
-    {
-      "at": "wave 5",
-      "text": "The blocker is now that world.ui.panels is an empty array. All that simulation depth is invisible because nothing can be clicked and nothing is displayed. Thirteen slices dispatched, seven of them interface."
-    },
-    {
-      "at": "wave 5",
-      "text": "A final agent will play the whole thing end to end afterwards, fix the seams between systems that never spoke to each other, and write an honest README and state-of-play handover rather than a flattering one."
-    },
-    {
-      "at": "wave 5",
-      "text": "Seven UI panels landed before the session limit: hud, notifications, infoviews, civic, inspector, map, events. Eleven render layers now including selection picking and the underground cutaway. Forty-six registrations boot clean with zero errors."
-    },
-    {
-      "at": "wave 6",
-      "text": "Found two holes in my own critic infrastructure, and both had been corrupting verdicts. TWIN.shot captures only the WebGL canvas, so the DOM interface never appeared in any screenshot and every UI critic was judging a blank island. And the exposure meter is GPU-only and on demand, so nothing drove it during a shot and every image came out a pale wash. Both fixed."
-    },
-    {
-      "at": "wave 6",
-      "text": "A correction on the record: I reported that the white silica beaches were rendering brown. They were not. With the exposure meter driven, Main Beach reads as a brilliant white strip down the whole east coast, exactly as it should. The instrument was broken, not the build."
-    },
-    {
-      "at": "wave 6",
-      "text": "The handover documents now run FIRST in the wave rather than last, because the final agent has been killed by a session limit in each of the last three waves."
-    }
+    { "at": "wave 0", "text": "Deterministic kernel: clock, entity store, event bus, seeded RNG pool, telemetry, save and load. Two runs of thirty sim-days agree exactly." },
+    { "at": "wave 1", "text": "Data agents grepped Luke's own repos and found his corrections. Rufus King Seafoods stays in the file marked closed so a future agent does not re-add it from a stale tourism listing." },
+    { "at": "wave 3", "text": "The lore agent audited my Quandamooka season names and found no published source for any of them. Worse, yalingbila is published as meaning whale, in QYAC and University of Queensland's own Yalingbila Bibula project, and I had used it as the name of a hot wet season. All six removed, replaced with plain English, logged in CULTURAL-REVIEW.md with a banned-token list so it cannot happen again." },
+    { "at": "wave 3", "text": "The island spine landed: a 908 by 1314 heightfield at 32 m resolution built from the geography pack. 271 km2 of land against a real 275, high point 233 m against a real 239, 39 km north to south." },
+    { "at": "wave 4", "text": "Thirteen builders landed 47,476 lines. 337 koalas with real disease prevalence, 74 humpback pods, 1700 shorebirds by species, 2069 residents in 970 households, 1,922 buildings, 33 million modelled plant stems, 62 civic levers." },
+    { "at": "wave 5", "text": "The blocker was that world.ui.panels was an empty array. All that simulation depth was invisible because nothing could be clicked and nothing was displayed. Thirteen slices dispatched, seven of them interface." },
+    { "at": "wave 6", "text": "Found two holes in my own critic infrastructure and both had been corrupting verdicts. TWIN.shot captures only the WebGL canvas, so the DOM interface never appeared in any screenshot. And the exposure meter is GPU-only and on demand, so nothing drove it during a shot and every image came out a pale wash." },
+    { "at": "wave 6", "text": "The handover documents now run FIRST in the wave rather than last, because the final agent had been killed by a session limit in each of the last three waves." },
+    { "at": "wave 7", "text": "The smoothing pass ran first, and nobody had ever played the whole thing before. Three of the biggest faults were invisible to every screenshot ever taken of this build: a sim-year could not finish, nine of eleven sentiment channels had never once fired, and the barge had never cancelled in any year, so the whole chain hanging off it was dead code that read as finished." },
+    { "at": "wave 7", "text": "Ran one of data/lore.json's thirteen machine-checkable rules by hand, because nothing executes them. It failed: five deleted invented season names were still being used as keys in data/narrative.json, in 28 seeds, including yalingbila as a season. Wave 3 found that exact mistake, wrote it up, and banned the words. The next pack shipped with them in it anyway. A rule that nothing executes is not a rule, and the harness is now the top of the next-five list." },
+    { "at": "wave 7", "text": "Thirteen panels written by thirteen agents were sitting on each other. The inspector docked over the top right of the HUD and squeezed a 1280 px readout until the numbers overlapped, and covered the minimap completely. The info view legend covered the entire launcher rail, so with a data layer on you could not click six of the thirteen panels. Measured now, in every state: zero overlaps." }
   ]
 }

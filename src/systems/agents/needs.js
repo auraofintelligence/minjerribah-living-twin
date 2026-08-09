@@ -179,42 +179,42 @@ const ACTIONS = [
 
   /* ---- work, school and the boat ---- */
   A({
-    id: 'work-shift', label: 'at work', at: 'work', mode: 'commute', dur: [60, 60], duty: true,
+    id: 'work-shift', label: 'at work', at: 'work', mode: 'commute', dur: [60, 60], duty: 'work',
     gains: { social: 0.22, fun: -0.05, hygiene: -0.10, energy: -0.035, comfort: -0.08 },
     gate: (p, c) => !!p.duty && p.duty.kind === 'work',
     bonus: () => 6,
     why: (p) => (p.duty && p.duty.reason) || 'on shift'
   }),
   A({
-    id: 'school', label: 'at school', at: 'school', mode: 'commute', dur: [60, 60], duty: true,
+    id: 'school', label: 'at school', at: 'school', mode: 'commute', dur: [60, 60], duty: 'school',
     gains: { social: 0.45, fun: 0.15, energy: -0.03 },
     gate: (p) => !!p.duty && p.duty.kind === 'school',
     bonus: () => 6,
     why: () => 'school'
   }),
   A({
-    id: 'the-school-run', label: 'on the school run', at: 'school', mode: 'drive', dur: [25, 40], duty: true,
+    id: 'the-school-run', label: 'on the school run', at: 'school', mode: 'drive', dur: [25, 40], duty: 'school-run',
     gains: { social: 0.5, comfort: -0.05 },
     gate: (p) => !!p.duty && p.duty.kind === 'school-run',
     bonus: () => 5,
     why: () => 'dropping the kids at the school gate'
   }),
   A({
-    id: 'crossing-out', label: 'on the boat to the mainland', at: 'ferry', mode: 'boat', dur: [40, 60], duty: true,
+    id: 'crossing-out', label: 'on the boat to the mainland', at: 'ferry', mode: 'boat', dur: [40, 60], duty: 'crossing-out',
     gains: { islandFatigue: 0.01, energy: -0.025, social: 0.15 },
     gate: (p) => !!p.duty && p.duty.kind === 'crossing-out',
     bonus: () => 7,
     why: (p) => (p.duty && p.duty.reason) || 'catching the boat across'
   }),
   A({
-    id: 'on-the-mainland', label: 'over on the mainland', at: 'mainland', mode: 'offisland', dur: [240, 480], duty: true,
+    id: 'on-the-mainland', label: 'over on the mainland', at: 'mainland', mode: 'offisland', dur: [240, 480], duty: 'mainland',
     gains: { islandFatigue: -0.0125, fun: 0.15, social: 0.2, energy: -0.04 },
     gate: (p) => !!p.duty && p.duty.kind === 'mainland',
     bonus: () => 7,
     why: (p) => (p.duty && p.duty.reason) || 'a day across the bay'
   }),
   A({
-    id: 'crossing-back', label: 'on the boat home', at: 'ferry', mode: 'boat', dur: [40, 60], duty: true,
+    id: 'crossing-back', label: 'on the boat home', at: 'ferry', mode: 'boat', dur: [40, 60], duty: 'crossing-back',
     gains: { islandFatigue: -0.005, place: 0.35, energy: -0.02 },
     gate: (p) => !!p.duty && p.duty.kind === 'crossing-back',
     bonus: () => 7,
@@ -242,14 +242,14 @@ const ACTIONS = [
     why: () => 'there are four jobs on this island and thirty people after them'
   }),
   A({
-    id: 'a-callout', label: 'out on a callout', at: 'island', mode: 'drive', dur: [60, 200], duty: true,
+    id: 'a-callout', label: 'out on a callout', at: 'island', mode: 'drive', dur: [60, 200], duty: 'callout',
     gains: { place: 0.6, social: 0.8, fun: 0.3, energy: -0.25, comfort: -0.3 },
     gate: (p) => !!p.duty && p.duty.kind === 'callout',
     bonus: () => 9,
     why: (p) => (p.duty && p.duty.reason) || 'the pager went'
   }),
   A({
-    id: 'on-patrol', label: 'on patrol', at: 'point-lookout-slsc', mode: 'drive', dur: [120, 240], duty: true,
+    id: 'on-patrol', label: 'on patrol', at: 'point-lookout-slsc', mode: 'drive', dur: [120, 240], duty: 'patrol',
     gains: { place: 0.5, social: 0.7, fun: 0.35, energy: -0.15 },
     gate: (p) => !!p.duty && p.duty.kind === 'patrol',
     bonus: () => 6,
@@ -293,7 +293,7 @@ const ACTIONS = [
     why: () => 'markets are on'
   }),
   A({
-    id: 'an-appointment', label: 'at an appointment', at: 'clinic', mode: 'drive', dur: [40, 80], duty: true,
+    id: 'an-appointment', label: 'at an appointment', at: 'clinic', mode: 'drive', dur: [40, 80], duty: 'appointment',
     gains: { comfort: 0.15, islandFatigue: 0.01 },
     gate: (p) => !!p.duty && p.duty.kind === 'appointment',
     bonus: () => 5,
@@ -550,10 +550,86 @@ const WHO = {
 for (const a of ACTIONS) { a.when = WHEN[a.id] || null; a.who = WHO[a.id] || null; }
 for (let i = 0; i < ACTIONS.length; i++) ACTIONS[i].index = i;
 
-/** Split once. Eleven of these can only fire when schedule.js has put an obligation on somebody,
+/**
+ * What is left of a gate once WHEN and WHO have both been asked.
+ *
+ * WHEN is evaluated once a tick and WHO once a day, and between them they already answer most of
+ * this table: for twenty eight of these actions the gate is WHEN and WHO written out a second time,
+ * so calling it is a closure call per candidate to learn something already known. `null` says the
+ * candidate is allowed and nothing more needs asking. A function is the remainder, with the full
+ * gate quoted above it so the two can be read against each other.
+ *
+ * An action that is not named here keeps its whole gate, so a new action added to the table above is
+ * correct without touching this one. That is the safe default and it is the reason this is a list of
+ * exceptions rather than a list of residuals.
+ *
+ * A residual that is wrong would quietly change what the island does, so it is checkable rather than
+ * asserted: `node tools/gate-audit.mjs` runs a sim-week with every candidate evaluated both ways and
+ * fails on the first disagreement, naming the action and the person.
+ */
+const RESIDUAL = {
+  /* ---- covered outright by WHEN and WHO ---- */
+  'sit-with-the-house': null,     // p.householdSize > 1 && !c.night
+  'the-couch': null,              // !c.night
+  'jobs-around-the-house': null,  // p.age >= 14 && c.daylight
+  'the-yard': null,               // c.daylight && !c.raining && c.apparentC < 33 && p.age >= 12
+  'bins-out': null,               // c.binNight && p.age >= 12 && c.hour >= 17
+  'ring-the-mainland': null,      // !c.night && p.age >= 16
+  'looking-for-work': null,       // p.occupationId === 'unemployed' && c.workHours && !c.weekend
+  'coffee-and-a-chat': null,      // c.hour >= 6 && c.hour < 14 && p.age >= 14
+  'counter-lunch': null,          // c.hour >= 11 && c.hour < 15 && p.age >= 16
+  'a-night-at-the-club': null,    // c.hour >= 16 && c.hour < 23 && p.age >= 18
+  'the-shop-run': null,           // c.hour >= 7 && c.hour < 19 && p.age >= 15
+  'the-markets': null,            // c.marketDay && c.hour >= 8 && c.hour < 14
+  'bowls-or-a-game': null,        // c.daylight && p.age >= 45 && !c.raining
+  'a-working-bee': null,          // c.weekend && c.daylight && c.hour >= 7 && c.hour < 13 && p.age >= 16 && !c.raining
+  'a-swim': null,                 // c.daylight && c.tempC > 20 && c.beachOk && p.age >= 4
+  surf: null,                     // c.daylight && c.surfable && c.surfQuality > 0.16 && c.beachOk && p.traits.water > 0.42 && p.age >= 10 && p.age < 72
+  'the-surf-check': null,         // c.firstLight && p.traits.water > 0.5 && p.age >= 12
+  'fishing-off-the-rocks': null,  // c.daylight && p.traits.water > 0.4 && c.swellM < 2.4 && p.age >= 12
+  'out-in-the-tinny': null,       // c.daylight && p.hasBoat && c.windKt < 18 && c.swellM < 2.2
+  'the-gorge-walk': null,         // c.daylight && !c.raining && c.apparentC < 33 && p.age >= 5
+  'whale-watching': null,         // c.whaleSeason && c.daylight && c.windKt < 24
+  'a-walk-on-the-beach': null,    // c.daylight && !c.raining && c.apparentC < 32
+  'walking-the-dog': null,        // p.hasDog && !c.night && c.apparentC < 33
+  'the-lake': null,               // c.daylight && c.tempC > 22 && !c.raining && p.age >= 4
+  'beach-driving': null,          // c.daylight && c.beachDrivingOpen && p.has4WD
+  'sitting-and-looking': null,    // !c.night
+  'a-ride': null,                 // c.daylight && !c.raining && c.windKt < 22 && p.age >= 8 && p.age < 68
+
+  /* ---- part covered: what is left reads the person, or the clock inside mealTimeFor ---- */
+  // p.age >= 16 && p.householdSize > 1 && (mealTimeFor(p, c) || p.n[HUNGER] < 0.3)
+  'cook-for-the-house': (p, c) => mealTimeFor(p, c) || p.n[HUNGER] < 0.3,
+  // !c.night && p.n[ENERGY] < 0.45 && (p.role === 'elder' || p.role === 'preschool' || p.workLoad === 'shift')
+  nap: (p) => p.n[ENERGY] < 0.45 && (p.role === 'elder' || p.role === 'preschool' || p.workLoad === 'shift'),
+  // (p.age < 18 || (p.age < 55 && p.traits.civic > 0.5)) && c.hour >= 15 && c.hour < 19 && !c.raining
+  'training-or-nippers': (p) => p.age < 18 || (p.age < 55 && p.traits.civic > 0.5),
+  // c.hour >= 8 && c.hour < 22 && p.age >= 12 && p.tieCount > 0
+  'visiting-someone': (p) => p.tieCount > 0,
+  // c.hour >= 11 && c.hour < 22 && p.age >= 18 && p.tieCount > 1
+  'having-people-over': (p) => p.tieCount > 1,
+  // c.hour >= 5 && c.hour < 10 && c.boatsRunning && p.age >= 16 && p.n[FATIGUE] > 0.45
+  'a-day-across-the-bay': (p) => p.n[FATIGUE] > 0.45
+};
+for (const a of ACTIONS) {
+  a.res = Object.prototype.hasOwnProperty.call(RESIDUAL, a.id) ? RESIDUAL[a.id] : a.gate;
+}
+
+/** Split once. Nine of these can only fire when schedule.js has put an obligation on somebody,
  *  and most people most of the time do not have one, so they are never scored. */
 const DUTY_ACTIONS = ACTIONS.filter((a) => a.hasDuty);
 const FREE_ACTIONS = ACTIONS.filter((a) => !a.hasDuty);
+
+/**
+ * Every duty action's gate is the same shape: this person has an obligation and it is this kind.
+ * At most one of them can ever be true, so walking all nine to find it is eight closure calls spent
+ * proving a negative. The kind is the key instead, and the gate stays the authority behind it: the
+ * audit checks the action this returns is exactly the action the gates would have chosen.
+ */
+const DUTY_BY_KIND = new Map();
+for (const a of DUTY_ACTIONS) { DUTY_BY_KIND.set(a.duty, a); a.res = null; }
+/** One reusable slot, so dispatching a duty allocates nothing. */
+const ONE = [null];
 
 /** How much each need matters when it is scored. Fun and social are the Sims levers; place and
  *  fatigue are this island's, and they are deliberately slower and quieter than the rest. */
@@ -802,12 +878,29 @@ export function registerNeeds(world) {
 
   const URG = new Float32Array(N);
 
+  /**
+   * Off unless the world was booted with the `needs-gate-audit` flag. When it is on, every candidate
+   * is decided by its residual and then checked against its full gate, and the first disagreement
+   * throws with the action and the person named. This is what makes the residual table above a
+   * claim that can be falsified rather than one that has to be believed.
+   */
+  let audit = false;
+  function auditGate(a, p, c, allowed) {
+    const truth = !a.gate || !!a.gate(p, c);
+    if (truth !== allowed) {
+      throw new Error(`[needs] residual disagrees with gate for '${a.id}': residual says `
+        + `${allowed}, gate says ${truth}, person ${p.id} age ${p.age} at tick ${world.clock.tick}`);
+    }
+  }
+
   function scoreList(list, p, c, u, out) {
     let best = out.best, bestScore = out.bestScore, bestPlace = out.bestPlace;
     for (let k = 0; k < list.length; k++) {
       const a = list[k];
       if (a.who && !p.canDo[a.index]) continue;
-      if (a.gate && !a.gate(p, c)) continue;
+      const allowed = !a.res || !!a.res(p, c);
+      if (audit) auditGate(a, p, c, allowed);
+      if (!allowed) continue;
       let score = 0;
       for (let g = 0; g < a.gi.length; g++) {
         const i = a.gi[g];
@@ -832,14 +925,17 @@ export function registerNeeds(world) {
       // resolved place and the distance home are cached per person per action and thrown away only
       // when they move house. Re-resolving them inside the scoring loop was a quarter of it.
       if (a.travels) {
+        // Indexed by the action's position in the table, not by its id: a plain array stays a fast
+        // elements store, where an object keyed by forty three different strings goes to dictionary
+        // mode and every lookup in the innermost loop of the hottest system pays for it.
         let cache = p._places;
-        if (!cache) cache = p._places = {};
-        let entry = cache[a.id];
+        if (!cache) cache = p._places = [];
+        let entry = cache[a.index];
         if (entry === undefined) {
           const resolved = resolvePlace(a, p);
-          if (!resolved) { cache[a.id] = null; continue; }
+          if (!resolved) { cache[a.index] = null; continue; }
           const dx0 = resolved.x - p.homeX, dz0 = resolved.z - p.homeZ;
-          entry = cache[a.id] = { place: resolved, km: Math.sqrt(dx0 * dx0 + dz0 * dz0) * 0.001 };
+          entry = cache[a.index] = { place: resolved, km: Math.sqrt(dx0 * dx0 + dz0 * dz0) * 0.001 };
         }
         if (entry === null) continue;
         // `tie` and `work` move with the person's life rather than with the map.
@@ -890,7 +986,11 @@ export function registerNeeds(world) {
     URG[FATIGUE] = 0;   // fatigue does not advertise; it biases the actions that relieve it
     choice.best = null; choice.bestScore = -1e9; choice.bestPlace = null;
     scoreList(liveFree, p, c, URG, choice);
-    if (p.duty) scoreList(DUTY_ACTIONS, p, c, URG, choice);
+    if (p.duty) {
+      const a = DUTY_BY_KIND.get(p.duty.kind);
+      if (a) { ONE[0] = a; scoreList(ONE, p, c, URG, choice); }
+      else if (audit) for (const d of DUTY_ACTIONS) auditGate(d, p, c, false);
+    }
     return choice;
   }
 
@@ -970,6 +1070,7 @@ export function registerNeeds(world) {
     order: 30,
 
     init(w) {
+      audit = w.flags.has('needs-gate-audit');
       R = w.residents;
       if (!R || !R.ready) return;
       R.byTownshipSeat = {};

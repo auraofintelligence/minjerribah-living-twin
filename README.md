@@ -2,10 +2,11 @@
 
 A digital twin of Minjerribah, North Stradbroke Island, Quandamooka Country, south east Queensland,
 that runs in a browser game engine. The island is modelled as a heightfield with real coordinates, and
-a set of simulation systems runs on top of it: tide, weather, daylight, groundwater and the lakes,
-dunes, koalas, whales, shorebirds, marine life, power, water, waste, telecoms, businesses, tourism,
-housing, jobs, prices, residents with needs and jobs and relationships, visitors, roads, the ferry,
-council decisions, policy levers, a budget, public sentiment and a narrative director.
+a set of simulation systems runs on top of it: tide, weather, daylight, the lakes and the water
+table, dunes, vegetation, koalas, whales, shorebirds, marine life, power, water, waste, telecoms,
+businesses, tourism, housing, jobs, prices, residents with needs and jobs and relationships,
+visitors, navigation, traffic, crowds, the ferry, council decisions, policy levers, a budget, public
+sentiment, a narrative director and the island's own written chronicle.
 
 It is a work in progress. It is not a product, it is not finished, and it does not claim to be
 better than anything.
@@ -40,7 +41,10 @@ and the first question on it is whether QYAC wants this project to exist.
 `data/lore.json` also carries a `prohibitions` block of thirteen rules covering invented language,
 invented ceremony, sacred and restricted sites, cultural content without a source, and generated
 Aboriginal art. Those rules are currently a convention that agents follow by hand. The check harness
-that would enforce them is not written yet.
+that would enforce them is not written yet, and on 9 August 2026 the first hand-run of one of them
+found a live violation in a shipped data pack: five deleted season names were still being used as
+keys in `data/narrative.json`. They have been removed and the whole episode is written up in
+`docs/CULTURAL-REVIEW.md` section D1. A rule that nothing executes is not a rule.
 
 ## Running it
 
@@ -59,9 +63,13 @@ With no browser at all:
 
 ```
 node tools/headless.mjs --ticks 4320 --profile     # 30 sim-days, with timings
+node tools/headless.mjs --ticks 52560 --profile    # one sim-year, about five minutes
 node tools/headless.mjs --determinism              # runs the world twice and diffs it
 node tools/headless.mjs --system koala             # one system's describe() output
 ```
+
+The keyboard is in `docs/KEYS.md`, in one table per area, and the arrival screens show the same map.
+If you bind a key, put it in that file in the same commit.
 
 On the running page, `window.TWIN` is the debug handle: `TWIN.probe()` for full machine-readable
 state, `TWIN.run(n)` to advance n ticks, `TWIN.bench(120)` for frame cost and draw calls,
@@ -86,9 +94,9 @@ under `src/ui/panels/`, and both guard on `world.stage` so headless is unaffecte
 
 ## The data
 
-Everything that is content rather than code lives in `data/`: eleven JSON packs, about 1.9 MB,
+Everything that is content rather than code lives in `data/`: twelve JSON packs, about 1.9 MB,
 covering geography, places, businesses, ecology, residents, transport, civic levers, events,
-narrative seeds, the proposed subterranean works, and lore.
+narrative seeds, the soundscape, the proposed subterranean works, and lore.
 
 The packs were built by reading public sources and they carry their working. There are about 1,100
 `source` fields and 760 source URLs across them, and most records carry a `confidence` of high,
@@ -107,39 +115,55 @@ and are never shown as existing.
 
 ## What works today
 
-- The island. 271 km2 of land, high point 233 m, built as a 908 by 1314 heightfield at 32 m
+Measured on 9 August 2026 by an agent who played the whole thing end to end, not reported by a
+builder.
+
+- **The island.** 271 km2 of land, high point 233 m, built as a 908 by 1314 heightfield at 32 m
   resolution in under a second, with height, normal, land cover, named regions and raycasting
-  available to every system. From the air the shape reads true: the Point Lookout headland, Main
-  Beach, Eighteen Mile Swamp behind the dunes, the bay shallows.
-- 46 systems and layers registering and running clean, with no console errors over 30 sim-days.
-- Determinism. Two runs of the same seed agree to a fingerprint over 1440 ticks.
-- Headless simulation at 3.27 ms per tick over 30 sim-days, against a 4 ms budget.
-- Rendering at 96 to 149 draw calls, against a 900 budget, using thin instances for trees and
-  buildings.
-- Seven UI panels: the HUD with weather, tide, fire danger and crossing conditions, the island log,
-  22 searchable info views that paint data over the island, a civic board with levers, traces,
-  decision makers, an in tray, groups, consultation and budget, an inspector, a map, and an island
-  calendar.
-- A camera with planner, street, follow, drone and cinematic modes, bookmarks and a photo mode.
+  available to every system. Flown to Amity Point at 900 m the shape reads as the real place: the
+  spit, the jetty, the two streets, the bay banks. Flown to Point Lookout at 420 m it is streets of
+  houses on a headland above a beach.
+- **55 systems and layers registering clean**, with zero console errors on a cold load and zero
+  entries in `TWIN.errors()` after driving every panel and pressing every key in `docs/KEYS.md`.
+- **A sim-year completes with zero runtime errors.** It did not until this pass: a string where a
+  number belonged killed the storyline engine about ninety days in, every time.
+- **Determinism.** Two runs of the same seed agree to a fingerprint over 1440 ticks.
+- **13 panels and 15 render layers.** The HUD with air, wind, swell, tide, UV, fire danger and
+  crossing conditions; the island log with severity filters and search; 22 searchable info views
+  that paint data over the ground; a civic board with levers, traces, decision makers, an in tray,
+  groups, consultation and budget; an inspector that fills when you click anything; a map with a
+  full-screen mode; an island calendar; a siting bench; the chronicle; the proposed works below the
+  sand; settings; and a generative soundscape with a mixer.
+- **People, vehicles and wildlife are on screen.** About 2,300 people drawn at a township in four
+  draw calls, vehicles on the road graph, whales off the headland in daylight and not at night,
+  koalas in the trees.
+- **The civic chain works end to end.** Pick a lever, read who decides it and what it claims it will
+  do, open a file, and the in tray gives you five commissionable studies with real week counts and
+  real prices, a lodge-it-anyway path that comes back as an information request twelve weeks later,
+  and a petition that is described as a list of names unless a consultation came back in favour.
+- **The seams between systems carry.** A koala hit on the road reaches the wildlife rescue call, the
+  notification bar, the chronicle and the conservation groups' mood. A barge cancellation rolls
+  vehicles, moves the ferry commuters, and gets written up. Eighteen of twenty-two lived-event
+  channels fire over a sim-year; two of eleven did before this pass.
+- **A camera** with planner, street, follow, drone and cinematic modes, bookmarks, labels,
+  letterbox and a photo mode.
 
 ## What does not work today
 
-- Nothing alive appears on screen. The render layers for people, vehicles, fauna and weather effects
-  are not built. 2,069 residents, 337 koalas, 74 whale pods, every car and every boat exist only as
-  numbers in a panel.
-- Close range is poor. At head height the ground is a flat colour wash with billboard trees and no
-  clutter, no surf line and no detail. Rock and reef platforms render as flat brown polygons with
-  visible contour stepping.
-- Eighteen of the modules named in `src/systems/manifest.js` do not exist yet, including fire, coast
-  erosion, groundwater, traffic, crowds, audio, and six UI panels. The manifest lists them on purpose
-  and the world runs without them.
-- Several read models report zeros for things that are actually happening, because the counters reset
-  daily and are read at a quiet hour. The ferry is the clearest case.
-- Two known bugs kill a system mid run: a data type problem in `data/narrative.json` disables the
-  storyline engine after roughly 200 sim-days, and `TWIN.setWeather` with an unknown value disables
-  the weather system.
-- The narrative director is thin against what it is meant to do. Twenty-three storylines fired across
-  a sim-year, and most days are quiet.
+- **The tick is over budget**, at 6.23 ms against 4. Draw calls are comfortable at 115 to 179
+  against a budget of 900, so this is CPU rather than the renderer.
+- **Close range is hazed and washed out.** Street level in a township has almost no contrast. The
+  bay-side water renders a saturated fluorescent green rather than turquoise.
+- **Five modules named in the design are not written**: fire, coastal erosion, groundwater, shared
+  presentation read models, and a stewardship board. They are listed in `PLANNED` in
+  `src/systems/manifest.js` and reported at boot rather than requested and failed.
+- **Several read models describe the instant rather than the day**, so a probe taken at 5:20am
+  reports zeros for a ferry that carried thousands of people. The ferry is the clearest case.
+- **Sixteen per cent of vehicle route requests fail**, every one of them because
+  `data/geography.json` does not carry the street. The system counts the failure rather than drawing
+  a car on a road that is not there, which is right, but it is why the roads look quiet.
+- **The narrative layer is thin against its brief.** Over a sim-year, 12 threads opened and 35 beats
+  fired against 514 cast failures, and most days are quiet.
 
 `docs/STATE-OF-PLAY.md` is the blunt engineering version of this list, with the measured numbers, the
 known traps, and what to do next.
@@ -150,6 +174,7 @@ known traps, and what to do next.
 | --- | --- |
 | `docs/CONTRACT.md` | The build contract. Architecture, non-negotiables, performance budget, definition of done. |
 | `docs/CRITIC.md` | How the project is judged. Read this before reviewing anything. |
+| `docs/KEYS.md` | The keyboard, in one place. Add a key here in the same commit you bind it. |
 | `docs/STATE-OF-PLAY.md` | Engineering handover: measured numbers, what is strong, what is scaffolding, what to fix. |
 | `docs/CULTURAL-REVIEW.md` | Open questions for QYAC. Not approvals. |
 | `docs/DATA-NOTES.md` | What each data pack could not verify. |

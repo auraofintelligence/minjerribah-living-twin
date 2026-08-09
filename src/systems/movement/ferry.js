@@ -129,6 +129,8 @@ export function registerFerry(world) {
   let cal = null;
   const svc = { vehicle: null, passenger: null, flyer: null };
   const vessels = new Map();
+  // Vehicle vessel ids that appear in today's sailing list. See mechanical().
+  const rosteredToday = new Set();
   let flyerSeats = 0;
 
   /** Today's sailings, rebuilt at midnight. */
@@ -194,6 +196,7 @@ export function registerFerry(world) {
   /* ---------------------------------------------------------------- today's timetable */
 
   function buildDay(w) {
+    rosteredToday.clear();
     const dow = DOW[w.clock.dayOfWeek];
     const info = cal ? cal.day(w.clock.date) : null;
     const peak = !!(info && (info.isSchoolHoliday || info.isLongWeekend || info.isPublicHoliday));
@@ -207,6 +210,7 @@ export function registerFerry(world) {
       const t = mins(timeStr);
       if (t == null) return;
       const ves = vessels.get(vesselId);
+      if (kind === 'vehicle' && ves) rosteredToday.add(ves.id);
       out.push({
         id: 's' + (seq++),
         service,
@@ -569,10 +573,17 @@ export function registerFerry(world) {
   the third vessel arrives. */
 
   function mechanical(w, t) {
+    // Only a vessel that is actually rostered today can break down on the run. Three vehicle
+    // vessels are in the pack but the base timetable is worked by two of them: Quandamooka is the
+    // relief boat and appears in no sailing. Rolling for all three sent a third of every failure to
+    // a vessel with nothing to cancel, and over a full sim-year that meant the barge never once
+    // cancelled and the whole chain hanging off it (rolled vehicles, spoiled chilled freight, a
+    // restock a day behind the shelves) never fired at all.
     for (const v of vessels.values()) {
       if (v.status === 'in service') {
         if (v.role === 'walk-on') continue;
-        // About one failure per vessel per two hundred sim-days.
+        if (!rosteredToday.has(v.id)) continue;
+        // About one failure per rostered vessel per two hundred sim-days.
         if (rng.float() < 1 / (200 * 144)) {
           v.status = 'out of service';
           v.reason = rng.pick(['a gearbox fault', 'a generator fault', 'a ramp hydraulic failure', 'unscheduled survey work']);

@@ -5,7 +5,7 @@
 import { World } from './kernel/world.js';
 import { Stage } from './render/stage.js';
 import { loadDataPacks } from './world/data.js';
-import { MANIFEST } from './systems/manifest.js';
+import { MANIFEST, PLANNED } from './systems/manifest.js';
 import { mountUI } from './ui/mount.js';
 
 const bootStatus = document.getElementById('boot-status');
@@ -54,12 +54,19 @@ async function main() {
   const wanted = only
     ? MANIFEST.filter((m) => only.some((o) => String(m).includes('/' + o + '.js')))
     : MANIFEST;
-  const missing = [];
+  // A module in MANIFEST that fails to import is a real fault and says so. Modules that have been
+  // designed but not written live in PLANNED and are reported, not requested: asking the server for
+  // a file nobody has written yet only fills the console with 404s that read like breakage.
+  const missing = PLANNED.map((p) => p.path);
+  const broke = [];
   const modules = await Promise.all(wanted.map((m) => m().catch((e) => {
-    missing.push(String(m).match(/['"](.+?)['"]/)?.[1] || 'unknown');
+    const path = String(m).match(/['"](.+?)['"]/)?.[1] || 'unknown';
+    broke.push(path);
+    console.error('[manifest] failed to load', path, e);
     return null;
   })));
-  if (missing.length) console.info('[manifest] not built yet (' + missing.length + '):', missing.join(', '));
+  if (missing.length) console.info('[manifest] designed, not built yet (' + missing.length + '):', missing.join(', '));
+  if (broke.length) missing.push(...broke);
   for (const mod of modules) {
     if (!mod) continue;
     const fns = Object.values(mod).filter((v) => typeof v === 'function' && /^register/.test(v.name));
@@ -98,7 +105,24 @@ async function main() {
       return world.clock.format();
     },
     /** Force a weather state, so a critic can check the wet look without waiting for rain. */
-    setWeather: (synoptic) => { const w = world.read('weather'); if (w) { w.synoptic = synoptic; } return w; },
+    /**
+     * Force a synoptic pattern. Validated, because it used to write whatever it was given straight
+     * into the read model: a name the weather system does not know (`TWIN.setWeather('clear')` is
+     * the obvious thing to try) threw at the next synoptic change, and World.step then disabled the
+     * weather system for the rest of the session with nothing on screen to say so.
+     */
+    setWeather: (synoptic) => {
+      const w = world.read('weather');
+      if (!w) return null;
+      const known = w.synoptics || [];
+      if (!known.includes(synoptic)) {
+        console.warn('[TWIN] setWeather: no such pattern "' + synoptic + '". Try one of: ' + known.join(', '));
+        return w;
+      }
+      if (typeof w.force === 'function') w.force(synoptic);
+      else w.synoptic = synoptic;
+      return w;
+    },
 
     /**
      * Render offscreen and write a PNG to shots/<name>.png on disk, so a critic can open the file

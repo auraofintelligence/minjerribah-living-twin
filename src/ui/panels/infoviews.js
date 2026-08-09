@@ -304,13 +304,23 @@ function injectCss() {
   const s = document.createElement('style');
   s.id = 'iv-panel-css';
   s.textContent = `
-.iv-dock { position:absolute; left:var(--sp-4); bottom:var(--sp-4); z-index:14;
+/* Top left, beside the launcher rail, not under it.
+   The dock used to sit in the bottom left corner with the legend growing upward out of it. On a
+   720 px screen a legend for a busy view is over four hundred pixels tall, so it covered the whole
+   launcher rail and the island log at the same time: with a data layer on, six of the thirteen
+   panels could not be reached with the mouse at all. The left edge now reads top to bottom as
+   rail, then the layer you have chosen and what its colours mean, then the log. The height cap
+   keeps the card clear of the log's own ceiling. */
+.iv-dock { position:absolute; left:calc(var(--sp-3) + 116px + var(--sp-2));
+  top:calc(var(--hud-height) + var(--sp-3)); z-index:14;
   display:flex; flex-direction:column; align-items:flex-start; gap:var(--sp-2);
-  transition:opacity var(--med) var(--ease); max-width:340px; }
+  transition:opacity var(--med) var(--ease); max-width:340px;
+  /* Ends above the audio prompt and the island log, which own the rest of this column. */
+  max-height:calc(100vh - var(--hud-height) - var(--sp-3) - 290px); }
 .iv-dock.dim { opacity:.22; }
 .iv-dock.dim .iv-card { pointer-events:none; }
 
-.iv-launch { order:2; background:var(--s-1); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
+.iv-launch { order:1; background:var(--s-1); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
   box-shadow:var(--shadow-1); padding:var(--sp-2) var(--sp-3); }
 .iv-launch kbd { font:600 9px/1 var(--f-num); background:var(--s-sunk); border:1px solid var(--edge);
   border-radius:3px; padding:2px 4px; color:var(--t-faint); margin-left:2px; }
@@ -318,7 +328,7 @@ function injectCss() {
 .iv-launch.active svg { color:var(--sea); }
 
 /* ---- the legend card ---- */
-.iv-card { order:1; display:none; width:318px;
+.iv-card { order:2; display:none; width:318px; min-height:0; flex:0 1 auto;
   background:var(--s-1); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
   border:1px solid var(--edge); border-radius:var(--r-3); box-shadow:var(--shadow-2);
   animation:slide-up var(--med) var(--ease-out) both; overflow:hidden; }
@@ -329,7 +339,9 @@ function injectCss() {
 .iv-card-group { font:600 var(--fs-micro)/1 var(--f-ui); letter-spacing:.14em; text-transform:uppercase; flex:none; }
 .iv-card-name { flex:1; font:500 var(--fs-base)/1.25 var(--f-ui); color:var(--t-hi); min-width:0; }
 .iv-card-min, .iv-card-x { align-self:center; width:22px; height:22px; padding:0; font-size:14px; line-height:1; }
-.iv-card-body { padding:var(--sp-3); max-height:min(52vh, 460px); }
+.iv-card-body { padding:var(--sp-3); overflow-y:auto; scrollbar-width:thin;
+  scrollbar-color:var(--edge-strong) transparent;
+  max-height:calc(100vh - var(--hud-height) - var(--sp-3) - 380px); }
 .iv-card.folded .iv-card-body { display:none; }
 
 .iv-why { font-size:var(--fs-sm); line-height:1.5; color:var(--t); margin-bottom:var(--sp-3); }
@@ -368,7 +380,8 @@ function injectCss() {
 .iv-basis p { margin-top:var(--sp-2); font-size:var(--fs-sm); line-height:1.5; color:var(--t-faint); }
 
 /* ---- the picker ---- */
-.iv-pick { position:absolute; left:0; bottom:0; width:352px; display:none; flex-direction:column;
+/* Opens downward from the top of the dock, which is where the dock now is. */
+.iv-pick { position:absolute; left:0; top:0; width:352px; display:none; flex-direction:column;
   background:var(--s-2); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
   border:1px solid var(--edge-strong); border-radius:var(--r-3); box-shadow:var(--shadow-3);
   overflow:hidden; animation:slide-up var(--med) var(--ease-out) both; }
@@ -379,7 +392,8 @@ function injectCss() {
   font:400 var(--fs-base)/1.2 var(--f-ui); color:var(--t-hi); min-width:0; }
 .iv-search::placeholder { color:var(--t-faint); }
 
-.iv-list { max-height:min(56vh, 460px); padding:var(--sp-2); }
+.iv-list { max-height:min(56vh, calc(100vh - var(--hud-height) - 200px)); padding:var(--sp-2);
+  overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--edge-strong) transparent; }
 .iv-grp { display:flex; align-items:center; gap:6px; padding:var(--sp-3) var(--sp-2) var(--sp-1);
   font:600 var(--fs-micro)/1 var(--f-ui); letter-spacing:.16em; text-transform:uppercase; color:var(--t-faint); }
 .iv-grp i { width:5px; height:5px; border-radius:50%; display:block; }
@@ -408,6 +422,9 @@ function injectCss() {
 @media (max-width: 900px) {
   .iv-dock { max-width:none; right:var(--sp-2); left:var(--sp-2); }
   .iv-card, .iv-pick { width:auto; right:0; left:0; }
+}
+@media (max-width: 860px) {
+  .iv-dock { left:calc(var(--sp-2) + 96px + var(--sp-2)); }
 }
 `;
   document.head.appendChild(s);

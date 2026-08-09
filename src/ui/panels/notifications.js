@@ -707,7 +707,7 @@ function mountNotifications(root, world) {
 
   const badge = el('span', { class: 'ntf-badge' }, '0');
   const drawerBtn = el('button', {
-    class: 'ntf-tab', type: 'button',
+    class: 'ntf-tab', type: 'button', title: 'The island log (I)',
     onclick: () => toggleDrawer()
   }, icon('bell'), el('span', { class: 'ntf-tab-label' }, 'Island log'), badge);
 
@@ -932,6 +932,23 @@ function mountNotifications(root, world) {
       paintDrawer();
       search.focus();
     }
+  }
+
+  // I for the island log. Every other board on this island opens from one key and this one only
+  // opened from a click, which is the sort of gap that reads as an oversight rather than a
+  // decision. The full map is in docs/KEYS.md. Escape closes it, the way Escape closes everything.
+  {
+    const TYPING = { INPUT: 1, TEXTAREA: 1, SELECT: 1 };
+    window.addEventListener('keydown', (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.target && TYPING[e.target.tagName]) {
+        // The drawer's own search box: Escape gets you out of it and out of the drawer.
+        if (e.code === 'Escape' && drawerOpen) { e.preventDefault(); toggleDrawer(false); }
+        return;
+      }
+      if (e.code === 'KeyI') { e.preventDefault(); toggleDrawer(); }
+      else if (e.code === 'Escape' && drawerOpen) { e.preventDefault(); toggleDrawer(false); }
+    });
   }
 
   function paintBadge() {
@@ -1220,7 +1237,10 @@ function injectStyle() {
   stroke-linecap:round;stroke-linejoin:round;display:block;flex:0 0 auto}
 
 /* ---- the stack ---- */
-.ntf-stack{display:flex;flex-direction:column;gap:var(--sp-2);width:100%;max-height:40vh;
+/* 28vh, not 40. The stack grows upward out of the bottom left corner and at 40vh on a 720 px
+   screen its ceiling reached the info view legend above it. Anything that does not fit is one
+   click away in the drawer, which is what the drawer is for. */
+.ntf-stack{display:flex;flex-direction:column;gap:var(--sp-2);width:100%;max-height:28vh;
   justify-content:flex-end}
 .ntf-card{display:flex;gap:10px;padding:9px 10px 9px 11px;width:100%;
   background:var(--s-1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);

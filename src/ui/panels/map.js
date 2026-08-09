@@ -600,7 +600,13 @@ function injectCss() {
   const s = document.createElement('style');
   s.id = 'map-panel-css';
   s.textContent = `
-.map-panel { position:absolute; right:var(--sp-4); bottom:var(--sp-4); z-index:12; }
+/* The minimap sits to the LEFT of the inspector column and clear of the camera bar and the place
+   readout along the bottom. The island is 39 km north to south and 15 km across, so a minimap of
+   it is a tall thin sliver: shrinking it to fit under the inspector would make it unreadable, and
+   stacking it under the inspector leaves neither panel enough height at 720. Offsets: 16 gutter +
+   376 inspector + 12 gap on the right, and clear of the 673 px camera bar and the 633 px place
+   readout at the bottom. */
+.map-panel { position:absolute; right:var(--map-right); bottom:var(--map-bottom); z-index:12; }
 .map-head { padding:var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3); gap:2px; }
 .map-head .panel-title { font-size:var(--fs-micro); }
 .map-wrap { position:relative; }
@@ -614,7 +620,7 @@ function injectCss() {
 .map-view { margin-left:auto; font:600 var(--fs-micro)/1 var(--f-ui); letter-spacing:.1em;
   text-transform:uppercase; color:var(--t-faint); }
 .map-view.on { color:var(--sea); }
-.map-show { position:absolute; right:var(--sp-4); bottom:var(--sp-4); z-index:12; }
+.map-show { position:absolute; right:var(--map-right); bottom:var(--map-bottom); z-index:12; }
 
 .map-tip { position:absolute; z-index:3; pointer-events:none; max-width:230px;
   background:var(--s-2); border:1px solid var(--edge-strong); border-radius:var(--r-2);

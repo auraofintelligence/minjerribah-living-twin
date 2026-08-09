@@ -34,8 +34,28 @@ export function registerWeather(world) {
     swellM: 1.0, swellPeriodS: 9, swellDirDeg: 110, seaState: 'slight',
     fireDangerIndex: 8, fireDangerLabel: 'Moderate',
     visibilityKm: 30, uvIndex: 6, dewPointC: 14,
-    beachCondition: 'good', crossingCondition: 'good'
+    beachCondition: 'good', crossingCondition: 'good',
+    // The list of patterns this system knows, so that anything driving the weather from outside
+    // (TWIN.setWeather, a scenario pack) can check a value against it rather than write a name
+    // nothing recognises and take the whole system down at the next synoptic change.
+    synoptics: Object.keys(SYNOPTIC),
+    /**
+     * Force a pattern, properly: the name, its label, the target it eases toward and the clock on
+     * how long it holds. Returns false for a name this system does not know, so a caller can say
+     * so rather than corrupt the state. TWIN.setWeather goes through here.
+     */
+    force: null
   });
+  state.force = (id) => {
+    if (!SYNOPTIC[id]) return false;
+    state.synoptic = id;
+    state.label = SYNOPTIC[id].label;
+    target = { ...SYNOPTIC[id] };
+    hoursLeft = 18;
+    state.hoursInState = 0;
+    world.bus.emit('weather:change', { synoptic: id, label: state.label, forced: true });
+    return true;
+  };
 
   let target = { ...SYNOPTIC.ridge };
   let hoursLeft = 18;

@@ -47,21 +47,8 @@ import { infoView } from '../../render/layers/infoview.js';
 function rail() {
   let r = document.getElementById('twin-rail');
   if (r) return r;
-  if (!document.getElementById('twin-rail-css')) {
-    const s = document.createElement('style');
-    s.id = 'twin-rail-css';
-    s.textContent = `
-#twin-rail { position: absolute; left: var(--sp-3); top: 50%; transform: translateY(-50%);
-  display: flex; flex-direction: column; gap: var(--sp-2); z-index: 20; }
-.rail-btn { position: relative; width: 116px; justify-content: flex-start; letter-spacing: .1em;
-  font-size: var(--fs-micro); text-transform: uppercase; padding: var(--sp-3) var(--sp-3); }
-.rail-btn .dot { position: absolute; top: -5px; right: -5px; min-width: 17px; height: 17px; padding: 0 4px;
-  border-radius: var(--r-pill); background: var(--sun); color: var(--t-on-accent);
-  font: 700 10px/17px var(--f-num); text-align: center; }
-.rail-btn .dot:empty { display: none; }
-@media (max-width: 860px) { #twin-rail { left: var(--sp-2); gap: 4px; } .rail-btn { width: 96px; } }`;
-    document.head.append(s);
-  }
+  // The rail's own look and position live in src/ui/design.css, once, rather than in a copy
+  // inside each of the six panels that can be the first to build it.
   r = el('div', { id: 'twin-rail' });
   document.getElementById('ui-root').append(r);
   return r;

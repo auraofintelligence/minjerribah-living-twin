@@ -42,22 +42,57 @@ const METRIC_GAIN = 1.9;
 const NOT_A_CONSTITUENCY = new Set(['qyac', 'minjerribah-camping', 'joint-management', 'qpws']);
 
 /**
- * Channels from the rest of the island. None of these systems is built yet. They are declared by
- * prefix so that whatever the movement, ecology and infrastructure slices end up naming their
- * events, the civic model hears them, and describe() reports which ones have ever fired.
+ * Channels from the rest of the island: the things that happen to people, arriving as bus events
+ * and moving a group's mood.
+ *
+ * These were written before the ecology, movement and infrastructure systems existed, against
+ * guessed event names. Nine of the eleven guesses were wrong, and because a channel that never
+ * matches also never complains, the mistake was invisible: over a full sim-year exactly two of the
+ * eleven ever fired. A koala hit on East Coast Road did not move the conservation groups, smoke
+ * over the townships did not move the retirees, and a household losing its lease to a holiday
+ * letting did not move the renters. Every prefix below is now an event a system in this repository
+ * actually emits, with the emitter named beside it so the next person can check.
+ *
+ * `when` is optional and narrows a channel to part of one event type, which is how one
+ * `wildlife:call` can mean a road strike to one group and a dog attack to another.
  */
 const LIVED_CHANNELS = [
-  { prefix: 'ferry:cancel', groups: ['ferry-commuters', 'young-families-and-school', 'renters-and-key-workers'], delta: -0.012, cause: 'a crossing cancelled' },
-  { prefix: 'ferry:queue', groups: ['long-term-residents', 'tradies-and-builders'], delta: -0.008, cause: 'the queue at the ramp' },
-  { prefix: 'wildlife:strike', groups: ['environmental-stewards', 'volunteers-and-emergency'], delta: -0.02, cause: 'wildlife hit on the road' },
-  { prefix: 'wildlife:dog', groups: ['environmental-stewards', 'conservation-groups'], delta: -0.03, cause: 'a dog attack on wildlife' },
-  { prefix: 'fire:burn', groups: ['retirees-and-seniors', 'tourism-operators'], delta: -0.01, cause: 'smoke over the townships' },
-  { prefix: 'fire:incident', groups: ['volunteers-and-emergency', 'long-term-residents'], delta: -0.03, cause: 'a fire on the island' },
-  { prefix: 'storm:', groups: ['foreshore-landowners', 'long-term-residents'], delta: -0.02, cause: 'a storm on the foreshore' },
-  { prefix: 'waste:missed', groups: ['long-term-residents', 'holiday-home-owners'], delta: -0.01, cause: 'a bin not collected' },
-  { prefix: 'housing:eviction', groups: ['renters-and-key-workers'], delta: -0.05, cause: 'a household moved on for the holiday rate' },
+  // movement/ferry.js
+  { prefix: 'ferry:cancelled', groups: ['ferry-commuters', 'young-families-and-school', 'renters-and-key-workers'], delta: -0.012, cause: 'a crossing cancelled' },
+  { prefix: 'ferry:stranded', groups: ['ferry-commuters', 'renters-and-key-workers'], delta: -0.014, cause: 'a boat called off with people waiting' },
+  { prefix: 'ferry:queue-spill', groups: ['long-term-residents', 'tradies-and-builders'], delta: -0.008, cause: 'the queue at the ramp' },
+  // ecology/koala.js and marine.js: one event type, told apart by what the call was for
+  { prefix: 'wildlife:call', when: (p) => /hit on the road/.test(String((p && p.situation) || '')),
+    groups: ['environmental-stewards', 'volunteers-and-emergency', 'conservation-groups'], delta: -0.02, cause: 'wildlife hit on the road' },
+  { prefix: 'wildlife:call', when: (p) => /dog/.test(String((p && p.situation) || '')),
+    groups: ['environmental-stewards', 'conservation-groups'], delta: -0.03, cause: 'a dog attack on wildlife' },
+  { prefix: 'wildlife:call', groups: ['volunteers-and-emergency'], delta: -0.006, cause: 'a call out to an animal' },
+  // ecology/vegetation.js
+  { prefix: 'ecology:smoke', groups: ['retirees-and-seniors', 'tourism-operators'], delta: -0.01, cause: 'smoke over the townships' },
+  { prefix: 'ecology:burn', when: (p) => (p && p.cause) !== 'planned',
+    groups: ['volunteers-and-emergency', 'long-term-residents'], delta: -0.03, cause: 'a fire on the island' },
+  // ecology/dunes.js
+  { prefix: 'coast:flow-slide', groups: ['foreshore-landowners', 'long-term-residents'], delta: -0.04, cause: 'the foreshore gave way' },
+  { prefix: 'coast:storm-cut', groups: ['foreshore-landowners', 'long-term-residents'], delta: -0.02, cause: 'a storm on the foreshore' },
+  // infrastructure/waste.js
+  { prefix: 'waste:kerbside-missed', groups: ['long-term-residents', 'holiday-home-owners'], delta: -0.01, cause: 'a bin not collected' },
+  { prefix: 'waste:centre-closed', groups: ['long-term-residents', 'tradies-and-builders'], delta: -0.008, cause: 'the transfer station shut' },
+  // infrastructure/power.js and water.js
+  { prefix: 'power:shedding', groups: ['long-term-residents', 'retirees-and-seniors', 'tourism-operators'], delta: -0.03, cause: 'the power went off' },
+  { prefix: 'water:restrictions', when: (p) => !!(p && p.level > 0),
+    groups: ['long-term-residents', 'holiday-home-owners'], delta: -0.012, cause: 'water restrictions' },
+  { prefix: 'water:boil-notice', groups: ['long-term-residents', 'young-families-and-school'], delta: -0.05, cause: 'a boil water notice' },
+  // agents/population.js
+  { prefix: 'housing:lost-to-holiday-let', groups: ['renters-and-key-workers'], delta: -0.05, cause: 'a house went to the holiday rate' },
+  // economy/jobs.js
+  { prefix: 'jobs:left-for-want-of-a-room', groups: ['renters-and-key-workers', 'tradies-and-builders'], delta: -0.03, cause: 'somebody left for want of a room' },
+  // agents/visitors.js, movement/crowd.js, economy/tourism.js
   { prefix: 'visitors:peak', groups: ['long-term-residents', 'retirees-and-seniors'], delta: -0.006, cause: 'a long weekend' },
-  { prefix: 'event:', groups: ['tourism-operators', 'young-families-and-school'], delta: 0.006, cause: 'something on in town' }
+  { prefix: 'crowd:crush', groups: ['long-term-residents', 'retirees-and-seniors'], delta: -0.004, cause: 'the gorge walk was shoulder to shoulder' },
+  { prefix: 'tourism:parking-full', groups: ['long-term-residents', 'tourism-operators'], delta: -0.004, cause: 'nowhere to park at Point Lookout' },
+  // ecology/whales.js and marine.js: the two that move a mood the other way
+  { prefix: 'whales:season', groups: ['tourism-operators', 'long-term-residents'], delta: 0.02, cause: 'the whales came back' },
+  { prefix: 'ecology:hatch', groups: ['environmental-stewards', 'conservation-groups'], delta: 0.02, cause: 'turtles made the water' }
 ];
 
 export function registerSentiment(world) {
@@ -83,6 +118,9 @@ export function registerSentiment(world) {
   let pack = null;
   let lastDay = -1;
   const channelFired = new Map();
+  // Two channels can share an event type and be told apart by `when`, so the tally is keyed by
+  // both. Save and load carry these keys, so changing a channel's cause text resets its counter.
+  const channelKey = (c) => c.prefix + (c.when ? '/' + c.cause : '');
 
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
   const dayOf = (w) => w.clock.dayIndex;
@@ -329,8 +367,10 @@ export function registerSentiment(world) {
 
   function handleLived(w, type, payload) {
     for (const ch of LIVED_CHANNELS) {
-      if (!type.startsWith(ch.prefix)) continue;
-      channelFired.set(ch.prefix, (channelFired.get(ch.prefix) || 0) + 1);
+      if (type !== ch.prefix && !type.startsWith(ch.prefix + ':')) continue;
+      if (ch.when && !ch.when(payload)) continue;
+      const key = channelKey(ch);
+      channelFired.set(key, (channelFired.get(key) || 0) + 1);
       for (const gid of ch.groups) {
         record(w, gid, ch.delta, ch.cause, payload && payload.text ? String(payload.text).slice(0, 160) : '', type);
       }
@@ -446,7 +486,7 @@ export function registerSentiment(world) {
         delta: +decayed(e, day).toFixed(3), cause: e.cause, detail: e.detail
       }));
 
-    state.channels = LIVED_CHANNELS.map((c) => ({ prefix: c.prefix, fired: channelFired.get(c.prefix) || 0 }));
+    state.channels = LIVED_CHANNELS.map((c) => ({ prefix: c.prefix, cause: c.cause, fired: channelFired.get(channelKey(c)) || 0 }));
   }
 
   /** The three specific things that moved this group, in plain sentences. */
@@ -504,11 +544,15 @@ export function registerSentiment(world) {
       w.bus.on('civic:info-request', (p) => inbox.push(['info', p]));
       w.bus.on('civic:media', (p) => inbox.push(['media', p]));
 
-      // Whatever the other slices end up calling their events, catch the ones that matter here.
+      // Catch the events the channels above name. The filter here has to agree with handleLived's,
+      // or an event reaches the inbox and is then dropped without a word.
       w.bus.onAny((payload, type) => {
         if (!type || type.startsWith('world:') || type.startsWith('civic:') || type.startsWith('ui:')) return;
         for (const ch of LIVED_CHANNELS) {
-          if (type.startsWith(ch.prefix)) { inbox.push(['lived', { type, payload }]); return; }
+          if (type === ch.prefix || type.startsWith(ch.prefix + ':')) {
+            inbox.push(['lived', { type, payload }]);
+            return;
+          }
         }
       });
 

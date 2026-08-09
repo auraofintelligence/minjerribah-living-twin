@@ -524,23 +524,61 @@ function bakeWaveField(elev, dirDeg, refLevel, periodRef) {
   // Shelter: march downwind, carrying a decaying shadow from any land the ray crossed. This is
   // what puts Cylinder Beach and Home Beach in the lee on a south swell while Main Beach copes
   // with the whole thing.
+  //
+  // The march also spreads sideways as it goes, because a real lee has no edge. Swell bends into
+  // the shadow of a headland by diffraction, and the width of that penumbra grows with the
+  // distance travelled past the tip. Without the lateral term this sweep is a hard-edged ray cast:
+  // every headland threw a wedge of dead-flat water across the bay with two dead-straight sides,
+  // and Amity Point threw the worst of them, a geometric triangle of pale shallow-looking water
+  // visible from orbit. Nothing in the sea has a straight edge, so neither does this now.
+  //
+  // The lateral weight is a one-cell-per-step spread, which over the 2.6 km e-folding length opens
+  // the penumbra to a few hundred metres: the right order for a swell of this period against a
+  // headland of this size, and enough to leave no edge anywhere on screen.
   const shelter = new Float32Array(N);
   const stepI = dx >= 0 ? 1 : -1;
   const stepJ = dz >= 0 ? 1 : -1;
-  const wI = Math.abs(dx) / (Math.abs(dx) + Math.abs(dz) + 1e-6);
+  const aI = Math.abs(dx), aJ = Math.abs(dz);
+  const wI = aI / (aI + aJ + 1e-6);
   const wJ = 1 - wI;
   const decay = Math.exp(-CELL / 2600);
+  // Spread perpendicular to travel: the axis the ray moves along least is the one it smears across.
+  const SPREAD = 0.28;
   const i0 = dx >= 0 ? 0 : NX - 1, i1 = dx >= 0 ? NX : -1;
   const j0 = dz >= 0 ? 0 : NZ - 1, j1 = dz >= 0 ? NZ : -1;
+  const at = (i, j) => (i < 0 || i >= NX || j < 0 || j >= NZ ? 0 : shelter[j * NX + i]);
   for (let j = j0; j !== j1; j += stepJ) {
     for (let i = i0; i !== i1; i += stepI) {
       const k = j * NX + i;
       const land = elev[k] > refLevel - 0.2 ? 1 : 0;
-      let up = 0;
       const pi = i - stepI, pj = j - stepJ;
-      if (pi >= 0 && pi < NX) up += wI * shelter[j * NX + pi];
-      if (pj >= 0 && pj < NZ) up += wJ * shelter[pj * NX + i];
-      shelter[k] = Math.max(land, up * decay);
+      // Upstream along each axis, each sampled across its own perpendicular so the shadow
+      // widens as it travels instead of holding a knife edge all the way across the bay.
+      const upI = (1 - 2 * SPREAD) * at(pi, j) + SPREAD * (at(pi, j - 1) + at(pi, j + 1));
+      const upJ = (1 - 2 * SPREAD) * at(i, pj) + SPREAD * (at(i - 1, pj) + at(i + 1, pj));
+      shelter[k] = Math.max(land, (wI * upI + wJ * upJ) * decay);
+    }
+  }
+  // One separable smoothing pass over the whole field. The sweep resolves the penumbra but still
+  // carries single-cell stripes off the staircased coastline, and a stripe one cell wide reads on
+  // screen as a scratch in the water when the camera is 15 km up.
+  {
+    const tmp = new Float32Array(N);
+    for (let j = 0; j < NZ; j++) {
+      for (let i = 0; i < NX; i++) {
+        const k = j * NX + i;
+        const l = i > 0 ? shelter[k - 1] : shelter[k];
+        const r = i < NX - 1 ? shelter[k + 1] : shelter[k];
+        tmp[k] = 0.25 * l + 0.5 * shelter[k] + 0.25 * r;
+      }
+    }
+    for (let j = 0; j < NZ; j++) {
+      for (let i = 0; i < NX; i++) {
+        const k = j * NX + i;
+        const u = j > 0 ? tmp[k - NX] : tmp[k];
+        const d = j < NZ - 1 ? tmp[k + NX] : tmp[k];
+        shelter[k] = 0.25 * u + 0.5 * tmp[k] + 0.25 * d;
+      }
     }
   }
 
@@ -685,16 +723,28 @@ void main(void) {
   vec4 bed = texture2D(bathyTex, uvc);
   vec4 wf = texture2D(waveTex, uvc);
 
+  // Beyond the bake box, open ocean.
+  //
+  // The disc reaches 46 km; the baked seabed covers 28 by 41 km. Clamping the lookup outside it
+  // does not stop at the edge, it EXTRUDES the edge row to the horizon: whatever depth, bay mix
+  // and wave exposure happened to sit on the last row of the bake streaked outward forever as
+  // dead-straight bands. That is where the pale wedges with geometric edges in the sea came from.
+  // Past the box the model simply has no bathymetry, and the honest answer is deep open water:
+  // fully exposed, no bay, no bed to see, no foam. Ramped over three kilometres so the join is
+  // a gradient rather than another edge.
+  vec2 outM = max(vec2(0.0), max(uBox.xy - p, p - (uBox.xy + uBox.zw)));
+  float open = smoothstep(0.0, 3000.0, max(outM.x, outM.y));
+
   float level = mix(mix(uTide.x, uTide.y, uvc.x), mix(uTide.z, uTide.w, uvc.x), uvc.y);
-  float elev = bed.x;
-  float bayMix = bed.y;
+  float elev = mix(bed.x, -90.0, open);
+  float bayMix = bed.y * (1.0 - open);
   float depth0 = level - elev;
   float dsafe = max(depth0, 0.30);
-  float expo = clamp(wf.y, 0.0, 1.0);
+  float expo = mix(clamp(wf.y, 0.0, 1.0), 1.0, open);
 
-  vec2 dir = normalize(wf.zw * 2.0 - 1.0 + vec2(1e-5));
+  vec2 dir = normalize(mix(wf.zw * 2.0 - 1.0, uSwellDir.xy, open) + vec2(1e-5));
   vec2 perp = vec2(-dir.y, dir.x);
-  float delay = wf.x;
+  float delay = wf.x * (1.0 - open);
 
   // Shoal the ground swell first, so the breaking test sees the shoaled height.
   float w0 = uSwell0.x;
@@ -765,10 +815,14 @@ varying vec4 vB;
 void main(void) {
   vec2 uv = clamp((vPos.xz - uBox.xy) / uBox.zw, 0.0018, 0.9982);
   vec4 bed = texture2D(bathyTex, uv);
-  float depth = vB.z - bed.x;
+  // Same open-ocean ramp the vertex stage uses, for the same reason: past the bake box there is
+  // no seabed, so nothing may be extruded outward from the edge of one.
+  vec2 outM = max(vec2(0.0), max(uBox.xy - vPos.xz, vPos.xz - (uBox.xy + uBox.zw)));
+  float open = smoothstep(0.0, 3000.0, max(outM.x, outM.y));
+  float depth = vB.z - mix(bed.x, -90.0, open);
   if (depth <= 0.004) discard;
-  float bayMix = bed.y;
-  float rockAmt = bed.z;
+  float bayMix = bed.y * (1.0 - open);
+  float rockAmt = bed.z * (1.0 - open);
 
   vec3 V = uCam - vPos;
   float dist = length(V);

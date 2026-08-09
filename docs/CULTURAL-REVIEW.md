@@ -426,3 +426,27 @@ script, not just read. The blocking ones:
 
 The check harness is not written yet. Writing it is the next job, and it is small: most of the rules are
 token scans over `src/`, `data/` and `docs/`.
+
+### D1. What the first hand-run of `no-banned-tokens` found (9 August 2026)
+
+Because the harness does not exist, the smoothing pass ran the token scan by hand. It failed.
+
+`data/narrative.json` still carried five of the deleted season names as `season_bias` keys, in 28
+seeds: `gubinbara` twelve times, `nunmatta` sixteen, `gulayi` twelve, `bujaboo` four, and
+`yalingbila` nine. The names had been removed from `src/kernel/clock.js` and recorded as banned in
+`data/lore.json` in wave 3, and the narrative pack, written afterwards by a different agent, used
+them anyway. `yalingbila` is the worse of the two cases: it is an allowlisted word with a published
+meaning, whale, and it was being used here as the name of a season, which is precisely the mistake
+wave 3 had already found and written up.
+
+They have been deleted, not renamed. Nothing in the repository records what the invented names were
+supposed to mean, so mapping each one onto a plain English season would have meant inventing a
+second time. `src/systems/narrative/director.js` never read them: it reads only
+`long_weekends`, `school_holidays`, `school_term` and `high_summer`, so no behaviour changed, and
+the `note` fields beside each block still carry the real seasonal reasoning in sourced plain
+English ("Southbound with calves peaks about October", "The mullet run runs May to August").
+
+Two things follow. First, a rule that is written down but not executed is not a rule: this one was
+recorded, agreed and violated inside the same repository, by an agent that had read the file.
+Second, the harness should be written before the next pack lands, and it should run over
+`data/**` as hard as over `src/**`, because the pack is where this came in.
