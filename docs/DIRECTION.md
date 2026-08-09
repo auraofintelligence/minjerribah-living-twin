@@ -140,6 +140,85 @@ work should follow, when the owner calls a wave.
    systems, not backdrops. A high fire-danger day closes tracks, and that closure policy is itself
    testable. Historical weather arrives as committed packs; generated weather is seeded.
 
+## The economic layer
+
+The twin already carries the shape that matters, in `src/systems/economy/chour.js`: a ledger that is
+money-only on purpose, the C-hour as a record someone chose to make, and the unmeasured care the
+ledger never sees, with the gap between them as the point. Everything here extends that braid. None
+of it is built, and every mechanism below is proposed.
+
+1. **The C-hour senses; it never prices.** Its macro role is to show where community work is already
+   flowing, so patient capital can follow it. An allocation rule may read where chosen records
+   cluster, by place and theme, in aggregate. It must never read what an hour is worth, because
+   there is no such number. The guard is absolute and it fails safe: sensing consumes only records
+   people elected to make, it never creates a reporting obligation, and if the signal thins the
+   answer is never a reporting requirement. Any sensing design gets rehearsed against the
+   crowding-out and hysteresis arithmetic already in that file before it ships.
+2. **Non-tradeable by construction, not by policy.** No simulated market, price field, exchange or
+   secondary transfer may exist for C-hour records. Then when a turbulence scenario adds speculative
+   actors, they are incapable of betting on or against the record because the schema gives them
+   nothing to bet with. Hold this the way the sim-never-imports-the-renderer rule is held, with a
+   test. A recognition layer that cannot be traded cannot be crashed: that is the whole of the
+   stabiliser claim, stated at its true size.
+3. **A community fund as a fifth purse.** Beside the four in `src/systems/civic/budget.js`, carrying
+   the same who-holds-it semantics: a corpus, a locked share that cannot be spent, a published
+   allocation rule, a patience parameter, and recipients that are real organisations from
+   `data/businesses.json`. Waves then rehearse allocation experiments: same corpus, different rules,
+   compared deterministically.
+4. **A mutual pool, in the discretionary shape.** Contributions in, a board considering claims at its
+   discretion rather than a contractual right to indemnity, surplus that stays on the island as
+   reserves or lower contributions or funded mitigation, and a catastrophic layer above the
+   self-funded one. The island-specific hard part is that losses correlate: one storm hits every
+   roof. So the pool's failure modes are the interesting output, not its success. Two boundaries are
+   law and not preference, and belong in as blocking rules: statutory workers-compensation
+   self-insurance is out of reach at this scale, and body-corporate building cover must sit with a
+   regulated insurer, so the pool never covers it and the group-purchasing lever is modelled
+   instead. The counterfactual worth running: the same seeded seasons against a retained-surplus
+   pool versus a configuration where surplus leaves the island each year.
+5. **Compute is the island's fourth utility.** The twin models power, water and telecoms; compute is
+   the missing one, and it couples cleanly: draw on the power system, waste heat into buildings,
+   and a mainland dependency that fails when telecoms fail. The sharpest scenario is the tether cut:
+   run a cyclone season twice, once with a local node on solar and battery holding a survival stack,
+   once without, and measure continuity of named civic functions. Household idle compute pooled by
+   opt-in is a second allocatable community resource, allocated by a published rule exactly as the
+   money is.
+6. **Turbulence is weather.** Programmable money, continuous algorithmic trading and agents betting
+   on prediction markets enter as an environmental force with mechanics, the way the barge and the
+   financial year already do: committed, deterministic shock series applied to the money lines while
+   the record and the care lines are structurally untouched. No live feeds, no runtime randomness,
+   no real assets, nothing that reads as market forecasting. Run the storm and let a player watch
+   which parts of island life keep working. The claim is under test, not asserted, and it belongs on
+   the claims board in the speculative register with its settling test named.
+7. **who_decides extends to money.** Every purse, pool and budget round ships with a decision-rights
+   table in the `data/civic.json` style: who proposes, who votes, who vetoes, at what quorum. No
+   allocation experiment runs without naming its decision rule, so that when two experiments differ
+   the twin can say whether the mechanism or the constitution made the difference.
+8. **Decision shapes are lever mechanics.** Six generic shapes extend the existing verb set: a
+   mandatory-consultation gate, an advisory chamber whose advice is recorded but not binding,
+   dual-key co-decision, exclusive local jurisdiction where the higher body has no verb at all,
+   custodian veto with wide standing, and a public objection window. These are generic mechanics
+   drawn from published Pacific constitutional practice, cited as such. For anything
+   Quandamooka-specific the twin models the process shape, waits, and says so.
+9. **Evidence before tuning.** Before any wave tunes these, commit a fact-checked pack of real
+   precedents with per-record confidence: time-banking trials, mutual-credit schemes, community
+   wealth funds, friendly societies, what each measured and what failed. The same discipline every
+   other pack already carries.
+10. **What is not ready.** Superannuation working for the community is a real intent with no sourced
+    mechanism behind it yet. The honest form in this repo today is the patient-capital pattern:
+    outside capital that earns a fixed modelled return and holds no votes and no ownership. A
+    community superannuation mechanism needs its own research pass before any wave writes direction
+    for it. Say so rather than model something that does not exist.
+
+Standing labels for this layer, because it touches regulated territory. Every scenario, screen and
+document carries **proposed, not offered**: the twin simulates proposed structures, nothing in this
+repo operates a fund or an insurer, and no output is financial advice. Legislative status is never
+stated as dated fact; where the owner tracks something as imminent, that framing is attributed to
+him. Figures enter only with a source, a confidence rating and A$ with the conversion noted, and
+scenario inputs are labelled as scenario inputs, never as benchmarks. The cultural gates rule the
+economic layer as fully as the civic one: no simulated QYAC position in any allocation scenario, and
+weighting allocation by categories of care is exactly the kind of design that can encode an
+assumption invisibly, so it goes through the review queue.
+
 ## What is settled
 
 These are decided, with their reasons on the record. A future wave that reopens them is solving
