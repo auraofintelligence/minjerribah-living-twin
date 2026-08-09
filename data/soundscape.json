@@ -1,0 +1,375 @@
+{
+  "pack": "soundscape",
+  "version": "1.0.0",
+  "generated": "2026-08-08",
+  "about": "Every voice the island can make, with where the claim that it belongs here comes from. There are no audio files in this repository and there must not be: this pack says what to synthesise and when, and src/audio/audio.js builds each one out of Web Audio nodes at runtime.",
+  "honesty": {
+    "what_is_sourced": "A voice with source_pack set to data/ecology.json is a species that pack records for this island, with its own citation there. Those are the ones to trust.",
+    "what_is_not": "A voice with confidence low is a species that is common in south-east Queensland and that a resident would expect to hear here, but that no pack in this repository records for Minjerribah. It is in the soundscape because leaving out the kookaburra and the curlew would make the island sound like nowhere. Every one of them is flagged, and every one is the first thing to correct if somebody has a real island bird list.",
+    "call_descriptions": "The `character` field describes what the synthesiser is aiming at, in plain English. It is a description of a sound design target, not a published description of the animal's call, and it should not be read as one.",
+    "no_cultural_sound": "Nothing in this pack is, or refers to, Quandamooka song, ceremony or cultural performance. The generative underscore in the music bus is ordinary tonal synthesis with no connection to Quandamooka culture, and it is off by default. See data/lore.json prohibitions no-invented-ceremony."
+  },
+  "buses": [
+    { "id": "ambience", "label": "Ambience", "what": "Surf, wind, rain. The bed the island always has under it." },
+    { "id": "wildlife", "label": "Wildlife", "what": "Birds, frogs, insects, whales, koalas." },
+    { "id": "human", "label": "Human", "what": "Townships, cars, the barge, the pub, a mower." },
+    { "id": "ui", "label": "Interface", "what": "Clicks and confirmations. Under 120 milliseconds each." },
+    { "id": "music", "label": "Underscore", "what": "A generative response to story beats. Off unless you turn it on." }
+  ],
+  "voices": [
+    {
+      "id": "dawn-chorus",
+      "label": "Dawn chorus",
+      "bus": "wildlife",
+      "species": "mixed small bush birds",
+      "character": "Many short high chirps at once, thickest in the half hour before first light, thinning out as the sun clears the horizon.",
+      "confidence": "low",
+      "source_note": "No island bird survey is in any pack. A pre-dawn chorus in eucalypt forest and wallum heath in spring is general knowledge for south-east Queensland, not an island record."
+    },
+    {
+      "id": "kookaburra",
+      "label": "Laughing kookaburra",
+      "bus": "wildlife",
+      "species": "Dacelo novaeguineae",
+      "character": "A rising and falling cackle in a group, at first light and again as the light goes.",
+      "confidence": "low",
+      "source_note": "Not in data/ecology.json. Common across south-east Queensland. No island record is in any pack in this repository."
+    },
+    {
+      "id": "lorikeet",
+      "label": "Rainbow lorikeet",
+      "bus": "wildlife",
+      "species": "Trichoglossus moluccanus",
+      "character": "Harsh screeching in flocks, worst in the late afternoon, worse again over a tree in flower.",
+      "confidence": "medium",
+      "source_pack": "data/ecology.json",
+      "source_ref": "plant-swamp-mahogany role: winter nectar source for flying-foxes and lorikeets",
+      "source_note": "The pack names lorikeets on the island's swamp mahogany but does not carry the species as a record of its own."
+    },
+    {
+      "id": "beach-stone-curlew",
+      "label": "Beach stone-curlew",
+      "bus": "wildlife",
+      "species": "Esacus magnirostris",
+      "character": "A long mournful wail after dark, on open sand near the water.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-beach-stone-curlew"
+    },
+    {
+      "id": "bush-stone-curlew",
+      "label": "Bush stone-curlew",
+      "bus": "wildlife",
+      "species": "Burhinus grallarius",
+      "character": "The wail everybody on the island knows: a drawn out rising cry after dark, from the edge of the yards and the road verges, repeated and answered.",
+      "confidence": "low",
+      "source_note": "Not in data/ecology.json. Present across coastal south-east Queensland and the sound residents most often name. No island record is in any pack in this repository."
+    },
+    {
+      "id": "eastern-curlew",
+      "label": "Eastern curlew",
+      "bus": "wildlife",
+      "species": "Numenius madagascariensis",
+      "character": "A rising two-note call over the flats, carrying a long way across the water.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-eastern-curlew, Critically Endangered"
+    },
+    {
+      "id": "oystercatcher",
+      "label": "Australian pied oystercatcher",
+      "bus": "wildlife",
+      "species": "Haematopus longirostris",
+      "character": "A piercing single note along the tide line, sharper when something walks at it.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-pied-oystercatcher"
+    },
+    {
+      "id": "little-tern",
+      "label": "Little tern",
+      "bus": "wildlife",
+      "species": "Sternula albifrons",
+      "character": "Thin chattering over the shallow water in the warm months.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-little-tern"
+    },
+    {
+      "id": "sea-eagle",
+      "label": "White-bellied sea-eagle",
+      "bus": "wildlife",
+      "species": "Haliaeetus leucogaster",
+      "character": "A loud repeated honk, usually a pair answering each other over the headland.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-white-bellied-sea-eagle"
+    },
+    {
+      "id": "osprey",
+      "label": "Eastern osprey",
+      "bus": "wildlife",
+      "species": "Pandion cristatus",
+      "character": "Short descending whistles above the jetties and the channel.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-eastern-osprey"
+    },
+    {
+      "id": "brahminy-kite",
+      "label": "Brahminy kite",
+      "bus": "wildlife",
+      "species": "Haliastur indus",
+      "character": "A thin drawn out mew, one bird, over the mangroves.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-brahminy-kite"
+    },
+    {
+      "id": "glossy-black",
+      "label": "Glossy black-cockatoo",
+      "bus": "wildlife",
+      "species": "Calyptorhynchus lathami lathami",
+      "character": "A soft creaking wheeze, quiet for a cockatoo, from the sheoaks.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-glossy-black-cockatoo, and vegetation.js publishes sheoakCrop and glossyBlackCockatooIndex",
+      "sim_note": "This voice is tied to the sheoak crop. Burn the sheoak too often and the call leaves the soundscape before the population number moves."
+    },
+    {
+      "id": "bee-eater",
+      "label": "Rainbow bee-eater",
+      "bus": "wildlife",
+      "species": "Merops ornatus",
+      "character": "A rolling liquid trill in flight, over open sandy ground in the warm months.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-rainbow-bee-eater; seasonal_calendar records nest burrows in sandy banks from late October"
+    },
+    {
+      "id": "magpie",
+      "label": "Australian magpie",
+      "bus": "wildlife",
+      "species": "Gymnorhina tibicen",
+      "character": "Carolling in the open ground around the townships, first light and late afternoon.",
+      "confidence": "low",
+      "source_note": "Not in data/ecology.json. Common across south-east Queensland. No island record is in any pack in this repository."
+    },
+    {
+      "id": "flying-fox",
+      "label": "Grey-headed flying-fox",
+      "bus": "wildlife",
+      "species": "Pteropus poliocephalus",
+      "character": "Squabbling and bickering in a flowering tree after dark.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-grey-headed-flying-fox"
+    },
+    {
+      "id": "koala-bellow",
+      "label": "Koala bellow",
+      "bus": "wildlife",
+      "species": "Phascolarctos cinereus",
+      "character": "A low grinding roar with a long inhale, from a male, at night, in the breeding season. The one sound visitors never believe came from a koala.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-koala, Endangered; koala.js publishes population, dispersing and the season"
+    },
+    {
+      "id": "frogs",
+      "label": "Wallum frogs",
+      "bus": "wildlife",
+      "species": "Litoria olongburensis, Crinia tinnula, Litoria freycineti, Litoria cooloolensis",
+      "character": "A chorus off the wet ground after rain, sparse and clicking rather than a wall of sound.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-wallum-sedge-frog, sp-wallum-froglet, sp-wallum-rocketfrog, sp-nsi-sedgefrog; lakes.js publishes callingNow per species",
+      "sim_note": "The chorus is not a weather effect. It follows lakes.frogCalling, which follows the water table and the acid wetland extent."
+    },
+    {
+      "id": "cicadas",
+      "label": "Cicadas",
+      "bus": "wildlife",
+      "species": "unidentified cicadas",
+      "character": "A dense high buzz that builds with the heat and stops together when a cloud crosses the sun.",
+      "confidence": "low",
+      "source_note": "No cicada record is in any pack in this repository. Summer cicada noise in coastal south-east Queensland forest is general knowledge, not an island record."
+    },
+    {
+      "id": "mosquitoes",
+      "label": "Mosquitoes",
+      "bus": "wildlife",
+      "species": "unidentified mosquitoes",
+      "character": "One whine near the ear, coming and going, on still evenings over the mangrove and saltmarsh edge.",
+      "confidence": "medium",
+      "source_note": "Mosquito habitat on the island is real: data/geography.json land cover carries mangrove and saltmarsh along the western shore, and Amity Point sits on it. Queensland Parks and Wildlife Service publishes one gloss of the island's name as place of many mosquitoes; data/lore.json records the meaning as contested and it is not asserted here."
+    },
+    {
+      "id": "whale-blow",
+      "label": "Humpback blow",
+      "bus": "wildlife",
+      "species": "Megaptera novaeangliae",
+      "character": "A short hard exhale off the headland, sometimes the only way you know a pod is there.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-humpback-whale; whales.js publishes pod positions, surfacing and distance"
+    },
+    {
+      "id": "dolphin-blow",
+      "label": "Dolphin blow",
+      "bus": "wildlife",
+      "species": "Tursiops aduncus",
+      "character": "A small sharp puff near the jetty pylons, at the surface, close in.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-indo-pacific-bottlenose-dolphin; marine.js publishes pod positions"
+    },
+    {
+      "id": "roost-flush",
+      "label": "A roost lifting",
+      "bus": "wildlife",
+      "species": "mixed migratory shorebirds",
+      "character": "Two hundred birds off the sand at once: a rush of wings and a scatter of alarm calls, then quiet.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "proc-shorebird-disturbance; shorebirds.js publishes roost bird counts, flushes and the worst source at each roost",
+      "sim_note": "This is a consequence, not decoration. Every flush costs the flock fuel it needs for an 11,000 km flight, and shorebirds.js counts it."
+    },
+    {
+      "id": "surf-ocean",
+      "label": "Ocean surf",
+      "bus": "ambience",
+      "character": "A continuous low roar with individual waves building through it on the real swell period, and a set every eight to thirteen waves.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json and data/geography.json",
+      "source_ref": "weather.js publishes swellM, swellPeriodS and swellDirDeg; dunes.js publishes 19 named reaches with position, length and exposure"
+    },
+    {
+      "id": "surf-bay",
+      "label": "Bay chop",
+      "bus": "ambience",
+      "character": "Short slapping chop, not swell. The bay is fetch limited, so the water noise on the western shore follows the wind and not the ocean.",
+      "confidence": "high",
+      "source_pack": "data/geography.json",
+      "source_ref": "island.bayness separates the Pacific shore from the Moreton Bay shore; weather.js publishes windKt"
+    },
+    {
+      "id": "wind",
+      "label": "Wind",
+      "bus": "ambience",
+      "character": "Different through every cover on the island: a hiss through sheoak, a rattle through banksia heath, a papery rush over the sedge, and nothing but the low body of it over open sand.",
+      "confidence": "high",
+      "source_pack": "data/geography.json and data/ecology.json",
+      "source_ref": "island.landCover; weather.js publishes windKt and gustKt; vegetation.js publishes sheoakCrop"
+    },
+    {
+      "id": "rain",
+      "label": "Rain",
+      "bus": "ambience",
+      "character": "Four surfaces at once: ground, tin, water and leaves, mixed by what is actually under and around you.",
+      "confidence": "high",
+      "source_pack": "data/geography.json",
+      "source_ref": "weather.js publishes rainMmHr; island.landCover and buildings.js decide which surfaces are near"
+    },
+    {
+      "id": "township",
+      "label": "Township",
+      "bus": "human",
+      "character": "A murmur that follows how many people are actually in that township at that hour, not a fixed city loop.",
+      "confidence": "high",
+      "source_pack": "data/residents.json and data/businesses.json",
+      "source_ref": "population.byTownship, visitors.byTownship, businesses.byTownship open counts"
+    },
+    {
+      "id": "car",
+      "label": "A car passing",
+      "bus": "human",
+      "character": "Tyres first, then the engine, then the tyres again. Panned across you if you are near the road.",
+      "confidence": "high",
+      "source_pack": "data/geography.json roads",
+      "source_ref": "roadNetwork publishes the real road graph with real road names"
+    },
+    {
+      "id": "barge-horn",
+      "label": "The barge",
+      "bus": "human",
+      "character": "One long low horn at the Dunwich ramp, on the published sailing time.",
+      "confidence": "high",
+      "source_pack": "data/transport.json",
+      "source_ref": "ferry.js publishes the sailing list, the vessel and the status; the horn follows ferry:departed and ferry:arrived"
+    },
+    {
+      "id": "water-taxi",
+      "label": "The water taxi",
+      "bus": "human",
+      "character": "A high strained outboard note crossing the channel, faster and thinner than the barge.",
+      "confidence": "high",
+      "source_pack": "data/transport.json",
+      "source_ref": "ferry.js walk-on sailings"
+    },
+    {
+      "id": "dog",
+      "label": "A dog",
+      "bus": "human",
+      "character": "One dog, close, in a yard or on the sand.",
+      "confidence": "high",
+      "source_pack": "data/ecology.json",
+      "source_ref": "sp-roaming-domestic-dog; koala.js and shorebirds.js both carry dogs as a pressure and a lever",
+      "sim_note": "A dog on the flats near a roost is what lifts the roost."
+    },
+    {
+      "id": "mower",
+      "label": "A mower",
+      "bus": "human",
+      "character": "Two-stroke, held at a constant note, dipping when it hits thick grass. Saturday morning.",
+      "confidence": "medium",
+      "source_note": "Modelled from the weekend calendar in schedule.js and the occupied dwelling counts in buildings.js. No pack records mowing."
+    },
+    {
+      "id": "pub",
+      "label": "The pub",
+      "bus": "human",
+      "character": "Heard from outside: the bass and the voices through a wall, never the band itself.",
+      "confidence": "high",
+      "source_pack": "data/businesses.json",
+      "source_ref": "stradbroke-island-beach-hotel, trading, published hours to midnight on Friday and Saturday, role_in_sim names live music nights"
+    },
+    {
+      "id": "school",
+      "label": "The school",
+      "bus": "human",
+      "character": "A playground at the break, only on a school day in term.",
+      "confidence": "high",
+      "source_pack": "data/places.json and data/businesses.json",
+      "source_ref": "dunwich-state-school; schedule.js publishes isTermTime and isSchoolHoliday"
+    },
+    {
+      "id": "boat-ramp",
+      "label": "The boat ramp",
+      "bus": "human",
+      "character": "Outboards starting, one after another, early, when the crossing is good.",
+      "confidence": "high",
+      "source_pack": "data/places.json",
+      "source_ref": "amity-boat-ramp, dunwich-barge-ramp; weather.js publishes crossingCondition"
+    }
+  ],
+  "surfaces": {
+    "note": "Which wind timbre belongs to which land cover. Cover ids come from src/world/island.js COVERS.",
+    "map": {
+      "beach": "open",
+      "foredune": "open",
+      "heath": "rattle",
+      "forest": "canopy",
+      "swamp": "papery",
+      "lake": "open",
+      "rock": "open",
+      "saltmarsh": "papery",
+      "mangrove": "clatter",
+      "cleared": "open",
+      "urban": "eaves",
+      "rehab": "canopy",
+      "water": "open"
+    },
+    "sheoak_note": "The hiss timbre is not a cover. It is added on top wherever the sheoak crop is up and the listener is inside about 400 m of the shore, because that is where the sheoak stands on this island."
+  }
+}

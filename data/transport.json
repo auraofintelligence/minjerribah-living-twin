@@ -1,0 +1,1266 @@
+{
+  "pack": "transport",
+  "version": "1.0.0",
+  "generated": "2026-08-07",
+  "island": "Minjerribah / North Stradbroke Island, Quandamooka Country, Queensland, Australia",
+  "postcode": "4183",
+  "crs": "WGS84 decimal degrees",
+  "coordinate_order": "lat, lon as separate named fields",
+  "language": "Australian English",
+  "currency": "A$",
+
+  "about": "Getting to, from and around Minjerribah. There is no bridge and no scheduled air service, so every person, every vehicle, every crate of milk and every ambulance patient crosses Quandamooka (Moreton Bay) on a boat with a published timetable and a hard capacity. That single fact is the throttle on every other system in this world: population, trade, waste, health, emergency response, housing and mood. Model the ferry first and everything else inherits its shape.",
+
+  "honesty": [
+    "Timetables in this pack are dated snapshots, not a live feed. The vehicle ferry, water taxi and bus timetables were captured in Luke's own straddie-night-market-lab repo on 11 May 2026 and re-checked against operator and Translink pages on 7 August 2026. Operators change services without notice. Never present a time in this file to a player as today's departure.",
+    "Every fare carries its own confidence and effective date. The vehicle ferry uses airline-style dynamic pricing, so a single number is always wrong. Where the only figure available came from a reseller rather than the operator it says so, because resellers add margin.",
+    "Vessel capacities, check-in rules, cancellation terms and freight restrictions are from the operator's own published documents and are high confidence. Queue lengths, wait times, marshalling capacity and demand curves are not. They are modelling constructs and every one of them is flagged.",
+    "The Toondah long weekend scenario is a model, not a measurement. Nobody has published vehicle counts, standby numbers or wait times for that terminal. The scenario shows its arithmetic so a local can correct one input and watch the rest move.",
+    "Road segment geometry is not repeated here. It lives in data/geography.json, sourced from OpenStreetMap. This pack adds the operating attributes: speed limit, surface behaviour, capacity constraint and failure mode.",
+    "Speed limits are the published island maximum plus township defaults. Only the two beach speed limits are individually sourced. Do not treat a per-segment limit in this file as signposted unless its speed_limit_basis says 'published'.",
+    "Nothing cultural is asserted here. Business and place names are recorded as their operators publish them. No name is translated or interpreted. That belongs in data/lore.json and docs/CULTURAL-REVIEW.md, and QYAC is the authority, not this file."
+  ],
+
+  "confidence_scale": {
+    "high": "Stated in an operator's own published document, a government or Translink page, or a legal terms and conditions document. Directly checkable.",
+    "medium": "Stated in a credible secondary source, a reseller, a tourism body, or a government source read at one remove. Or a figure that is dated and may have moved.",
+    "low": "Plausible and useful for simulation, but not verified for this island or this operator. Treat as a placeholder a local can correct."
+  },
+
+  "field_guide": {
+    "id": "stable slug, safe as a key",
+    "operator": "the legal or trading entity that actually runs the service",
+    "waypoints": "ordered stops with coordinates where known. A waypoint is a real named place, never a made-up node",
+    "schedule": "departures by variant. basis says published or estimate. Times are 24 hour local (AEST, Queensland does not observe daylight saving)",
+    "capacity": "vehicles and passengers per movement, from the operator where possible",
+    "fare_aud": "A$ with an effective date and its own confidence. null where the published figure could not be read",
+    "travel_time_min": "scheduled or published crossing or run time, not including check-in, loading or queueing",
+    "reliability": "the named things that stop or delay this service, each with an effect on the simulation",
+    "queue_model": "the behaviour a simulation should reproduce, with parameters. All parameters marked modelled unless stated otherwise",
+    "source": "URL or local repo path",
+    "confidence": "high | medium | low",
+    "note": "anything a local would correct us on"
+  },
+
+  "source_registry": {
+    "repo-night-market": "C:/Users/sbt41/githublocal/straddie-night-market-lab/transport.html and docs/research-notes.md. Luke's own repo. Full published timetable snapshot for the vehicle ferry, the passenger ferry, the Flyer and Translink routes 880 and 881, captured 11 May 2026, with an update guide at docs/official-timetable-update-guide.md",
+    "repo-gumpi": "C:/Users/sbt41/githublocal/dunwich-gumpi-ferry-terminal-open-data-lab. Luke's own repo. Community open data and 360 photo evidence layer for the Dunwich (Gumpi) terminal upgrade",
+    "repo-businesses": "C:/Users/sbt41/githublocal/minjerribah-living-twin/data/businesses.json. Operator entries for SeaLink, the Flyer, the buses and the cab service already carry sourcing",
+    "repo-residents": "C:/Users/sbt41/githublocal/minjerribah-living-twin/data/residents.json. Visitor baseline and journey to work percentages",
+    "repo-geography": "C:/Users/sbt41/githublocal/minjerribah-living-twin/data/geography.json. Road and track geometry from OpenStreetMap, with length_km per segment",
+    "sealink-tc": "https://www.allurestradbroke.com.au/wp-content/uploads/2024/05/Sealkink-SEQ-Terms-and-Conditions-2024.pdf (SeaLink SEQ terms and conditions, 2024, read in full)",
+    "translink-fares": "https://translink.com.au/tickets-and-fares/fares-and-zones/northstradbrokeisland",
+    "translink-880-881": "https://translink.com.au/sites/default/files/acquiadam-assets/timetables/251201-880-881.pdf (effective 1 December 2025)",
+    "osm": "OpenStreetMap via Nominatim, queried 7 August 2026",
+    "visit-straddie": "https://stradbrokeisland.com/ (North Stradbroke Island visitor site)",
+    "minjerribah-camping": "https://minjerribahcamping.com.au/4wd-permits/"
+  },
+
+  "structural_facts": [
+    {
+      "id": "no-bridge",
+      "claim": "There is no bridge to Minjerribah. Every vehicle, every person and all freight crosses by boat, or on a private aircraft into the Dunwich airfield.",
+      "consequence_for_sim": "Set a hard daily import and export ceiling equal to the sum of scheduled sailings times their capacity, minus crew and vehicle deck losses. No system may exceed it. If a system needs more, it has to buy an extra sailing or wait for tomorrow.",
+      "source": "general knowledge, corroborated by https://stradbrokeisland.com/getting-here/by-boat/",
+      "confidence": "high"
+    },
+    {
+      "id": "walk-on-freight-rides-the-passenger-boat",
+      "claim": "On the North Stradbroke Island route, walk-on freight is permitted on the passenger ferry service only, may travel unaccompanied, and is charged at a per item rate. This is the reverse of the Southern Moreton Bay Islands route, where walk-on freight goes on the vehicle ferry and must be accompanied.",
+      "consequence_for_sim": "Small parcel and unaccompanied goods flow follows the passenger ferry timetable, not the barge timetable. Anything big goes in a vehicle or a truck on the barge.",
+      "source": "sealink-tc",
+      "confidence": "high"
+    },
+    {
+      "id": "emergency-vehicles-jump-the-queue",
+      "claim": "SeaLink SEQ reserves the right to prioritise travel for emergency service vehicles and passengers as required.",
+      "consequence_for_sim": "An ambulance or fire appliance displaces booked vehicles from a sailing. Model the displacement: two to four booked cars roll to the next boat, and the affected drivers get an unhappiness event that is not the operator's fault.",
+      "source": "sealink-tc",
+      "confidence": "high"
+    },
+    {
+      "id": "mainland-car-park-waitlist",
+      "claim": "The SeaLink long term car park at Toondah Harbour, on the corner of Middle Street and Emmett Drive behind the terminal, holds bays on a permanent long term basis for standard vehicles up to 5.4 m long and 2.0 m wide. Demand is high enough that there is a waitlist measured in years, not months. It is not a secure car park.",
+      "consequence_for_sim": "A household with a mainland car and a long term bay has a different, much cheaper and faster mainland trip than a household without one. Make the bay an inheritable, tradeable household asset with a multi-year queue, not a purchase.",
+      "source": "https://www.sealink.com.au/north-stradbroke-island/ferry-information/north-stradbroke-island-residents/toondah-harbour-carpark-waitlist/",
+      "confidence": "medium",
+      "note": "The waitlist length was read twice on 7 August 2026 and returned two different figures, longer than a year and longer than 4 years. The page appears to have been updated between reads. Use 'years' and do not state a number. The existence of the waitlist, the vehicle size limit and the not-secure disclaimer were consistent across both reads."
+    },
+    {
+      "id": "two-vessel-rotation",
+      "claim": "The base vehicle ferry timetable is two vessels in a clean alternating loop. Each Cleveland departure is followed about an hour later by the same vessel departing Dunwich. Verified by reconstructing the published timetable: Minjerribah runs Cleveland 06:00, Dunwich 07:00, Cleveland 08:00, Dunwich 09:00 and so on, with Sea Breeze offset one hour behind.",
+      "consequence_for_sim": "One vessel going mechanical removes roughly half the day's vehicle capacity, not a single sailing. This is the single most damaging non-weather failure in the world and it should be modelled as a cascading day, not an incident.",
+      "source": "derived from the published timetable in repo-night-market, cross-checked against https://stradbrokeisland.com/getting-here/by-ferry/",
+      "confidence": "high",
+      "note": "DERIVED. The rotation is an inference from the times, not a statement by the operator. It holds exactly for every sailing in the base timetable."
+    },
+    {
+      "id": "busiest-days",
+      "claim": "Public holidays, school holidays, Fridays and Sundays are the busiest times to travel.",
+      "consequence_for_sim": "The demand curve is not a smooth seasonal sine wave. It is a weekly sawtooth with a Friday out spike and a Sunday back spike, multiplied by the holiday calendar.",
+      "source": "https://stradbrokeisland.com/getting-here/by-ferry/",
+      "confidence": "high"
+    },
+    {
+      "id": "near-identical-water-taxi-timetables",
+      "claim": "The two walk-on water taxi operators run to almost exactly the same times. Visit Straddie states plainly that both walk-on water taxis operate an identical timetable. Checked departure by departure, the eastbound times match minute for minute and the westbound times match on every departure except two in the afternoon, where the Flyer runs 16:45 and 18:00 against SeaLink's 17:00 and 18:15.",
+      "consequence_for_sim": "They compete head to head on the same departures to two different Dunwich landings, so the choice a walk-on passenger makes is mostly about which side of Dunwich they want to arrive at, not about time. The one place time matters is the two afternoon departures where the Flyer goes fifteen minutes earlier.",
+      "source": "https://stradbrokeisland.com/about-stradbroke/passenger-water-taxi-timetables/ and https://www.visitstradbroke.com.au/stradbroke-flyer-water-taxi and https://jp.translink.com.au/plan-your-journey/timetables/ferry/n/stradbroke-island-one-mile-flyer",
+      "confidence": "medium",
+      "note": "Luke's 11 May 2026 snapshot recorded a different Flyer timetable, offset ten minutes (04:55, 05:55, 06:55 and so on). Three current sources now agree on the identical times. Treat the ten minute offset as stale. A local who catches the Flyer weekly will settle this in one sentence."
+    },
+    {
+      "id": "school-travel-crosses-the-bay",
+      "claim": "Students travelling to and from school on the passenger ferry under the Translink School Travel Assistance Scheme must present a Student Travel Pass.",
+      "consequence_for_sim": "Secondary school students are a fixed, non-negotiable weekday passenger block on the first morning and mid-afternoon passenger sailings. They do not respond to price and they cannot be shifted. Model them as inelastic demand that has priority claim on seats.",
+      "source": "sealink-tc",
+      "confidence": "high"
+    }
+  ],
+
+  "terminals": [
+    {
+      "id": "terminal-toondah-vehicle",
+      "name": "Cleveland (Toondah Harbour) vehicle ferry terminal",
+      "operator": "SeaLink South East Queensland (Stradbroke Ferries Pty Ltd)",
+      "side": "mainland",
+      "address": "12 Emmett Drive, Cleveland QLD 4163",
+      "lat": -27.5274951,
+      "lon": 153.2846542,
+      "coordinate_source": "osm, node tagged ferry_terminal, Cleveland (Toondah Harbour)",
+      "coordinate_confidence": "high",
+      "handles": ["vehicle-ferry"],
+      "facilities": ["vehicle marshalling lanes", "check in window", "public car park", "long term car park (waitlist)"],
+      "check_in": "Follow the blue line and signs through the car park to the check in window. Have the booking number ready.",
+      "source": "https://stradbrokeisland.com/getting-here/by-boat/ and https://www.accommodationstradbroke.com.au/tips-get-to-stradbroke-island/",
+      "confidence": "high",
+      "note": "The marshalling lane count and the number of vehicles the yard holds before the queue spills onto Middle Street are not published anywhere we could find. See scenario toondah-long-weekend-friday, where a modelled figure is used and flagged."
+    },
+    {
+      "id": "terminal-toondah-passenger",
+      "name": "Cleveland (Toondah Harbour) passenger ferry terminal",
+      "operator": "SeaLink South East Queensland (Stradbroke Ferries Pty Ltd)",
+      "side": "mainland",
+      "address": "Emmett Drive, Cleveland QLD 4163",
+      "lat": -27.5287411,
+      "lon": 153.2845144,
+      "coordinate_source": "osm, node tagged ferry_terminal, Cleveland (Toondah Harbour) Passenger Ferry",
+      "coordinate_confidence": "high",
+      "handles": ["passenger-ferry", "walk-on-freight"],
+      "source": "osm, https://stradbrokeisland.com/getting-here/by-boat/",
+      "confidence": "high"
+    },
+    {
+      "id": "terminal-toondah-flyer",
+      "name": "Stradbroke Flyer terminal, Cleveland",
+      "operator": "Stradbroke Flyer Gold Cat",
+      "side": "mainland",
+      "address": "13-21 Emmett Drive, Cleveland QLD 4163 (corner of Middle Street and Emmett Drive)",
+      "lat": null,
+      "lon": null,
+      "coordinate_source": null,
+      "coordinate_confidence": null,
+      "handles": ["water-taxi"],
+      "facilities": ["ticket office", "car park", "courtesy bus to and from Cleveland railway station"],
+      "source": "https://www.flyer.com.au/timetable and https://stradbrokeisland.com/getting-here/by-boat/",
+      "confidence": "high",
+      "note": "Address confirmed on the operator's own page. Coordinate left null rather than guessed; Translink stop 318760 is the same terminal and would give a surveyed point."
+    },
+    {
+      "id": "terminal-junner-street",
+      "name": "Junner Street ferry terminal, Dunwich (Goompi)",
+      "operator": "SeaLink South East Queensland (Stradbroke Ferries Pty Ltd)",
+      "side": "island",
+      "township": "Dunwich (Goompi)",
+      "address": "Junner Street, Dunwich QLD 4183",
+      "lat": -27.5032513,
+      "lon": 153.4011797,
+      "coordinate_source": "osm, node named Junner St Ferry Terminal (Dunwich), tagged bus_station",
+      "coordinate_confidence": "medium",
+      "handles": ["vehicle-ferry", "passenger-ferry", "bus-880", "bus-881", "walk-on-freight"],
+      "facilities": ["barge apron", "passenger pontoon", "bus interchange", "ticket office"],
+      "source": "osm and repo-businesses",
+      "confidence": "high",
+      "note": "The single point covers a precinct. Public data would not separate the vehicle barge apron from the passenger pontoon, and this is the same limitation already recorded for this location in docs/DATA-NOTES.md under places. The Dunwich (Gumpi) Ferry Terminal Upgrade will change the layout; see project dunwich-gumpi-terminal-upgrade below."
+    },
+    {
+      "id": "terminal-one-mile",
+      "name": "One Mile Jetty, Dunwich",
+      "operator": "Stradbroke Flyer Gold Cat",
+      "side": "island",
+      "township": "One Mile",
+      "address": "Yabby Street, Dunwich QLD 4183",
+      "lat": -27.4928688,
+      "lon": 153.4028735,
+      "coordinate_source": "osm, node named One Mile Jetty, tagged ferry_terminal",
+      "coordinate_confidence": "high",
+      "handles": ["water-taxi", "bus-880", "bus-881"],
+      "source": "osm and https://stradbrokeisland.com/getting-here/by-boat/",
+      "confidence": "high",
+      "note": "Street name is spelled Yabby Street in OpenStreetMap and on Visit Straddie, and Yabbie Street on the Marine Rescue Queensland page for the unit next door. Both spellings are in public circulation. Not resolved here."
+    },
+    {
+      "id": "terminal-dunwich-airfield",
+      "name": "Dunwich Airfield (YDUN)",
+      "operator": "North Stradbroke Airfield Pty Ltd (holds the lease)",
+      "side": "island",
+      "township": "Dunwich (Goompi)",
+      "address": "approximately 2 nautical miles south-east of Dunwich township",
+      "lat": -27.51901,
+      "lon": 153.42762,
+      "coordinate_source": "aviation gazetteer listings for YDUN",
+      "coordinate_confidence": "medium",
+      "handles": ["general-aviation", "helicopter"],
+      "facilities": ["runway 15/33, gravel and topsoil", "aircraft parking apron", "helipad", "office and amenities building", "hangars"],
+      "source": "https://irp.cdn-website.com/f0089a37/files/uploaded/NSA%20-%20Airfield%20Operational%20Guidelines.pdf (Dunwich Airfield Operational Guidelines, effective 1 February 2024, read in full) and http://www.ydun.com.au/",
+      "confidence": "high",
+      "note": "No scheduled passenger service. Runway length is reported as 800 m in one listing and 865 m in another and is not stated in the operational guidelines, so it is left out rather than picked. The guidelines list a helipad; the operator's site currently says remedial works are under way and all helicopters are to land and park on the apron south of the passenger shelter. An older aviation listing names Stradbroke Air P/L as operator, which the 2024 guidelines supersede."
+    }
+  ],
+
+  "services": [
+    {
+      "id": "svc-vehicle-ferry",
+      "name": "SeaLink vehicle ferry (the barge)",
+      "also_known_as": ["the barge", "the vehicle ferry", "Stradbroke Ferries"],
+      "type": "vehicle-ferry",
+      "operator": "SeaLink South East Queensland",
+      "legal_entity": "Stradbroke Ferries Pty Ltd, ABN 63 009 725 713",
+      "operator_source": "sealink-tc",
+      "status": "operating",
+      "waypoints": [
+        { "ref": "terminal-toondah-vehicle", "name": "Cleveland (Toondah Harbour)" },
+        { "ref": "terminal-junner-street", "name": "Junner Street, Dunwich (Goompi)" }
+      ],
+      "route_note": "Straight across Quandamooka (Moreton Bay) through the dredged Toondah channel and Rainbow Channel. Entirely inside the bay: no ocean swell reaches this crossing.",
+      "travel_time_min": { "value": 45, "range": [45, 50], "basis": "published", "source": "https://stradbrokeisland.com/getting-here/by-ferry/ and https://www.sealink.com.au/north-stradbroke-island/", "confidence": "high" },
+      "capacity": {
+        "vessels": [
+          { "id": "minjerribah", "name": "Minjerribah", "built": 2003, "cars": 52, "passengers": 400, "features": ["licensed air conditioned cafe", "viewing platform", "lift"], "confidence": "high" },
+          { "id": "sea-breeze", "name": "Sea Breeze", "formerly": "Big Red Cat", "built": 2006, "cars": 60, "passengers": 300, "features": ["licensed air conditioned cafe"], "confidence": "high" },
+          { "id": "quandamooka", "name": "Quandamooka", "built": 1994, "extended": 1999, "cars": 52, "passengers": 400, "features": ["licensed air conditioned cafe", "viewing platform"], "confidence": "high", "role": "third vessel, used for extra services" }
+        ],
+        "source": "https://www.sealink.com.au/north-stradbroke-island/ferry-information/sealink-seq-ferries/ and repo-night-market",
+        "confidence": "high"
+      },
+      "schedule": {
+        "basis": "published",
+        "snapshot_taken": "2026-05-11",
+        "snapshot_rechecked": "2026-08-07",
+        "source": "repo-night-market (transport.html, SeaLink vehicle ferry base timetable) cross-checked against https://stradbrokeisland.com/getting-here/by-ferry/",
+        "confidence": "high",
+        "timezone": "AEST, no daylight saving",
+        "variants": [
+          {
+            "id": "base",
+            "applies_to": "Monday to Sunday, all gazetted public holidays unless the operator publishes otherwise",
+            "cleveland_to_dunwich": [
+              { "time": "06:00", "vessel": "minjerribah", "days": ["mon", "tue", "wed", "thu", "fri", "sat"] },
+              { "time": "07:00", "vessel": "sea-breeze", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "08:00", "vessel": "minjerribah", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "09:30", "vessel": "sea-breeze", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "10:30", "vessel": "minjerribah", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "12:00", "vessel": "sea-breeze", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "13:00", "vessel": "minjerribah", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "14:00", "vessel": "sea-breeze", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "15:30", "vessel": "minjerribah", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "16:30", "vessel": "sea-breeze", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "18:00", "vessel": "minjerribah", "days": ["sun"] }
+            ],
+            "dunwich_to_cleveland": [
+              { "time": "07:00", "vessel": "minjerribah", "days": ["mon", "tue", "wed", "thu", "fri", "sat"] },
+              { "time": "08:00", "vessel": "sea-breeze", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "09:00", "vessel": "minjerribah", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "10:30", "vessel": "sea-breeze", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "11:30", "vessel": "minjerribah", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "13:00", "vessel": "sea-breeze", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "14:00", "vessel": "minjerribah", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "15:00", "vessel": "sea-breeze", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "16:30", "vessel": "minjerribah", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "17:30", "vessel": "sea-breeze", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+              { "time": "19:00", "vessel": "minjerribah", "days": ["sun"] }
+            ],
+            "daily_capacity_each_way_cars": {
+              "mon_to_sat": 560,
+              "sun": 560,
+              "derivation": "Monday to Saturday: five Minjerribah sailings at 52 plus five Sea Breeze sailings at 60 equals 560. Sunday drops the 06:00 Minjerribah and adds an 18:00 Minjerribah, so the count is unchanged.",
+              "confidence": "high",
+              "basis": "derived from published sailing list and published vessel capacities"
+            },
+            "day_restriction_conflict": "Luke's 11 May 2026 snapshot marks the 06:00 Cleveland and 07:00 Dunwich sailings Monday to Saturday only, and the late evening pair Sunday only. A current read of Visit Straddie's vehicle ferry page suggests the late evening sailing runs Friday and Sunday. The Sunday-only reading is used here because it comes from the cleaner snapshot, but a Friday evening barge is exactly the sort of thing a long weekend depends on, so check it before modelling a Friday night arrival."
+          },
+          {
+            "id": "peak-extended",
+            "applies_to": "school holidays, Easter, the Christmas and New Year period, and the Friday, Saturday, Sunday and Monday of a long weekend",
+            "description": "SeaLink publishes extra services for peak periods and uses Quandamooka as the third vessel. The exact extra sailings are published per period and are not fixed, so this pack does not invent a peak timetable. The scenario toondah-long-weekend-friday models one plausible extended day and shows its arithmetic.",
+            "basis": "estimate",
+            "confidence": "medium",
+            "source": "repo-night-market notes that extra services may use Quandamooka; https://www.sealink.com.au/north-stradbroke-island/ferry-information/timetable/ publishes the actual period timetables"
+          }
+        ]
+      },
+      "booking": {
+        "required_for_vehicles": true,
+        "walk_on_bookings": "not required; walk-on passengers may buy onboard",
+        "check_in_min_before_departure": 20,
+        "check_in_rule": "Check in time for vehicle ferry travel is a minimum of 20 minutes prior to departure. SeaLink reserves the right to refuse boarding for vehicles that check in after this time.",
+        "online_change_cutoff_hours": 2,
+        "change_after_cutoff": "must be done by phone with the Reservations Team on (07) 3488 5300",
+        "cancellation": {
+          "48h_or_more": "A$10 fee per one way journey, remaining value refunded or held as credit for 12 months from booking creation",
+          "under_48h_before_departure": "A$10 fee per one way journey, remaining value held as credit for 12 months from booking creation",
+          "no_show": "100 per cent of total cost forfeited"
+        },
+        "vehicle_dimension_rule": "Declared dimensions must include any load that changes the length, width or height. Trailer length is measured from the towball to the end of the loaded unit. SeaLink may refuse boarding where dimensions were declared incorrectly.",
+        "bicycles": "Push bikes carried at no extra cost, subject to available space",
+        "animals": "Allowed on terminals and ferries. Dogs outside an enclosed cabin must be muzzled and leaded. Livestock such as goats and pigs not carried on passenger ferries and must travel in a vehicle.",
+        "source": "sealink-tc",
+        "confidence": "high"
+      },
+      "fare_aud": {
+        "pricing_model": "Airline style dynamic pricing for vehicles, flat rates for walk-on passengers. A single number is always wrong; model a fare band that moves with load.",
+        "resident_flat": { "standard_car": 59, "large_car": 69, "public_holiday_and_peak_christmas_surcharge": 20, "period": "8 September 2025 to 31 March 2027", "eligibility": "North Stradbroke Island residents", "source": "https://redlandbaysidenews.com.au/stradbroke-ferry-fares/ and https://www.sealink.com.au/north-stradbroke-island/ferry-information/north-stradbroke-island-residents/", "confidence": "medium", "note": "Announced by SeaLink with the State Member for Oodgeroo. Reported as a saving of A$31 on the previous average standard car fare, a reduction of 35 per cent. The end date is reported differently in different sources (31 March 2026 in one, 31 March 2027 in another); do not rely on it." },
+        "visitor_vehicle_lowest_advertised_one_way": { "value": 79, "condition": "quiet off peak services only", "source": "https://www.sealink.com.au/north-stradbroke-island/special-offers/travel-to-straddie-for-less-79-one-way/", "confidence": "medium" },
+        "visitor_vehicle_reseller_quote": { "standard_car_up_to_5_4m_same_day_return_incl_driver": 290, "standard_car_different_day_return": 307, "extra_passenger_each": 16, "source": "https://www.fittravel.com.au/product/north-stradbroke-ferry/", "confidence": "low", "note": "A reseller price, so it may carry a margin over the operator's own fare, and it is a snapshot of a dynamic price. Use it as an upper band, not as the fare." },
+        "walk_on_reseller_quote": { "adult_same_day_return": 22, "child_5_to_14_same_day_return": 13, "infant_0_to_4": 0, "adult_different_day_return": 32, "child_different_day_return": 22, "source": "https://www.fittravel.com.au/product/north-stradbroke-ferry/", "confidence": "low" },
+        "multi_trip": { "options": ["10 returns (20 trips)", "30 returns (60 trips)"], "note": "SeaLink states the 30 return ticket brings the cost down to about A$6 per trip, a saving of more than 50 per cent on the standard fare. Which fare that is measured against is not stated.", "source": "https://www.sealink.com.au/north-stradbroke-island/ferry-information/north-stradbroke-island-ferry-fares/", "confidence": "medium" },
+        "payment": "Visa, MasterCard and American Express carry a 1 per cent surcharge. PayPal, direct deposit, EFTPOS and cash are surcharge free.",
+        "payment_source": "sealink-tc",
+        "effective_note": "SeaLink states prices effective from 1 July 2026. The full fare table could not be read: sealink.com.au returns HTTP 403 to an automated fetch."
+      },
+      "freight": {
+        "walk_on_freight_rule": "North Stradbroke Island walk-on freight is permitted on the passenger ferry service only, may travel unaccompanied, and is charged at a per item rate.",
+        "handling_rule": "All freight items must be able to be carried by one person and large items must be secured to a trolley. Freight quantities are limited and SeaLink may refuse carriage when the freight area is full.",
+        "never_carried_as_walk_on": ["furniture including lounge chairs and beds", "TVs larger than 53 cm", "windows, glass panels, fish tanks", "carpet rolls", "timber, pipe or conduit longer than 3.0 m", "large building items", "cubby houses and animal enclosures over 1 cubic metre", "livestock on deck"],
+        "off_peak_or_masters_discretion": ["tradesperson's tools such as welders and large toolboxes", "screen doors", "small hot water system secured on a trolley", "small fridge or freezer up to 280 litre, washing machine or clothes dryer secured on a trolley", "kayaks under 3.0 m", "timber, pipe or conduit under 3.0 m", "lawn mowers, whipper snippers, portable generators and outboard motors, empty of fuel, on vehicle ferries only", "two 20 litre approved fuel containers per passenger, on vehicle ferries only"],
+        "large_freight": "SeaLink operates vehicle and passenger ferry services and directs customers to a local transport operator for large freight and furniture deliveries.",
+        "source": "sealink-tc",
+        "confidence": "high",
+        "consequence_for_sim": "A household that buys a fridge or a couch cannot bring it home on a walk-on ticket. It needs a vehicle deck slot or a carrier. That is a real, common, expensive island friction and it should generate errands, costs and delays in the sim."
+      },
+      "reliability": [
+        { "factor": "wind", "mechanism": "The crossing is inside the bay so ocean swell is not the driver. Strong wind raises short bay chop across the exposed reach between the Toondah channel and Rainbow Channel, which slows the vessel and can suspend loading of high-sided vehicles.", "modelled_effect": "Above a modelled 25 knot sustained wind, add 5 to 12 minutes to the crossing. Above 35 knots, model a cancellation probability rising with wind speed.", "basis": "estimate", "confidence": "low", "note": "No published wind threshold for this route was found. The operator's terms only say services are subject to alteration, sometimes without notice, including for adverse weather." },
+        { "factor": "swell", "mechanism": "Not a factor on this crossing. Minjerribah and Moorgumpin shelter the whole route from ocean swell.", "modelled_effect": "none. Do not add a swell term to the vehicle ferry. Swell belongs to the beaches, the bar and the offshore boats.", "basis": "geography", "confidence": "high" },
+        { "factor": "tide", "mechanism": "Both terminals sit in shallow, dredged water. The Toondah channel needs maintenance dredging.", "modelled_effect": "unknown", "basis": "unverified", "confidence": "low", "note": "Whether the vehicle ferry has any tidal restriction at Toondah or at the Dunwich apron could not be verified. Do not model a tide gate on the barge until a local or the operator confirms one. Tide restrictions on beach driving are separate and are verified; see beach_driving." },
+        { "factor": "mechanical", "mechanism": "Two vessels run the base timetable in an alternating loop. Losing one halves the day.", "modelled_effect": "A vessel out of service removes its five daily sailings each way, roughly 260 to 300 car slots. Bring Quandamooka in from the third-vessel role with a modelled 4 to 12 hour lead time, and until it arrives the backlog rolls forward day on day.", "basis": "derived from the published timetable", "confidence": "high" },
+        { "factor": "demand", "mechanism": "Booked out sailings on a peak Friday, with a standby queue that has no reservation to fall back on.", "modelled_effect": "See scenario toondah-long-weekend-friday.", "basis": "modelled", "confidence": "medium" },
+        { "factor": "fog", "mechanism": "Winter morning fog on the bay.", "modelled_effect": "unknown", "basis": "unverified", "confidence": "low", "note": "Plausible but not confirmed as a cause of cancellations on this route. Left as a named unknown rather than a modelled term." }
+      ],
+      "queue_model": {
+        "summary": "Two queues, not one. A booked queue that is orderly and a standby queue that is not.",
+        "stages": [
+          { "id": "book", "description": "Vehicles book online days ahead. Peak Friday afternoon sailings sell out first, then Sunday and Monday afternoon returns.", "parameter": "sellout_lead_days", "modelled_value": [3, 10], "basis": "modelled" },
+          { "id": "arrive", "description": "Booked vehicles arrive at Toondah, most in the 20 to 60 minute window before their sailing, some much earlier hoping to roll forward onto an earlier boat.", "parameter": "early_arrival_share", "modelled_value": 0.16, "basis": "modelled" },
+          { "id": "check-in", "description": "Check in window. Booking number checked, driver directed to a marshalling lane. Check in closes 20 minutes before departure and late vehicles can be refused.", "parameter": "check_in_service_time_s_per_vehicle", "modelled_value": [35, 70], "basis": "modelled" },
+          { "id": "marshal", "description": "Vehicles wait in lanes by sailing. When the lanes fill, the queue backs out of the yard onto Middle Street.", "parameter": "yard_capacity_vehicles", "modelled_value": 110, "basis": "modelled", "confidence": "low", "note": "UNVERIFIED. No published lane count or yard capacity. This is the single number in this pack most likely to be wrong and it drives the whole spillover behaviour." },
+          { "id": "load", "description": "Loading. Drivers accept crew direction, engines off once under way.", "parameter": "load_time_min_per_sailing", "modelled_value": [12, 20], "basis": "modelled" },
+          { "id": "standby", "description": "Unbooked vehicles and rollers wait for no-shows and unsold slots to be released at the check-in cut. This is where the anger lives.", "parameter": "no_show_rate", "modelled_value": 0.03, "basis": "modelled", "note": "A no-show forfeits 100 per cent of the fare, which is a strong incentive to turn up. Keep the rate low." }
+        ],
+        "priority_order": ["emergency service vehicles", "booked vehicles checked in before the cut", "rollers with a later booking on the same day", "standby"],
+        "priority_source": "sealink-tc for the emergency vehicle right; the rest is modelled",
+        "confidence": "medium"
+      },
+      "source": "repo-night-market, sealink-tc, https://www.sealink.com.au/north-stradbroke-island/ferry-information/sealink-seq-ferries/",
+      "confidence": "high"
+    },
+
+    {
+      "id": "svc-sealink-passenger-ferry",
+      "name": "SeaLink passenger ferry (walk-on water taxi)",
+      "type": "passenger-ferry",
+      "operator": "SeaLink South East Queensland",
+      "legal_entity": "Stradbroke Ferries Pty Ltd, ABN 63 009 725 713",
+      "status": "operating",
+      "waypoints": [
+        { "ref": "terminal-toondah-passenger", "name": "Cleveland (Toondah Harbour)" },
+        { "ref": "terminal-junner-street", "name": "the pontoon, Junner Street, Dunwich (Goompi)" }
+      ],
+      "travel_time_min": { "value": 25, "basis": "published", "source": "https://stradbrokeisland.com/about-stradbroke/passenger-water-taxi-timetables/", "confidence": "high" },
+      "capacity": {
+        "vessels": [
+          { "id": "yalingbila", "name": "Yalingbila", "formerly": "Elizabeth Cook", "built": 2013, "builder": "Richardson Devine Marine Constructions", "length_m": 24, "cars": 0, "passengers": 198, "confidence": "high" }
+        ],
+        "source": "https://www.sealink.com.au/north-stradbroke-island/ferry-information/sealink-seq-ferries/ and repo-night-market",
+        "confidence": "high",
+        "note": "Yalingbila is the vessel named in the operator's fleet page and in Luke's research notes. Other vessels may be rostered onto passenger runs; this pack does not claim a full passenger fleet list."
+      },
+      "schedule": {
+        "basis": "published",
+        "snapshot_taken": "2026-05-11",
+        "snapshot_rechecked": "2026-08-07",
+        "source": "repo-night-market cross-checked against https://stradbrokeisland.com/about-stradbroke/passenger-water-taxi-timetables/",
+        "confidence": "high",
+        "variants": [
+          {
+            "id": "base",
+            "applies_to": "Monday to Sunday",
+            "cleveland_to_dunwich": ["04:45", "05:45", "06:45", "07:45", "09:00", "10:15", "11:30", "12:45", "14:00", "15:30", "17:00", "18:15", "19:15"],
+            "dunwich_to_cleveland": ["05:15", "06:15", "07:15", "08:15", "09:30", "10:45", "12:00", "13:15", "14:30", "16:15", "17:30", "18:45", "19:45"],
+            "late_service": { "cleveland_to_dunwich": "20:15", "dunwich_to_cleveland": "20:45", "days": ["fri", "sat", "sun"] }
+          }
+        ],
+        "note": "Luke's 11 May 2026 snapshot and the current Visit Straddie table agree on every departure. The Visit Straddie page as read on 7 August 2026 has a visible row-shift in its Dunwich column from 14:00 down, pairing 14:00 with 13:25 and 15:30 with 14:30, which cannot be right for a 25 minute crossing. The times above follow Luke's snapshot, which pairs cleanly with a 30 minute turnaround. Two of the afternoon westbound times here (17:00 and 18:15) are where this operator differs from the Flyer."
+      },
+      "booking": { "required": false, "note": "No bookings required for passenger water taxis. Tickets are bought at the terminal or onboard.", "source": "https://stradbrokeisland.com/getting-here/by-boat/", "confidence": "high" },
+      "fare_aud": { "adult_same_day_return": 22, "child_5_to_14_same_day_return": 13, "infant": 0, "adult_different_day_return": 32, "child_different_day_return": 22, "source": "https://www.fittravel.com.au/product/north-stradbroke-ferry/", "confidence": "low", "note": "Reseller figures. The operator's own fare page returns HTTP 403 to an automated fetch. Student and concession fares exist (a valid Australian student or concession card must be presented) but the amounts are unknown." },
+      "reliability": [
+        { "factor": "wind", "mechanism": "A 24 m catamaran is more weather-sensitive than a 52 to 60 car barge and slows sooner in bay chop.", "modelled_effect": "Cancel or slow before the vehicle ferry does, at a modelled 5 knots lower threshold.", "basis": "estimate", "confidence": "low" },
+        { "factor": "connection", "mechanism": "Routes 880 and 881 are written to meet this boat. A late boat means a missed bus and a 60 to 75 minute wait, not a five minute one.", "modelled_effect": "Model the connection as a hard dependency: a delay over the bus dwell time strands the whole walk-on load at Junner Street.", "basis": "derived from the bus timetable", "confidence": "high" }
+      ],
+      "queue_model": {
+        "summary": "Walk-up, first come first served, no reservation to fall back on. The queue forms later than the vehicle queue and clears faster.",
+        "stages": [
+          { "id": "arrive", "parameter": "arrival_window_min_before_departure", "modelled_value": [5, 25], "basis": "modelled" },
+          { "id": "overflow", "description": "When a sailing hits 198 passengers, the surplus waits for the next boat, roughly 75 minutes later in the middle of the day.", "parameter": "overflow_wait_min", "modelled_value": [60, 90], "basis": "derived from the published headways" }
+        ],
+        "confidence": "medium"
+      },
+      "source": "repo-night-market, https://stradbrokeisland.com/about-stradbroke/passenger-water-taxi-timetables/",
+      "confidence": "high"
+    },
+
+    {
+      "id": "svc-stradbroke-flyer",
+      "name": "Stradbroke Flyer Gold Cat",
+      "also_known_as": ["the Flyer", "Gold Cats", "the water taxi"],
+      "type": "water-taxi",
+      "operator": "Stradbroke Flyer Gold Cat",
+      "status": "operating",
+      "waypoints": [
+        { "ref": "terminal-toondah-flyer", "name": "Stradbroke Flyer terminal, Toondah Harbour, Cleveland" },
+        { "ref": "terminal-one-mile", "name": "One Mile Jetty, Yabby Street, Dunwich" }
+      ],
+      "route_note": "Lands at One Mile, not at the Junner Street terminal. Different side of Dunwich, different bus stop, roughly a kilometre apart. This distinction matters for wayfinding and is the most common visitor mistake.",
+      "travel_time_min": { "value": 25, "range": [25, 30], "basis": "published", "source": "https://www.flyer.com.au/ states about 25 minutes; https://stradbrokeisland.com/getting-here/by-boat/ says about 30 minutes; the Translink One Mile Flyer page shows a 30 minute gap between One Mile departure and Cleveland arrival", "confidence": "high" },
+      "capacity": { "cars": 0, "passengers": null, "confidence": "low", "note": "Passenger capacity per vessel is not published on the operator's site in a form that could be read. Left null rather than guessed. Ask the office on (07) 3821 3821." },
+      "schedule": {
+        "basis": "published",
+        "snapshot_rechecked": "2026-08-07",
+        "source": "https://www.visitstradbroke.com.au/stradbroke-flyer-water-taxi and https://jp.translink.com.au/plan-your-journey/timetables/ferry/n/stradbroke-island-one-mile-flyer",
+        "confidence": "medium",
+        "variants": [
+          {
+            "id": "base",
+            "applies_to": "Monday to Sunday",
+            "cleveland_to_one_mile": ["04:45", "05:45", "06:45", "07:45", "09:00", "10:15", "11:30", "12:45", "14:00", "15:30", "16:45", "18:00", "19:15", "20:15"],
+            "one_mile_to_cleveland": ["05:15", "06:15", "07:15", "08:15", "09:30", "10:45", "12:00", "13:15", "14:30", "16:15", "17:30", "18:45", "19:45", "20:45"],
+            "no_connecting_bus": "Some early and late services are not met by a bus. The operator marks these with a hash on its own timetable.",
+            "christmas_day": "limited service"
+          }
+        ],
+        "note": "See structural_facts.near-identical-water-taxi-timetables. Luke's 11 May 2026 snapshot had these times ten minutes later (04:55, 05:55, 06:55 and so on). Three current sources now agree on the times above, so treat the ten minute offset as stale. A local who catches the Flyer weekly settles this in one sentence."
+      },
+      "booking": { "required": false, "policy_quote": "There is no need to book tickets in advance, just come down on the day.", "tickets": "Sold at the Cleveland office or onboard. Cash and EFTPOS. Single, return and non-expiring multi-ticket passes.", "source": "https://www.flyer.com.au/timetable", "confidence": "high" },
+      "fare_aud": { "value": null, "effective_from": "13 July 2026", "confidence": "low", "note": "New fares took effect 13 July 2026. The fare table on flyer.com.au is published as images, so the figures could not be read by an automated fetch. A single Tripadvisor review quotes A$20 adult return and A$10 child return, but that predates the July 2026 change and is not used. Left null rather than guessed." },
+      "connections": { "courtesy_bus": "A complimentary courtesy bus runs to and from the Cleveland office, described by the operator as serving passengers getting to and from Cleveland railway station. Departs about 10 to 15 minutes before water taxi departures, excluding some early and late services.", "source": "https://www.flyer.com.au/timetable and https://www.accommodationstradbroke.com.au/tips-get-to-stradbroke-island/", "confidence": "high" },
+      "contact": { "office": "13-21 Emmett Drive, Cleveland QLD 4163", "phone": "07 3821 3821", "email": "flyer@flyer.com.au", "source": "https://www.flyer.com.au/timetable", "confidence": "high" },
+      "reliability": [
+        { "factor": "wind", "mechanism": "Small fast catamarans. Same bay chop exposure as the SeaLink passenger boat.", "modelled_effect": "Same threshold as svc-sealink-passenger-ferry.", "basis": "estimate", "confidence": "low" },
+        { "factor": "competition", "mechanism": "Head to head on identical departure times with the SeaLink passenger ferry, into a different Dunwich landing.", "modelled_effect": "Split walk-on demand between the two by destination preference and habit, not by time. A price move by one should shift share.", "basis": "derived", "confidence": "medium" }
+      ],
+      "queue_model": { "summary": "Walk-up only, no bookings, so the queue is pure arrival process. It forms later than the vehicle queue and it has no reservation safety net, which is why it is the one that fails visibly on a hot Saturday.", "stages": [{ "id": "arrive", "parameter": "arrival_window_min_before_departure", "modelled_value": [5, 25], "basis": "modelled" }], "confidence": "medium" },
+      "source": "https://www.flyer.com.au/, repo-night-market",
+      "confidence": "high"
+    },
+
+    {
+      "id": "svc-bus-880",
+      "name": "Route 880, Dunwich to Point Lookout",
+      "type": "bus",
+      "operator": "Transit Systems (Stradbroke Island), trading as North Stradbroke Island Bus Service, under contract to Translink",
+      "status": "operating",
+      "waypoints": [
+        { "name": "Junner Street Ferry Terminal", "ref": "terminal-junner-street" },
+        { "name": "One Mile Ferry Terminal", "ref": "terminal-one-mile" },
+        { "name": "Amity Point turnoff", "note": "the Beehive Road junction on East Coast Road" },
+        { "name": "Point Lookout, Adder Rock" },
+        { "name": "Point Lookout, Cylinder Beach" },
+        { "name": "Point Lookout, Gorge Walk" }
+      ],
+      "roads_used": ["road-junner-street-a", "road-bingle", "road-east-coast-a", "road-dickson-way-a", "road-mooloomba"],
+      "travel_time_min": { "junner_street_to_gorge_walk": 43, "gorge_walk_to_junner_street": 39, "basis": "published", "source": "translink-880-881", "confidence": "high" },
+      "capacity": { "seats_per_vehicle": null, "charter_fleet_seats": [40, 62], "confidence": "medium", "note": "Charter vehicles are advertised at 40 to 62 seats. The vehicle actually allocated to a scheduled 880 run is not published. Model route capacity as a parameter the player can see, because a full bus at Cylinder Beach on a January afternoon is a real event." },
+      "schedule": {
+        "basis": "published",
+        "effective_from": "2025-12-01",
+        "printed": "December 2025",
+        "source": "translink-880-881, snapshot held in repo-night-market",
+        "confidence": "high",
+        "footnotes": {
+          "A": "Operates on Saturday, Sunday, public holidays and all school holiday weekdays only",
+          "asterisk": "The regular timetable operates on all gazetted public holidays except Christmas Day",
+          "dash": "The bus does not travel via that location"
+        },
+        "timing_points_outbound": ["Junner Street Ferry Terminal", "One Mile Ferry Terminal", "Amity Point turnoff", "Point Lookout - Adder Rock", "Point Lookout - Cylinder Beach", "Point Lookout - Gorge Walk"],
+        "dunwich_to_point_lookout": [
+          { "dep_junner": "06:15", "one_mile": "06:22", "amity_turnoff": "06:38", "adder_rock": "06:48", "cylinder": "06:54", "gorge": "06:58", "flag": null },
+          { "dep_junner": "07:15", "one_mile": "07:22", "amity_turnoff": "07:38", "adder_rock": "07:48", "cylinder": "07:54", "gorge": "07:58", "flag": null },
+          { "dep_junner": "07:20", "one_mile": "07:27", "amity_turnoff": "07:43", "adder_rock": "07:53", "cylinder": "07:59", "gorge": "08:03", "flag": "A" },
+          { "dep_junner": "08:15", "one_mile": "08:22", "amity_turnoff": "08:38", "adder_rock": "08:48", "cylinder": "08:54", "gorge": "08:58", "flag": null },
+          { "dep_junner": "08:20", "one_mile": "08:27", "amity_turnoff": "08:43", "adder_rock": "08:53", "cylinder": "08:59", "gorge": "09:03", "flag": "A" },
+          { "dep_junner": null, "one_mile": "09:30", "amity_turnoff": "09:46", "adder_rock": "09:56", "cylinder": "10:02", "gorge": "10:06", "flag": "A" },
+          { "dep_junner": "09:30", "one_mile": "09:37", "amity_turnoff": "09:53", "adder_rock": "10:03", "cylinder": "10:09", "gorge": "10:13", "flag": null },
+          { "dep_junner": null, "one_mile": "10:45", "amity_turnoff": "11:01", "adder_rock": "11:11", "cylinder": "11:17", "gorge": "11:21", "flag": "A" },
+          { "dep_junner": "10:45", "one_mile": "10:52", "amity_turnoff": "11:08", "adder_rock": "11:18", "cylinder": "11:24", "gorge": "11:28", "flag": null },
+          { "dep_junner": null, "one_mile": "12:00", "amity_turnoff": "12:16", "adder_rock": "12:26", "cylinder": "12:32", "gorge": "12:36", "flag": "A" },
+          { "dep_junner": "12:00", "one_mile": "12:07", "amity_turnoff": "12:23", "adder_rock": "12:33", "cylinder": "12:39", "gorge": "12:43", "flag": null },
+          { "dep_junner": "13:15", "one_mile": "13:22", "amity_turnoff": "13:38", "adder_rock": "13:48", "cylinder": "13:54", "gorge": "13:58", "flag": null },
+          { "dep_junner": "14:30", "one_mile": "14:37", "amity_turnoff": "14:53", "adder_rock": "15:03", "cylinder": "15:09", "gorge": "15:13", "flag": null },
+          { "dep_junner": "16:00", "one_mile": "16:07", "amity_turnoff": "16:23", "adder_rock": "16:33", "cylinder": "16:39", "gorge": "16:43", "flag": null },
+          { "dep_junner": "17:30", "one_mile": "17:37", "amity_turnoff": "17:53", "adder_rock": "18:03", "cylinder": "18:09", "gorge": "18:13", "flag": null },
+          { "dep_junner": "18:45", "one_mile": "18:52", "amity_turnoff": "19:08", "adder_rock": "19:18", "cylinder": "19:24", "gorge": "19:28", "flag": null },
+          { "dep_junner": "19:45", "one_mile": "19:52", "amity_turnoff": "20:08", "adder_rock": "20:18", "cylinder": "20:24", "gorge": "20:28", "flag": null }
+        ],
+        "point_lookout_to_dunwich": [
+          { "dep_gorge": "06:30", "cylinder": "06:34", "adder_rock": "06:40", "amity_turnoff": "06:50", "one_mile": "07:03", "junner": "07:09", "flag": null },
+          { "dep_gorge": "07:30", "cylinder": "07:34", "adder_rock": "07:40", "amity_turnoff": "07:50", "one_mile": "08:03", "junner": "08:09", "flag": null },
+          { "dep_gorge": "08:45", "cylinder": "08:49", "adder_rock": "08:55", "amity_turnoff": "09:05", "one_mile": "09:18", "junner": "09:24", "flag": null },
+          { "dep_gorge": "10:00", "cylinder": "10:04", "adder_rock": "10:10", "amity_turnoff": "10:20", "one_mile": "10:33", "junner": "10:39", "flag": null },
+          { "dep_gorge": "11:15", "cylinder": "11:19", "adder_rock": "11:25", "amity_turnoff": "11:35", "one_mile": "11:48", "junner": "11:54", "flag": null },
+          { "dep_gorge": "12:30", "cylinder": "12:34", "adder_rock": "12:40", "amity_turnoff": "12:50", "one_mile": "13:03", "junner": "13:09", "flag": null },
+          { "dep_gorge": "13:40", "cylinder": "13:44", "adder_rock": "13:50", "amity_turnoff": "14:00", "one_mile": "14:13", "junner": "14:19", "flag": "A" },
+          { "dep_gorge": "13:45", "cylinder": "13:49", "adder_rock": "13:55", "amity_turnoff": "14:05", "one_mile": "14:18", "junner": "14:24", "flag": null },
+          { "dep_gorge": "15:20", "cylinder": "15:24", "adder_rock": "15:30", "amity_turnoff": "15:40", "one_mile": "15:53", "junner": "15:59", "flag": "A" },
+          { "dep_gorge": "15:25", "cylinder": "15:29", "adder_rock": "15:35", "amity_turnoff": "15:45", "one_mile": "15:58", "junner": "16:04", "flag": "A" },
+          { "dep_gorge": "15:30", "cylinder": "15:34", "adder_rock": "15:40", "amity_turnoff": "15:50", "one_mile": "16:03", "junner": "16:09", "flag": null },
+          { "dep_gorge": "16:40", "cylinder": "16:44", "adder_rock": "16:50", "amity_turnoff": "17:00", "one_mile": "17:13", "junner": "17:19", "flag": "A" },
+          { "dep_gorge": "16:45", "cylinder": "16:49", "adder_rock": "16:55", "amity_turnoff": "17:05", "one_mile": "17:18", "junner": "17:24", "flag": null },
+          { "dep_gorge": "17:55", "cylinder": "17:59", "adder_rock": "18:05", "amity_turnoff": "18:15", "one_mile": "18:28", "junner": "18:34", "flag": "A" },
+          { "dep_gorge": "18:00", "cylinder": "18:04", "adder_rock": "18:10", "amity_turnoff": "18:20", "one_mile": "18:33", "junner": "18:39", "flag": null },
+          { "dep_gorge": "19:00", "cylinder": "19:04", "adder_rock": "19:10", "amity_turnoff": "19:20", "one_mile": "19:33", "junner": "19:39", "flag": null },
+          { "dep_gorge": "20:00", "cylinder": "20:04", "adder_rock": "20:10", "amity_turnoff": "20:20", "one_mile": "20:33", "junner": "20:39", "flag": null }
+        ],
+        "seasonal_variants": [
+          { "id": "school-holiday-and-weekend-uplift", "description": "The A-flagged services in the tables above are the seasonal uplift. They run on Saturday, Sunday, public holidays and all school holiday weekdays only, and they add four westbound and five eastbound runs.", "basis": "published", "confidence": "high" },
+          { "id": "dec-2025-uplift", "description": "The 1 December 2025 Translink change added daily 880 services timed to meet earlier ferry arrivals and later ferry departures, and extended route 881 to Dunwich.", "source": "https://www.transitsystems.com.au/news/new-enhanced-bus-services-on-minjerribah-north-stradbroke-island and https://translink.com.au/news-and-media/releases/932881", "confidence": "high" }
+        ]
+      },
+      "fare_aud": { "single": 0.50, "daily": 1.00, "weekly": 5.00, "single_note": "One way, includes two hour transfer time", "daily_note": "Unlimited travel until the last service on the day of issue", "weekly_note": "Unlimited travel for seven days from the issue date", "go_card": false, "go_card_note": "North Stradbroke Island bus services are not part of the go card network. A separate paper ticket is required, bought onboard with cash or EFTPOS.", "source": "translink-fares", "confidence": "high", "note": "Child and concession prices are not separately published on the Translink page. These are the Queensland flat fares, so the bus is effectively free at the point of use and price is not a lever in this system." },
+      "reliability": [
+        { "factor": "ferry connection", "mechanism": "The timetable is written to meet the boats. Every westbound run is anchored to a ferry arrival.", "modelled_effect": "A late ferry pushes the connecting bus or makes it leave without the load. Model both behaviours and let the operator's choice be a visible policy lever.", "basis": "derived from the timetable", "confidence": "high" },
+        { "factor": "capacity", "mechanism": "A single vehicle per run on a route with no overtaking option.", "modelled_effect": "A full bus at One Mile leaves the surplus for the next run, 60 to 75 minutes later.", "basis": "modelled", "confidence": "medium" },
+        { "factor": "road", "mechanism": "One sealed spine. East Coast Road has no alternative route between Dunwich and the Amity turnoff.", "modelled_effect": "Any blockage on East Coast Road stops both routes and there is no detour. See road_segments and the incident note there.", "basis": "derived from geography", "confidence": "high" }
+      ],
+      "queue_model": { "summary": "No queue in the ferry sense. The failure mode is a full bus or a missed connection, not a wait for a slot.", "confidence": "high" },
+      "source": "translink-880-881, repo-night-market, https://www.stradbrokebus.com.au/timetablesandtickets",
+      "confidence": "high"
+    },
+
+    {
+      "id": "svc-bus-881",
+      "name": "Route 881, Dunwich to Amity Point",
+      "type": "bus",
+      "operator": "Transit Systems (Stradbroke Island), trading as North Stradbroke Island Bus Service, under contract to Translink",
+      "status": "operating",
+      "waypoints": [
+        { "name": "One Mile Ferry Terminal", "ref": "terminal-one-mile" },
+        { "name": "Junner Street Ferry Terminal", "ref": "terminal-junner-street" },
+        { "name": "QUAMPI", "note": "the Quandamooka Arts, Museum and Performance Institute at Dunwich. Added as a timing point in the 1 December 2025 change." },
+        { "name": "Amity Point turnoff", "note": "the Beehive Road junction on East Coast Road" },
+        { "name": "Amity Point (Pulan)" }
+      ],
+      "roads_used": ["road-junner-street-a", "road-bingle", "road-east-coast-a", "road-beehive", "road-claytons", "road-ballow-street"],
+      "travel_time_min": { "junner_street_to_amity_point": 29, "amity_point_to_junner_street": 29, "basis": "published", "source": "translink-880-881", "confidence": "high" },
+      "capacity": { "seats_per_vehicle": null, "confidence": "low", "note": "Not published. Same treatment as route 880." },
+      "schedule": {
+        "basis": "published",
+        "effective_from": "2025-12-01",
+        "source": "translink-880-881, snapshot held in repo-night-market",
+        "confidence": "high",
+        "timing_points_outbound": ["One Mile Ferry Terminal", "Junner Street Ferry Terminal", "QUAMPI", "Amity Point turnoff", "Amity Point"],
+        "dunwich_to_amity_point": [
+          { "one_mile": "08:15", "junner": "08:21", "quampi": "08:25", "amity_turnoff": "08:39", "amity_point": "08:50" },
+          { "one_mile": "09:30", "junner": "09:36", "quampi": "09:40", "amity_turnoff": "09:54", "amity_point": "10:05" },
+          { "one_mile": "12:00", "junner": "12:06", "quampi": "12:10", "amity_turnoff": "12:24", "amity_point": "12:35" },
+          { "one_mile": "13:15", "junner": "13:21", "quampi": "13:25", "amity_turnoff": "13:39", "amity_point": "13:50" },
+          { "one_mile": "14:30", "junner": "14:36", "quampi": "14:40", "amity_turnoff": "14:54", "amity_point": "15:05" },
+          { "one_mile": "16:00", "junner": "16:06", "quampi": "16:10", "amity_turnoff": "16:24", "amity_point": "16:35" },
+          { "one_mile": "17:25", "junner": "17:31", "quampi": "17:35", "amity_turnoff": "17:49", "amity_point": "18:00" }
+        ],
+        "amity_point_to_dunwich": [
+          { "amity_point": "06:35", "amity_turnoff": "06:46", "quampi": "07:00", "junner": "07:04", "one_mile": "07:10" },
+          { "amity_point": "07:35", "amity_turnoff": "07:46", "quampi": "08:00", "junner": "08:04", "one_mile": "08:10" },
+          { "amity_point": "08:50", "amity_turnoff": "09:01", "quampi": "09:15", "junner": "09:19", "one_mile": "09:25" },
+          { "amity_point": "10:05", "amity_turnoff": "10:16", "quampi": "10:30", "junner": "10:34", "one_mile": "10:40" },
+          { "amity_point": "11:20", "amity_turnoff": "11:31", "quampi": "11:45", "junner": "11:49", "one_mile": "11:55" },
+          { "amity_point": "12:35", "amity_turnoff": "12:46", "quampi": "13:00", "junner": "13:04", "one_mile": "13:10" },
+          { "amity_point": "13:50", "amity_turnoff": "14:01", "quampi": "14:15", "junner": "14:19", "one_mile": "14:25" },
+          { "amity_point": "16:45", "amity_turnoff": "16:56", "quampi": "17:10", "junner": "17:14", "one_mile": "17:20" },
+          { "amity_point": "18:05", "amity_turnoff": "18:16", "quampi": "18:30", "junner": "18:34", "one_mile": "18:40" }
+        ],
+        "asymmetry_note": "Seven runs out, nine runs back. The morning has two early Amity to Dunwich runs with no matching outbound service, because the first job of the day is getting Amity Point residents to the boat, not getting visitors to Amity Point. This is a real shape in the published timetable and it says something true about who the route is for."
+      },
+      "fare_aud": { "single": 0.50, "daily": 1.00, "weekly": 5.00, "go_card": false, "source": "translink-fares", "confidence": "high" },
+      "reliability": [
+        { "factor": "ferry connection", "mechanism": "Same as 880: written to meet the boats.", "modelled_effect": "Same as 880.", "basis": "derived", "confidence": "high" },
+        { "factor": "thin service", "mechanism": "Seven outbound runs a day for a township of a few hundred people.", "modelled_effect": "Missing a bus at Amity Point costs 60 to 165 minutes depending on the gap. The 14:15 to 16:45 gap eastbound is the widest and it is where the taxi and StradEasy demand comes from.", "basis": "derived from the timetable", "confidence": "high" }
+      ],
+      "source": "translink-880-881, repo-night-market",
+      "confidence": "high"
+    },
+
+    {
+      "id": "svc-stradbroke-cab",
+      "name": "Stradbroke Cab Service",
+      "type": "taxi",
+      "operator": "Stradbroke Cab Service, family owned",
+      "status": "trading-unconfirmed",
+      "waypoints": [{ "name": "Island-wide: Dunwich, Amity Point and Point Lookout, door to door" }],
+      "capacity": { "vehicles": 2, "seats_per_vehicle": 10, "wheelchair_accessible_vehicles": 1, "vehicle_type": "air conditioned 10 seat commuter vans with secure luggage compartment, security cameras and child seating", "source": "https://www.visitstradbroke.com.au/stradbroke-cab-service and https://stradbrokeisland.com/stradbroke-cab-service/", "confidence": "medium" },
+      "schedule": { "basis": "estimate", "description": "On call, including late night bookings. No published hours.", "confidence": "low" },
+      "fare_aud": { "value": null, "model": "metered, from the point of pick up to the destination only", "payment": "cash or EFTPOS", "source": "https://www.visitstradbroke.com.au/stradbroke-cab-service", "confidence": "medium", "note": "No published rate. Model as a Queensland metered taxi rate until a local supplies the real one." },
+      "contact": { "phone": "0408 193 685", "source": "https://www.visitstradbroke.com.au/stradbroke-cab-service, corroborated by the Redlands Disaster Plan island page which lists the same number as the island taxi service", "confidence": "high" },
+      "reliability": [
+        { "factor": "hard capacity", "mechanism": "Two vehicles for three townships and 275 square kilometres.", "modelled_effect": "Total island taxi supply is 2 vehicles. On a Saturday night after the pub, or when the last bus has gone, demand exceeds supply by a wide margin and people walk, drive, or do not go. This is one of the clearest hard caps in the world and it should be visible to the player.", "basis": "derived from the published fleet", "confidence": "medium" },
+        { "factor": "accessibility", "mechanism": "One wheelchair accessible vehicle on the whole island.", "modelled_effect": "If that vehicle is booked or off the road, accessible road transport on Minjerribah is zero. Model it as a single point of failure with real consequences for a resident, not as a rounding error.", "basis": "derived", "confidence": "medium" }
+      ],
+      "source": "repo-businesses, https://www.visitstradbroke.com.au/stradbroke-cab-service",
+      "confidence": "medium",
+      "note": "Status is trading-unconfirmed, carried forward from businesses.json. Described as operating for over 40 years. Confirm it is still running before showing it to a player."
+    },
+
+    {
+      "id": "svc-stradeasy",
+      "name": "StradEasy",
+      "type": "private-transfer",
+      "operator": "StradEasy",
+      "status": "trading",
+      "waypoints": [
+        { "name": "Junner Street Ferry Terminal, Dunwich", "ref": "terminal-junner-street" },
+        { "name": "One Mile Jetty, Dunwich", "ref": "terminal-one-mile" },
+        { "name": "accommodation and chosen destinations island-wide" }
+      ],
+      "description": "Booked ferry-to-door transport meeting the boats at both Dunwich landings, plus charter for groups, weddings, conferences and school trips.",
+      "capacity": { "seats_per_vehicle": 11, "source": "https://stradbrokeisland.com/stradeasy-north-stradbroke-island-transport-bus-service/ and repo-night-market", "confidence": "medium" },
+      "schedule": { "basis": "estimate", "description": "By booking, timed to ferry arrivals. No published hours.", "confidence": "low" },
+      "fare_aud": { "value": null, "confidence": "low", "note": "Not published. Booking by phone or web form." },
+      "contact": { "phone": "0488 029 718", "web": "https://stradeasy.com.au/", "confidence": "high" },
+      "role_in_sim": "The fallback when the bus does not go where someone is staying, when a party is too big for the cab, or when the last bus has gone. Model it as bookable, finite and priced above the bus.",
+      "source": "https://stradeasy.com.au/island-faq/",
+      "confidence": "medium"
+    },
+
+    {
+      "id": "svc-scooters-on-straddie",
+      "name": "Scooters On Straddie",
+      "type": "vehicle-hire",
+      "operator": "Scooters On Straddie",
+      "status": "trading",
+      "address": "126 Dickson Way, Point Lookout QLD 4183",
+      "description": "Scooter and car hire with a courtesy bus for pickup and drop-off. Positioned as the way to reach Brown Lake, Myora Springs and Amity Point without a long walk or a bus wait.",
+      "capacity": { "scooters": 27, "seats_per_scooter": 1, "source": "https://www.mustdobrisbane.com/tours/scooters-on-straddie-stradbroke-island for the fleet count; https://scootersonstraddie.com.au/ for the current offer", "confidence": "medium", "note": "The fleet count of 27 single seat scooters comes from a tourism listing that also places the business in Dunwich, while the operator's own site gives a Point Lookout address. Treat the count as indicative." },
+      "fare_aud": { "scooter_half_day": 55.55, "scooter_one_day": 85.85, "scooter_three_to_five_days_per_day": 75.75, "scooter_weekly": 454.50, "car_half_day": 80.80, "car_full_day": 151.50, "security_deposit_scooter": 100, "deposit_refundable": true, "source": "https://scootersonstraddie.com.au/", "confidence": "high" },
+      "requirements": "Valid driver licence. 150cc scooters require a motorcycle licence. P plates accepted per a tourism listing.",
+      "contact": { "phone": "0497 777 933", "confidence": "high" },
+      "role_in_sim": "Gives a walk-on visitor a private vehicle without a barge booking. This is the cheapest way for the simulation to let a car-free arrival reach the far end of the island, and it changes their whole day.",
+      "source": "https://scootersonstraddie.com.au/",
+      "confidence": "high"
+    },
+
+    {
+      "id": "svc-yura-banji-scooters",
+      "name": "Yura Banji Scooters",
+      "type": "vehicle-hire",
+      "operator": "Yura Banji Scooters Pty Ltd",
+      "status": "closed-unconfirmed",
+      "address": "Point Lookout Bowls Club, 75 Dickson Way, Point Lookout QLD 4183",
+      "description": "Electric scooter hire by the hour plus a guided cultural tour, run by a Quandamooka family.",
+      "capacity": { "seats_per_scooter": 1, "fleet": null, "confidence": "low" },
+      "fare_aud": { "cultural_tour": 89, "hire": null, "source": "https://www.weekendnotes.com/yura-banji-scooters/", "confidence": "low" },
+      "source": "https://www.weekendnotes.com/yura-banji-scooters/, https://yurabanjiscooters.com.au/, Tripadvisor listing",
+      "confidence": "low",
+      "note": "STATUS UNRESOLVED. The business is real and has a company entity and a booking site, but a search result reports the operator has closed its doors to start a new adventure. Do not render it as an operating business until a local confirms. Nothing cultural has been attached to this entry beyond what the operator publishes about itself. Do not translate or interpret the trading name; that is a matter for the family and for QYAC."
+    },
+
+    {
+      "id": "svc-air-general-aviation",
+      "name": "Private and charter aircraft into Dunwich Airfield",
+      "type": "air",
+      "operator": "North Stradbroke Airfield Pty Ltd operates the airfield; no scheduled carrier",
+      "status": "operating",
+      "waypoints": [{ "ref": "terminal-dunwich-airfield", "name": "Dunwich Airfield (YDUN)" }],
+      "capacity": { "scheduled_seats": 0, "confidence": "high", "note": "There is no scheduled passenger air service to Minjerribah. This is general aviation and helicopters only, plus emergency aeromedical use." },
+      "schedule": { "basis": "n/a", "description": "No timetable. Movements are by pilot decision." },
+      "fare_aud": { "landing_fee_non_member_or_commercial": 20, "members_and_fly_in_breakfast": 0, "source": "https://aircraftaustralia.com.au/dunwich-aerodrome/", "confidence": "low", "note": "Secondary aviation listing, possibly dated. The airfield's own guidelines say a fee structure is published on ydun.com.au without giving figures." },
+      "reliability": [
+        { "factor": "surface", "mechanism": "Grass over gravel and topsoil, sloping. Caution warranted after heavy rain.", "modelled_effect": "Wet weather closes the strip to some aircraft types.", "basis": "secondary source", "confidence": "medium" },
+        { "factor": "wildlife", "mechanism": "Kangaroos, wallabies and birds on the runway, worst at early morning and late afternoon.", "modelled_effect": "A real strike hazard at exactly the hours a medical flight is most likely.", "basis": "secondary source", "confidence": "medium" },
+        { "factor": "wind", "mechanism": "Turbulence and wind shear on approach to runway 15 in strong southerly and south-easterly winds.", "basis": "secondary source", "confidence": "medium" }
+      ],
+      "role_in_sim": "The quiet third door. It carries almost nobody, but it is the difference between a two hour and a twenty minute medical transfer, and it is why the island is not quite as cut off as the ferry timetable makes it look.",
+      "source": "https://irp.cdn-website.com/f0089a37/files/uploaded/NSA%20-%20Airfield%20Operational%20Guidelines.pdf and https://aircraftaustralia.com.au/dunwich-aerodrome/",
+      "confidence": "medium"
+    },
+
+    {
+      "id": "svc-private-boat",
+      "name": "Private boats and the Amity Point and Dunwich ramps",
+      "type": "private-boat",
+      "operator": "n/a",
+      "status": "operating",
+      "description": "A significant share of island movement never touches a timetable. Residents and mainland boat owners cross under their own power to the Amity Point boat ramp, the Dunwich ramps and private moorings.",
+      "capacity": { "value": null, "confidence": "low", "note": "No count of registered vessels, ramp movements or mooring holders was found for this island." },
+      "reliability": [
+        { "factor": "bar and weather", "mechanism": "Crossing the bay in a small boat is weather dependent in a way the barge is not.", "modelled_effect": "This channel closes first and reopens last.", "basis": "general knowledge", "confidence": "medium" }
+      ],
+      "role_in_sim": "Model it as an uncounted background flow with a weather gate, not as a service. It is how a certain kind of islander opts out of the ferry economy entirely.",
+      "source": "general knowledge, corroborated by the Redlands Disaster Plan which names the Amity Point boat ramp and One Mile Jetty as assembly areas",
+      "confidence": "low"
+    },
+
+    {
+      "id": "svc-freight-carriers",
+      "name": "Island freight carriers",
+      "type": "freight",
+      "operator": "multiple; Stradbroke Island Carriers is the named island carrier found",
+      "status": "trading-unconfirmed",
+      "description": "Commercial freight, building materials, whitegoods and furniture that cannot travel as walk-on freight move by truck on the vehicle ferry, booked through a carrier.",
+      "capacity": { "value": null, "confidence": "low", "note": "No fleet, load or frequency figure was found. A semi-trailer combination at about 19 m occupies a large share of a vehicle deck, so a single truck booking displaces many cars." },
+      "fare_aud": { "commercial_vehicle_rate_per_metre": 26, "source": "repo: C:/Users/sbt41/githublocal/aura-knowledge-base/themes/minjerribah-quandamooka/ai-laundromat-business-plan-straddie.md", "confidence": "low", "note": "A per-metre commercial vehicle rate of about A$26 appears in Luke's own knowledge base, citing SeaLink. It could not be confirmed against a current SeaLink page and the date it applied to is unknown. Treat as an order of magnitude, not a price." },
+      "reliability": [
+        { "factor": "deck competition", "mechanism": "Trucks and cars share the same finite deck.", "modelled_effect": "On peak days freight and visitors compete directly. A busy long weekend pushes deliveries to Tuesday, which is why the shops run thin by Sunday night.", "basis": "derived", "confidence": "medium" }
+      ],
+      "role_in_sim": "The supply chain for every business in businesses.json runs through this. Stock levels on the island should be a function of vehicle deck slots won, not of demand.",
+      "source": "https://stradbrokeislandcarriers.com.au/ (site did not resolve on 7 August 2026), general knowledge",
+      "confidence": "low",
+      "note": "The carrier's own website would not resolve. The business appears in directory listings. Confirm the trading name and whether it is still operating before naming it to a player."
+    }
+  ],
+
+  "road_segments": [
+    {
+      "id": "road-east-coast-a",
+      "name": "East Coast Road",
+      "geometry_ref": "data/geography.json roads[road-east-coast-a]",
+      "length_km": 15.808,
+      "from": "Dunwich (Goompi)",
+      "to": "Point Lookout (Mooloomba)",
+      "surface": "asphalt",
+      "lanes": 2,
+      "speed_limit_kmh": 80,
+      "speed_limit_basis": "island maximum, not a signposted per-segment value",
+      "speed_limit_source": "https://hemamaps.com/blogs/location-guides/north-stradbroke-island-qld states the maximum speed limit on the island is 80 km/h and significantly less through the townships",
+      "speed_limit_confidence": "medium",
+      "role": "The island spine. Both bus routes, all ferry traffic and almost every visitor use it.",
+      "capacity_constraint": {
+        "type": "no-alternative-route",
+        "description": "There is no parallel sealed road between Dunwich and the Amity turnoff. A crash, a fallen tree, a fire closure or a road works stop halts the entire island road network in that direction.",
+        "detour": "The only alternative is 4WD: the beach and the inland sand tracks. Not available to a bus, a truck, an ambulance with a patient or a two-wheel-drive car.",
+        "confidence": "high",
+        "basis": "derived from data/geography.json road network"
+      },
+      "hazards": [
+        { "type": "wildlife-strike", "description": "Koalas, wallabies and other wildlife on and beside the road, worst at dawn and dusk.", "source": "https://stradbrokeisland.com/about-stradbroke/wildlife/ names car strike as a threat and advises driving under the limit at dawn and dusk; data/ecology.json records vehicle strike as the top ranked recorded koala mortality cause on the island, 35 deaths 1997 to 2010", "confidence": "high" }
+      ],
+      "source": "geometry from OpenStreetMap via data/geography.json; operating attributes as cited above",
+      "confidence": "high"
+    },
+    {
+      "id": "road-beehive",
+      "name": "Beehive Road",
+      "geometry_ref": "data/geography.json roads[road-beehive]",
+      "length_km": 3.285,
+      "from": "East Coast Road (the Amity Point turnoff, a bus timing point)",
+      "to": "Claytons Road junction",
+      "surface": "asphalt",
+      "speed_limit_kmh": 80,
+      "speed_limit_basis": "island maximum, not a signposted per-segment value",
+      "speed_limit_confidence": "low",
+      "role": "The Amity turn-off. Route 881 and every vehicle bound for Amity Point uses it.",
+      "capacity_constraint": { "type": "no-alternative-route", "description": "Sole sealed access to Amity Point. Cut it and Amity Point is reachable only by boat or by Flinders Beach at the right tide.", "confidence": "high", "basis": "derived from data/geography.json" },
+      "source": "data/geography.json",
+      "confidence": "high"
+    },
+    {
+      "id": "road-claytons",
+      "name": "Claytons Road",
+      "geometry_ref": "data/geography.json roads[road-claytons]",
+      "length_km": 2.498,
+      "from": "Beehive Road junction",
+      "to": "Amity Point (Pulan)",
+      "surface": "asphalt",
+      "speed_limit_kmh": 60,
+      "speed_limit_basis": "township approach default",
+      "speed_limit_confidence": "low",
+      "source": "data/geography.json",
+      "confidence": "high"
+    },
+    {
+      "id": "road-ballow-street",
+      "name": "Ballow Street",
+      "geometry_ref": "data/geography.json roads[road-ballow-street]",
+      "length_km": 0.614,
+      "township": "Amity Point (Pulan)",
+      "surface": "asphalt",
+      "speed_limit_kmh": 50,
+      "speed_limit_basis": "Queensland built-up area default",
+      "speed_limit_confidence": "medium",
+      "role": "Amity Point main street. The Amity Pavilion, the community hall and the shops are on it.",
+      "source": "data/geography.json",
+      "confidence": "high"
+    },
+    {
+      "id": "road-sovereign",
+      "name": "Sovereign Road",
+      "geometry_ref": "data/geography.json roads[road-sovereign]",
+      "length_km": 1.121,
+      "township": "Amity Point (Pulan)",
+      "surface": "asphalt",
+      "speed_limit_kmh": 50,
+      "speed_limit_basis": "Queensland built-up area default",
+      "speed_limit_confidence": "medium",
+      "role": "Runs east through the eastern side of Amity Point. Its eastern end is one of the Flinders Beach 4WD entry points.",
+      "source": "data/geography.json; the beach entry role from https://www.blokespost.com/travel/queensland-travel/four-wheel-driving-on-stradbroke-island-main-beach-flinders-beach-and-tripod-track/3192",
+      "confidence": "medium"
+    },
+    {
+      "id": "road-flinders-beach",
+      "name": "Flinders Beach Road",
+      "geometry_ref": "data/geography.json roads[road-flinders-beach]",
+      "length_km": 1.143,
+      "from": "Claytons Road junction",
+      "to": "Flinders Beach",
+      "surface": "asphalt",
+      "speed_limit_kmh": 60,
+      "speed_limit_confidence": "low",
+      "role": "One of the Flinders Beach 4WD entry points and the road to the Flinders Beach camping area.",
+      "source": "data/geography.json, OpenStreetMap (tertiary, -27.4089555, 153.4621148)",
+      "confidence": "high"
+    },
+    {
+      "id": "road-dickson-way-a",
+      "name": "Dickson Way",
+      "geometry_ref": "data/geography.json roads[road-dickson-way-a]",
+      "length_km": 2.054,
+      "township": "Point Lookout (Mooloomba)",
+      "surface": "asphalt",
+      "speed_limit_kmh": 50,
+      "speed_limit_basis": "Queensland built-up area default",
+      "speed_limit_confidence": "medium",
+      "role": "Point Lookout from the Home Beach end past the oval to Cylinder Beach. Carries the campgrounds, the bowls club, the skate park and the busiest beach access in the world.",
+      "capacity_constraint": { "type": "on-street-parking-saturation", "description": "In peak season the kerbside along Dickson Way and Mooloomba Road absorbs the parking overflow from the beaches and the Gorge Walk. When it saturates, traffic circulates looking for a space and the through-movement slows.", "basis": "modelled", "confidence": "low" },
+      "closure_precedent": { "event": "Straddie Salute", "description": "Dickson Way is closed in three separate windows on the event morning and East Coast Road closes in both directions for about 40 minutes, at Queensland Police request. Real precedent that the island's only spine can be closed by a community event.", "source": "https://straddiesalute.com.au/roads/", "confidence": "high" },
+      "source": "data/geography.json",
+      "confidence": "high"
+    },
+    {
+      "id": "road-mooloomba",
+      "name": "Mooloomba Road",
+      "geometry_ref": "data/geography.json roads[road-mooloomba]",
+      "length_km": 1.647,
+      "township": "Point Lookout (Mooloomba)",
+      "surface": "asphalt",
+      "speed_limit_kmh": 50,
+      "speed_limit_basis": "Queensland built-up area default",
+      "speed_limit_confidence": "medium",
+      "role": "Cylinder Beach out to the Gorge and the headland. The Gorge Walk bus timing point is at the far end.",
+      "parking": { "type": "free kerbside and beside the park", "capacity": null, "note": "Free parking beside the park and along Mooloomba Road, which gets busy. No capacity figure is published.", "source": "https://www.accommodationstradbroke.com.au/guide-to-the-north-gorge-walk/", "confidence": "medium" },
+      "source": "data/geography.json",
+      "confidence": "high"
+    },
+    {
+      "id": "road-junner-street-a",
+      "name": "Junner Street",
+      "geometry_ref": "data/geography.json roads[road-junner-street-a]",
+      "length_km": 0.307,
+      "township": "Dunwich (Goompi)",
+      "surface": "asphalt",
+      "speed_limit_kmh": 50,
+      "speed_limit_basis": "Queensland built-up area default",
+      "speed_limit_confidence": "medium",
+      "role": "Dunwich main street off the ferry terminal end. Every vehicle that lands on this island drives up this street.",
+      "capacity_constraint": { "type": "arrival-surge", "description": "Fifty-two to sixty vehicles discharge onto a short township street in under fifteen minutes, eleven times a day. This is the sharpest, most regular traffic pulse on the island and it is entirely predictable from the timetable.", "basis": "derived from vessel capacity and the sailing list", "confidence": "high" },
+      "source": "data/geography.json",
+      "confidence": "high"
+    },
+    {
+      "id": "road-bingle",
+      "name": "Bingle Road",
+      "geometry_ref": "data/geography.json roads[road-bingle]",
+      "length_km": 0.564,
+      "township": "Dunwich (Goompi)",
+      "surface": "asphalt",
+      "speed_limit_kmh": 60,
+      "speed_limit_confidence": "low",
+      "role": "Links Dunwich township to East Coast Road. The barge surge passes through here on its way out of town.",
+      "source": "data/geography.json",
+      "confidence": "high"
+    },
+    {
+      "id": "road-alfred-martin-way",
+      "name": "Alfred Martin Way",
+      "geometry_ref": "data/geography.json roads[road-alfred-martin-way]",
+      "length_km": 11.615,
+      "from": "Dunwich (Goompi)",
+      "to": "the eastern dunes and the Main Beach causeway",
+      "surface": "asphalt near Dunwich, then unpaved and sand",
+      "speed_limit_kmh": 60,
+      "speed_limit_basis": "unsealed road default assumption",
+      "speed_limit_confidence": "low",
+      "role": "The trans-island road. Sealed as a secondary road out of Dunwich, degrading to a track further east. It is the access to Brown Lake Drive, the Blue Lake country and the southern Main Beach causeway.",
+      "capacity_constraint": { "type": "surface", "description": "The eastern end is sand. Two-wheel-drive vehicles cannot use it, and the causeway approach to Main Beach is described as powdery and difficult even for park rangers.", "source": "https://www.blokespost.com/travel/queensland-travel/four-wheel-driving-on-stradbroke-island-main-beach-flinders-beach-and-tripod-track/3192", "confidence": "medium" },
+      "source": "data/geography.json, OpenStreetMap (secondary at -27.5069419 153.4506287, track at -27.5216667 153.4964941)",
+      "confidence": "high",
+      "note": "One travel blog calls the trans-island road Trans Island Road. That name returns nothing in OpenStreetMap and is not used here. Alfred Martin Way is the name in the mapped data. If locals say Trans Island Road, add it as an alias, do not replace the gazetted name."
+    },
+    {
+      "id": "road-brown-lake-drive",
+      "name": "Brown Lake Drive",
+      "geometry_ref": "data/geography.json roads[road-brown-lake-drive]",
+      "length_km": 1.174,
+      "surface": "gravel",
+      "speed_limit_kmh": 40,
+      "speed_limit_basis": "unsealed access road assumption",
+      "speed_limit_confidence": "low",
+      "role": "Access from East Coast Road to Brown Lake (Bummiera).",
+      "cultural_note": "Published sources record Bummiera as a place of deep significance with a permission protocol. That belongs in data/lore.json and docs/CULTURAL-REVIEW.md, not here. This entry records only that a road goes there.",
+      "source": "data/geography.json",
+      "confidence": "high"
+    },
+    {
+      "id": "route-main-beach-4wd",
+      "name": "Main Beach 4WD route",
+      "geometry_ref": "data/geography.json roads[route-main-beach-4wd]",
+      "length_km": 35.639,
+      "surface": "sand",
+      "speed_limit_kmh": 60,
+      "speed_limit_basis": "published",
+      "speed_limit_source": "minjerribah-camping",
+      "speed_limit_confidence": "high",
+      "vehicle_requirement": "4WD only. All-wheel-drive vehicles, motorbikes and quad bikes are not permitted.",
+      "permit_required": true,
+      "access_points": [
+        { "name": "George Nothling Drive entrance, Point Lookout", "lat": -27.4383775, "lon": 153.5322827, "coordinate_source": "osm", "note": "The main access. Described in a travel account as very soft and rough and badly rutted.", "confidence": "high" },
+        { "name": "the causeway off Alfred Martin Way from Dunwich", "lat": null, "lon": null, "confidence": "low", "note": "Named in a single travel account as a second, difficult, powdery access. Not confirmed against an official source." }
+      ],
+      "extent_rule": "4WD vehicles are permitted between the George Nothling Drive entrance and the southern end of the surf beach.",
+      "tide_rule": "Do not drive on Main Beach 2 hours either side of high tide.",
+      "source": "minjerribah-camping",
+      "confidence": "high",
+      "note": "The 35.6 km geometry in geography.json is a DERIVED line offset from the OSM coastline, indicative only. The real driving line moves with the tide and the sand. Do not use it as a road centreline."
+    },
+    {
+      "id": "route-flinders-beach-4wd",
+      "name": "Flinders Beach 4WD route",
+      "geometry_ref": "data/geography.json roads[route-flinders-beach-4wd]",
+      "length_km": 10.003,
+      "surface": "sand",
+      "speed_limit_kmh": 40,
+      "speed_limit_basis": "published",
+      "speed_limit_source": "minjerribah-camping",
+      "speed_limit_confidence": "high",
+      "vehicle_requirement": "4WD only. All-wheel-drive vehicles, motorbikes and quad bikes are not permitted.",
+      "permit_required": true,
+      "extent_rule": "4WD vehicles are permitted between the Amity Point and Adder Rock entrances.",
+      "access_points": [
+        { "name": "Amity Point, the eastern end of Sovereign Road", "confidence": "medium" },
+        { "name": "the end of Flinders Beach Road", "confidence": "medium" },
+        { "name": "Adder Rock, Point Lookout", "confidence": "high" }
+      ],
+      "tide_rule": "Do not drive on Flinders Beach 2 hours either side of high tide.",
+      "hazards": "Small creeks cross the beach with channels up to about 30 cm deep. Access points churn up under traffic.",
+      "hazards_source": "https://www.blokespost.com/travel/queensland-travel/four-wheel-driving-on-stradbroke-island-main-beach-flinders-beach-and-tripod-track/3192",
+      "hazards_confidence": "low",
+      "source": "minjerribah-camping",
+      "confidence": "high",
+      "note": "Same derived-geometry caveat as Main Beach."
+    }
+  ],
+
+  "beach_driving": {
+    "permit": {
+      "name": "Vehicle Access Permit (VAP)",
+      "issuer": "Minjerribah Camping",
+      "requirement": "All vehicles entering the Recreation Reserve on Minjerribah require a current Vehicle Access Permit. A 4WD and a permit are needed to reach the beach camping areas on Flinders Beach and Main Beach.",
+      "durations": ["1 month", "1 year"],
+      "price_aud": { "one_month": 53.65, "one_year": 160.80, "confidence": "low", "note": "CONFLICTING. One secondary source gives A$53.65 for up to one month and A$160.80 for more than one month up to one year. Another gives A$55.90 for one month. The Minjerribah Camping permit page itself shows prices only inside its booking system, which could not be read. Both figures are recorded so a local can strike out the wrong one." },
+      "where_to_buy": ["online through Minjerribah Camping", "Cylinder Beach office", "Amity Point office", "Adder Rock office"],
+      "office_hours": "8am to 4pm, seven days",
+      "enforcement": "Permits obtained for a non-compliant vehicle will be confiscated and fees forfeited.",
+      "source": "minjerribah-camping and https://minjerribahcamping.com.au/frequently-asked-questions/",
+      "confidence": "high"
+    },
+    "rules": {
+      "main_beach": { "speed_limit_kmh": 60, "tide": "no driving 2 hours either side of high tide", "vehicles": "4WD only" },
+      "flinders_beach": { "speed_limit_kmh": 40, "tide": "no driving 2 hours either side of high tide", "vehicles": "4WD only" },
+      "dune_rule": "Do not drive or park within 1 metre of dune vegetation.",
+      "dune_rule_source": "https://stradbrokeisland.com/point-lookout-beach-access/",
+      "source": "minjerribah-camping",
+      "confidence": "high"
+    },
+    "tide_rule_conflict": {
+      "issue": "Three different tide windows are published for the same beaches.",
+      "values": [
+        { "window": "2 hours either side of high tide", "source": "minjerribah-camping (the permit issuer)", "confidence": "high" },
+        { "window": "1 hour 15 minutes either side of high tide", "source": "https://stradbrokeisland.com/getting-around/", "confidence": "medium" },
+        { "window": "1 hour either side of high tide", "source": "https://stradbrokeisland.com/point-lookout-beach-access/", "confidence": "medium" }
+      ],
+      "resolution": "Use 2 hours. It comes from the body that issues the permit and enforces the condition, and it is the most conservative. The other two are recorded rather than deleted so a local can say which is signposted."
+    },
+    "simulation_hook": {
+      "description": "Beach driving is the clearest tide coupling in the world. Read data/geography.json for the beach routes and the tide system for the water level, and open or close both beaches on the 4 hour window around each high tide.",
+      "effect": "Two closed windows per day, each about 4 hours, sliding roughly 50 minutes later each day. Camping traffic on Flinders and Main Beach clusters hard against the edges of those windows, so beach access points surge just after a beach opens.",
+      "confidence": "high",
+      "basis": "derived from the published tide rule plus the standard semi-diurnal tide cycle"
+    }
+  },
+
+  "parking": [
+    {
+      "id": "parking-toondah-public",
+      "name": "Toondah Harbour public car park, Cleveland",
+      "side": "mainland",
+      "type": "free public",
+      "capacity": null,
+      "capacity_note": "Described as hundreds of spaces in the vicinity, and as free. No count published. It fills during school holidays and long weekends.",
+      "source": "https://www.sealink.com.au/north-stradbroke-island/ferry-information/north-stradbroke-island-residents/toondah-harbour-carpark-waitlist/ and https://www.accommodationstradbroke.com.au/tips-get-to-stradbroke-island/",
+      "confidence": "medium"
+    },
+    {
+      "id": "parking-toondah-long-term",
+      "name": "SeaLink long term car park, Toondah Harbour",
+      "side": "mainland",
+      "type": "permanent leased bay",
+      "location": "corner of Middle Street and Emmett Drive, behind the SeaLink terminal",
+      "capacity": null,
+      "vehicle_limit": "standard vehicles only, up to 5.4 m long and 2.0 m wide",
+      "waitlist": "yes, measured in years. Two reads of the same page on 7 August 2026 gave longer than a year and longer than 4 years, so no number is stated here.",
+      "secure": false,
+      "secure_note": "SeaLink states this is not a secure car park and it will not be held liable for loss or damage.",
+      "price_aud": null,
+      "source": "https://www.sealink.com.au/north-stradbroke-island/ferry-information/north-stradbroke-island-residents/toondah-harbour-carpark-waitlist/",
+      "confidence": "high",
+      "role_in_sim": "See structural_facts.mainland-car-park-waitlist. A bay here is a household asset worth modelling."
+    },
+    {
+      "id": "parking-point-lookout-peak",
+      "name": "Point Lookout kerbside parking",
+      "side": "island",
+      "type": "free kerbside",
+      "streets": ["Mooloomba Road", "Dickson Way", "Cumming Parade"],
+      "capacity": null,
+      "capacity_note": "UNVERIFIED. No published bay count for any Point Lookout car park or street. The brief asked for peak season parking at Point Lookout and this is the gap: everyone who lives there knows the answer and nobody has published it.",
+      "peak_behaviour": {
+        "description": "In peak season the Gorge Walk, Cylinder Beach and Home Beach draw more vehicles than the kerb holds. Overflow circulates, parks further out, and walks in.",
+        "modelled_parameters": { "search_time_min_offpeak": [0, 2], "search_time_min_peak": [6, 20], "walk_in_distance_m_peak": [200, 900] },
+        "basis": "modelled",
+        "confidence": "low"
+      },
+      "source": "https://www.accommodationstradbroke.com.au/guide-to-the-north-gorge-walk/ for the free kerbside parking and that it gets busy",
+      "confidence": "medium"
+    }
+  ],
+
+  "cycling": {
+    "distances_km": { "dunwich_to_point_lookout": 22, "dunwich_to_amity_point": 22, "dunwich_to_main_beach_causeway": 22, "basis": "published", "source": "https://stradbrokeisland.com/getting-around/", "confidence": "medium", "note": "Visit Straddie gives about 22 km for all three. The mapped East Coast Road segment from Dunwich to Point Lookout is 15.8 km, so 22 km is likely a round trip or a township-to-township figure that includes the run out of Dunwich. Do not use 22 km as a one-way road distance without checking." },
+    "conditions": { "description": "Roads have narrow or no shoulder in parts and are frequented by large trucks in business hours.", "source": "https://stradbrokeisland.com/getting-around/", "confidence": "high" },
+    "on_the_ferry": { "rule": "Push bikes are carried at no extra cost, subject to available space.", "source": "sealink-tc", "confidence": "high" },
+    "hire": { "operators": [], "confidence": "low", "note": "No current bike hire operator on the island could be confirmed. Straddie Super Sports was named as bike and 4WD hire in an earlier brief and public listings describe it as the outdoor gear and sporting goods shop; hire was not confirmed and is not claimed. See docs/DATA-NOTES.md under businesses. Scooter hire is confirmed and is in services." },
+    "simulation_role": "A bicycle is the only zero-cost, zero-permit, zero-booking way to move between townships. It is also the most exposed to truck traffic, heat and the 15.8 km of East Coast Road with no shoulder. Model it as cheap, slow and weather-sensitive, with a real injury risk term on the spine."
+  },
+
+  "walking": {
+    "tracks_ref": "data/geography.json roads[] entries with type walking_track: North Gorge Walk (1.375 km), Kaboora Track (3.094 km), Neembeemba Track (2.744 km), Dakabin Track (1.738 km), Kabul Track (3.155 km), Jarlo Beetle Track (3.015 km), Brown Lake Walk (0.795 km)",
+    "note": "Track geometry, surface and naming are already sourced in the geography pack from OpenStreetMap and are not duplicated here. Track names in that pack come from OpenStreetMap and have not been checked against a park authority sign or against QYAC. That is a cultural-care question, not a transport one, and it belongs in docs/CULTURAL-REVIEW.md.",
+    "within_township": { "description": "Point Lookout and Amity Point are walkable end to end. Dunwich is walkable from the terminal to the shops. Between townships, walking is not a practical mode: 15.8 km of open road with no shoulder.", "confidence": "high", "basis": "derived from geography" },
+    "beach_access_tracks": { "count": 15, "ref": "data/geography.json roads[] entries with type beach_access_track, numbered Track 1 to Track 15", "note": "Numbered sand access tracks between Main Beach and the country behind it. Lengths 16 m to 194 m." },
+    "confidence": "high"
+  },
+
+  "emergency_transport": {
+    "principle": "Every serious medical case leaves the island by boat or by air. There is no hospital on Minjerribah. The transfer time, not the treatment, is the thing the simulation should make a player feel.",
+    "assets": [
+      {
+        "id": "qas-dunwich",
+        "name": "Queensland Ambulance Service, Dunwich station",
+        "address": "Oxley Parade, Dunwich QLD 4183",
+        "phone": "07 3409 9333",
+        "source": "https://www.sealink.com.au/north-stradbroke-island/island-information/medical-information via search summary",
+        "confidence": "medium",
+        "note": "Address and number from a secondary read of the SeaLink island information page, which returns HTTP 403 to a direct automated fetch. A second station at Point Lookout is referenced in the same summary but was not separately confirmed, and docs/DATA-NOTES.md already records this as an open question from the businesses pass."
+      },
+      {
+        "id": "mrq-north-stradbroke",
+        "name": "Marine Rescue Queensland, North Stradbroke unit",
+        "formerly": "VMR North Stradbroke",
+        "base": "Yabbie Street, Dunwich, overlooking One Mile",
+        "operating_since": 1977,
+        "operating_area": "south to Macleay Island, west to the mainland, north to the mouth of the Brisbane River, and east across the South Passage Bar to offshore waters off Point Lookout and Moreton Island",
+        "role": "Crews work with the Queensland Ambulance Service to assist with medical evacuations from the island to the mainland.",
+        "activation": "VHF Channel 16 or Triple Zero (000). General enquiries 131 MRQ or (07) 3409 9338.",
+        "vessels": null,
+        "crew": null,
+        "source": "https://www.mrq.qld.gov.au/rescue-units/mrq-north-stradbroke",
+        "confidence": "high",
+        "note": "Vessel names, sizes and crew numbers are not published on the unit page. Left null."
+      },
+      {
+        "id": "lifeflight-aeromedical",
+        "name": "LifeFlight rescue helicopter and air ambulance",
+        "base": "Brisbane, not on the island",
+        "role": "Airlifts patients from Minjerribah to hospital. Rescue helicopters and air ambulance jets crewed by medical staff.",
+        "landing": "Dunwich Airfield has a helipad; the operator currently directs all helicopters to land and park on the apron south of the passenger shelter while remedial works are under way.",
+        "source": "https://www.lifeflight.org.au/ and the Dunwich Airfield operational guidelines and operator site",
+        "confidence": "medium",
+        "note": "That LifeFlight has airlifted people from North Stradbroke Island is reported in its own news material. Response times, tasking rules and whether it uses the airfield or a beach or oval landing site in a given case were not established."
+      }
+    ],
+    "ferry_priority": { "rule": "SeaLink SEQ reserves the right to prioritise travel for emergency service vehicles and passengers as required.", "source": "sealink-tc", "confidence": "high" },
+    "transfer_paths": [
+      { "id": "path-routine", "description": "Non-urgent transfer: patient and escort walk on to the scheduled passenger ferry, 25 minutes plus the wait for the next departure.", "modelled_total_min": [30, 105], "basis": "derived from the passenger ferry headway", "confidence": "medium" },
+      { "id": "path-ambulance-on-barge", "description": "Ambulance drives onto the next vehicle ferry with priority boarding, displacing booked vehicles. 45 to 50 minute crossing plus the wait for the next sailing plus the mainland run to hospital.", "modelled_total_min": [70, 190], "basis": "derived from the sailing list and the crossing time", "confidence": "medium", "note": "The worst case is an incident just after the last sailing of the day. On a Monday to Saturday the last Dunwich departure is 17:30 and the next is 07:00, a gap of 13.5 hours in which the barge is not an option at all." },
+      { "id": "path-marine-rescue", "description": "MRQ vessel with QAS crew across to the mainland. The path that exists precisely because the timetable does not cover the night.", "modelled_total_min": [45, 120], "basis": "modelled", "confidence": "low" },
+      { "id": "path-air", "description": "Aeromedical helicopter to a Brisbane hospital.", "modelled_total_min": [25, 70], "basis": "modelled", "confidence": "low" }
+    ],
+    "evacuation": {
+      "coordinator": "Redland City Local Disaster Management Group",
+      "primary_evacuation_centre": { "name": "Dunwich Public Hall", "address": "4 Ballow Road, Dunwich" },
+      "alternate_centres": [
+        { "name": "Amity Point Community Hall", "address": "16 Ballow Street, Amity Point" },
+        { "name": "Point Lookout Community Hall", "address": "50 East Coast Road, Point Lookout" }
+      ],
+      "assembly_areas": ["the barge terminal", "One Mile Jetty", "the boat ramp at Amity Point"],
+      "transport_used": "East Coast Road as the primary land route, with 4WD beach access from Point Lookout to Amity Point as the alternate; barge and ferry from Dunwich and Amity Point to Cleveland; the island bus service, the taxi and courtesy buses from the Rugby League Club and the Bowls Club",
+      "public_information": "ABC 612 AM, Bay FM 100.3 and council channels",
+      "advice_quote": "If it's flooded, forget it!",
+      "source": "http://www.redlandsdisasterplan.com.au/north-stradbroke-island/north-stradbroke-evacuation/",
+      "confidence": "high",
+      "note": "No capacity figure, ferry weather cut-off or evacuation timing is published in the plan page read. The 2013 to 2014 fire, in which more than 900 campers were evacuated, is the real precedent and it is recorded in data/ecology.json."
+    }
+  },
+
+  "scenarios": [
+    {
+      "id": "toondah-long-weekend-friday",
+      "name": "The Toondah queue on the Friday of a long weekend",
+      "status": "MODELLED. Not measured. Read the inputs table before using any number here.",
+      "why_it_matters": "This is the island's defining crowd scene and the moment its whole economy becomes visible as a physical line of cars. It is also the cleanest teaching moment in the simulation: a fixed supply of steel decks meeting an elastic demand, with a 20 minute cut-off and a 100 per cent no-show penalty doing all the interesting behavioural work.",
+      "inputs": {
+        "measured": [
+          { "name": "vessel car capacity", "value": { "minjerribah": 52, "sea_breeze": 60, "quandamooka": 52 }, "source": "SeaLink fleet page", "confidence": "high" },
+          { "name": "base Cleveland to Dunwich sailings, Friday", "value": 10, "source": "published base timetable in this pack", "confidence": "high" },
+          { "name": "base daily westbound capacity", "value_cars": 560, "derivation": "five Minjerribah sailings at 52 plus five Sea Breeze sailings at 60", "confidence": "high" },
+          { "name": "check-in cut-off", "value_min_before_departure": 20, "source": "sealink-tc", "confidence": "high" },
+          { "name": "no-show penalty", "value": "100 per cent of total cost", "source": "sealink-tc", "confidence": "high" },
+          { "name": "online change cut-off", "value_hours_before_departure": 2, "source": "sealink-tc", "confidence": "high" },
+          { "name": "island visitors, most recent published year", "value": 375000, "year": 2018, "source": "data/residents.json visitor_baseline, from https://www.redlandcitybulletin.com.au/", "confidence": "medium" },
+          { "name": "crossing time", "value_min": 45, "range": [45, 50], "confidence": "high" }
+        ],
+        "assumed": [
+          { "name": "extra Quandamooka sailings westbound on the long weekend Friday", "value": 5, "basis": "modelled", "reason": "SeaLink publishes peak timetables per period and uses Quandamooka for extras. Five is a plausible day for a third vessel on a 45 to 50 minute crossing with turnarounds. Replace with the real published peak timetable when one is to hand." },
+          { "name": "vehicles presenting westbound across the day", "value": 1050, "basis": "modelled", "reason": "A normal Friday is modelled at about 85 per cent of the 560 slots, roughly 476 vehicles. A long weekend Friday is modelled at 2.2 times that." },
+          { "name": "Toondah marshalling yard capacity before the queue spills onto Middle Street", "value_vehicles": 110, "basis": "modelled", "confidence": "low", "reason": "UNVERIFIED. No lane count or yard capacity is published. This single number drives all the spillover behaviour and is the first thing to correct." },
+          { "name": "share of capacity sold in advance", "value": 0.92, "basis": "modelled" },
+          { "name": "no-show rate", "value": 0.03, "basis": "modelled", "reason": "Kept low because a no-show forfeits the whole fare." },
+          { "name": "early arrivals hoping to roll onto an earlier sailing", "value_vehicles": 120, "basis": "modelled" }
+        ]
+      },
+      "modelled_day": {
+        "timetable_westbound": [
+          { "time": "06:00", "vessel": "minjerribah", "cars": 52 },
+          { "time": "07:00", "vessel": "sea-breeze", "cars": 60 },
+          { "time": "08:00", "vessel": "minjerribah", "cars": 52 },
+          { "time": "09:00", "vessel": "quandamooka", "cars": 52, "extra": true },
+          { "time": "09:30", "vessel": "sea-breeze", "cars": 60 },
+          { "time": "10:30", "vessel": "minjerribah", "cars": 52 },
+          { "time": "11:30", "vessel": "quandamooka", "cars": 52, "extra": true },
+          { "time": "12:00", "vessel": "sea-breeze", "cars": 60 },
+          { "time": "13:00", "vessel": "minjerribah", "cars": 52 },
+          { "time": "14:00", "vessel": "sea-breeze", "cars": 60 },
+          { "time": "14:30", "vessel": "quandamooka", "cars": 52, "extra": true },
+          { "time": "15:30", "vessel": "minjerribah", "cars": 52 },
+          { "time": "16:30", "vessel": "sea-breeze", "cars": 60 },
+          { "time": "17:30", "vessel": "quandamooka", "cars": 52, "extra": true },
+          { "time": "18:30", "vessel": "minjerribah", "cars": 52, "extra": true }
+        ],
+        "sailings": 15,
+        "capacity_cars": 820,
+        "capacity_derivation": "52+60+52+52+60+52+52+60+52+60+52+52+60+52+52 = 820",
+        "arrival_profile_vehicles_presenting": [
+          { "window": "05:00-08:00", "vehicles": 90 },
+          { "window": "08:00-10:00", "vehicles": 95 },
+          { "window": "10:00-12:00", "vehicles": 130 },
+          { "window": "12:00-14:00", "vehicles": 200 },
+          { "window": "14:00-16:00", "vehicles": 285 },
+          { "window": "16:00-19:00", "vehicles": 250 }
+        ],
+        "arrival_profile_total": 1050,
+        "outcomes": {
+          "carried": 820,
+          "not_carried_on_the_day": 230,
+          "carried_derivation": "1050 presenting minus 820 slots equals 230 who do not get across on the Friday",
+          "booked_vehicles": 754,
+          "booked_derivation": "820 slots times 0.92 sold in advance equals 754",
+          "slots_released_at_the_cut": 23,
+          "slots_released_derivation": "754 booked times a 3 per cent no-show rate equals about 23 slots released to standby across the day, roughly one and a half per sailing",
+          "standby_hopefuls_presenting": 230,
+          "standby_success_rate": 0.10,
+          "standby_success_derivation": "23 released slots plus about 43 unsold slots on the two earliest sailings, shared among 230 hopefuls",
+          "rolled_to_saturday": 90,
+          "queue_peak_vehicles_in_yard": 110,
+          "queue_spillover_onto_middle_street": true,
+          "queue_spillover_window": "14:10 to 17:10",
+          "standby_wait_median_min": 150,
+          "standby_wait_p90_min": 270,
+          "yard_saturated_from": "13:40",
+          "yard_clears_at": "18:10"
+        },
+        "eastbound_mirror": "The same shape runs in reverse on the Monday afternoon, and it is worse, because a visitor who misses the last Monday sailing loses a day of work rather than a day of holiday. Model Monday 13:00 to 17:30 eastbound with the same arithmetic and a higher unhappiness weight per hour waited."
+      },
+      "second_order_effects": [
+        "The Dunwich end floods in 45 to 50 minute pulses of 52 to 60 vehicles onto Junner Street. On this day there are 15 pulses instead of 10 and the last one lands at 19:20.",
+        "The 230 who do not get across spend money in Cleveland, not on the island, or go home. Some rebook for Saturday, which pushes the Saturday queue up before the Friday one has cleared.",
+        "Freight loses. Trucks are long and every metre of deck sold to a car is a metre not sold to a delivery. Shops run thin by Sunday and the restock lands Tuesday.",
+        "The taxi and StradEasy demand spikes at Dunwich, against a total island supply of two cabs and a small transfer fleet.",
+        "Route 880 is meeting boats that are now 50 per cent more frequent than the timetable it was written against. Every extra sailing either has a bus or does not, and if it does not, 200 foot passengers are standing at Junner Street with luggage.",
+        "Campground check-in at Minjerribah Camping and the 4WD permit counter take the whole arrival wave at once, and Flinders and Main Beach are on a tide gate at the same time.",
+        "Any emergency vehicle movement on this day displaces booked cars from a sold-out sailing, which is the one time the priority rule is visible and resented."
+      ],
+      "how_to_falsify_this": "Stand at Toondah on the Friday before a long weekend with a clicker and a phone. Count vehicles presenting per hour, count the lane capacity, ask the check-in staff what proportion of the day was standby, and time the longest wait. Four hours of counting replaces every assumed number above.",
+      "confidence": "low",
+      "confidence_reason": "Every measured input is high confidence. Every demand and queue number is modelled. The scenario is arithmetically consistent and structurally right; the magnitudes are guesses until somebody counts."
+    }
+  ],
+
+  "projects": [
+    {
+      "id": "dunwich-gumpi-terminal-upgrade",
+      "name": "Dunwich (Gumpi) Ferry Terminal Upgrade",
+      "status": "funded, concept design released for community input, consultation closed 21 June 2026",
+      "funders": { "australian_government_aud": 10000000, "queensland_government_aud": 30000000, "redland_city_council_aud": 1000000, "programme": "South East Queensland City Deal", "confidence": "medium", "note": "The three-way split was returned by a search of the TMR and State Development project pages. Neither page could be fetched directly (both return HTTP 403) and the figures were not repeated in the local news coverage that could be read. Confirm before quoting." },
+      "scope": "Concept design elements Council supports: a dual-berth passenger ferry pontoon, safer pedestrian links, improved vehicle and bus access, on-site parking and kiss and ride, sheltered waiting areas, landscaping, community open space and retail provision. Identified as a catalyst project under the Gumpi Master Plan.",
+      "council_position": "Council supports consolidating public ferry services into one primary location and says the facility must be designed from the outset to accommodate multiple ferry operators. Council has also said any closure of the One Mile terminal should only proceed after the Gumpi Master Plan commitments are met, including all-weather capability and sufficient parking.",
+      "source": "https://www.redlandscoasttoday.com.au/2026/06/council-to-provide-feedback-on-ferry-terminal-upgrade/, https://redlandbaysidenews.com.au/council-pushes-for-single-ferry-hub-as-dunwich-terminal-upgrade-moves-forward/, https://www.tmr.qld.gov.au/projects/dunwich-gumpi-ferry-terminal-upgrade, and repo-gumpi",
+      "confidence": "high",
+      "role_in_sim": "A real, funded, currently undecided civic lever with a genuine trade-off already articulated by the people who will decide it. Single hub removes the two-landing confusion and simplifies bus scheduling. It also takes the water taxi arrival away from One Mile, and Council has already named the conditions (all weather, enough parking) under which that would be acceptable. Model those two conditions as gates on the lever, not as flavour text."
+    },
+    {
+      "id": "toondah-harbour-pda",
+      "name": "Toondah Harbour Priority Development Area, Cleveland",
+      "status": "development partner withdrawn, PDA still in place, no clear pathway forward as at April 2026",
+      "history": "A federal assessment under the Environment Protection and Biodiversity Conservation Act was the defining hurdle. A proposed refusal in April 2024 on unacceptable environmental impacts led Walker Group to withdraw its application. A smaller land-based revised concept never progressed to formal approvals. On 24 April 2026 Redland City Council acknowledged the withdrawal of Walker Group as development partner and said it would keep working with the Queensland Government, the majority landowner in the precinct.",
+      "relevance": "This is the mainland end of the island's front door. A terminal upgrade at Cleveland is a longstanding community ask and it is not funded or scheduled.",
+      "source": "https://www.walkercorp.com.au/media/toondah-harbour-statement, https://www.redlandscoasttoday.com.au/2026/04/council-to-assess-next-steps-for-toondah-harbour-precinct/, https://redlandbaysidenews.com.au/exclusive-walker-walks-away-from-toondah-after-decade-long-development-saga/",
+      "confidence": "high",
+      "role_in_sim": "Mark the Toondah marshalling yard as unimproved and unfunded. The queue scenario above is not a temporary problem waiting on a project; it is the steady state."
+    }
+  ],
+
+  "simulation_hooks": {
+    "phase": "movement",
+    "reads": ["tide (for beach driving windows)", "weather or wind (for ferry reliability)", "clock (for timetable lookup)", "calendar (for school holidays, public holidays and long weekends)"],
+    "publishes": ["transport: per-service next departure, load, delay state, queue length, and the island's current import and export ceiling"],
+    "determinism_note": "Every stochastic term in this pack (arrival jitter, no-shows, breakdown, wind) must draw from world.rng.stream('transport'). Never Math.random. Timetable lookups must use world.clock, never Date.now.",
+    "player_legibility": "The one number a player should always be able to see is how many vehicle deck slots are left today. Everything else in this pack is downstream of it."
+  },
+
+  "counts": {
+    "terminals": 6,
+    "services": 12,
+    "road_segments": 14,
+    "parking_records": 3,
+    "scenarios": 1,
+    "projects": 2,
+    "structural_facts": 8
+  }
+}

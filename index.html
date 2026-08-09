@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Minjerribah Living Twin</title>
+<meta name="description" content="A living digital twin of Minjerribah / North Stradbroke Island: civic planning, island life, events, stewardship, and the works below the sand.">
+<link rel="stylesheet" href="src/ui/design.css">
+<link rel="stylesheet" href="src/ui/ui.css">
+</head>
+<body>
+<div id="boot">
+  <div class="boot-inner">
+    <div class="boot-mark">MINJERRIBAH</div>
+    <div class="boot-sub">Living Twin</div>
+    <div class="boot-bar"><i id="boot-bar-fill"></i></div>
+    <div class="boot-status" id="boot-status">waking the island</div>
+    <div class="boot-ack">Quandamooka Country. Built with respect for the Traditional Owners of Minjerribah, past and present.</div>
+  </div>
+</div>
+
+<canvas id="stage" touch-action="none"></canvas>
+<div id="ui-root"></div>
+
+<script src="vendor/babylon.js"></script>
+<script src="vendor/babylon.gui.js"></script>
+<script src="vendor/babylon.materials.js"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

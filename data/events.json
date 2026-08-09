@@ -1,0 +1,1612 @@
+{
+  "pack": "events",
+  "version": "1.0.0",
+  "generated": "2026-08-07",
+  "island": "Minjerribah / North Stradbroke Island, Quandamooka Country",
+  "timezone": "Australia/Brisbane",
+  "currency": "AUD",
+  "about": "The island calendar. Three arrays: `events` are dated things that draw a crowd, `periods` are the seasons and holiday blocks that change the island's load without being an event, and `rhythms` are the repeating operational patterns that behave like events because the island plans around them. Every record carries what it needs, what it strains, who earns from it, an hourly crowd curve and a weather sensitivity, so the simulation can run a day on this island without a designer inventing one.",
+  "honesty": [
+    "No event in this pack was invented. Every named event had a public source, a record in one of Luke's own repos, or both. Anything that could not be confirmed is marked status `unconfirmed` or was left out.",
+    "Every attendance figure is a modelling estimate unless it carries its own `source`. Nobody publishes gate counts for this island. The one measured figure in the pack is the roughly 1,500 people at the final Island Vibe Festival, which is sourced.",
+    "Every `needs` number is a modelling estimate. No event management plan, traffic management plan or council permit condition was read for any event here.",
+    "Every `crowd_curve` is a modelling estimate. They are shaped from the published start and finish times where those exist, and from the ferry timetable where they do not.",
+    "Every `revenue_to` entry is a plausible trade link, not measured turnover. Business ids resolve against `data/businesses.json`.",
+    "Dates for 2026 are as published at the time of writing. Island event dates move. Treat `next_known` as a snapshot, not a rule; `date_rule` is the thing the simulation should use.",
+    "Cultural events are recorded here as civic load only: dates, places, crowds, ferries, bins. No ceremony, story, language or protocol has been written into this pack. See `docs/CULTURAL-REVIEW.md`."
+  ],
+  "conventions": {
+    "status": "current = confirmed as running now. unconfirmed = a real event we could not confirm still runs on the current pattern. ended = it ran and it has stopped, kept because the reason it stopped is a civic lever. proposed = Luke's own proposal, never render as real.",
+    "date_rule": "kind is one of: fixed (same calendar date each year), nth_weekday (for example third Saturday of October), moveable (tied to Easter or another moving anchor), weekly, fortnightly, monthly, season (a window, not a date), irregular (real but no stable pattern found).",
+    "attendance": "low, typical and high are people on site at the busiest moment, not tickets sold and not cumulative visitors across a multi-day event. `cumulative` is given separately where a multi-day total makes more sense.",
+    "archetype_mix": "fractions of the on-site crowd, summing to about 1.0. Archetype ids resolve against `visitor_archetypes` in this file.",
+    "crowd_curve": "24 values, index 0 is midnight to 1am. Each value is the fraction of that event's own peak crowd on site during that hour. All zeroes outside operating hours. Multi-day events give the curve for a typical single day.",
+    "strains": "level 1 to 5. 1 = noticed by the people running it. 3 = noticed by residents who are not attending. 5 = the island's capacity is the binding constraint and something fails.",
+    "weather_sensitivity": "0 to 1 per driver. 1 means the event does not happen in that condition. `cancels_if` is written where a public source or plain physics gives a threshold; otherwise null.",
+    "place_ids": "resolve against `data/places.json`. Where a venue has no place record yet, `place_ids` holds the township and `place_note` says where it actually is.",
+    "confidence": "high = a current public source states it directly. medium = a public source states it but for a different year, or two sources disagree on detail. low = inferred, or from a single weak listing."
+  },
+  "visitor_archetypes": [
+    {
+      "id": "resident",
+      "name": "Island resident",
+      "description": "Lives in one of the three townships. No ferry leg, no accommodation demand, but a car and a strong opinion about parking.",
+      "arrives_by": "own vehicle or walks",
+      "typical_stay_hours": 3,
+      "spends_at": "clubs, bakery, groceries, fuel"
+    },
+    {
+      "id": "day-tripper-walkon",
+      "name": "Walk-on day tripper",
+      "description": "Comes over on the water taxi without a car, uses the 880 or 881 bus or a taxi, goes home the same day. Bound by the last return sailing.",
+      "arrives_by": "water taxi then bus",
+      "typical_stay_hours": 7,
+      "spends_at": "cafes, takeaway, gelato, bus fare, tours"
+    },
+    {
+      "id": "day-tripper-vehicle",
+      "name": "Day tripper with a vehicle",
+      "description": "Brings a car or 4WD on the barge for the day. The single largest source of parking and beach-access pressure per head.",
+      "arrives_by": "vehicle barge",
+      "typical_stay_hours": 8,
+      "spends_at": "fuel, takeaway, pub, seafood retail"
+    },
+    {
+      "id": "holiday-house",
+      "name": "Holiday house or resort guest",
+      "description": "Multi-night, usually a family, usually with a car. Spreads spend across groceries, the pub and eating out.",
+      "arrives_by": "vehicle barge",
+      "typical_stay_hours": 96,
+      "spends_at": "groceries, restaurants, pub, hire, tours"
+    },
+    {
+      "id": "camper",
+      "name": "Camper",
+      "description": "Campground or beach camping permit. Lower spend per night than a house guest, higher water and waste load per head, and the group most exposed when campgrounds close.",
+      "arrives_by": "vehicle barge, often a 4WD",
+      "typical_stay_hours": 72,
+      "spends_at": "groceries, ice, fuel, bottle shop, bakery"
+    },
+    {
+      "id": "competitor",
+      "name": "Registered competitor or performer",
+      "description": "Entered in the event. Arrives before the public, needs a start area, gear storage, water and a toilet block, and brings supporters.",
+      "arrives_by": "either ferry, often the day before",
+      "typical_stay_hours": 30,
+      "spends_at": "accommodation, cafes, club bar"
+    },
+    {
+      "id": "quandamooka-family",
+      "name": "Quandamooka family and returning kin",
+      "description": "Quandamooka people living on and off the island, and extended family returning for a gathering. Stay with family more often than in paid beds.",
+      "arrives_by": "either ferry",
+      "typical_stay_hours": 48,
+      "spends_at": "groceries, fuel, market stalls"
+    },
+    {
+      "id": "crew-and-official",
+      "name": "Crew, volunteers and officials",
+      "description": "Stallholders, sound crew, traffic controllers, first aid, council officers, media. Arrive earliest, leave latest, and their vehicles occupy the best parking all day by design.",
+      "arrives_by": "vehicle barge, booked ahead",
+      "typical_stay_hours": 14,
+      "spends_at": "fuel, takeaway, accommodation"
+    },
+    {
+      "id": "boatie",
+      "name": "Arrives by private boat",
+      "description": "Anchors off Amity, Dunwich or Peel and comes ashore. Invisible to every ferry count, which is why ferry numbers underread big fishing weekends.",
+      "arrives_by": "own boat",
+      "typical_stay_hours": 6,
+      "spends_at": "club bar, fuel, ice, seafood retail"
+    },
+    {
+      "id": "backpacker",
+      "name": "Backpacker",
+      "description": "Hostel bed, walk-on, no car, longest stay per dollar spent, most likely to be on the beach at sunrise.",
+      "arrives_by": "water taxi then bus",
+      "typical_stay_hours": 60,
+      "spends_at": "hostel, groceries, dive and surf lessons"
+    }
+  ],
+  "reference_2026": {
+    "note": "Anchors the moveable and holiday rules for the simulation's default year.",
+    "queensland_public_holidays": [
+      { "date": "2026-01-01", "name": "New Year's Day" },
+      { "date": "2026-01-26", "name": "Australia Day" },
+      { "date": "2026-04-03", "name": "Good Friday" },
+      { "date": "2026-04-04", "name": "The day after Good Friday" },
+      { "date": "2026-04-05", "name": "Easter Sunday" },
+      { "date": "2026-04-06", "name": "Easter Monday" },
+      { "date": "2026-04-25", "name": "Anzac Day", "note": "Falls on a Saturday. Queensland does not add a substitute holiday." },
+      { "date": "2026-05-04", "name": "Labour Day" },
+      { "date": "2026-10-05", "name": "King's Birthday" },
+      { "date": "2026-12-25", "name": "Christmas Day" },
+      { "date": "2026-12-26", "name": "Boxing Day" }
+    ],
+    "public_holidays_source": "https://www.fairwork.gov.au/employment-conditions/public-holidays/2026-public-holidays",
+    "queensland_state_school_terms": [
+      { "term": 1, "start": "2026-01-27", "end": "2026-04-02" },
+      { "term": 2, "start": "2026-04-20", "end": "2026-06-26" },
+      { "term": 3, "start": "2026-07-13", "end": "2026-09-18" },
+      { "term": 4, "start": "2026-10-06", "end": "2026-12-11" }
+    ],
+    "queensland_state_school_holidays": [
+      { "start": "2026-04-03", "end": "2026-04-19", "label": "autumn" },
+      { "start": "2026-06-27", "end": "2026-07-12", "label": "winter" },
+      { "start": "2026-09-19", "end": "2026-10-05", "label": "spring" },
+      { "start": "2026-12-12", "end": "2027-01-26", "label": "summer" }
+    ],
+    "school_terms_source": "https://education.qld.gov.au/about-us/calendar/term-dates",
+    "long_weekends": [
+      { "start": "2026-01-24", "end": "2026-01-26", "anchor": "Australia Day" },
+      { "start": "2026-04-03", "end": "2026-04-06", "anchor": "Easter, four days" },
+      { "start": "2026-05-02", "end": "2026-05-04", "anchor": "Labour Day" },
+      { "start": "2026-10-03", "end": "2026-10-05", "anchor": "King's Birthday" }
+    ],
+    "visitors_per_year": {
+      "value": 400000,
+      "range": [350000, 400000],
+      "confidence": "low",
+      "basis": "A travel guide figure repeated across tourism copy. No Redland City Council, Tourism and Events Queensland or SeaLink figure was found to confirm it. Do not present this to a player as fact.",
+      "source": "https://ferrygogo.com/au/destinations/north-stradbroke-island/"
+    }
+  },
+  "events": [
+    {
+      "id": "gage-roads-straddie-invitational",
+      "name": "Gage Roads Straddie Invitational",
+      "also_known_as": ["Straddie Assault"],
+      "status": "current",
+      "category": "surfing",
+      "organiser": "Point Lookout Boardriders",
+      "organiser_business_id": null,
+      "description": "The island's biggest surfing weekend and the reason the brief calls it the Straddie Assault. Twenty invited boardriders clubs surf a teams event and a tag teams event over two days at Point Lookout. Publicly described as the longest-running teams surfing competition in the world, first held in 1983. Free to enter and free to watch, which is exactly why the beach car parks fail before the surf does.",
+      "date_rule": { "kind": "nth_weekday", "month": 10, "weekday": "friday", "nth": 3, "duration_days": 3, "note": "Runs Friday to Sunday on a mid-October weekend. The organisers call the beach on the day, so which beach is not fixed." },
+      "next_known": { "start": "2026-10-16", "end": "2026-10-18", "confidence": "medium", "source": "repo:quandamooka-country-events-engine/assets/site-data.js (SeaLink event listing, 22 May 2026 source pass)" },
+      "typical_hours": { "start": "06:30", "end": "16:30", "basis": "estimate" },
+      "place_ids": ["main-beach", "cylinder-beach", "point-lookout"],
+      "place_note": "Main Beach is the listed venue. The final call between Main, Cylinder and Home Beach is made on the morning by the organisers based on swell direction.",
+      "attendance": { "low": 400, "typical": 900, "high": 1800, "cumulative_over_event": 3000, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "competitor": 0.3, "holiday-house": 0.2, "resident": 0.2, "day-tripper-vehicle": 0.15, "crew-and-official": 0.1, "camper": 0.05 },
+      "needs": {
+        "parking_spaces": 320,
+        "toilets_extra": 4,
+        "potable_water": "existing beach taps plus a refill point at the contest site",
+        "waste_extra_bins": 24,
+        "traffic_management": "Mooloomba Road and the beach car park entries need marshalling from about 06:00 on both mornings",
+        "ferry_capacity": "about 500 extra one-way passenger seats and 120 extra vehicle spaces across the Friday and the Sunday",
+        "power": "generator for the PA and judging tower",
+        "beach_access": "a marshalled corridor between the contest area and the public swimming flags",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "parking", "level": 4, "note": "Twenty clubs means twenty vans and trailers with boards on the roof, parked where the day trippers usually park." },
+        { "system": "ferry-vehicle", "level": 3, "note": "Friday afternoon and Sunday afternoon collide with the ordinary weekend peak." },
+        { "system": "toilets", "level": 3, "note": "The beach amenities were not built for a spectator crowd standing in one place for six hours." },
+        { "system": "dune-vegetation", "level": 2, "note": "Spectators fan out onto the dune face for the view, which is the one place they should not stand." },
+        { "system": "emergency-services", "level": 2, "note": "A big surf contest and a big beach crowd on the same day, with one ambulance station on the island." }
+      ],
+      "revenue_to": [
+        { "business_id": "stradbroke-island-beach-hotel", "effect": "high", "note": "Saturday night after the teams event." },
+        { "business_id": "point-lookout-roadhouse", "effect": "high" },
+        { "business_id": "foodworks-point-lookout", "effect": "high" },
+        { "business_id": "fins-n-fries", "effect": "medium" },
+        { "business_id": "blue-room-cafe", "effect": "medium" },
+        { "business_id": "north-stradbroke-island-surf-school", "effect": "medium" },
+        { "business_id": "sealink-south-east-queensland", "effect": "high" },
+        { "business_id": "minjerribah-camping", "effect": "medium" }
+      ],
+      "crowd_curve": { "basis": "estimate", "note": "Two peaks: the morning heats and the afternoon finals, with a lunchtime dip when the tide is wrong.", "hours": [0, 0, 0, 0, 0, 0.05, 0.35, 0.7, 0.9, 1.0, 0.95, 0.8, 0.6, 0.65, 0.85, 0.95, 0.7, 0.3, 0.1, 0.05, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.2, "wind": 0.5, "swell": 0.7, "heat": 0.1, "cancels_if": "No rideable surf. The contest runs in rain and postpones for flat or blown-out conditions rather than cancelling.", "note": "Swell sensitivity is inverted: too little swell is the failure mode, not too much." },
+      "confidence": "high",
+      "source": "https://visit.brisbane.qld.au/whats-on/north-stradbroke-island/sporting-events/gage-roads-straddie-invitational-surfing-competition-f3a1",
+      "notes": "The brief called this the Straddie Assault. That is the historic name and locals still use it; the current public name carries a sponsor. Sources disagree on the edition number and on whether the 41st running was 2024 or 2026, so no edition number is recorded here. The 1983 first year is from the visit.brisbane listing."
+    },
+    {
+      "id": "quandamooka-festival",
+      "name": "Quandamooka Festival",
+      "status": "current",
+      "category": "cultural",
+      "organiser": "Quandamooka Yoolooburrabee Aboriginal Corporation (QYAC), in association with Brisbane Festival",
+      "organiser_business_id": "qyac",
+      "description": "The island's cultural anchor, run by the Traditional Owners. The 2026 public listing is a two-day gathering at Dunwich with dance, music, food, weaving, arts, markets, workshops and panel discussions. Free, all ages. It is the one event in the calendar where the island's own people are the hosts rather than the hosts' neighbours.",
+      "date_rule": { "kind": "irregular", "window_months": [6, 7, 8, 9], "duration_days": 2, "note": "The 2026 public gathering is a two-day event in late August. Published material from earlier years describes a longer season running from about 1 June to 31 August with separate named days. The simulation should treat the two-day gathering as the load event and the wider window as a season of smaller activity." },
+      "next_known": { "start": "2026-08-29", "end": "2026-08-30", "confidence": "high", "source": "https://www.queensland.com/au/en/things-to-do/events/p-68bfac3e4a35d00b1f6817eb-quandamooka-festival-2026" },
+      "typical_hours": { "start": "10:00", "end": "17:30", "basis": "published", "note": "Saturday 10:00 to 17:30, Sunday 10:00 to 17:00 per the 2026 listing." },
+      "place_ids": ["dunwich"],
+      "place_note": "The 2026 listing gives 100 East Coast Road, Dunwich. Luke's own events engine records the venue as the QUAMPI Arts and Culture Centre. These may be the same site. `data/places.json` has no QUAMPI record yet.",
+      "attendance": { "low": 800, "typical": 2500, "high": 5000, "cumulative_over_event": 6000, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "quandamooka-family": 0.3, "day-tripper-walkon": 0.2, "resident": 0.15, "day-tripper-vehicle": 0.15, "holiday-house": 0.1, "crew-and-official": 0.1 },
+      "needs": {
+        "parking_spaces": 700,
+        "toilets_extra": 20,
+        "potable_water": "refill stations across the site; August is dry and the crowd stands in the open",
+        "waste_extra_bins": 60,
+        "traffic_management": "East Coast Road and the Dunwich terminal approaches need controlled flow for the whole of both days",
+        "ferry_capacity": "the binding constraint. Roughly 2,000 extra one-way passenger seats and 400 extra vehicle spaces across the weekend",
+        "power": "stage, sound and food stall power",
+        "shuttle": "terminal to site shuttle, because most of the crowd walks on",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "ferry-passenger", "level": 5, "note": "A free family event three kilometres from the terminal produces a walk-on crowd the timetable cannot absorb in one hour." },
+        { "system": "ferry-vehicle", "level": 4 },
+        { "system": "parking", "level": 4, "note": "Dunwich has a working port's parking, not a festival's." },
+        { "system": "toilets", "level": 4 },
+        { "system": "waste", "level": 3, "note": "Everything generated has to leave on a barge." },
+        { "system": "accommodation", "level": 3, "note": "Late August is already whale season, so the beds are half taken before the festival is announced." }
+      ],
+      "revenue_to": [
+        { "business_id": "sealink-south-east-queensland", "effect": "high" },
+        { "business_id": "stradbroke-flyer", "effect": "high" },
+        { "business_id": "quampi", "effect": "high" },
+        { "business_id": "salt-water-murris", "effect": "high" },
+        { "business_id": "delvene-cockatoo-collins-studio", "effect": "high" },
+        { "business_id": "foodworks-dunwich", "effect": "medium" },
+        { "business_id": "straddie-brewing-co", "effect": "medium" },
+        { "business_id": "little-ship-club", "effect": "medium" },
+        { "business_id": "stradbroke-island-buses", "effect": "high" },
+        { "business_id": "straddie-adventures", "effect": "medium" },
+        { "business_id": "yura-tours", "effect": "medium" }
+      ],
+      "crowd_curve": { "basis": "estimate", "note": "Shaped by the published 10:00 open and by the ferry timetable: the crowd steps up with each arrival rather than flowing in evenly.", "hours": [0, 0, 0, 0, 0, 0, 0, 0.05, 0.15, 0.45, 0.75, 0.9, 1.0, 0.95, 0.9, 0.85, 0.7, 0.4, 0.15, 0.05, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.5, "wind": 0.2, "swell": 0.0, "heat": 0.3, "cancels_if": null },
+      "confidence": "high",
+      "source": "https://www.visitredlandscoast.com.au/whats-on/event/6748-quandamooka-festival-2026",
+      "cultural_handling": "This record holds civic load only: dates, place, crowd, ferries, bins, money. Published sources name specific ceremony days within the festival season. Those are not written into this pack and must not be generated. They belong in `data/lore.json` with QYAC's own sourcing, or nowhere. See `docs/CULTURAL-REVIEW.md`.",
+      "notes": "Queensland's Minjerribah Futures program lists growing and promoting the festival as a funded tourism action, which is a real civic lever the simulation can expose. The DETSI page returned HTTP 403 to an automated fetch and its figures were not read."
+    },
+    {
+      "id": "straddie-salute",
+      "name": "Straddie Salute Triathlon Festival",
+      "status": "current",
+      "category": "endurance-sport",
+      "organiser": "Straddie Salute",
+      "organiser_business_id": null,
+      "description": "A participant event rather than a spectator event, and the one that spreads furthest across the island. The off-road triathlon is a 750 m swim, a 15 km mountain bike and an 8 km run, with an on-road triathlon, a kids event, an adventure run and an ocean swim alongside it. The swim starts at Home Beach and the hub is Point Lookout Oval.",
+      "date_rule": { "kind": "nth_weekday", "month": 5, "weekday": "friday", "nth": 3, "duration_days": 3, "note": "A mid-May Friday to Sunday. In 2026 it ran 15 to 17 May." },
+      "next_known": { "start": "2026-05-15", "end": "2026-05-17", "confidence": "high", "source": "https://straddiesalute.com.au/straddie-salute/" },
+      "typical_hours": { "start": "05:30", "end": "14:00", "basis": "estimate" },
+      "place_ids": ["home-beach", "point-lookout-oval", "point-lookout", "main-beach"],
+      "place_note": "Swim start at Home Beach, hub at Point Lookout Oval, bike and run legs on the sand and the bush tracks. The exact course is not published as a route file and is not recorded here.",
+      "attendance": { "low": 300, "typical": 800, "high": 1500, "cumulative_over_event": 2000, "basis": "estimate", "confidence": "low", "note": "Competitors plus supporters. No entrant figure is published." },
+      "archetype_mix": { "competitor": 0.4, "crew-and-official": 0.15, "holiday-house": 0.2, "resident": 0.15, "camper": 0.1 },
+      "needs": {
+        "parking_spaces": 400,
+        "toilets_extra": 10,
+        "potable_water": "aid stations on the run and bike legs; May is mild but the run is on sand",
+        "waste_extra_bins": 20,
+        "traffic_management": "rolling closures on Mooloomba Road and East Coast Road through the morning, which is the single most disruptive traffic event of the island's year",
+        "ferry_capacity": "about 600 extra one-way passenger seats and 200 extra vehicle spaces, concentrated on the Friday",
+        "power": "timing tent, PA, results",
+        "medical": "on-course first aid and a water safety crew for the ocean swim",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "road", "level": 5, "note": "Residents who are not competing cannot drive their normal route for several hours on a Saturday morning. This is the classic consultation flashpoint." },
+        { "system": "ferry-vehicle", "level": 4, "note": "Bikes travel with cars. Friday afternoon fills." },
+        { "system": "accommodation", "level": 4, "note": "Mid-May is otherwise the quietest month, so the event effectively creates its own accommodation peak." },
+        { "system": "beach-access", "level": 3 },
+        { "system": "volunteers", "level": 4, "note": "A course this long needs more marshals than a small island can raise from its own residents." }
+      ],
+      "revenue_to": [
+        { "business_id": "stradbroke-island-beach-hotel", "effect": "high" },
+        { "business_id": "point-lookout-bowls-club", "effect": "high" },
+        { "business_id": "pandanus-palms-resort", "effect": "high" },
+        { "business_id": "allure-stradbroke-resort", "effect": "high" },
+        { "business_id": "blue-room-cafe", "effect": "high" },
+        { "business_id": "loaves-bakery-point-lookout", "effect": "medium" },
+        { "business_id": "sealink-south-east-queensland", "effect": "high" },
+        { "business_id": "manta-lodge-scuba-centre", "effect": "medium" },
+        { "business_id": "foodworks-point-lookout", "effect": "high" }
+      ],
+      "crowd_curve": { "basis": "estimate", "note": "A dawn event. Almost everyone is on site by 07:00 and almost everyone is gone by early afternoon.", "hours": [0, 0, 0, 0, 0, 0.4, 0.85, 1.0, 0.95, 0.9, 0.85, 0.7, 0.5, 0.3, 0.15, 0.05, 0, 0, 0, 0, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.3, "wind": 0.4, "swell": 0.8, "heat": 0.2, "cancels_if": "The ocean swim leg is the fragile part. A big swell or a strong cross-current at Home Beach shortens or cancels the swim before it cancels the event." },
+      "confidence": "high",
+      "source": "https://straddiesalute.com.au/straddie-salute/",
+      "notes": "Described on its own site as the original off-road event. No founding year and no participant count are published, so neither is claimed."
+    },
+    {
+      "id": "stradbroke-chamber-music-festival",
+      "name": "Stradbroke Chamber Music Festival",
+      "status": "current",
+      "category": "music-arts",
+      "organiser": "Stradbroke Chamber Music Festival",
+      "organiser_business_id": null,
+      "description": "Six concerts over three days that turn the Point Lookout Community Hall into a concert room. Small in headcount and large in overnight spend: the audience is older, stays two or three nights, eats out every night and does not bring a tent.",
+      "date_rule": { "kind": "nth_weekday", "month": 7, "weekday": "friday", "nth": 3, "duration_days": 3, "note": "A mid-July Friday to Sunday. In 2026 it ran 17 to 19 July." },
+      "next_known": { "start": "2026-07-17", "end": "2026-07-19", "confidence": "high", "source": "https://www.stradmusic.org.au/program-2026" },
+      "typical_hours": { "start": "10:00", "end": "21:30", "basis": "estimate", "note": "Concert sessions across the day and evening rather than continuous operation." },
+      "place_ids": ["point-lookout-community-hall", "point-lookout"],
+      "attendance": { "low": 100, "typical": 200, "high": 300, "cumulative_over_event": 900, "basis": "estimate", "confidence": "low", "note": "Bounded by the hall, not by demand. No hall capacity figure is published." },
+      "archetype_mix": { "holiday-house": 0.5, "resident": 0.2, "day-tripper-vehicle": 0.15, "competitor": 0.1, "crew-and-official": 0.05 },
+      "needs": {
+        "parking_spaces": 120,
+        "toilets_extra": 0,
+        "potable_water": "hall supply is sufficient",
+        "waste_extra_bins": 4,
+        "traffic_management": "none beyond signage; the pressure is evening parking on Mooloomba Road",
+        "ferry_capacity": "no extra sailings needed; the load fits inside the ordinary July timetable",
+        "power": "hall supply",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "parking", "level": 2, "note": "Evening concerts put 100 cars on a residential street in the dark." },
+        { "system": "accommodation", "level": 3, "note": "Mid-July is winter school holidays and whale season already. This lands on top." },
+        { "system": "restaurants", "level": 3, "note": "Three hundred people wanting dinner at the same hour in a town with a handful of kitchens." }
+      ],
+      "revenue_to": [
+        { "business_id": "stradbroke-island-beach-hotel", "effect": "high" },
+        { "business_id": "fishes-at-the-point", "effect": "high" },
+        { "business_id": "six-beaches", "effect": "high" },
+        { "business_id": "pandanus-palms-resort", "effect": "high" },
+        { "business_id": "anchorage-on-straddie", "effect": "high" },
+        { "business_id": "ray-white-north-stradbroke-island", "effect": "high" },
+        { "business_id": "blue-room-cafe", "effect": "medium" },
+        { "business_id": "sealink-south-east-queensland", "effect": "medium" }
+      ],
+      "crowd_curve": { "basis": "estimate", "note": "Discrete concert sessions, not a continuous crowd. The peaks are session start times.", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.9, 0.8, 0.3, 0.2, 0.85, 0.8, 0.3, 0.2, 0.5, 1.0, 0.9, 0.4, 0.05, 0] },
+      "weather_sensitivity": { "rain": 0.05, "wind": 0.05, "swell": 0.0, "heat": 0.0, "cancels_if": null, "note": "Indoors. Weather only reaches it through the ferry: a cancelled crossing strands the musicians, not the audience." },
+      "confidence": "high",
+      "source": "https://www.stradmusic.org.au/program-2026",
+      "notes": "Sources disagree on the edition number for 2026 (18th in one listing, 19th year in another), so no edition number is recorded."
+    },
+    {
+      "id": "straddie-arts-trail",
+      "name": "Straddie Arts Trail",
+      "status": "current",
+      "category": "arts",
+      "organiser": "iam Straddie",
+      "organiser_business_id": null,
+      "description": "A self-guided trail across the townships: open studios, gallery pop-ups, workshops, demonstrations, live music and market stalls. The 2026 edition is the fifth, and its published stop list runs to 33 stops with an opening celebration at QUAMPI. It is the one event that deliberately spreads its crowd across the whole island instead of concentrating it, which makes it the cheapest large event the island runs.",
+      "date_rule": { "kind": "nth_weekday", "month": 8, "weekday": "thursday", "nth": 2, "duration_days": 4, "note": "A mid-August block. Sources give both 13 to 16 August 2026 (four days) and 14 to 16 August 2026 (three days) for the same event, so both the start day and the duration are unresolved." },
+      "next_known": { "start": "2026-08-13", "end": "2026-08-16", "confidence": "medium", "source": "repo:quandamooka-country-events-engine/assets/site-data.js and https://iamstraddie.com.au/artists-community-2026" },
+      "typical_hours": { "start": "09:00", "end": "16:00", "basis": "estimate" },
+      "place_ids": ["point-lookout", "dunwich", "amity-point"],
+      "place_note": "33 stops. The published 2026 stop directory groups them under Amity Point, Dunwich, Point Lookout and Cleveland, so some stops are on the mainland side and are outside this simulation's boundary. The stop list is published each year and is not reproduced here.",
+      "attendance": { "low": 400, "typical": 1200, "high": 2500, "cumulative_over_event": 3500, "basis": "estimate", "confidence": "low", "note": "Distributed across 33 stops, so no single point ever holds more than a few dozen people." },
+      "archetype_mix": { "day-tripper-vehicle": 0.3, "holiday-house": 0.25, "resident": 0.2, "day-tripper-walkon": 0.15, "crew-and-official": 0.1 },
+      "needs": {
+        "parking_spaces": 300,
+        "toilets_extra": 2,
+        "potable_water": "existing township supply",
+        "waste_extra_bins": 12,
+        "traffic_management": "wayfinding signage rather than control; the load is spread",
+        "ferry_capacity": "about 400 extra one-way passenger seats and 150 extra vehicle spaces across the three days",
+        "power": "existing",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "road", "level": 3, "note": "The trail turns the island's one connecting road into a circuit, so the traffic is between the townships rather than in them." },
+        { "system": "parking", "level": 2, "note": "Domestic driveways and verges at private studios." },
+        { "system": "ferry-vehicle", "level": 2 },
+        { "system": "volunteers", "level": 3, "note": "33 stops need 33 people who can stand there all day for three days." }
+      ],
+      "revenue_to": [
+        { "business_id": "starfish-studio", "effect": "high" },
+        { "business_id": "salt-water-murris", "effect": "high" },
+        { "business_id": "delvene-cockatoo-collins-studio", "effect": "high" },
+        { "business_id": "quampi", "effect": "high" },
+        { "business_id": "noreens-seaside-shop", "effect": "medium" },
+        { "business_id": "linen-caravan", "effect": "medium" },
+        { "business_id": "straddie-brewing-co", "effect": "medium" },
+        { "business_id": "st-stradbroke", "effect": "medium" },
+        { "business_id": "amity-pavilion", "effect": "medium" },
+        { "business_id": "stradbroke-island-buses", "effect": "medium" }
+      ],
+      "crowd_curve": { "basis": "estimate", "note": "A slow, flat, all-day browse. No spike, which is the point of it.", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.5, 0.8, 0.95, 1.0, 0.95, 0.85, 0.6, 0.25, 0.05, 0, 0, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.3, "wind": 0.1, "swell": 0.0, "heat": 0.1, "cancels_if": null, "note": "Most stops are indoors, so rain moves the crowd rather than removing it." },
+      "confidence": "medium",
+      "source": "https://iamstraddie.com.au/artists-community-2026",
+      "notes": "The 33 stops and the fifth year are consistent across sources. The dates are not: Luke's events engine and one guide give 13 to 16 August 2026 and describe four days, another summary gives 14 to 16 August. The wider range is used so the simulation does not under-book the load. The 'more than 70 artists' figure appears in a guide summary and was not confirmed on the organiser's own page, so it is not asserted in this record."
+    },
+    {
+      "id": "straddie-oyster-and-seafood-festival",
+      "name": "Straddie Oyster and Seafood Festival",
+      "status": "current",
+      "category": "food-community",
+      "organiser": "North Stradbroke Island Rugby League and Allsports Club Inc",
+      "organiser_business_id": "straddie-sharks-all-sports-club",
+      "description": "A free one-day festival on the Dunwich waterfront side of the island: local oysters and prawns, live entertainment through the day, market stalls, oyster and prawn eating competitions, mud crab races and a jumping castle. It is a club fundraiser that behaves like a town festival.",
+      "date_rule": { "kind": "nth_weekday", "month": 11, "weekday": "saturday", "nth": 3, "duration_days": 1, "note": "A late-November Saturday. It ran 29 November 2025 and is listed for 21 November 2026, so the weekend moves." },
+      "next_known": { "start": "2026-11-21", "end": "2026-11-21", "confidence": "high", "source": "https://visit.brisbane.qld.au/whats-on/north-stradbroke-island/eat-and-drink-events/straddie-oyster-and-seafood-festival-e648" },
+      "typical_hours": { "start": "10:00", "end": "18:00", "basis": "published", "note": "The listing gives a 10:00 start. The finish is an estimate." },
+      "place_ids": ["ron-stark-oval", "dunwich"],
+      "place_note": "2 Ballow Road, Dunwich: the All Sports Club sits in the corner of Ron Stark Oval.",
+      "attendance": { "low": 500, "typical": 1500, "high": 3000, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "day-tripper-walkon": 0.25, "resident": 0.25, "day-tripper-vehicle": 0.2, "boatie": 0.1, "holiday-house": 0.1, "crew-and-official": 0.1 },
+      "needs": {
+        "parking_spaces": 450,
+        "toilets_extra": 12,
+        "potable_water": "refill points; late November is hot and the crowd is eating salt",
+        "waste_extra_bins": 40,
+        "traffic_management": "Ballow Road and the oval approaches; the terminal is walking distance so the pressure is pedestrian as much as vehicular",
+        "ferry_capacity": "about 800 extra one-way passenger seats on the day, most of them wanting the same two return sailings",
+        "power": "stage and food stalls",
+        "cold_chain": "the entire premise of the event is keeping seafood cold on a hot day at the end of a barge line",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "ferry-passenger", "level": 4, "note": "A free food festival ten minutes' walk from the terminal. The 15:00 to 17:00 return window is the failure point." },
+        { "system": "waste", "level": 4, "note": "Prawn shells and oyster shells in an open bin in November. The bins have to leave the island the same day or the next." },
+        { "system": "toilets", "level": 4 },
+        { "system": "parking", "level": 3 },
+        { "system": "emergency-services", "level": 2, "note": "Alcohol, heat and seafood in one afternoon." }
+      ],
+      "revenue_to": [
+        { "business_id": "straddie-sharks-all-sports-club", "effect": "high" },
+        { "business_id": "little-ship-club", "effect": "medium" },
+        { "business_id": "straddie-brewing-co", "effect": "high" },
+        { "business_id": "sealink-south-east-queensland", "effect": "high" },
+        { "business_id": "stradbroke-flyer", "effect": "high" },
+        { "business_id": "foodworks-dunwich", "effect": "medium" },
+        { "business_id": "cellarbrations-dunwich", "effect": "medium" },
+        { "business_id": "stradbroke-island-buses", "effect": "medium" },
+        { "business_id": "straddie-kingfisher-tours", "effect": "medium", "note": "Runs a beach transfer to the festival in some years." }
+      ],
+      "crowd_curve": { "basis": "estimate", "note": "Builds on the late-morning sailings, peaks over lunch, empties hard into the afternoon returns.", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.25, 0.6, 0.9, 1.0, 0.95, 0.8, 0.6, 0.35, 0.15, 0.05, 0, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.6, "wind": 0.2, "swell": 0.0, "heat": 0.4, "cancels_if": "A November storm cell over Moreton Bay empties an outdoor food festival in twenty minutes and can stop the water taxis." },
+      "confidence": "high",
+      "source": "https://visit.brisbane.qld.au/whats-on/north-stradbroke-island/eat-and-drink-events/straddie-oyster-and-seafood-festival-e648"
+    },
+    {
+      "id": "little-ship-game-classic-reef-rumble",
+      "name": "Little Ship Club Game Classic and Reef Rumble",
+      "status": "current",
+      "category": "fishing-competition",
+      "organiser": "Little Ship Game Fishing Club",
+      "organiser_business_id": "little-ship-club",
+      "description": "A three-day offshore tournament based at the Little Ship Club at Dunwich, fishing the summer run of juvenile marlin, sailfish and northern bluefin tuna, with a reef and pelagic section alongside it. The Little Ship Game Fishing Club states it was established in 1975 and is the second oldest game fishing club in south-east Queensland. Most of the crowd arrives by boat, so it is nearly invisible to the ferry counts and very visible at the boat ramp.",
+      "date_rule": { "kind": "nth_weekday", "month": 3, "weekday": "friday", "nth": 4, "duration_days": 3, "note": "A late-March Friday to Sunday. It ran 27 to 29 March 2026." },
+      "next_known": { "start": "2026-03-27", "end": "2026-03-29", "confidence": "high", "source": "https://littleshipclub.com.au/on-the-water/game-fishing/" },
+      "typical_hours": { "start": "04:30", "end": "20:00", "basis": "estimate", "note": "Boats leave before first light and the weigh-in and presentation run into the evening." },
+      "place_ids": ["little-ship-club", "dunwich", "one-mile-jetty"],
+      "place_note": "Club base at Dunwich, fishing grounds offshore in Moreton Bay and beyond the bar. The offshore grounds are not in `data/places.json`.",
+      "attendance": { "low": 150, "typical": 350, "high": 600, "basis": "estimate", "confidence": "low", "note": "Anglers plus crew plus family at the club. Boat numbers are not published." },
+      "archetype_mix": { "boatie": 0.45, "competitor": 0.2, "resident": 0.15, "holiday-house": 0.1, "crew-and-official": 0.1 },
+      "needs": {
+        "parking_spaces": 120,
+        "boat_trailer_spaces": 60,
+        "toilets_extra": 2,
+        "potable_water": "club supply plus ice",
+        "waste_extra_bins": 8,
+        "traffic_management": "boat ramp queueing before dawn, which is a different problem from car parking",
+        "ferry_capacity": "small; most competitors bring their own hull",
+        "fuel": "the single biggest island supply draw of the weekend",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "boat-ramp", "level": 4, "note": "Sixty trailers wanting the ramp inside a ninety-minute pre-dawn window." },
+        { "system": "fuel", "level": 3, "note": "Offshore boats take hundreds of litres each from an island that gets its fuel by barge." },
+        { "system": "marine-rescue", "level": 3, "note": "A fleet of small boats crossing the South Passage bar in the dark is exactly the scenario VMR exists for." },
+        { "system": "parking", "level": 2 }
+      ],
+      "revenue_to": [
+        { "business_id": "little-ship-club", "effect": "high" },
+        { "business_id": "straddie-servo-and-hardware", "effect": "high" },
+        { "business_id": "cellarbrations-dunwich", "effect": "medium" },
+        { "business_id": "foodworks-dunwich", "effect": "medium" },
+        { "business_id": "mal-starkey-seafood", "effect": "medium" },
+        { "business_id": "straddie-super-sports", "effect": "medium" }
+      ],
+      "crowd_curve": { "basis": "estimate", "note": "Two spikes at the ramp, dawn and dusk, and an empty middle because everyone is offshore.", "hours": [0, 0, 0, 0, 0.5, 0.9, 0.7, 0.3, 0.15, 0.1, 0.1, 0.1, 0.1, 0.15, 0.25, 0.55, 0.9, 1.0, 0.85, 0.6, 0.3, 0.1, 0, 0] },
+      "weather_sensitivity": { "rain": 0.2, "wind": 0.8, "swell": 0.9, "heat": 0.1, "cancels_if": "The South Passage bar. A strong easterly or a big swell against an outgoing tide closes the bar and the offshore day does not happen, whatever the forecast says on land." },
+      "confidence": "high",
+      "source": "https://littleshipclub.com.au/on-the-water/game-fishing/"
+    },
+    {
+      "id": "anzac-day-services",
+      "name": "Anzac Day dawn service and main service, Dunwich",
+      "status": "current",
+      "category": "commemoration",
+      "organiser": "Local RSL and community",
+      "organiser_business_id": null,
+      "description": "Two services at the cenotaph on Welsby Street, Dunwich. The dawn march assembles at the butcher shop at 05:10 and the dawn service is at 05:30. The main march assembles at Dunwich State School at 10:15, steps off at 10:45, and the main commemorative service is at 11:00. Almost the entire crowd is island residents, which makes it the one large gathering of the year with no ferry consequence at all.",
+      "date_rule": { "kind": "fixed", "month": 4, "day": 25, "duration_days": 1, "note": "25 April every year, whatever day it falls on. Queensland adds no substitute public holiday when it lands on a weekend." },
+      "next_known": { "start": "2026-04-25", "end": "2026-04-25", "confidence": "high", "source": "https://redlandbaysidenews.com.au/anzac-day-2026-council-operations-road-closures-and-anzac-day-services/" },
+      "typical_hours": { "start": "05:10", "end": "12:30", "basis": "published", "note": "Times published for 2026. The gap between the two services is real: the town goes quiet again between about 07:00 and 10:00." },
+      "place_ids": ["dunwich", "dunwich-state-school"],
+      "place_note": "Cenotaph on Welsby Street, Dunwich. `data/places.json` has no cenotaph record and `data/geography.json` has no Welsby Street. Both are gaps.",
+      "attendance": { "low": 150, "typical": 400, "high": 700, "basis": "estimate", "confidence": "low", "note": "Two separate gatherings on one day, not one crowd." },
+      "archetype_mix": { "resident": 0.75, "holiday-house": 0.1, "day-tripper-vehicle": 0.05, "quandamooka-family": 0.05, "crew-and-official": 0.05 },
+      "needs": {
+        "parking_spaces": 150,
+        "toilets_extra": 0,
+        "potable_water": "existing",
+        "waste_extra_bins": 4,
+        "traffic_management": "a short road closure on Welsby Street for each march; no accredited traffic control was recorded in the public notice",
+        "ferry_capacity": "none; this is a resident event",
+        "power": "PA at the cenotaph",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "road", "level": 2, "note": "Two short closures on the same street on the same morning." },
+        { "system": "parking", "level": 2, "note": "Dawn parking in the dark on a residential street." },
+        { "system": "volunteers", "level": 2 }
+      ],
+      "revenue_to": [
+        { "business_id": "little-ship-club", "effect": "medium", "note": "Modelled as carrying part of the post-service afternoon because it is the licensed waterfront club at Dunwich. No published arrangement was found. An earlier year's listing put a march assembly at the club on Yabby Street; the 2026 notice does not." },
+        { "business_id": "dunwich-bakery", "effect": "medium" },
+        { "business_id": "stradbroke-island-butchery", "effect": "low" },
+        { "business_id": "straddie-sharks-all-sports-club", "effect": "medium" }
+      ],
+      "crowd_curve": { "basis": "estimate", "note": "Two distinct peaks with a genuinely empty middle. Modelling it as one curve would be wrong.", "hours": [0, 0, 0, 0, 0, 0.9, 0.6, 0.15, 0.05, 0.05, 0.7, 1.0, 0.7, 0.5, 0.4, 0.3, 0.2, 0.1, 0.05, 0, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.05, "wind": 0.05, "swell": 0.0, "heat": 0.0, "cancels_if": null, "note": "Rain does not cancel Anzac Day. It only thins it." },
+      "confidence": "high",
+      "source": "https://redlandbaysidenews.com.au/anzac-day-2026-council-operations-road-closures-and-anzac-day-services/",
+      "notes": "One search result places the dawn assembly at the butcher shop on Stradbroke Place; the article itself says Welsby Street. The article is used. No Point Lookout or Amity Point service was found in the public 2026 notice, which is not the same as saying there is none. A North Stradbroke Island RSL Memorial Club at 23 Mallon Street appears in an Anzac Day listing and is not yet in `data/businesses.json`."
+    },
+    {
+      "id": "naidoc-week",
+      "name": "NAIDOC Week",
+      "status": "current",
+      "category": "cultural",
+      "organiser": "National NAIDOC Committee, with local activity by local organisations",
+      "organiser_business_id": null,
+      "description": "The national week. On the island it shows up as school activity, community events and gatherings run by local organisations rather than as one ticketed event. The 2026 theme announced by the National NAIDOC Committee is '50 Years of Deadly'.",
+      "date_rule": { "kind": "moveable", "anchor": "first Sunday in July to the following Sunday", "duration_days": 8, "note": "5 to 12 July 2026." },
+      "next_known": { "start": "2026-07-05", "end": "2026-07-12", "confidence": "high", "source": "https://www.naidoc.org.au/" },
+      "typical_hours": { "start": "09:00", "end": "16:00", "basis": "estimate" },
+      "place_ids": ["dunwich", "point-lookout", "amity-point", "dunwich-state-school"],
+      "attendance": { "low": 50, "typical": 250, "high": 600, "basis": "estimate", "confidence": "low", "note": "Spread across a week and across separate local gatherings. There is no single NAIDOC crowd on this island." },
+      "archetype_mix": { "quandamooka-family": 0.45, "resident": 0.3, "day-tripper-walkon": 0.1, "crew-and-official": 0.1, "day-tripper-vehicle": 0.05 },
+      "needs": {
+        "parking_spaces": 100,
+        "toilets_extra": 2,
+        "potable_water": "existing",
+        "waste_extra_bins": 6,
+        "traffic_management": "none recorded",
+        "ferry_capacity": "coincides with the winter school holidays, so the ferries are already at holiday load",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "ferry-passenger", "level": 2, "note": "The week sits inside the winter school holidays every year, so its own load lands on top of an already full timetable." },
+        { "system": "volunteers", "level": 2 }
+      ],
+      "revenue_to": [
+        { "business_id": "quampi", "effect": "medium" },
+        { "business_id": "salt-water-murris", "effect": "medium" },
+        { "business_id": "foodworks-dunwich", "effect": "low" }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.6, 0.9, 1.0, 0.9, 0.8, 0.7, 0.5, 0.3, 0.15, 0.05, 0, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.4, "wind": 0.1, "swell": 0.0, "heat": 0.0, "cancels_if": null },
+      "confidence": "high",
+      "source": "https://www.naidoc.org.au/",
+      "cultural_handling": "Recorded as a dated week with a civic load. No local NAIDOC program, ceremony or content is written into this pack. Local activity belongs to the organisations that run it.",
+      "notes": "Luke's events engine records a Goompi NAIDOC Community Film Celebration on 31 July 2026, which sits outside the national week. Local NAIDOC activity commonly runs outside the official dates for exactly this reason: the week collides with the school holidays."
+    },
+    {
+      "id": "goompi-naidoc-film-celebration",
+      "name": "Goompi NAIDOC Community Film Celebration",
+      "status": "unconfirmed",
+      "category": "cultural",
+      "organiser": "Listed with MMEIC and Redlands Coast",
+      "organiser_business_id": "mmeic",
+      "description": "A free community evening on the Dunwich State School oval built around film. Recorded once for 2026; whether it is an annual fixture is not established.",
+      "date_rule": { "kind": "irregular", "window_months": [7], "duration_days": 1, "note": "One recorded date. Do not assume it recurs." },
+      "next_known": { "start": "2026-07-31", "end": "2026-07-31", "confidence": "medium", "source": "repo:quandamooka-country-events-engine/assets/site-data.js" },
+      "typical_hours": { "start": "17:00", "end": "21:00", "basis": "estimate" },
+      "place_ids": ["dunwich-state-school", "dunwich"],
+      "attendance": { "low": 80, "typical": 250, "high": 500, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "quandamooka-family": 0.4, "resident": 0.4, "holiday-house": 0.1, "crew-and-official": 0.1 },
+      "needs": {
+        "parking_spaces": 90,
+        "toilets_extra": 2,
+        "potable_water": "school supply",
+        "waste_extra_bins": 6,
+        "traffic_management": "none recorded",
+        "ferry_capacity": "none; an evening event cannot draw day trippers because the last sailing beats it",
+        "power": "projector, screen and PA",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "parking", "level": 2 },
+        { "system": "noise", "level": 1 }
+      ],
+      "revenue_to": [
+        { "business_id": "cjs-island-pizza", "effect": "low" },
+        { "business_id": "foodworks-dunwich", "effect": "low" }
+      ],
+      "crowd_curve": { "basis": "estimate", "note": "An evening event that starts when it gets dark, which in late July on this island is about 17:30.", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.5, 0.95, 1.0, 0.8, 0.3, 0.05, 0] },
+      "weather_sensitivity": { "rain": 0.9, "wind": 0.5, "swell": 0.0, "heat": 0.0, "cancels_if": "An outdoor screen in rain or wind. This one genuinely cancels." },
+      "confidence": "medium",
+      "source": "repo:quandamooka-country-events-engine/assets/site-data.js",
+      "cultural_handling": "Civic load only. No content, programming or cultural material recorded."
+    },
+    {
+      "id": "point-lookout-markets",
+      "name": "Point Lookout Markets",
+      "status": "current",
+      "category": "market",
+      "organiser": "Point Lookout Markets",
+      "organiser_business_id": "point-lookout-markets",
+      "description": "The island's regular market, held at the Point Lookout Bowls Club on a Sunday morning. Island vendors: toys, beach clothing, island honey, soaps, gifts, food and jewellery. It moved to the Bowls Club from the Community Hall, and the club leans on it: you can follow the market with barefoot bowls without moving your car.",
+      "date_rule": { "kind": "fortnightly", "weekday": "sunday", "note": "Published as every second Sunday, with extra dates through the holiday periods. The published date list runs out of date faster than any other record in this pack." },
+      "next_known": null,
+      "typical_hours": { "start": "08:00", "end": "12:00", "basis": "estimate", "note": "Described as about 8am to midday in Luke's events engine. No current published times were found." },
+      "place_ids": ["point-lookout-bowls-club", "point-lookout"],
+      "place_note": "The Bowls Club gives its own address as 75 Dickson Way; a tourism listing gives East Coast Road. `data/businesses.json` carries the same conflict.",
+      "attendance": { "low": 80, "typical": 300, "high": 800, "basis": "estimate", "confidence": "low", "note": "The high figure is a school-holiday Sunday, not a normal one." },
+      "archetype_mix": { "resident": 0.35, "holiday-house": 0.3, "day-tripper-vehicle": 0.15, "camper": 0.1, "crew-and-official": 0.1 },
+      "needs": {
+        "parking_spaces": 120,
+        "toilets_extra": 0,
+        "potable_water": "club supply",
+        "waste_extra_bins": 6,
+        "traffic_management": "none; signage only",
+        "ferry_capacity": "no extra sailings, but stallholders bringing vehicles want the early Sunday barge",
+        "power": "club supply for a handful of stalls",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "parking", "level": 2, "note": "Rises to 4 on a holiday Sunday when the market, the beach and the bowls club all want the same spaces." },
+        { "system": "ferry-vehicle", "level": 1 }
+      ],
+      "revenue_to": [
+        { "business_id": "point-lookout-bowls-club", "effect": "high" },
+        { "business_id": "point-lookout-markets", "effect": "high" },
+        { "business_id": "coffee-in-cylinders", "effect": "medium" },
+        { "business_id": "loaves-bakery-point-lookout", "effect": "medium" },
+        { "business_id": "starfish-studio", "effect": "low" }
+      ],
+      "crowd_curve": { "basis": "estimate", "note": "A morning market. Peaks at 09:00 and is packing up by midday, then the same site fills again at 16:00 for barefoot bowls.", "hours": [0, 0, 0, 0, 0, 0, 0.1, 0.45, 0.85, 1.0, 0.9, 0.6, 0.25, 0.05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.7, "wind": 0.5, "swell": 0.0, "heat": 0.2, "cancels_if": "Wet weather cancels or thins an outdoor market with soft goods on trestle tables." },
+      "confidence": "medium",
+      "source": "https://stradbrokeisland.com/point-lookout-markets/",
+      "notes": "The brief asked for Dunwich markets as well. No current regular Dunwich market could be confirmed. Market stalls appear at Dunwich inside the Quandamooka Festival and the Oyster Festival, but as part of those events, not as a standing market. Left out rather than invented."
+    },
+    {
+      "id": "bowls-club-wednesday-trivia",
+      "name": "Wednesday night trivia at the Point Lookout Bowls Club",
+      "status": "current",
+      "category": "club-night",
+      "organiser": "Point Lookout Bowls Club",
+      "organiser_business_id": "point-lookout-bowls-club",
+      "description": "Roast dinner and Billy's 'World Famous' Trivia every Wednesday night. The steadiest midweek gathering on the island and, out of season, one of the few reasons anyone drives after dark.",
+      "date_rule": { "kind": "weekly", "weekday": "wednesday", "duration_days": 1 },
+      "next_known": null,
+      "typical_hours": { "start": "18:00", "end": "21:30", "basis": "estimate", "note": "Trivia from 19:00 per the club's what's-on listing. The dinner service before it and the finish time are estimates." },
+      "place_ids": ["point-lookout-bowls-club", "point-lookout"],
+      "attendance": { "low": 25, "typical": 70, "high": 150, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "resident": 0.6, "holiday-house": 0.25, "camper": 0.1, "backpacker": 0.05 },
+      "needs": { "parking_spaces": 45, "toilets_extra": 0, "potable_water": "club supply", "waste_extra_bins": 0, "traffic_management": "none", "ferry_capacity": "none", "basis": "estimate" },
+      "strains": [
+        { "system": "road", "level": 1, "note": "The drive home from a licensed club on a dark island road with wildlife on it. Small numbers, real risk." }
+      ],
+      "revenue_to": [
+        { "business_id": "point-lookout-bowls-club", "effect": "high" }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.6, 1.0, 0.95, 0.55, 0.1, 0] },
+      "weather_sensitivity": { "rain": 0.15, "wind": 0.0, "swell": 0.0, "heat": 0.0, "cancels_if": null },
+      "confidence": "medium",
+      "source": "https://www.pointlookoutbowlsclub.com.au/",
+      "notes": "The Wednesday roast and trivia night appears on the club's what's-on pages and in Luke's own events engine from a May 2026 source pass. It was not visible on the club's front page at the time of writing, so the weekly pattern is treated as medium rather than high."
+    },
+    {
+      "id": "bowls-club-sunday-barefoot-bowls",
+      "name": "Sunday barefoot bowls at the Point Lookout Bowls Club",
+      "status": "current",
+      "category": "club-social",
+      "organiser": "Point Lookout Bowls Club",
+      "organiser_business_id": "point-lookout-bowls-club",
+      "description": "Barefoot bowls from 16:00 on a Sunday afternoon. It is the island's default late-Sunday social gathering, and it runs directly against the Sunday departure rush: the people on the green are the ones who are not going home.",
+      "date_rule": { "kind": "weekly", "weekday": "sunday", "duration_days": 1 },
+      "next_known": null,
+      "typical_hours": { "start": "16:00", "end": "19:00", "basis": "published", "note": "From 16:00 per the club's own front page. The finish is an estimate." },
+      "place_ids": ["point-lookout-bowls-club", "point-lookout"],
+      "place_note": "75 Dickson Way, Point Lookout, per the club's own site. One tourism listing gives East Coast Road instead. `data/businesses.json` carries the same conflict.",
+      "attendance": { "low": 20, "typical": 60, "high": 200, "basis": "estimate", "confidence": "low", "note": "The high figure is a long weekend or a school-holiday Sunday." },
+      "archetype_mix": { "holiday-house": 0.4, "resident": 0.3, "camper": 0.15, "backpacker": 0.1, "day-tripper-vehicle": 0.05 },
+      "needs": { "parking_spaces": 60, "toilets_extra": 0, "potable_water": "club supply", "waste_extra_bins": 0, "traffic_management": "none", "ferry_capacity": "none", "green_rinks": 6, "basis": "estimate" },
+      "strains": [
+        { "system": "parking", "level": 2 },
+        { "system": "greens", "level": 2, "note": "A hundred people on a bowling green in bare feet is wear, and the greenkeeper is a volunteer." }
+      ],
+      "revenue_to": [
+        { "business_id": "point-lookout-bowls-club", "effect": "high" },
+        { "business_id": "the-point-bar-and-bistro", "effect": "medium" }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.8, 1.0, 0.9, 0.5, 0.15, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.85, "wind": 0.2, "swell": 0.0, "heat": 0.3, "cancels_if": "Rain closes the green." },
+      "confidence": "high",
+      "source": "https://www.barefootbowls.com.au/club/point-lookout-bowls-club/"
+    },
+    {
+      "id": "stitching-stories",
+      "name": "Stitching Stories at the museum",
+      "status": "current",
+      "category": "community-workshop",
+      "organiser": "North Stradbroke Island Museum on Minjerribah",
+      "organiser_business_id": "nsi-museum-on-minjerribah",
+      "description": "A small recurring making session on the museum verandah, second Saturday of the month, 10:00 to 13:00. The kind of thing that never appears in a tourism campaign and holds a town together.",
+      "date_rule": { "kind": "monthly", "weekday": "saturday", "nth": 2, "duration_days": 1 },
+      "next_known": null,
+      "typical_hours": { "start": "10:00", "end": "13:00", "basis": "published" },
+      "place_ids": ["straddie-museum", "dunwich"],
+      "attendance": { "low": 4, "typical": 12, "high": 25, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "resident": 0.8, "day-tripper-walkon": 0.1, "holiday-house": 0.1 },
+      "needs": { "parking_spaces": 10, "toilets_extra": 0, "potable_water": "museum supply", "waste_extra_bins": 0, "traffic_management": "none", "ferry_capacity": "none", "basis": "estimate" },
+      "strains": [],
+      "revenue_to": [
+        { "business_id": "nsi-museum-on-minjerribah", "effect": "low" },
+        { "business_id": "barn-cafe-dunwich", "effect": "low" }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 1.0, 0.9, 0.4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.2, "wind": 0.1, "swell": 0.0, "heat": 0.1, "cancels_if": null, "note": "The verandah is covered." },
+      "confidence": "medium",
+      "source": "https://www.stradbrokemuseum.com.au/"
+    },
+    {
+      "id": "grass-roots-live-music",
+      "name": "Grass Roots Live Music at Straddie Brewing Co",
+      "status": "current",
+      "category": "live-music",
+      "organiser": "Straddie Brewing Co",
+      "organiser_business_id": "straddie-brewing-co",
+      "description": "First Sunday of the month, 14:00 to 17:00, on the rooftop deck at Dunwich. Its timing is the interesting part: it sits exactly on top of the Sunday departure window, so it competes directly with the ferry queue for the same people.",
+      "date_rule": { "kind": "monthly", "weekday": "sunday", "nth": 1, "duration_days": 1 },
+      "next_known": null,
+      "typical_hours": { "start": "14:00", "end": "17:00", "basis": "published" },
+      "place_ids": ["dunwich"],
+      "place_note": "Straddie Brewing Co has no `data/places.json` record yet.",
+      "attendance": { "low": 40, "typical": 120, "high": 300, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "day-tripper-walkon": 0.3, "resident": 0.25, "holiday-house": 0.25, "day-tripper-vehicle": 0.15, "boatie": 0.05 },
+      "needs": { "parking_spaces": 60, "toilets_extra": 0, "potable_water": "venue supply", "waste_extra_bins": 2, "traffic_management": "none", "ferry_capacity": "pushes walk-on demand onto the last two Sunday sailings", "basis": "estimate" },
+      "strains": [
+        { "system": "ferry-passenger", "level": 2, "note": "A 17:00 finish and a walk-on crowd is a late-Sunday queue by construction." }
+      ],
+      "revenue_to": [
+        { "business_id": "straddie-brewing-co", "effect": "high" },
+        { "business_id": "stradbroke-flyer", "effect": "medium" },
+        { "business_id": "stradbroke-cab-service", "effect": "medium" }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.3, 0.85, 1.0, 0.9, 0.6, 0.2, 0.05, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.5, "wind": 0.3, "swell": 0.0, "heat": 0.2, "cancels_if": null, "note": "A rooftop deck. Rain moves it inside or thins it." },
+      "confidence": "medium",
+      "source": "https://stradbrokeisland.com/straddie-brewing-co-2/"
+    },
+    {
+      "id": "straddie-sharks-home-games",
+      "name": "Straddie Sharks home games",
+      "status": "current",
+      "category": "sport-fixture",
+      "organiser": "North Stradbroke Island Rugby League and All Sports Club",
+      "organiser_business_id": "straddie-sharks-all-sports-club",
+      "description": "Rugby league at Ron Stark Oval through the winter season. Junior grades kick off from about 10:30 with the canteen open, seniors later in the day. A home game brings a visiting team, their families and their referees across on the barge, then feeds them all at the club afterwards, which is the entire economic point of a home game.",
+      "date_rule": { "kind": "weekly", "weekday": "saturday", "season_months": [3, 4, 5, 6, 7, 8], "duration_days": 1, "note": "Alternating home and away through the season, so roughly fortnightly at Ron Stark Oval. The exact draw is published by the club each year and is not recorded here." },
+      "next_known": null,
+      "typical_hours": { "start": "09:30", "end": "17:00", "basis": "estimate", "note": "Juniors from about 10:30 per the club's own posts." },
+      "place_ids": ["ron-stark-oval", "dunwich"],
+      "attendance": { "low": 60, "typical": 200, "high": 500, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "resident": 0.4, "competitor": 0.2, "quandamooka-family": 0.2, "crew-and-official": 0.1, "day-tripper-vehicle": 0.1 },
+      "needs": {
+        "parking_spaces": 120,
+        "toilets_extra": 0,
+        "potable_water": "ground supply",
+        "waste_extra_bins": 4,
+        "traffic_management": "none",
+        "ferry_capacity": "a visiting club is a bus or a convoy of cars on a specific sailing, and it has to get home the same night",
+        "medical": "sideline first aid; a serious injury means an ambulance and a barge",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "ferry-vehicle", "level": 2, "note": "A visiting team missing the last barge is a real and recurring problem for island clubs." },
+        { "system": "emergency-services", "level": 2, "note": "A contact sport at the end of a ferry line. Transfer time to a mainland hospital is the constraint." },
+        { "system": "parking", "level": 2 }
+      ],
+      "revenue_to": [
+        { "business_id": "straddie-sharks-all-sports-club", "effect": "high" },
+        { "business_id": "foodworks-dunwich", "effect": "medium" },
+        { "business_id": "sealink-south-east-queensland", "effect": "medium" },
+        { "business_id": "cellarbrations-dunwich", "effect": "low" }
+      ],
+      "crowd_curve": { "basis": "estimate", "note": "Grades stack through the day: juniors first, seniors last, and the club fills after the final whistle.", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.6, 0.75, 0.7, 0.8, 1.0, 0.9, 0.7, 0.6, 0.4, 0.2, 0.05, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.3, "wind": 0.1, "swell": 0.0, "heat": 0.2, "cancels_if": "Ground closure after heavy rain, or a ferry cancellation that strands the visiting team." },
+      "confidence": "medium",
+      "source": "https://www.facebook.com/Straddiesharks/",
+      "notes": "The brief asked for Point Lookout Football Club fixtures. There is no Point Lookout Football Club. PLFC on this island is the Point Lookout Fishing Club, an incorporated association based out of the Bowls Club. Rugby league on Minjerribah is the Straddie Sharks at Ron Stark Oval, Dunwich, which is what this record covers."
+    },
+    {
+      "id": "straddie-sharks-easter-carnival",
+      "name": "Straddie Sharks Easter Carnival",
+      "status": "current",
+      "category": "sport-carnival",
+      "organiser": "Straddie Sharks",
+      "organiser_business_id": "straddie-sharks-all-sports-club",
+      "description": "A one-day carnival at Ron Stark Oval over the Easter break. It lands in the single busiest visitor window of the autumn, which means the crowd is half islanders and half people who are here anyway.",
+      "date_rule": { "kind": "moveable", "anchor": "Easter", "offset_days": -1, "duration_days": 1, "note": "Ran on Easter Saturday, 4 April 2026." },
+      "next_known": { "start": "2026-04-04", "end": "2026-04-04", "confidence": "medium", "source": "https://straddiesharks.com/upcoming-events/" },
+      "typical_hours": { "start": "08:30", "end": "17:00", "basis": "estimate" },
+      "place_ids": ["ron-stark-oval", "dunwich"],
+      "attendance": { "low": 200, "typical": 600, "high": 1200, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "resident": 0.3, "competitor": 0.25, "holiday-house": 0.2, "quandamooka-family": 0.15, "crew-and-official": 0.1 },
+      "needs": {
+        "parking_spaces": 250,
+        "toilets_extra": 6,
+        "potable_water": "ground supply plus refill",
+        "waste_extra_bins": 16,
+        "traffic_management": "Ballow Road approaches",
+        "ferry_capacity": "visiting teams competing for barge space with the Easter holiday peak, which is the worst possible collision",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "ferry-vehicle", "level": 4, "note": "Easter is already the tightest vehicle barge weekend outside Christmas." },
+        { "system": "parking", "level": 3 },
+        { "system": "toilets", "level": 3 },
+        { "system": "accommodation", "level": 4, "note": "There are no spare beds at Easter, so visiting teams travel same-day and the ferry load doubles." }
+      ],
+      "revenue_to": [
+        { "business_id": "straddie-sharks-all-sports-club", "effect": "high" },
+        { "business_id": "sealink-south-east-queensland", "effect": "high" },
+        { "business_id": "foodworks-dunwich", "effect": "medium" },
+        { "business_id": "dunwich-bakery", "effect": "medium" }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0.3, 0.7, 0.9, 1.0, 0.95, 0.9, 0.85, 0.7, 0.45, 0.2, 0.05, 0, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.5, "wind": 0.1, "swell": 0.0, "heat": 0.3, "cancels_if": "Ground closure after heavy autumn rain." },
+      "confidence": "medium",
+      "source": "https://straddiesharks.com/upcoming-events/"
+    },
+    {
+      "id": "nippers",
+      "name": "Nippers at Point Lookout SLSC",
+      "status": "current",
+      "category": "junior-sport",
+      "organiser": "Point Lookout Surf Life Saving Club",
+      "organiser_business_id": "point-lookout-slsc",
+      "description": "Junior surf life saving every Saturday from October to March at Main Beach or Cylinder Beach, depending on conditions. It is a reason a number of mainland families own or rent on this island, and it is the recruitment pipeline for the patrols that keep the beaches open.",
+      "date_rule": { "kind": "weekly", "weekday": "saturday", "season_months": [10, 11, 12, 1, 2, 3], "duration_days": 1 },
+      "next_known": null,
+      "typical_hours": { "start": "08:00", "end": "11:00", "basis": "estimate" },
+      "place_ids": ["main-beach", "cylinder-beach", "point-lookout-slsc"],
+      "place_note": "Beach chosen on the morning based on conditions.",
+      "attendance": { "low": 40, "typical": 130, "high": 300, "basis": "estimate", "confidence": "low", "note": "Nippers plus the parents standing behind them, which is the larger half." },
+      "archetype_mix": { "resident": 0.35, "holiday-house": 0.35, "crew-and-official": 0.15, "day-tripper-vehicle": 0.15 },
+      "needs": {
+        "parking_spaces": 90,
+        "toilets_extra": 0,
+        "potable_water": "beach taps",
+        "waste_extra_bins": 2,
+        "traffic_management": "none",
+        "ferry_capacity": "none, but families travelling for it fill the early Saturday sailings",
+        "beach_access": "a clear stretch of patrolled beach for two to three hours",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "parking", "level": 3, "note": "Summer Saturday morning at the beach car park, plus Nippers, plus everyone else who wants a swim." },
+        { "system": "beach-access", "level": 2 },
+        { "system": "volunteers", "level": 3, "note": "Every session needs qualified water safety, and the same volunteers also patrol." }
+      ],
+      "revenue_to": [
+        { "business_id": "point-lookout-slsc", "effect": "medium" },
+        { "business_id": "blue-room-cafe", "effect": "medium" },
+        { "business_id": "coffee-in-cylinders", "effect": "medium" },
+        { "business_id": "whale-tail-gelati", "effect": "medium" }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0.2, 0.85, 1.0, 0.9, 0.4, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.3, "wind": 0.4, "swell": 0.7, "heat": 0.2, "cancels_if": "Dangerous surf. The club moves the session to the more sheltered beach before it cancels." },
+      "confidence": "high",
+      "source": "https://pointlookoutslsc.com.au/nippers/"
+    },
+    {
+      "id": "clean-up-australia-day",
+      "name": "Clean Up Australia Day (Clean Up Straddie)",
+      "status": "current",
+      "category": "volunteer-environment",
+      "organiser": "Local sites registered under Clean Up Australia, with Straddie Brewing Co running an island beach cleanup",
+      "organiser_business_id": "straddie-brewing-co",
+      "description": "First Sunday in March. Registration points in all three townships and volunteers walking the beaches, the foreshore and the road verges. Small headcount, disproportionate effect: it is the one day of the year the island measures its own rubbish, and the results are a real input to a waste argument.",
+      "date_rule": { "kind": "nth_weekday", "month": 3, "weekday": "sunday", "nth": 1, "duration_days": 1 },
+      "next_known": { "start": "2026-03-01", "end": "2026-03-01", "confidence": "high", "source": "https://www.cleanup.org.au/faq-s/" },
+      "typical_hours": { "start": "08:00", "end": "12:00", "basis": "estimate" },
+      "place_ids": ["point-lookout", "dunwich", "amity-point", "dunwich-foreshore", "main-beach", "flinders-beach"],
+      "attendance": { "low": 30, "typical": 120, "high": 300, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "resident": 0.6, "holiday-house": 0.15, "day-tripper-walkon": 0.1, "crew-and-official": 0.1, "camper": 0.05 },
+      "needs": {
+        "parking_spaces": 60,
+        "toilets_extra": 0,
+        "potable_water": "refill points at each registration site; March is hot and humid",
+        "waste_extra_bins": 0,
+        "waste_handling": "the collected material has to be received at the recycling and waste centre in one afternoon, which is a bigger ask than the collecting",
+        "traffic_management": "high-visibility vests for anyone working a road verge",
+        "ferry_capacity": "none",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "waste", "level": 3, "note": "A day's collected rubbish arriving at one transfer station at once, on an island where everything leaves by barge." },
+        { "system": "volunteers", "level": 2 }
+      ],
+      "revenue_to": [
+        { "business_id": "straddie-brewing-co", "effect": "medium", "note": "Runs the post-cleanup gathering." },
+        { "business_id": "nsi-recycling-and-waste-centre", "effect": "low", "note": "Cost rather than revenue." }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0.3, 0.9, 1.0, 0.85, 0.5, 0.4, 0.3, 0.15, 0.05, 0, 0, 0, 0, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.6, "wind": 0.1, "swell": 0.0, "heat": 0.4, "cancels_if": "Heavy rain. March on this island is wet-season tail and a storm cell will end it." },
+      "confidence": "high",
+      "source": "https://straddiebrewing.com.au/news/beach-cleanup/",
+      "notes": "The national date is confirmed for 1 March 2026. Whether the island runs registered sites every year, and how many, was not confirmed. Luke's events engine records island-wide registration points for 1 March 2026."
+    },
+    {
+      "id": "working-bees",
+      "name": "Bushcare and community working bees",
+      "status": "unconfirmed",
+      "category": "volunteer-environment",
+      "organiser": "Point Lookout Bushcare, Friends of Stradbroke Island, and individual clubs",
+      "organiser_business_id": "point-lookout-bushcare",
+      "description": "Weeding, dune planting, track work and ground maintenance run by volunteer groups and by clubs on their own grounds. Small, regular, unglamorous, and the reason several of the island's weed programs are winning. No public schedule was found, so the pattern here is a modelling assumption, not a timetable.",
+      "date_rule": { "kind": "monthly", "weekday": "saturday", "nth": 1, "duration_days": 1, "note": "A modelling assumption. Neither Point Lookout Bushcare nor Friends of Stradbroke Island publishes a current working bee calendar that could be read." },
+      "next_known": null,
+      "typical_hours": { "start": "07:30", "end": "11:00", "basis": "estimate", "note": "Early, to beat the heat. This is the pattern for volunteer bush work in south-east Queensland." },
+      "place_ids": ["point-lookout", "dunwich", "amity-point", "headland-park", "cylinder-beach-park"],
+      "attendance": { "low": 3, "typical": 10, "high": 30, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "resident": 0.9, "holiday-house": 0.1 },
+      "needs": { "parking_spaces": 10, "toilets_extra": 0, "potable_water": "bring your own", "waste_extra_bins": 0, "green_waste_handling": "the pile has to be collected or it becomes the next problem", "traffic_management": "none", "ferry_capacity": "none", "basis": "estimate" },
+      "strains": [
+        { "system": "volunteers", "level": 3, "note": "The binding constraint is the same eight people, and they are getting older. Model volunteer supply as a stock that depletes." }
+      ],
+      "revenue_to": [],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0.6, 1.0, 0.9, 0.6, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.7, "wind": 0.1, "swell": 0.0, "heat": 0.5, "cancels_if": "Rain, or a total fire ban if the work involves machinery." },
+      "confidence": "low",
+      "source": "general knowledge, plus the presence of Point Lookout Bushcare and Friends of Stradbroke Island in `data/businesses.json`",
+      "notes": "Included because the brief asked for it and because the simulation needs a volunteer-labour rhythm. The frequency is invented as a modelling default and must be replaced with the real calendar before anything is shown to a player as fact."
+    },
+    {
+      "id": "caxton-classic-golf",
+      "name": "Caxton Classic Golf Tournament",
+      "status": "unconfirmed",
+      "category": "sport-fundraiser",
+      "organiser": "Listed with the North Stradbroke Island Golf Club and Straddie Brewing Co",
+      "organiser_business_id": "north-stradbroke-island-golf-club",
+      "description": "A small invitational tournament on the island's golf course with a fundraising and hospitality tail at Straddie Brewing Co. Low crowd, high per-head spend, and it fills beds midweek in May when nothing else does.",
+      "date_rule": { "kind": "irregular", "window_months": [5], "duration_days": 1 },
+      "next_known": { "start": "2026-05-16", "end": "2026-05-16", "confidence": "medium", "source": "https://stradbrokeisland.com/caxton-classic-golf-tournament/" },
+      "typical_hours": { "start": "07:00", "end": "20:00", "basis": "estimate" },
+      "place_ids": ["dunwich"],
+      "place_note": "The golf course has no `data/places.json` record yet.",
+      "attendance": { "low": 60, "typical": 130, "high": 250, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "competitor": 0.5, "day-tripper-vehicle": 0.2, "resident": 0.15, "crew-and-official": 0.15 },
+      "needs": { "parking_spaces": 80, "toilets_extra": 2, "potable_water": "course and venue supply", "waste_extra_bins": 4, "traffic_management": "none", "ferry_capacity": "about 150 extra one-way passenger seats", "basis": "estimate" },
+      "strains": [
+        { "system": "accommodation", "level": 2 },
+        { "system": "ferry-passenger", "level": 1 }
+      ],
+      "revenue_to": [
+        { "business_id": "north-stradbroke-island-golf-club", "effect": "high" },
+        { "business_id": "straddie-brewing-co", "effect": "high" },
+        { "business_id": "stradbroke-island-beach-hotel", "effect": "medium" },
+        { "business_id": "stradeasy", "effect": "medium" }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0.6, 0.9, 1.0, 0.95, 0.9, 0.7, 0.5, 0.4, 0.4, 0.5, 0.7, 0.9, 0.7, 0.3, 0.05, 0, 0] },
+      "weather_sensitivity": { "rain": 0.6, "wind": 0.2, "swell": 0.0, "heat": 0.2, "cancels_if": null },
+      "confidence": "medium",
+      "source": "https://stradbrokeisland.com/caxton-classic-golf-tournament/"
+    },
+    {
+      "id": "amity-point-community-day",
+      "name": "Amity Point Community Day",
+      "status": "unconfirmed",
+      "category": "community",
+      "organiser": "Amity Point Community Club",
+      "organiser_business_id": "amity-point-community-club",
+      "description": "A free family day at the community club in the smallest township. Recorded once, for 13 June 2026. Amity gets almost no event load, so a day like this is a genuine outlier for the village and worth modelling as such.",
+      "date_rule": { "kind": "irregular", "window_months": [6], "duration_days": 1 },
+      "next_known": { "start": "2026-06-13", "end": "2026-06-13", "confidence": "medium", "source": "https://amitypointcommunityclub.com.au/whats-on/" },
+      "typical_hours": { "start": "11:00", "end": "17:00", "basis": "estimate" },
+      "place_ids": ["amity-point-community-club", "amity-point"],
+      "attendance": { "low": 60, "typical": 180, "high": 400, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "resident": 0.55, "holiday-house": 0.2, "day-tripper-vehicle": 0.15, "crew-and-official": 0.1 },
+      "needs": {
+        "parking_spaces": 90,
+        "toilets_extra": 2,
+        "potable_water": "club supply",
+        "waste_extra_bins": 6,
+        "traffic_management": "none",
+        "ferry_capacity": "route 881 is the only public transport to Amity, and it is a small bus",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "parking", "level": 3, "note": "Amity's streets are narrow and the shoreline has already taken some of them." },
+        { "system": "road", "level": 2, "note": "Everyone comes and goes on one road, and it is a long way back to a ferry after dark." }
+      ],
+      "revenue_to": [
+        { "business_id": "amity-point-community-club", "effect": "high" },
+        { "business_id": "amity-pavilion", "effect": "medium" },
+        { "business_id": "amity-point-general-dealers", "effect": "medium" },
+        { "business_id": "bo-beans-coffee", "effect": "low" }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.6, 0.9, 1.0, 0.95, 0.8, 0.5, 0.2, 0.05, 0, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.6, "wind": 0.3, "swell": 0.0, "heat": 0.1, "cancels_if": null },
+      "confidence": "medium",
+      "source": "https://amitypointcommunityclub.com.au/whats-on/"
+    },
+    {
+      "id": "little-ship-club-social-events",
+      "name": "Little Ship Club social events",
+      "status": "current",
+      "category": "club-social",
+      "organiser": "Little Ship Club",
+      "organiser_business_id": "little-ship-club",
+      "description": "A rolling social calendar at the Dunwich waterfront club: ticketed live music, the Arthur Mobsby Seafood Spectacular in January, Pig Day Out in June, and the Anzac Day afternoon. Individually small; together they are the most consistent evening crowd at Dunwich.",
+      "date_rule": { "kind": "monthly", "duration_days": 1, "note": "Roughly monthly with named annual events layered on. The club publishes its own social calendar." },
+      "next_known": null,
+      "typical_hours": { "start": "12:00", "end": "20:00", "basis": "estimate" },
+      "place_ids": ["little-ship-club", "dunwich"],
+      "attendance": { "low": 50, "typical": 200, "high": 500, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "resident": 0.35, "day-tripper-walkon": 0.2, "holiday-house": 0.2, "boatie": 0.15, "day-tripper-vehicle": 0.1 },
+      "needs": { "parking_spaces": 100, "toilets_extra": 0, "potable_water": "club supply", "waste_extra_bins": 4, "traffic_management": "none", "ferry_capacity": "an evening finish means the last water taxi is the hard stop on attendance", "basis": "estimate" },
+      "strains": [
+        { "system": "ferry-passenger", "level": 2, "note": "The last sailing is the real closing time for anyone from the mainland." },
+        { "system": "parking", "level": 2 }
+      ],
+      "revenue_to": [
+        { "business_id": "little-ship-club", "effect": "high" },
+        { "business_id": "stradbroke-flyer", "effect": "medium" },
+        { "business_id": "stradbroke-cab-service", "effect": "medium" }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.5, 0.8, 1.0, 0.95, 0.8, 0.6, 0.35, 0.15, 0.05, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.3, "wind": 0.3, "swell": 0.2, "heat": 0.1, "cancels_if": "A water taxi cancellation removes the mainland half of the crowd." },
+      "confidence": "medium",
+      "source": "https://littleshipclub.com.au/whats-on/social-calendar/",
+      "notes": "Named events confirmed from Luke's events engine and the club's own listings: Arthur Mobsby Seafood Spectacular (17 January 2026), Pig Day Out (27 June 2026), The Australian Eagles Show (6 June 2026). Whether each recurs annually is not established, so they are folded into one recurring social record rather than claimed as fixtures."
+    },
+    {
+      "id": "island-vibe-festival",
+      "name": "Island Vibe Festival",
+      "status": "ended",
+      "category": "music-festival",
+      "organiser": "Island Vibe Festival",
+      "organiser_business_id": null,
+      "description": "The island's music festival for eighteen years, held at Home Beach at Point Lookout in October. It has ended on Minjerribah. The final island edition drew about 1,500 people. It is kept in this pack because the reasons it stopped are exactly the levers a civic planner in this simulation has their hands on.",
+      "date_rule": { "kind": "nth_weekday", "month": 10, "weekday": "friday", "nth": 4, "duration_days": 3, "note": "Historic pattern only. This event no longer runs on the island." },
+      "next_known": null,
+      "ended": {
+        "final_island_edition": "25 to 27 October 2024, Home Beach",
+        "editions": 18,
+        "director_wording": "The festival director described it as a hiatus on the island and said he would take the festival elsewhere. Treat it as ended on Minjerribah, not as ended outright.",
+        "final_attendance": 1500,
+        "reasons": [
+          "Minjerribah Camping closed over the festival weekend for the second year running, so affordable accommodation for attendees disappeared.",
+          "Council compliance costs for traffic management, fencing and safety officers rose by about A$30,000 between 2022 and the final year.",
+          "A disputed A$4,948 ground maintenance bill for fertilising and watering the field after the event."
+        ],
+        "council_position": "Redland City Council stated its approvals required external providers for traffic and security management.",
+        "source": "https://redlandbaysidenews.com.au/island-vibe-festival-ends/"
+      },
+      "typical_hours": { "start": "11:00", "end": "23:00", "basis": "estimate" },
+      "place_ids": ["home-beach", "point-lookout", "point-lookout-oval"],
+      "attendance": { "low": 1000, "typical": 1500, "high": 2500, "basis": "measured for the final edition", "confidence": "medium", "source": "https://redlandbaysidenews.com.au/island-vibe-festival-ends/" },
+      "archetype_mix": { "camper": 0.35, "day-tripper-walkon": 0.2, "holiday-house": 0.2, "resident": 0.1, "crew-and-official": 0.1, "backpacker": 0.05 },
+      "needs": {
+        "parking_spaces": 600,
+        "toilets_extra": 40,
+        "potable_water": "tankered water and refill stations for a three-day outdoor crowd",
+        "waste_extra_bins": 80,
+        "traffic_management": "accredited external traffic management, which is the cost line that killed it",
+        "ferry_capacity": "about 2,500 extra one-way passenger seats and 500 extra vehicle spaces across the weekend",
+        "power": "full temporary event power across multiple stages",
+        "camping": "the whole festival model depended on nearby campgrounds being open, and they were not",
+        "basis": "estimate, except the traffic management cost which is sourced"
+      },
+      "strains": [
+        { "system": "accommodation", "level": 5, "note": "The failure point. A festival that needs 1,500 cheap beds next to a campground that closes that weekend does not survive." },
+        { "system": "ferry-passenger", "level": 4 },
+        { "system": "noise", "level": 4, "note": "Amplified music until late, a few hundred metres from houses." },
+        { "system": "waste", "level": 4 },
+        { "system": "parking", "level": 4 },
+        { "system": "dune-vegetation", "level": 3 }
+      ],
+      "revenue_to": [
+        { "business_id": "minjerribah-camping", "effect": "high", "note": "Historic. The campground closure over the festival weekend is what broke the arrangement." },
+        { "business_id": "stradbroke-island-beach-hotel", "effect": "high" },
+        { "business_id": "foodworks-point-lookout", "effect": "high" },
+        { "business_id": "sealink-south-east-queensland", "effect": "high" },
+        { "business_id": "point-lookout-roadhouse", "effect": "high" }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0.15, 0.05, 0, 0, 0, 0, 0, 0, 0.05, 0.15, 0.3, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 1.0, 1.0, 0.9, 0.6, 0.3] },
+      "weather_sensitivity": { "rain": 0.4, "wind": 0.3, "swell": 0.0, "heat": 0.2, "cancels_if": null },
+      "confidence": "high",
+      "source": "https://redlandbaysidenews.com.au/island-vibe-festival-ends/",
+      "notes": "One search summary gave the final year as 2025; the article itself and a September 2024 preview both give the final island edition as October 2024. The article is used. The festival has since been announced for a mainland site, which is outside this island's scope and is not modelled here."
+    },
+    {
+      "id": "new-years-eve",
+      "name": "New Year's Eve",
+      "status": "current",
+      "category": "seasonal-peak",
+      "organiser": "No single organiser. Venues, campgrounds and households.",
+      "organiser_business_id": null,
+      "description": "The island's hardest night. No central event, which is precisely the problem: the crowd is already here on holiday, it is distributed across campgrounds, holiday houses, the pub and the beaches, and there is no organiser to hold a permit or run a plan. Emergency services, water and waste all peak on a night when almost every business is also short-staffed.",
+      "date_rule": { "kind": "fixed", "month": 12, "day": 31, "duration_days": 1 },
+      "next_known": { "start": "2026-12-31", "end": "2027-01-01", "confidence": "high", "source": "calendar" },
+      "typical_hours": { "start": "17:00", "end": "03:00", "basis": "estimate" },
+      "place_ids": ["point-lookout", "dunwich", "amity-point", "cylinder-beach", "home-beach", "main-beach"],
+      "attendance": { "low": 3000, "typical": 6000, "high": 12000, "basis": "estimate", "confidence": "low", "note": "This is the whole-island holiday population, not a gate count. The three townships hold about 1,975 residents at the 2021 census; the multiple at peak is not published." },
+      "archetype_mix": { "holiday-house": 0.35, "camper": 0.3, "resident": 0.2, "day-tripper-vehicle": 0.08, "backpacker": 0.05, "boatie": 0.02 },
+      "needs": {
+        "parking_spaces": 1200,
+        "toilets_extra": 20,
+        "potable_water": "peak township draw of the year, at the end of a dry December",
+        "waste_extra_bins": 120,
+        "traffic_management": "beach access control and drink driving enforcement rather than event traffic control",
+        "ferry_capacity": "the return pressure lands on 1 and 2 January, not on the night itself",
+        "emergency_cover": "the highest simultaneous demand of the year on one ambulance service, one police station, one rural fire brigade and one marine rescue unit",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "emergency-services", "level": 5, "note": "Alcohol, water, fire, heat and vehicles at once, with the nearest hospital across the bay." },
+        { "system": "waste", "level": 5, "note": "Bins overflow on 1 January and the next collection is Monday." },
+        { "system": "water", "level": 4 },
+        { "system": "noise", "level": 4 },
+        { "system": "dune-vegetation", "level": 3, "note": "Fires and foot traffic on the dunes." },
+        { "system": "ferry-vehicle", "level": 5, "note": "On the days either side, not on the night." },
+        { "system": "mobile-network", "level": 3, "note": "Everyone on the island trying to send the same message at midnight." }
+      ],
+      "revenue_to": [
+        { "business_id": "stradbroke-island-beach-hotel", "effect": "high" },
+        { "business_id": "point-lookout-bowls-club", "effect": "high" },
+        { "business_id": "little-ship-club", "effect": "high" },
+        { "business_id": "amity-point-community-club", "effect": "high" },
+        { "business_id": "cellarbrations-dunwich", "effect": "high" },
+        { "business_id": "foodworks-point-lookout", "effect": "high" },
+        { "business_id": "foodworks-dunwich", "effect": "high" },
+        { "business_id": "minjerribah-camping", "effect": "high" },
+        { "business_id": "ray-white-north-stradbroke-island", "effect": "high" }
+      ],
+      "crowd_curve": { "basis": "estimate", "note": "Runs past midnight, so the curve wraps: hours 0 to 3 are the early hours of 1 January.", "hours": [0.9, 0.6, 0.3, 0.15, 0.05, 0.05, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1.0, 1.0] },
+      "weather_sensitivity": { "rain": 0.2, "wind": 0.1, "swell": 0.2, "heat": 0.2, "cancels_if": null, "note": "Nothing cancels. A storm just moves the crowd indoors, which concentrates it." },
+      "confidence": "medium",
+      "source": "general knowledge, with the resident populations from `data/places.json` (2021 census)",
+      "notes": "No published figure exists for the island's peak holiday population. The attendance range here is a modelling estimate and must not be shown to a player as a fact."
+    },
+    {
+      "id": "easter-peak",
+      "name": "Easter",
+      "status": "current",
+      "category": "seasonal-peak",
+      "organiser": null,
+      "organiser_business_id": null,
+      "description": "Four consecutive public holidays in Queensland, landing at the start of the autumn school holidays. The vehicle barge is the binding constraint for the entire four days, and every campground and holiday house on the island is full.",
+      "date_rule": { "kind": "moveable", "anchor": "Good Friday to Easter Monday", "duration_days": 4 },
+      "next_known": { "start": "2026-04-03", "end": "2026-04-06", "confidence": "high", "source": "https://www.fairwork.gov.au/employment-conditions/public-holidays/2026-public-holidays" },
+      "typical_hours": { "start": "06:00", "end": "22:00", "basis": "estimate" },
+      "place_ids": ["point-lookout", "dunwich", "amity-point", "main-beach", "cylinder-beach", "flinders-beach"],
+      "attendance": { "low": 3000, "typical": 5500, "high": 9000, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "holiday-house": 0.35, "camper": 0.3, "resident": 0.15, "day-tripper-vehicle": 0.15, "day-tripper-walkon": 0.05 },
+      "needs": {
+        "parking_spaces": 1000,
+        "toilets_extra": 12,
+        "potable_water": "high township draw",
+        "waste_extra_bins": 100,
+        "traffic_management": "barge queue management at Toondah and at Dunwich, which is a mainland problem and an island problem at the same time",
+        "ferry_capacity": "the constraint. Vehicle bookings are exhausted well before the weekend and the queue forms on the mainland.",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "ferry-vehicle", "level": 5, "note": "The classic image: a queue at Toondah Harbour on Good Friday morning." },
+        { "system": "parking", "level": 5 },
+        { "system": "waste", "level": 4, "note": "Four public holidays in a row against a Monday collection." },
+        { "system": "water", "level": 3 },
+        { "system": "emergency-services", "level": 4 },
+        { "system": "beach-access", "level": 4, "note": "4WD traffic on Main Beach and Flinders Beach at its highest of the autumn." }
+      ],
+      "revenue_to": [
+        { "business_id": "sealink-south-east-queensland", "effect": "high" },
+        { "business_id": "minjerribah-camping", "effect": "high" },
+        { "business_id": "foodworks-point-lookout", "effect": "high" },
+        { "business_id": "foodworks-dunwich", "effect": "high" },
+        { "business_id": "stradbroke-island-beach-hotel", "effect": "high" },
+        { "business_id": "point-lookout-roadhouse", "effect": "high" },
+        { "business_id": "straddie-servo-and-hardware", "effect": "high" },
+        { "business_id": "discover-stradbroke-real-estate", "effect": "high" }
+      ],
+      "crowd_curve": { "basis": "estimate", "note": "A holiday day, not an event. Two peaks: beach in the morning, town in the evening.", "hours": [0.05, 0.02, 0.02, 0.02, 0.05, 0.15, 0.3, 0.5, 0.7, 0.85, 0.95, 1.0, 0.95, 0.9, 0.9, 0.85, 0.8, 0.8, 0.85, 0.8, 0.6, 0.4, 0.2, 0.1] },
+      "weather_sensitivity": { "rain": 0.3, "wind": 0.1, "swell": 0.2, "heat": 0.1, "cancels_if": null, "note": "Rain reduces the beach load and increases the pub load. It does not reduce the ferry load, because the accommodation is already booked." },
+      "confidence": "high",
+      "source": "https://www.fairwork.gov.au/employment-conditions/public-holidays/2026-public-holidays"
+    },
+    {
+      "id": "christmas-new-year-peak",
+      "name": "Christmas and the summer holidays",
+      "status": "current",
+      "category": "seasonal-peak",
+      "organiser": null,
+      "organiser_business_id": null,
+      "description": "The long peak: from about mid-December to the Australia Day long weekend. Every business runs at its maximum, every campground is full, and the whole island's infrastructure operates at the top of its range for six weeks straight. It is the only period where staffing, not demand, is the limit on trade.",
+      "date_rule": { "kind": "season", "start_month": 12, "start_day": 12, "end_month": 1, "end_day": 26, "note": "Anchored to the Queensland state school summer holidays, which in 2026 to 2027 run 12 December to 26 January." },
+      "next_known": { "start": "2026-12-12", "end": "2027-01-26", "confidence": "high", "source": "https://education.qld.gov.au/about-us/calendar/term-dates" },
+      "typical_hours": { "start": "06:00", "end": "22:00", "basis": "estimate" },
+      "place_ids": ["point-lookout", "dunwich", "amity-point", "main-beach", "cylinder-beach", "home-beach", "flinders-beach", "brown-lake"],
+      "attendance": { "low": 3000, "typical": 6000, "high": 12000, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "holiday-house": 0.35, "camper": 0.3, "resident": 0.15, "day-tripper-vehicle": 0.12, "backpacker": 0.05, "boatie": 0.03 },
+      "needs": {
+        "parking_spaces": 1200,
+        "toilets_extra": 24,
+        "potable_water": "the annual peak in township extraction, in the driest part of the year",
+        "waste_extra_bins": 150,
+        "traffic_management": "sustained rather than event-based: beach access, campground entries, the Dunwich terminal precinct",
+        "ferry_capacity": "extended timetables and full vehicle bookings for six weeks",
+        "staffing": "the real constraint. Hospitality staff have to live somewhere, and in January there is nowhere for them to live.",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "ferry-vehicle", "level": 5 },
+        { "system": "water", "level": 5, "note": "Peak draw against the lowest aquifer recharge. This is the season where the water lever in the simulation actually bites." },
+        { "system": "waste", "level": 5 },
+        { "system": "parking", "level": 5 },
+        { "system": "emergency-services", "level": 5 },
+        { "system": "staffing", "level": 5, "note": "Worker accommodation is the hidden constraint on the island's entire summer economy." },
+        { "system": "dune-vegetation", "level": 4 },
+        { "system": "turtle-nesting", "level": 4, "note": "Loggerhead nesting and hatching on the ocean beaches happens in exactly this window. See `data/ecology.json`." }
+      ],
+      "revenue_to": [
+        { "business_id": "sealink-south-east-queensland", "effect": "high" },
+        { "business_id": "stradbroke-flyer", "effect": "high" },
+        { "business_id": "minjerribah-camping", "effect": "high" },
+        { "business_id": "foodworks-point-lookout", "effect": "high" },
+        { "business_id": "foodworks-dunwich", "effect": "high" },
+        { "business_id": "stradbroke-island-beach-hotel", "effect": "high" },
+        { "business_id": "whale-tail-gelati", "effect": "high" },
+        { "business_id": "bella-balena-gelateria", "effect": "high" },
+        { "business_id": "fins-n-fries", "effect": "high" },
+        { "business_id": "point-lookout-roadhouse", "effect": "high" },
+        { "business_id": "straddie-servo-and-hardware", "effect": "high" },
+        { "business_id": "north-stradbroke-island-surf-school", "effect": "high" },
+        { "business_id": "manta-lodge-scuba-centre", "effect": "high" },
+        { "business_id": "ray-white-north-stradbroke-island", "effect": "high" }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0.1, 0.05, 0.03, 0.03, 0.05, 0.2, 0.45, 0.7, 0.9, 1.0, 1.0, 0.95, 0.85, 0.85, 0.9, 0.9, 0.85, 0.8, 0.8, 0.75, 0.55, 0.35, 0.2, 0.12] },
+      "weather_sensitivity": { "rain": 0.2, "wind": 0.1, "swell": 0.2, "heat": 0.1, "cancels_if": null, "note": "The one weather event that genuinely changes this season is a cyclone or an east coast low closing the crossing." },
+      "confidence": "high",
+      "source": "https://education.qld.gov.au/about-us/calendar/term-dates"
+    }
+  ],
+  "periods": [
+    {
+      "id": "school-holidays",
+      "name": "Queensland school holidays",
+      "kind": "load-period",
+      "description": "Four blocks a year. The island's visitor load steps up on the first Saturday of each one and steps down on the last Sunday. Camping demand, ferry bookings, grocery deliveries, waste volume and beach 4WD traffic all move together. The state school calendar is the single best predictor of load on this island, better than weather and better than any event.",
+      "occurrences_2026": [
+        { "start": "2026-04-03", "end": "2026-04-19", "label": "autumn", "load_multiplier": 2.8, "note": "Contains Easter, so it is the hardest of the three short breaks." },
+        { "start": "2026-06-27", "end": "2026-07-12", "label": "winter", "load_multiplier": 2.2, "note": "Overlaps whale season and NAIDOC Week." },
+        { "start": "2026-09-19", "end": "2026-10-05", "label": "spring", "load_multiplier": 2.4, "note": "Contains the King's Birthday long weekend and the start of the surf patrol season." },
+        { "start": "2026-12-12", "end": "2027-01-26", "label": "summer", "load_multiplier": 3.5, "note": "The long peak. See the `christmas-new-year-peak` event." }
+      ],
+      "load_multiplier_basis": "estimate. Multiplier is applied to the non-holiday weekday visitor baseline, not to the resident population. No measured figure exists.",
+      "strains": [
+        { "system": "ferry-vehicle", "level": 4 },
+        { "system": "parking", "level": 4 },
+        { "system": "waste", "level": 3 },
+        { "system": "school", "level": -3, "note": "Negative load: the school run stops entirely, which takes the morning peak off Bingle Road and off the bus routes." }
+      ],
+      "confidence": "high",
+      "source": "https://education.qld.gov.au/about-us/calendar/term-dates"
+    },
+    {
+      "id": "long-weekends",
+      "name": "Long weekends",
+      "kind": "load-period",
+      "description": "Three days is exactly long enough to justify putting a car on the barge and not long enough for the island to recover between waves. The load profile is sharper than a school holiday: a hard Friday afternoon arrival, two full days, a hard Monday afternoon departure.",
+      "occurrences_2026": [
+        { "start": "2026-01-24", "end": "2026-01-26", "anchor": "Australia Day", "load_multiplier": 2.6, "note": "Lands inside the summer holidays, so it stacks on an already high base." },
+        { "start": "2026-04-03", "end": "2026-04-06", "anchor": "Easter, four days", "load_multiplier": 3.2 },
+        { "start": "2026-05-02", "end": "2026-05-04", "anchor": "Labour Day", "load_multiplier": 2.2, "note": "The surf patrol season traditionally closes on this weekend." },
+        { "start": "2026-10-03", "end": "2026-10-05", "anchor": "King's Birthday", "load_multiplier": 2.4, "note": "Inside the spring school holidays." }
+      ],
+      "load_multiplier_basis": "estimate",
+      "strains": [
+        { "system": "ferry-vehicle", "level": 5, "note": "The peak strain of a long weekend is on the Friday afternoon out and the Monday afternoon back, not on the Saturday." },
+        { "system": "parking", "level": 4 },
+        { "system": "waste", "level": 4, "note": "A Monday public holiday and a Monday bin collection is the specific failure." },
+        { "system": "emergency-services", "level": 3 }
+      ],
+      "confidence": "high",
+      "source": "https://www.fairwork.gov.au/employment-conditions/public-holidays/2026-public-holidays"
+    },
+    {
+      "id": "whale-season",
+      "name": "Whale season",
+      "kind": "natural-season",
+      "description": "Humpbacks pass Point Lookout from about June to November: north to the breeding grounds through the winter, south with calves and close inshore through the spring. Point Lookout's headland juts into the migration corridor, which makes it one of the best land-based whale watching sites on the east coast. It is a free attraction that fills paid beds, and it is the only reliable winter driver the island has.",
+      "occurrences_2026": [
+        { "start": "2026-06-01", "end": "2026-11-30", "label": "full season", "load_multiplier": 1.4 },
+        { "start": "2026-07-01", "end": "2026-07-31", "label": "northward peak", "load_multiplier": 1.8 },
+        { "start": "2026-10-01", "end": "2026-10-31", "label": "southward peak with calves", "load_multiplier": 1.7 }
+      ],
+      "load_multiplier_basis": "estimate",
+      "hotspots": ["point-lookout-headland", "north-gorge-walk", "whale-rock", "cylinder-headland"],
+      "strains": [
+        { "system": "parking", "level": 3, "note": "Headland Park and the gorge walk car park, mid-morning, all winter." },
+        { "system": "toilets", "level": 2 },
+        { "system": "walk-track-wear", "level": 3, "note": "The North Gorge Walk carries the whole of this load on one boardwalk." }
+      ],
+      "revenue_to": [
+        { "business_id": "straddie-kingfisher-tours", "effect": "high" },
+        { "business_id": "fishes-at-the-point", "effect": "high" },
+        { "business_id": "pandanus-palms-resort", "effect": "high" },
+        { "business_id": "whalewatch-ocean-beach-resort", "effect": "high" },
+        { "business_id": "stradbroke-island-beach-hotel", "effect": "high" },
+        { "business_id": "manta-lodge-scuba-centre", "effect": "medium" }
+      ],
+      "confidence": "high",
+      "source": "https://stradbrokeisland.com/whale-watching-on-redlands-coast/",
+      "notes": "Population figures for the east Australian humpback migration vary widely between tourism sources and are not recorded here. `data/ecology.json` is the authority on the animals; this record is about the human load they generate."
+    },
+    {
+      "id": "surf-patrol-season",
+      "name": "Surf life saving patrol season",
+      "kind": "operational-season",
+      "description": "In the club's own words, the patrolling season commences on the first weekend of the September school holidays and continues every weekend and public holiday through until the first weekend in May. The club states it is the only surf life saving club in Australia that actively patrols two beaches, Main and Cylinder, and provides roving patrols of six other beaches on the island. Outside the season, the beaches are unpatrolled and the risk profile of the whole island changes.",
+      "occurrences_2026": [
+        { "start": "2026-09-19", "end": "2027-05-02", "label": "2026 to 2027 season", "confidence": "medium", "note": "Both ends are derived from the club's published rule and the Queensland school holiday dates, not from a published patrol roster. The actual first and last patrol dates are set by the club." }
+      ],
+      "place_ids": ["main-beach", "cylinder-beach", "point-lookout-slsc"],
+      "strains": [
+        { "system": "volunteers", "level": 4, "note": "Two patrolled beaches plus roving patrols over six more, every weekend and public holiday for seven and a half months, from one club, mostly unpaid." },
+        { "system": "emergency-services", "level": 3, "note": "Outside the patrol season the same rips are still there and nobody is watching them." }
+      ],
+      "confidence": "high",
+      "source": "https://pointlookoutslsc.com.au/about-the-club/",
+      "notes": "The brief asked for surf carnivals. The club's own history records members travelling to carnivals since the 1950s and Nippers competing in carnivals against other clubs, but no current home carnival on this island could be confirmed. Left out rather than invented."
+    },
+    {
+      "id": "quandamooka-festival-season",
+      "name": "The wider Quandamooka Festival season",
+      "kind": "cultural-season",
+      "description": "Published material from earlier years describes the Quandamooka Festival as running from about 1 June to 31 August, with named days spread across that window rather than a single weekend. The 2026 public listing is a two-day gathering in late August. Both patterns are recorded so the simulation does not assume the festival is only ever a weekend.",
+      "occurrences_2026": [
+        { "start": "2026-06-01", "end": "2026-08-31", "label": "wider season", "confidence": "low", "load_multiplier": 1.15 },
+        { "start": "2026-08-29", "end": "2026-08-30", "label": "main public gathering", "confidence": "high", "load_multiplier": 3.0 }
+      ],
+      "confidence": "low",
+      "source": "https://www.redlandcitybulletin.com.au/story/6135798/jessica-mauboy-headlines-straddies-quandamooka-festival-line-up/",
+      "cultural_handling": "The published season includes named ceremony days at specific places. Those names, their meanings and their protocols are not written into this pack and must not be generated into the world. They are a QYAC matter. Logged in `docs/CULTURAL-REVIEW.md`.",
+      "notes": "The June to August season description comes from a report on an earlier festival year, not from a current QYAC source. Treat as low confidence until QYAC's own program is read."
+    }
+  ],
+  "rhythms": [
+    {
+      "id": "bin-day",
+      "name": "Bin day",
+      "kind": "council-service",
+      "description": "Redland City Council collects on the island on Mondays. Bins go kerbside on Sunday afternoon because collection can start very early. For the simulation this matters more than it sounds: a Monday collection means a long weekend generates four days of rubbish before anything is taken away, and Christmas and New Year both fall against the same single weekly cycle.",
+      "cycle": { "kind": "weekly", "weekday": "monday", "put_out": "sunday afternoon", "note": "General waste weekly. Whether recycling alternates weekly or fortnightly on the island was not confirmed." },
+      "affects": ["dunwich", "point-lookout", "amity-point"],
+      "linked_business_id": "nsi-recycling-and-waste-centre",
+      "strains": [
+        { "system": "waste", "level": 3, "note": "Rises to 5 after a long weekend or over the summer holidays, when the bin is full by Saturday." },
+        { "system": "wildlife", "level": 2, "note": "Kerbside bins out overnight on an island with brushtail possums, goannas and crows." }
+      ],
+      "confidence": "medium",
+      "source": "https://www.visitstradbroke.com.au/departure-information",
+      "notes": "The Monday collection comes from a holiday letting agency's departure information page, not from a council source. The Redland City Council bin day lookup is an address-by-address tool that could not be queried without an island address. Worth a five-minute check by anyone with a Straddie address."
+    },
+    {
+      "id": "vehicle-barge",
+      "name": "The vehicle barge",
+      "kind": "transport",
+      "description": "The island's supply line and its hardest constraint. SeaLink runs vehicle ferries between Toondah Harbour at Cleveland and Dunwich, roughly hourly, seven days a week including public holidays. The crossing takes about 45 to 50 minutes. Every vehicle, every pallet of groceries, every skip bin and every ambulance transfer moves on this. When the barge stops, the island stops.",
+      "cycle": {
+        "kind": "daily",
+        "first_departure_cleveland": "06:00",
+        "last_departure_approx": "19:00",
+        "headway_minutes": 60,
+        "headway_note": "Roughly hourly, with extra sailings on Friday and Sunday. Some periods run every 90 to 120 minutes.",
+        "crossing_minutes": 47,
+        "basis": "published description, not a transcribed timetable"
+      },
+      "fleet": [
+        { "vessel": "Minjerribah", "cars": 52, "passengers": 400 },
+        { "vessel": "Sea Breeze", "cars": 60, "passengers": 300 },
+        { "vessel": "Quandamooka", "cars": 52, "passengers": 400 },
+        { "vessel": "Yalingbila", "cars": 0, "passengers": 198 }
+      ],
+      "fleet_source": "repo:straddie-night-market-lab/docs/research-notes.md, from a SeaLink fleet page read on 11 May 2026. The SeaLink fleet page returns HTTP 403 to an automated fetch, so these numbers were not independently re-verified.",
+      "affects": ["dunwich-barge-ramp", "dunwich-ferry-terminal", "dunwich"],
+      "linked_business_id": "sealink-south-east-queensland",
+      "strains": [
+        { "system": "ferry-vehicle", "level": 3, "note": "Baseline. Rises to 5 on any Friday afternoon in a holiday period and on Easter." },
+        { "system": "road", "level": 2, "note": "Every arrival releases up to 60 vehicles onto Junner Street at once, which is why Dunwich traffic comes in pulses rather than a flow." }
+      ],
+      "sim_hint": "Model arrivals as pulses, not as a rate. The whole island's traffic, shop trade and queue behaviour is shaped by the fact that vehicles land in batches an hour apart.",
+      "confidence": "medium",
+      "source": "https://stradbrokeisland.com/getting-here/by-ferry/",
+      "notes": "Exact sailing times were not transcribed. The SeaLink timetable page returns HTTP 403 to an automated fetch, and the Stradbroke Flyer publishes its timetable as an image. Anyone with a browser can fix this in five minutes and should, because the timetable is load-bearing for the whole simulation."
+    },
+    {
+      "id": "water-taxi",
+      "name": "The water taxi",
+      "kind": "transport",
+      "description": "Two operators, SeaLink and the Stradbroke Flyer, running passenger-only catamarans from Cleveland. The crossing takes about 25 minutes. SeaLink lands at the Junner Street pontoon at Dunwich; the Flyer lands at One Mile Jetty. No bookings on the Flyer, and a free courtesy bus on the mainland side. This is how the island's workers, students, day trippers and shoppers move, and the last sailing is the effective closing time of every evening event on the island.",
+      "cycle": {
+        "kind": "daily",
+        "first_departure_approx": "04:45",
+        "last_departure_approx": "20:15",
+        "crossing_minutes": 25,
+        "headway_note": "Frequent through the day with extended weekend hours. Exact times not transcribed.",
+        "basis": "published description, not a transcribed timetable"
+      },
+      "affects": ["dunwich-ferry-terminal", "one-mile-jetty", "dunwich"],
+      "linked_business_id": "stradbroke-flyer",
+      "strains": [
+        { "system": "ferry-passenger", "level": 2, "note": "Baseline. Rises to 5 for a free event within walking distance of a terminal." },
+        { "system": "bus", "level": 3, "note": "Every arrival is a busload wanting the 880 or the 881 at the same moment." }
+      ],
+      "sim_hint": "The last return sailing is a hard behavioural boundary for the `day-tripper-walkon` archetype. Agents of that type should start walking towards the terminal a fixed margin before it.",
+      "confidence": "medium",
+      "source": "https://stradbrokeisland.com/getting-here/by-ferry/"
+    },
+    {
+      "id": "island-bus",
+      "name": "The island bus",
+      "kind": "transport",
+      "description": "Two Translink routes run by Stradbroke Island Buses, timed to meet the ferries. Route 880 runs Dunwich to Point Lookout, from the Junner Street ferry terminal to Mooloomba Road at the gorge walk, 19 stops. Route 881 runs One Mile to Amity Point, from the Yabby Street ferry terminal to Tosh Street at Sovereign Road, 14 stops. A network update on 1 December 2025 extended the 881 to Dunwich, added a QUAMPI stop and introduced a seasonal timetable with extra capacity for school holidays, public holidays and weekends.",
+      "cycle": { "kind": "daily", "note": "Timed to ferry arrivals rather than to a clock headway. Seasonal timetable variation for school holidays, public holidays and weekends.", "basis": "published description, not a transcribed timetable" },
+      "fleet_note": "Vehicles listed at 40 to 62 seats.",
+      "affects": ["dunwich-ferry-terminal", "one-mile-jetty", "point-lookout", "amity-point", "dunwich"],
+      "linked_business_id": "stradbroke-island-buses",
+      "strains": [
+        { "system": "bus", "level": 3, "note": "A 400-passenger water taxi arriving at a 62-seat bus is the arithmetic that shapes a walk-on visitor's whole day." }
+      ],
+      "confidence": "medium",
+      "source": "repo:straddie-night-market-lab/docs/research-notes.md, citing Translink route data and the 1 December 2025 network update"
+    },
+    {
+      "id": "school-run",
+      "name": "The school run",
+      "kind": "daily-life",
+      "description": "Dunwich State School on Bingle Road is the only school on the island. It takes Prep to Year 6 and draws from all three townships, so the morning run is an island-wide movement, not a suburban one: buses collect from Point Lookout and Amity Point and converge on Dunwich. Secondary students are a separate and harder rhythm. Dunwich State High School closed in 2012 with six students enrolled, and every island secondary student now attends Cleveland District State High School on the mainland, which means an early water taxi out and a mid-afternoon water taxi back, every school day, for the whole of their high school years.",
+      "cycle": {
+        "kind": "weekdays",
+        "school_terms_only": true,
+        "primary_morning_window": ["07:30", "08:45"],
+        "primary_afternoon_window": ["14:45", "15:45"],
+        "secondary_ferry_out_approx": "06:30",
+        "secondary_ferry_back_approx": "16:00",
+        "basis": "estimate. The published school bus timetables are images and were not transcribed, and no bell times were read."
+      },
+      "affects": ["dunwich-state-school", "dunwich", "point-lookout", "amity-point", "dunwich-ferry-terminal"],
+      "linked_business_id": "dunwich-state-school",
+      "strains": [
+        { "system": "road", "level": 2, "note": "A short, sharp weekday peak on Bingle Road and the East Coast Road approach, twice a day, forty weeks a year." },
+        { "system": "ferry-passenger", "level": 2, "note": "The secondary students are on the first useful sailing every weekday morning, which is not negotiable and not weather-dependent for them." },
+        { "system": "household-time", "level": 3, "note": "A Point Lookout family with a high schooler loses roughly three hours a day to the crossing. This is a real driver of who can afford to live where on this island." }
+      ],
+      "sim_hint": "The school run disappears completely during school holidays. That absence is one of the clearest legible signals in the simulation that the calendar has changed.",
+      "confidence": "medium",
+      "source": "https://dunwichss.eq.edu.au/our-school",
+      "school_closure_source": "https://www.redlandcitybulletin.com.au/story/247451/dunwich-high-school-closes-its-doors/",
+      "notes": "The Anzac Day notice places Dunwich State School on Welsby Street; the school's own material and directory listings give Bingle Road. They may be corners of the same block. Not resolved."
+    },
+    {
+      "id": "tide-fishing-window",
+      "name": "The tide-driven fishing window",
+      "kind": "natural-rhythm",
+      "description": "The island's fishing does not run on a clock, it runs on water movement. The working pattern is the run-in and the run-out around a tide change, weighted by the solunar major and minor windows and cut short by wind and swell. Around the South Passage and the bar off Amity, the tide is not a preference but a safety limit: a strong outgoing tide against an easterly swell makes the bar unworkable regardless of how good the fishing is. Land-based fishing off the gutters at Main Beach and Flinders Beach follows the same logic on a smaller scale.",
+      "cycle": {
+        "kind": "tidal",
+        "period_hours": 12.42,
+        "note": "Two highs and two lows a day, shifting about 50 minutes later each day, on a roughly fortnightly spring and neap cycle.",
+        "working_window_hours_either_side_of_change": 2,
+        "basis": "general knowledge of semidiurnal tides, plus the field-board pattern in Luke's own Point Lookout Fishing Club prototype"
+      },
+      "affects": ["amity-point", "amity-boat-ramp", "one-mile-jetty", "main-beach", "flinders-beach", "point-lookout-headland", "amity-jetty"],
+      "linked_business_id": "point-lookout-fishing-club",
+      "strains": [
+        { "system": "boat-ramp", "level": 2, "note": "Everybody wants the ramp in the same ninety minutes, because the tide told them all the same thing." },
+        { "system": "marine-rescue", "level": 3, "note": "The South Passage bar is where an ordinary fishing morning becomes a rescue." }
+      ],
+      "sim_hint": "Read the tide from `world.read('tide')`. Fishing agents should choose their departure from the tide state and the wind, never from the clock. This is one of the clearest places the simulation can teach a player something true about how this island actually works.",
+      "confidence": "medium",
+      "source": "repo:plfc-community-platform/data/latest-field-data.json (Point Lookout Fishing Club field board prototype, tide, solunar and weather windows), plus general knowledge",
+      "notes": "The specific solunar major and minor window times in the PLFC prototype are explicitly labelled sample data, not measurements, and none of them are copied into this pack. No published tide table for Amity Point or Dunwich was read. The `tide` system in `src/systems/environment/tide.js` is the authority on tide state; this record only says what people do about it."
+    },
+    {
+      "id": "friday-afternoon-arrivals",
+      "name": "Friday afternoon arrivals",
+      "kind": "weekly-load",
+      "description": "The weekly wave. From about 13:00 on a Friday the vehicle barge fills with weekenders, the water taxi fills with people who have finished work, and by 18:00 the townships have a different population from the one they had at lunchtime. Extra Friday sailings exist because of this. Groceries sell out on Friday evening, the pub is full, and the roads carry the year's highest proportion of drivers who have never driven them before.",
+      "cycle": { "kind": "weekly", "weekday": "friday", "window": ["13:00", "20:00"], "peak_hour": "17:00", "basis": "estimate, with the extra Friday sailings confirmed in the published ferry description" },
+      "affects": ["dunwich-barge-ramp", "dunwich-ferry-terminal", "dunwich", "point-lookout", "amity-point"],
+      "load_multiplier": { "value": 1.8, "basis": "estimate", "note": "Applied to the weekday visitor baseline. Higher inside school holidays and on a long weekend, where it can double again." },
+      "strains": [
+        { "system": "ferry-vehicle", "level": 4 },
+        { "system": "road", "level": 3, "note": "Unfamiliar drivers, dusk, and wildlife on the road at exactly the same hour. This is the island's highest-risk driving window of the week." },
+        { "system": "groceries", "level": 3, "note": "Both FoodWorks stores restock by barge. A Friday run on the shelves is not replaced until the next delivery." }
+      ],
+      "revenue_to": [
+        { "business_id": "foodworks-point-lookout", "effect": "high" },
+        { "business_id": "foodworks-dunwich", "effect": "high" },
+        { "business_id": "cellarbrations-dunwich", "effect": "high" },
+        { "business_id": "stradbroke-island-beach-hotel", "effect": "high" },
+        { "business_id": "sealink-south-east-queensland", "effect": "high" },
+        { "business_id": "point-lookout-roadhouse", "effect": "high" }
+      ],
+      "confidence": "medium",
+      "source": "https://stradbrokeisland.com/getting-here/by-ferry/, plus general knowledge of the pattern"
+    },
+    {
+      "id": "sunday-afternoon-departures",
+      "name": "Sunday afternoon departures",
+      "kind": "weekly-load",
+      "description": "The mirror of Friday, and worse, because it is compressed. Checkout is late morning, the beach is good until mid-afternoon, and then everybody wants the same three sailings. The barge queue at Dunwich forms on Junner Street. The islanders' own rule is to either leave early or stay for dinner, and the businesses that do well on a Sunday are the ones that give people a reason to take the later boat.",
+      "cycle": { "kind": "weekly", "weekday": "sunday", "window": ["11:00", "19:00"], "peak_hour": "15:00", "basis": "estimate, with the extra Sunday sailings confirmed in the published ferry description" },
+      "affects": ["dunwich-barge-ramp", "dunwich-ferry-terminal", "dunwich", "one-mile-jetty"],
+      "load_multiplier": { "value": 1.6, "basis": "estimate", "note": "Departure load, not arrival load. The island empties rather than fills." },
+      "strains": [
+        { "system": "ferry-vehicle", "level": 5, "note": "The single most reliable queue on the island's calendar. It happens every week and it surprises people every week." },
+        { "system": "road", "level": 3, "note": "Queue spillback onto Junner Street blocks the town for everyone who is not leaving." },
+        { "system": "waste", "level": 3, "note": "Holiday houses and campgrounds all empty their bins on the same afternoon, against a Monday collection." }
+      ],
+      "revenue_to": [
+        { "business_id": "straddie-brewing-co", "effect": "high", "note": "Directly benefits from people choosing the later boat." },
+        { "business_id": "little-ship-club", "effect": "high" },
+        { "business_id": "st-stradbroke", "effect": "medium" },
+        { "business_id": "point-lookout-bowls-club", "effect": "high", "note": "Sunday barefoot bowls competes with the departure window for the same people." },
+        { "business_id": "dunwich-bakery", "effect": "medium" }
+      ],
+      "sim_hint": "This is the best small civic puzzle in the pack. Anything that gives departing visitors a reason to take a later sailing flattens the queue without adding a single sailing.",
+      "confidence": "medium",
+      "source": "https://stradbrokeisland.com/getting-here/by-ferry/, plus general knowledge of the pattern"
+    },
+    {
+      "id": "waste-transfer-rhythm",
+      "name": "The waste transfer station rhythm",
+      "kind": "council-service",
+      "description": "Everything the island throws away is handled at the North Stradbroke Island Recycling and Waste Centre at Dunwich and then leaves by barge. That is the whole story of waste on this island: there is no landfill capacity to grow into, only barge slots. Peak weekends and holiday periods generate volume faster than the barge schedule removes it, and the shortfall sits on the island until it can go.",
+      "cycle": { "kind": "daily", "note": "Public opening hours are published for the facility; the barge removal schedule for waste is not public and is not recorded here.", "basis": "estimate for the removal cycle" },
+      "affects": ["dunwich"],
+      "linked_business_id": "nsi-recycling-and-waste-centre",
+      "strains": [
+        { "system": "waste", "level": 3, "note": "Rises to 5 in the summer holidays and after any large event." },
+        { "system": "ferry-vehicle", "level": 2, "note": "Waste going out competes for barge deck space with visitors coming in, on the same sailings." }
+      ],
+      "sim_hint": "Model waste as a stock with an outflow limited by barge slots, not as a rate that clears itself. That single choice makes every event in this pack cost something real.",
+      "confidence": "low",
+      "source": "https://stradbrokeisland.com/waste-transfer-station/",
+      "notes": "No public data on the waste removal schedule, tonnage, barge slot allocation or the facility's capacity was found. This is the largest unfilled gap in the pack for anyone modelling event load honestly."
+    }
+  ],
+  "left_out": [
+    {
+      "name": "Dunwich markets",
+      "reason": "The brief asked for them. No current regular market at Dunwich could be confirmed from any public source. Market stalls appear at Dunwich inside the Quandamooka Festival and the Oyster Festival. Left out rather than invented."
+    },
+    {
+      "name": "Point Lookout Football Club fixtures",
+      "reason": "There is no Point Lookout Football Club. PLFC on this island is the Point Lookout Fishing Club. Rugby league is the Straddie Sharks at Ron Stark Oval, Dunwich, which is in the pack."
+    },
+    {
+      "name": "Sandy Sports Club events",
+      "reason": "The brief asked for them. Sandy Sports Club is Luke's own proposed incorporated association, carried in `data/businesses.json` with status `proposed`. It has no events because it does not yet exist. Nothing has been invented for it and it must never render as a real venue."
+    },
+    {
+      "name": "Point Lookout Fishing Club competitions",
+      "reason": "The club is real, incorporated and running competitions and social trips. No competition calendar, comp names or dates are published, and the field board in Luke's own prototype is explicitly labelled sample data. Nothing was invented. The tide-driven fishing window rhythm carries the club's actual behaviour instead."
+    },
+    {
+      "name": "Surf carnivals hosted at Point Lookout",
+      "reason": "The club's history records members attending carnivals since the 1950s and Nippers competing in carnivals, but no current home carnival on this island could be confirmed."
+    },
+    {
+      "name": "Named ceremony days within the Quandamooka Festival season",
+      "reason": "Published sources name specific ceremony days at specific places. These are cultural content and belong to QYAC. They are not written into this pack. Logged in `docs/CULTURAL-REVIEW.md`."
+    },
+    {
+      "name": "Stradbroke Island Hostplus Cup game",
+      "reason": "A rugby league fixture at Ron Stark Oval listed for 18 July 2026. It is a scheduled competition match rather than an island event with its own recurrence, and whether the island hosts one every year is not established. Not written as an annual event."
+    },
+    {
+      "name": "One-off 2026 listings",
+      "reason": "Luke's events engine carries a number of confirmed one-off 2026 listings: weaving and collage workshops at a Point Lookout studio, Tones and Tides concerts, a Red Cross EmergencyRedi workshop, a youth climate gathering, a ferry party cruise, an art teacher camp, a nature art retreat and a gallery and museum hop. These are real but they are single dates, not calendar rhythms, so they are not modelled here. They live in `quandamooka-country-events-engine/assets/site-data.js` with their sources if a future agent wants a specific 2026 day."
+    }
+  ],
+  "sim_defaults": {
+    "tick_minutes": 10,
+    "crowd_curve_interpolation": "linear between hourly values",
+    "attendance_noise": "Apply a deterministic jitter from `world.rng.stream('events')`, plus or minus 20 per cent on `typical`, clamped to the low and high bounds. Never `Math.random`.",
+    "weather_coupling": "Multiply attendance by (1 - sensitivity * severity) for each active driver, then apply `cancels_if` as a hard gate.",
+    "load_multiplier_application": "Period multipliers multiply the visitor baseline only. They never multiply the resident population.",
+    "strain_to_consequence": "A strain at level 5 should produce a visible failure in the world: a queue that does not clear before the last sailing, a bin that overflows, a car park that turns cars away, a patrol that cannot be filled. If nothing fails at level 5, the number is decoration."
+  }
+}

@@ -1,0 +1,853 @@
+{
+  "pack": "lore",
+  "version": "0.1.0",
+  "updated": "2026-08-07",
+  "about": "Cultural protocol, acknowledgement, documented history and sources for the Minjerribah Living Twin. This pack is the gate. Nothing cultural enters the world unless it is recorded here with a citable public source. QYAC, the Quandamooka Yoolooburrabee Aboriginal Corporation, is the authority on all of this. This file is not QYAC and has not been reviewed by QYAC. Everything here is public-record material assembled by an agent, and every open question is queued in docs/CULTURAL-REVIEW.md for a human to take to QYAC.",
+  "status": "not_reviewed_by_traditional_owners",
+  "authority": {
+    "body": "Quandamooka Yoolooburrabee Aboriginal Corporation (QYAC)",
+    "role": "Registered Native Title Body Corporate for the Quandamooka People, and the cultural heritage body for the Quandamooka estate.",
+    "registered": "1 June 2011",
+    "icn": "7564",
+    "website": "https://qyac.net.au/",
+    "office": "Dunwich, Minjerribah",
+    "rule": "Where this pack and QYAC disagree, QYAC is right and this pack is wrong. Where QYAC has not published a position, this project has no position."
+  },
+  "conventions": {
+    "confidence": "high = stated by QYAC or a Queensland or Commonwealth government publication. medium = stated by a reputable institution such as a university, museum or peer-reviewed paper. low = general knowledge or a single secondary source, and must not be shown to a player.",
+    "source": "Every non-obvious entry carries a source key resolving against `sources`, or a full URL, or the string \"general knowledge\".",
+    "spelling": "Quandamooka names are spelled differently in different published sources, including in QYAC's own publications. Variation is recorded rather than resolved. The North Stradbroke Island Museum states plainly that as a result of colonisation and the suppression of Aboriginal languages there are ad hoc spelling and name variations and that the names on its map are not universal.",
+    "player_facing": "A record with `player_facing: false` may inform simulation behaviour but must never be rendered as text, audio or art to a player.",
+    "no_paraphrase_of_culture": "Facts about history, law and public policy may be summarised. Cultural knowledge, story and practice may not be summarised, extended or dramatised by an agent."
+  },
+
+  "acknowledgement": {
+    "note": "QYAC publishes its own acknowledgement in its Quandamooka Country Sustainability Strategy. This project does not copy that wording into a game asset. It uses its own plain wording, written to say only what is publicly documented, and defers to QYAC's published wording as the reference.",
+    "qyac_published_acknowledgement": {
+      "where": "Acknowledgements page, Jara Marumba Yaga: Quandamooka Country Sustainability Strategy, QYAC",
+      "summary_of_content": "QYAC acknowledges that it operates on the lands of the Quandamooka Peoples, pays respect to the land and sea, acknowledges Ancestors who managed these lands for over 40,000 years, acknowledges Elders as knowledge holders, teachers and leaders, acknowledges youth as future leaders, and acknowledges members who have passed.",
+      "source": "qyac-sustainability",
+      "confidence": "high"
+    },
+    "game_wording": {
+      "long": {
+        "text": "Minjerribah is Quandamooka Country. This project acknowledges the Quandamooka People as the Traditional Owners of Minjerribah and of the lands and waters of Moreton Bay, and pays respect to Elders past and present. QYAC, the Quandamooka Yoolooburrabee Aboriginal Corporation, holds and manages the Quandamooka People's native title rights and interests. This is a simulation built from public records. It is not a cultural work and it does not speak for the Quandamooka People.",
+        "where": "splash screen, about panel, README",
+        "confidence": "high"
+      },
+      "short": {
+        "text": "Minjerribah is Quandamooka Country. We acknowledge the Quandamooka People as Traditional Owners, and pay respect to Elders past and present.",
+        "where": "loading screen, footer",
+        "confidence": "high"
+      },
+      "hud": {
+        "text": "Quandamooka Country",
+        "where": "persistent, next to the place name",
+        "confidence": "high"
+      },
+      "optional_line": {
+        "text": "The Quandamooka People have never ceded sovereignty of their Country.",
+        "basis": "QYAC states in its 2015 issues briefing to the Queensland parliament that the Quandamooka have never ceded sovereignty of their Country and that this issue remains live.",
+        "source": "qyac-briefing-2015",
+        "confidence": "high",
+        "note": "Include only if the author wants it. It is QYAC's own statement, not a claim this project originated."
+      }
+    },
+    "rules": [
+      "Never abbreviate the acknowledgement to a logo, a tick or an icon.",
+      "Never place the acknowledgement behind a menu the player must find.",
+      "Never write an acknowledgement in first person plural on behalf of Quandamooka People.",
+      "Never generate a Welcome to Country. A Welcome to Country can only be given by a Traditional Owner. An acknowledgement is what a visitor gives."
+    ]
+  },
+
+  "peoples": {
+    "quandamooka_people": {
+      "name": "Quandamooka People",
+      "description": "The Aboriginal people of Moreton Bay and its islands, including Minjerribah. QYAC describes the Quandamooka People as a First Nation of over 2000 Traditional Owners of Moreton Bay in south east Queensland, who have owned and occupied the lands and waters of Moreton Bay since time immemorial.",
+      "country_extent": "QYAC describes Quandamooka Country as the waters and lands of and around Moreton Island, Minjerribah, the southern Moreton Bay islands and South Stradbroke Island, and the mainland from the mouth of the Brisbane River through Wynnum, Chandler, Lytton, Belmont and Tingalpa, south to Cleveland and the Logan River. It crosses four local government areas: Brisbane, Redland, Logan and Gold Coast.",
+      "source": "qyac-briefing-2015",
+      "confidence": "high"
+    },
+    "occupation_length": {
+      "note": "Published figures differ, including between QYAC's own publications, and between QYAC and archaeological dating. All are recorded. None is to be presented as the single number.",
+      "statements": [
+        { "claim": "At least 20,000 years BCE, people settled in what is now the Moreton Bay region and on North Stradbroke Island, and their descendants have maintained a continuous presence ever since.", "who": "QYAC", "source": "qyac-briefing-2015", "confidence": "high" },
+        { "claim": "An unbroken connection to Quandamooka Country with over 40,000 years of stewardship.", "who": "QYAC", "source": "qyac-sustainability", "confidence": "high" },
+        { "claim": "Wallen Wallen Creek, an open site on Minjerribah about 6 km south of Dunwich, produced a radiocarbon date of 21,800 plus or minus 400 BP, and was for almost forty years the oldest dated site on the Australian eastern seaboard.", "who": "Neal and Stock 1986 in Nature, restated in Scientific Reports 2024", "source": "wallen-wallen-nature-1986", "source_2": "eastern-seaboard-2024", "confidence": "medium" },
+        { "claim": "Optically stimulated luminescence work published in 2024 indicates human occupation at Wallen Wallen Creek beginning between about 30 and 49 thousand years ago.", "who": "Scientific Reports 2024", "source": "eastern-seaboard-2024", "confidence": "medium" }
+      ],
+      "usage_rule": "If the twin must show a number, show QYAC's, attribute it to QYAC, and do not present an archaeological date as a correction to a Traditional Owner statement."
+    },
+    "clans": {
+      "note": "QYAC describes three clans or sub-groups. Spellings vary between published sources, including between QYAC's own documents. All published spellings are recorded and none is declared correct. The correct spellings for this project are a QYAC decision, logged in docs/CULTURAL-REVIEW.md.",
+      "groups": [
+        {
+          "id": "nunukul",
+          "spellings": [
+            { "spelling": "Nunukul", "who": "QYAC 2015 issues briefing", "source": "qyac-briefing-2015" },
+            { "spelling": "Noonuccal", "who": "QYAC Sustainability Strategy artist biography", "source": "qyac-sustainability" },
+            { "spelling": "Nunukul", "who": "stradbrokeisland.com", "source": "stradbrokeisland-quandamooka" }
+          ],
+          "association": "QYAC associates the clans with Quandamooka Country generally. stradbrokeisland.com associates Nunukul with Minjerribah. Myora Mission at Moongalba is described in published history as a traditional Nunukul place of residence.",
+          "confidence": "high"
+        },
+        {
+          "id": "ngugi",
+          "spellings": [
+            { "spelling": "Ngughi", "who": "QYAC 2015 issues briefing", "source": "qyac-briefing-2015" },
+            { "spelling": "Ngugi", "who": "QYAC Sustainability Strategy artist biography", "source": "qyac-sustainability" },
+            { "spelling": "Nughi", "who": "stradbrokeisland.com", "source": "stradbrokeisland-quandamooka" }
+          ],
+          "association": "stradbrokeisland.com associates Ngugi with Moorgumpin, Moreton Island.",
+          "confidence": "high"
+        },
+        {
+          "id": "goenpul",
+          "spellings": [
+            { "spelling": "Goenpul", "who": "QYAC 2015 issues briefing", "source": "qyac-briefing-2015" },
+            { "spelling": "Gorenpul", "who": "QYAC Sustainability Strategy artist biography", "source": "qyac-sustainability" },
+            { "spelling": "Gorenpul", "who": "stradbrokeisland.com", "source": "stradbrokeisland-quandamooka" }
+          ],
+          "association": "stradbrokeisland.com associates Gorenpul with Minjerribah.",
+          "confidence": "high"
+        }
+      ],
+      "usage_rule": "The twin may state that the Quandamooka People are made up of these three groups, using QYAC's own spellings from its 2015 issues briefing, and citing it. The twin must not assign a clan to any simulated resident, must not map clans to townships, and must not draw clan boundaries on the island."
+    },
+    "family_groups": {
+      "structure": "QYAC's board has one director from each of the twelve families descended from the twelve apical ancestors recognised in the 2011 native title determination. Quandamooka People are the descendants of the apical ancestors listed in Schedule 1 of Delaney on behalf of the Quandamooka People v State of Queensland [2011] FCA 741.",
+      "source": "aigi-qyac-decision-making",
+      "secondary_source": "qyac-native-title",
+      "confidence": "medium",
+      "names_recorded": false,
+      "why_not": "The twelve apical ancestors are named in a public court schedule, but they are the named forebears of living families on a small island. Listing them in a game data file is not an agent's call. If QYAC wants them named, a human can add them with QYAC's approval. Queued in docs/CULTURAL-REVIEW.md.",
+      "usage_rule": "The twin may state that QYAC's board is drawn one director per family from twelve families. It must not name a family, must not attach a family name to a simulated resident, and must not simulate family politics."
+    }
+  },
+
+  "language": {
+    "language_name": {
+      "name": "Jandai",
+      "also_spelled": ["Janday", "Jandai"],
+      "note": "QYAC describes Quandamooka as a word from the Jandai language used to describe Moreton Bay and the islands within it. QYAC credits Jandai language expertise in its Sustainability Strategy to Aunty Sandra Delaney, supported by the Australian Government Indigenous Languages and Arts Program, and describes an Indigenous Languages Preservation and Revival Project.",
+      "dictionary": "Jandai Language Dictionary, compiled by the Minjerribah Moorgumpin Elders-in-Council, first published 2011. It is the published community reference for the language.",
+      "source": "qyac-briefing-2015",
+      "source_2": "qyac-sustainability",
+      "source_3": "mmeic-dictionary",
+      "confidence": "high"
+    },
+    "hard_rule": "Only words in `allowlist` may appear anywhere in this project, in code, data, UI text, asset names or comments. Every one of them is a name or gloss published by QYAC, a Queensland or Commonwealth government body, a university or the North Stradbroke Island Museum. No word may be inflected, combined, translated, pluralised or coined. If a needed word is not on this list, use English.",
+    "allowlist": [
+      {
+        "word": "Minjerribah",
+        "refers_to": "North Stradbroke Island",
+        "usage": "Used constantly by QYAC and by the Queensland Government. Safe to use as the island's name throughout.",
+        "meaning": "contested, do not assert",
+        "published_meanings": [
+          { "gloss": "place of many mosquitoes", "who": "Queensland Parks and Wildlife Service, Naree Budjong Djara National Park culture page", "source": "qpws-nbd-culture" },
+          { "gloss": "island in the sun", "who": "widely repeated in tourism and secondary material, no primary source found", "source": "general knowledge", "confidence": "low" }
+        ],
+        "confidence": "high",
+        "player_facing": true
+      },
+      {
+        "word": "Quandamooka",
+        "refers_to": "Moreton Bay and the islands within it, and the people of that bay",
+        "usage": "Safe as the name of the People and of Country.",
+        "published_meanings": [
+          { "gloss": "a Jandai word used to describe Moreton Bay and the islands within it", "who": "QYAC", "source": "qyac-briefing-2015" },
+          { "gloss": "people of the bay", "who": "Queensland Parks and Wildlife Service", "source": "qpws-nbd-culture" }
+        ],
+        "confidence": "high",
+        "player_facing": true
+      },
+      {
+        "word": "Yoolooburrabee",
+        "refers_to": "the Quandamooka People, in QYAC's corporate name",
+        "published_meaning": "people of the sand and sea",
+        "who": "QYAC, stated in its own 2015 issues briefing and its Sustainability Strategy",
+        "source": "qyac-briefing-2015",
+        "confidence": "high",
+        "usage": "Use only as part of the corporation's full name, or when quoting QYAC's own gloss with attribution.",
+        "player_facing": true
+      },
+      {
+        "word": "Goompi",
+        "refers_to": "Dunwich",
+        "variants": [
+          { "spelling": "Goompi", "who": "QYAC uses Goompi for the Dunwich cultural landscape and for the Goompi Trail; North Stradbroke Island Museum language map", "source": "qyac-sustainability", "source_2": "nsi-museum-language-map" },
+          { "spelling": "Gumpi", "who": "Queensland Government material relating to the Dunwich township master plan, and the QUAMPI site address", "source": "repo-data-notes", "source_2": "quampi-icn" },
+          { "spelling": "Koompe", "who": "recorded in data/places.json against Wikipedia as an alternative spelling", "source": "repo-data-notes", "confidence": "low" }
+        ],
+        "meaning": "not published in any source found. Do not invent one.",
+        "confidence": "high",
+        "player_facing": true
+      },
+      {
+        "word": "Pulan",
+        "refers_to": "Amity Point",
+        "variants": [
+          { "spelling": "Pulan", "who": "QYAC, describing the 1824 pilot station at Pulan (Amity Point)", "source": "qyac-briefing-2015" },
+          { "spelling": "Pulan Pulan", "who": "North Stradbroke Island Museum Quandamooka language map", "source": "nsi-museum-language-map" },
+          { "spelling": "Bulan", "who": "in public circulation, recorded in docs/DATA-NOTES.md against Wikipedia", "source": "repo-data-notes", "confidence": "low" }
+        ],
+        "meaning": "not published in any source found. Do not invent one.",
+        "confidence": "high",
+        "player_facing": true
+      },
+      {
+        "word": "Mooloomba",
+        "refers_to": "Point Lookout",
+        "variants": [
+          { "spelling": "Mooloomba", "who": "North Stradbroke Island Museum Quandamooka language map; Queensland Heritage Register records the Point Lookout foreshore as also known as Mooloomba; Mooloomba Road carries the spelling", "source": "nsi-museum-language-map", "source_2": "repo-data-notes" },
+          { "spelling": "Mulumba", "who": "stradbrokeisland.com", "source": "repo-data-notes" }
+        ],
+        "meaning": "not published in any source found. Do not invent one.",
+        "confidence": "high",
+        "player_facing": true
+      },
+      {
+        "word": "Bummiera",
+        "refers_to": "Brown Lake",
+        "variants": [{ "spelling": "Bummiera", "who": "QYAC Sustainability Strategy image caption; North Stradbroke Island Museum language map", "source": "qyac-sustainability", "source_2": "nsi-museum-language-map" }, { "spelling": "Bummeria", "who": "also published, recorded in docs/DATA-NOTES.md", "source": "repo-data-notes" }],
+        "meaning": "not recorded here.",
+        "confidence": "high",
+        "player_facing": true,
+        "protocol_flag": "Published sources describe Bummiera as a place of deep cultural significance with a protocol before entering the water. This project does not model, dramatise or gate that protocol. See docs/CULTURAL-REVIEW.md."
+      },
+      {
+        "word": "Kaboora",
+        "refers_to": "Blue Lake",
+        "variants": [{ "spelling": "Kaboora", "who": "North Stradbroke Island Museum Quandamooka language map", "source": "nsi-museum-language-map" }, { "spelling": "Karboora", "who": "also published, recorded in docs/DATA-NOTES.md", "source": "repo-data-notes" }],
+        "meaning": "not recorded here. A tourism source publishes a gloss; it is not repeated because no authoritative source was found.",
+        "confidence": "high",
+        "player_facing": true,
+        "protocol_flag": "Described in public sources as an area of special cultural significance. Nothing further is recorded. See docs/CULTURAL-REVIEW.md."
+      },
+      {
+        "word": "Naree Budjong Djara",
+        "refers_to": "the national park covering a large part of Minjerribah, jointly managed by QYAC and the Queensland Parks and Wildlife Service",
+        "published_meanings": [
+          { "gloss": "Our Mother Earth", "who": "QYAC 2015 issues briefing", "source": "qyac-briefing-2015" },
+          { "gloss": "My Mother Earth", "who": "Queensland Parks and Wildlife Service", "source": "qpws-nbd-about" }
+        ],
+        "confidence": "high",
+        "player_facing": true,
+        "note": "Both glosses are published by authoritative bodies. Use the park's name; if a gloss is shown, attribute it."
+      },
+      {
+        "word": "Moorgumpin",
+        "refers_to": "Moreton Island",
+        "variants": [
+          { "spelling": "Moorgumpin", "who": "QYAC 2015 issues briefing; Minjerribah Moorgumpin Elders-in-Council", "source": "qyac-briefing-2015" },
+          { "spelling": "Mulgumpin", "who": "QYAC Quandamooka Country Sustainability Strategy, which uses Mulgumpin throughout", "source": "qyac-sustainability" }
+        ],
+        "meaning": "not published in any source found.",
+        "confidence": "high",
+        "player_facing": true,
+        "note": "Off-island. Relevant only for the horizon, the bay and the whale migration."
+      },
+      {
+        "word": "Moongalba",
+        "refers_to": "the place associated with the Myora Mission site, described in published history as a traditional Nunukul place of residence with a freshwater spring near the coast, and known as the sitting-down place associated with Oodgeroo Noonuccal",
+        "source": "wikipedia-myora",
+        "confidence": "medium",
+        "player_facing": false,
+        "note": "Recorded for history only. Not to be placed, labelled or rendered in the world until a human has resolved it with QYAC. See docs/CULTURAL-REVIEW.md."
+      },
+      {
+        "word": "Yalingbila",
+        "refers_to": "whale",
+        "published_meaning": "In the Quandamooka language yalingbila refers to whales. The QYAC and University of Queensland project at Mooloomba is named Yalingbila Bibula, published in English as Whale on the Hill.",
+        "source": "uq-yalingbila-bibula",
+        "confidence": "high",
+        "player_facing": true,
+        "usage": "Use only as part of the project name Yalingbila Bibula, or as the name of the SeaLink passenger vessel Yalingbila recorded in data/transport.json. Do not use the bare word as a label for a season, a month, an animal in the sim or anything else.",
+        "correction_note": "src/kernel/clock.js previously glossed Yalingbila as a season meaning hot wet time. That was wrong. It has been removed."
+      },
+      {
+        "word": "Terangeri",
+        "refers_to": "North Stradbroke Island, recorded alongside Minjerribah",
+        "source": "nsi-museum-language-map",
+        "confidence": "medium",
+        "player_facing": false,
+        "note": "Recorded once, on the museum map. Not used anywhere in this project. Minjerribah is the name in current use by QYAC and government."
+      },
+      {
+        "word": "Jara marumba yaga",
+        "refers_to": "the title of QYAC's Quandamooka Country Sustainability Strategy",
+        "published_meaning": "Make good Country",
+        "source": "qyac-sustainability",
+        "confidence": "high",
+        "player_facing": true,
+        "usage": "Use only as the title of that document, when citing it."
+      },
+      {
+        "word": "Quandamooka Yoolooburrabee Aboriginal Corporation",
+        "refers_to": "QYAC, the corporate body",
+        "source": "qyac-home",
+        "confidence": "high",
+        "player_facing": true
+      },
+      {
+        "word": "Capembah",
+        "refers_to": "Myora Springs and Capembah Creek",
+        "variants": [
+          { "spelling": "Capembah", "who": "the creek is named Capembah Creek in OpenStreetMap and recorded in data/places.json", "source": "repo-data-notes" },
+          { "spelling": "Capeembah", "who": "stradbrokeisland.com", "source": "repo-data-notes" }
+        ],
+        "meaning": "not published in any source found.",
+        "confidence": "medium",
+        "player_facing": true,
+        "note": "Already in use in data/places.json. Distinct from Moongalba, which is a separate place nearby and is not to be placed in the world."
+      },
+      {
+        "word": "Bibula",
+        "refers_to": "used only in the project name Yalingbila Bibula, published in English as Whale on the Hill",
+        "source": "uq-yalingbila-bibula",
+        "confidence": "high",
+        "player_facing": true,
+        "usage": "Never on its own. Only as part of Yalingbila Bibula."
+      },
+      {
+        "word": "QUAMPI",
+        "refers_to": "the Quandamooka Art, Museum and Performance Institute at Gumpi, Dunwich, a QYAC project opened on 11 September 2025",
+        "source": "quampi-icn",
+        "source_2": "detsi-quampi",
+        "confidence": "high",
+        "player_facing": true,
+        "usage": "The name of a real building and organisation. Use it as a name. Do not describe what happens inside it beyond what QYAC publishes.",
+        "note": "Also published as QAMPI in some architectural material. Already referenced in data/transport.json and data/businesses.json."
+      },
+      {
+        "word": "Yulu-Burri-Ba",
+        "refers_to": "Yulu-Burri-Ba Aboriginal Corporation for Community Health, the Aboriginal community controlled health service serving Minjerribah and the bayside",
+        "source": "repo-data-notes",
+        "confidence": "medium",
+        "player_facing": true,
+        "usage": "The registered name of a real health service. Use it as a name only. Do not gloss it, do not simulate its clinical operations, do not attribute a view to it.",
+        "note": "Already referenced in data/businesses.json and data/residents.json. The meaning of the name was not found in any public source and is not asserted."
+      },
+      {
+        "word": "Deanbilla",
+        "refers_to": "Deanbilla Bay at Gumpi, Dunwich, the QUAMPI site",
+        "source": "quampi-icn",
+        "confidence": "medium",
+        "player_facing": true,
+        "meaning": "not published in any source found.",
+        "note": "Not yet used in this repository. Allowlisted in advance because the QUAMPI place record will need it."
+      },
+      {
+        "word": "Oodgeroo Noonuccal",
+        "refers_to": "the poet and campaigner, quoted by QYAC in its own 2015 issues briefing",
+        "source": "qyac-briefing-2015",
+        "confidence": "high",
+        "player_facing": false,
+        "usage": "A real, recently living person with living family on this island, and a body of work in copyright. Her name may appear in a citation or a factual note. She must not be depicted, voiced, placed, quoted at length or made a character. See history.timeline h-oodgeroo and docs/CULTURAL-REVIEW.md."
+      }
+    ],
+    "banned_tokens": {
+      "note": "Strings that must not appear anywhere in the repository. Each was either invented by an earlier pass or is a known miscoinage. A build check can grep for these and fail.",
+      "tokens": [
+        { "token": "Mibarra", "reason": "invented season name, no published source, removed from src/kernel/clock.js on 7 August 2026" },
+        { "token": "Bujiyam", "reason": "invented season name, no published source, removed from src/kernel/clock.js on 7 August 2026" },
+        { "token": "Bujaboo", "reason": "invented season id, no published source, removed from src/kernel/clock.js on 7 August 2026" },
+        { "token": "Gubinbara", "reason": "invented season name, no published source, removed from src/kernel/clock.js on 7 August 2026" },
+        { "token": "Nunmatta", "reason": "invented season name, no published source, removed from src/kernel/clock.js on 7 August 2026" },
+        { "token": "Gulayi", "reason": "invented season name, no published source, removed from src/kernel/clock.js on 7 August 2026" },
+        { "token": "QUANDAMOOKA_SEASONS", "reason": "the identifier asserted that the six-season calendar in code was Quandamooka. No published Quandamooka seasonal calendar was found. Renamed to ISLAND_SEASONS in src/kernel/clock.js." }
+      ]
+    },
+    "seasonal_calendar": {
+      "finding": "No published Quandamooka seasonal calendar was found. Searches covered QYAC's own publications, the Queensland Government, the Bureau of Meteorology Indigenous Weather Knowledge seasonal calendars, the North Stradbroke Island Museum and the Jandai language material. The Bureau publishes Indigenous seasonal calendars for other nations; there is no Quandamooka one. Jajoo Warrngara: The Culture Classroom hosts a video resource titled Quandamooka Seasonal Cycles, presented by Quandamooka Traditional Custodian Elisha Kissick, but its contents are behind a subscription and the season names, if any, could not be read.",
+      "consequence": "The six season names previously in src/kernel/clock.js were written from memory and could not be sourced. Two of them were demonstrably wrong: Yalingbila is published as meaning whale, not a season. They have been replaced with plain descriptive English season names. The ecological markers attached to them were kept, because they describe observable island conditions rather than cultural knowledge, and they are individually checkable against data/ecology.json.",
+      "source": "jajoo-warrngara-seasonal-cycles",
+      "source_2": "bom-indigenous-calendars",
+      "open_question": "Whether the twin should carry a Quandamooka seasonal calendar at all, and if so, whose. Queued in docs/CULTURAL-REVIEW.md."
+    }
+  },
+
+  "native_title": {
+    "determinations": [
+      {
+        "id": "nt-minjerribah-2011",
+        "name": "Delaney on behalf of the Quandamooka People v State of Queensland [2011] FCA 741",
+        "date": "2011-07-04",
+        "court": "Federal Court of Australia",
+        "judge": "Justice Dowsett",
+        "kind": "consent determination",
+        "area": "Minjerribah, North Stradbroke Island, and nearby islands and waters. QYAC records 54,408 hectares in total, of which about 2,264 hectares are exclusive possession, about 22,639 hectares are onshore non-exclusive possession and about 29,505 hectares are offshore non-exclusive possession.",
+        "note": "QYAC describes this as the first formal recognition since colonisation that the laws and customs of the Quandamooka People had survived in respect of their lands and waters on and around North Stradbroke Island. The Federal Court made two determinations on that date.",
+        "source": "qyac-native-title",
+        "source_2": "qyac-briefing-2015",
+        "confidence": "high"
+      },
+      {
+        "id": "nt-mulgumpin-2019",
+        "name": "Anderson on behalf of the Quandamooka People (Mulgumpin/Moreton Island Claim) v State of Queensland (No 2) [2019] FCA 2001",
+        "date": "2019-11-27",
+        "court": "Federal Court of Australia",
+        "area": "QYAC records the determination as covering about 90 per cent of the land on Mulgumpin, Moreton Island, above the high-water mark. News reporting at the time of the determination gave 98 per cent of the island. QYAC's own figure is used and the difference is recorded rather than resolved.",
+        "note": "Off-island. Included because the twin's horizon and bay are shared, and because QYAC's remit spans both islands. The claim was first lodged more than two decades before the determination, with Robert Anderson as lead applicant.",
+        "source": "qyac-native-title",
+        "source_2": "aiatsis-ntpd-1883",
+        "confidence": "high"
+      }
+    ],
+    "pending": [
+      {
+        "id": "nt-quandamooka-coast",
+        "name": "Quandamooka Coast Claim",
+        "authorised": "2016-10-22",
+        "registered_by_nntt": "2017-05-12",
+        "area": "mainland Redlands area including Cleveland, Capalaba, Redland Bay and Victoria Point, and several southern Moreton Bay islands, where native title has not already been validly extinguished",
+        "status_as_recorded": "QYAC's native title page records a trial commencing 1 September 2025 for three weeks with a further week from 1 December 2025.",
+        "current_status": "unknown",
+        "why": "No determination or judgment for this claim was found in searches on 7 August 2026. Do not state an outcome. Do not show this claim as decided.",
+        "source": "qyac-native-title",
+        "confidence": "medium"
+      }
+    ],
+    "agreements": [
+      {
+        "id": "ilua-state-2011",
+        "name": "Quandamooka Indigenous Land Use Agreement, State of Queensland",
+        "signed": "2011-06-15",
+        "parties": "Quandamooka elders and the Queensland Government",
+        "source": "qyac-briefing-2015",
+        "confidence": "high",
+        "note": "The pack has not read the ILUA text. Its contents are not modelled and must not be paraphrased. Recorded as an unclosed gap in docs/DATA-NOTES.md under civic."
+      },
+      {
+        "id": "ima-joint-management",
+        "name": "Indigenous Management Agreement and joint management of Naree Budjong Djara National Park",
+        "since": "2011",
+        "parties": "QYAC and the State of Queensland through the Queensland Parks and Wildlife Service",
+        "note": "The park was declared on 25 March 2011, taking in the area previously known as Blue Lake National Park, and has been jointly managed since. Queensland Parks material records the park as covering about half of Minjerribah, with the jointly managed protected area expected to reach about 80 per cent of the island in future. QYAC lists joint management, the Quandamooka People's Gift Fund, and ownership and management of Minjerribah Camping among its functions.",
+        "source": "qpws-nbd-about",
+        "source_2": "qyac-briefing-2015",
+        "source_3": "npaq-nbd",
+        "confidence": "high"
+      }
+    ],
+    "corporation": {
+      "registered": "2011-06-01",
+      "act": "Corporations (Aboriginal and Torres Strait Islander) Act 2006",
+      "regulator": "Office of the Registrar of Indigenous Corporations",
+      "source": "qyac-briefing-2015",
+      "confidence": "high"
+    }
+  },
+
+  "history": {
+    "note": "Documented history only, from public records. Dates and framing are as published. Entries about Quandamooka life before and during colonisation are recorded as the historical record states them, and are not extended, interpreted or dramatised.",
+    "timeline": [
+      {
+        "id": "h-occupation",
+        "when": "before European arrival",
+        "what": "Continuous Quandamooka occupation of Minjerribah and Moreton Bay. QYAC states at least 20,000 years BCE in its 2015 briefing and over 40,000 years of stewardship in its Sustainability Strategy.",
+        "source": "qyac-briefing-2015",
+        "source_2": "qyac-sustainability",
+        "confidence": "high"
+      },
+      {
+        "id": "h-wallen-wallen",
+        "when": "Pleistocene",
+        "what": "Wallen Wallen Creek, an open site about 6 km south of Dunwich with a stratified deposit at least 2.5 m deep, gave the first evidence of Pleistocene occupation in south east Queensland and on the Australian east coast north of the Sydney region. Radiocarbon date 21,800 plus or minus 400 BP. Luminescence work published in 2024 indicates occupation from between about 30 and 49 thousand years ago.",
+        "source": "wallen-wallen-nature-1986",
+        "source_2": "eastern-seaboard-2024",
+        "confidence": "medium",
+        "player_facing": true,
+        "handling_rule": "State it as what archaeologists have dated at a named site. Do not use it to bound how long Quandamooka People say they have been here."
+      },
+      {
+        "id": "h-middens",
+        "when": "throughout",
+        "what": "Shell middens are present across Minjerribah and the wider Moreton region and are protected Aboriginal cultural heritage under Queensland law. QYAC is the cultural heritage body for the Quandamooka estate.",
+        "source": "qyac-home",
+        "confidence": "medium",
+        "player_facing": false,
+        "handling_rule": "The twin must not place a midden at a coordinate, must not let a player dig, excavate, collect from or build on one, and must not generate midden locations procedurally. If middens appear at all, they appear as a legal and planning constraint layer with no location detail, and only after a human has cleared it with QYAC. Queued in docs/CULTURAL-REVIEW.md."
+      },
+      {
+        "id": "h-cook-1770",
+        "when": "1770",
+        "what": "James Cook claims possession of the east coast of Australia for Great Britain.",
+        "source": "qyac-briefing-2015",
+        "confidence": "high"
+      },
+      {
+        "id": "h-nsw-1788",
+        "when": "1788-01-26",
+        "what": "The British colony of New South Wales is established, purporting to annexe the east coast and adjacent waters including Minjerribah.",
+        "source": "qyac-briefing-2015",
+        "confidence": "high"
+      },
+      {
+        "id": "h-pilot-station-pulan",
+        "when": "1824",
+        "what": "A pilot station is established at Pulan, Amity Point. QYAC records this as the first substantial contact between the British and the Quandamooka People.",
+        "source": "qyac-briefing-2015",
+        "confidence": "high",
+        "note": "QYAC dates the pilot station to 1824, in the same year as the Moreton Bay penal settlement. Some secondary histories give 1825. QYAC's date is used."
+      },
+      {
+        "id": "h-convict-outstation",
+        "when": "1827 to 1831",
+        "what": "A convict out-station is established at Dunwich to serve the Moreton Bay penal settlement at Brisbane town. A warehouse and accommodation for convict labourers, boatmen and soldiers are built in 1827 and 1828. The out-station closes in 1831.",
+        "source": "qhr-dunwich-cemetery",
+        "source_2": "queenslandplaces-stradbroke",
+        "confidence": "medium"
+      },
+      {
+        "id": "h-passionist-mission",
+        "when": "1843 to 1847",
+        "what": "Four Passionist Fathers occupy the former convict buildings at Dunwich in the first Catholic mission to Aboriginal people in the Australian colonies. It fails.",
+        "source": "queenslandplaces-stradbroke",
+        "confidence": "medium"
+      },
+      {
+        "id": "h-quarantine-station",
+        "when": "1849 to 1850",
+        "what": "A quarantine station is established at Dunwich in 1849 and Dunwich is gazetted as a quarantine area in July 1850. The immigrant ship Emigrant, which left Plymouth for Moreton Bay with 276 passengers and had typhus aboard within four weeks of sailing, anchors in Moreton Bay on 8 August 1850 and is quarantined at Dunwich, where a further 26 people die. They are buried at Dunwich cemetery along with Dr David Ballow, the acting health officer for Moreton Bay, who died of typhus on 29 September 1850, and the ship's doctor Dr George Mitchell.",
+        "source": "qhr-dunwich-cemetery",
+        "source_2": "emigrant-ship-project",
+        "confidence": "medium",
+        "note": "The 1849 establishment and the July 1850 gazettal are both published and are not contradictory. Sources differ on Dr Ballow's exact title; he is variously described as acting health officer and as Surgeon-General."
+      },
+      {
+        "id": "h-benevolent-asylum",
+        "when": "1865 to 1946",
+        "what": "The Dunwich Benevolent Asylum operates at Dunwich for the aged, infirm and destitute, run by the Queensland Government. It opens on 13 May 1865 with patients transferred from the benevolent ward of the Brisbane General Hospital, and was the first and largest institution of its type in the state, holding roughly 1000 to 1600 people at a time. It closes on 30 September 1946 because of overcrowding and deteriorating conditions, and residents are moved to Eventide Home at Sandgate, which opens on 4 October 1946. Published figures record over 21,000 admissions across its life and 8,426 former inmates buried in Dunwich Cemetery between 1867 and 1947. A surviving ward was entered in the Queensland Heritage Register in 2023 after nomination by the North Stradbroke Island Museum.",
+        "source": "wikipedia-dunwich-asylum",
+        "source_2": "qld-heritage-asylum-ward",
+        "confidence": "medium",
+        "note": "Published history records that Aboriginal residents of the island were used as cheap or free labour at the Benevolent Institution and other island enterprises. That is recorded under h-myora-mission."
+      },
+      {
+        "id": "h-myora-mission",
+        "when": "1892 to 1943",
+        "what": "In October 1892 about 20 hectares at Moongalba is reserved for a mission station, and on 26 November 1892 Myora Mission is proclaimed a Reserve for Mission. In 1896 it is re-proclaimed as a reserve for the use of the Aboriginal inhabitants of the state, and from 1897 it is under the control of the Chief Protectors of Aborigines. Published history records residents being used as cheap or free labour at the Benevolent Institution, a fish cannery, an abattoir and the Moreton Bay Oyster Company. The reserve and school close in 1943, and residents continue living at Myora or One Mile.",
+        "source": "wikipedia-myora",
+        "source_2": "uq-walker-thesis",
+        "confidence": "medium",
+        "player_facing": true,
+        "handling_rule": "This is mission and protection-era history involving named living families' forebears. State it plainly, cite it, and do not dramatise it, do not simulate it, and do not place mission buildings in the world. The scholarly source is Faith Walker's 1998 University of Queensland thesis on the Myora Aboriginal Mission 1892 to 1940; a human should read it before any of this is built."
+      },
+      {
+        "id": "h-one-mile",
+        "when": "20th century to present",
+        "what": "The One Mile settlement near Dunwich. QYAC's 2015 briefing to the Queensland parliament asked for funding to ensure One Mile residents had access to clean water, sewerage, electricity and waste management, with a preliminary estimate of about $20 million.",
+        "source": "qyac-briefing-2015",
+        "confidence": "high",
+        "note": "This is a live housing and infrastructure question, not a heritage item. Its current status was not verified. See data/civic.json for levers and docs/DATA-NOTES.md for what is unconfirmed."
+      },
+      {
+        "id": "h-oodgeroo",
+        "when": "20th century",
+        "what": "Oodgeroo Noonuccal, poet and campaigner, is quoted in QYAC's own 2015 briefing and is closely associated with Minjerribah and with Moongalba.",
+        "source": "qyac-briefing-2015",
+        "confidence": "high",
+        "player_facing": false,
+        "handling_rule": "A real, recently living, much-loved person. This project does not write her, quote her at length, place her, or put words in her mouth. Any use of her name or work is a human decision with the family and QYAC, and her published work is in copyright. Queued in docs/CULTURAL-REVIEW.md."
+      },
+      {
+        "id": "h-native-title-2011",
+        "when": "2011",
+        "what": "The Quandamooka Indigenous Land Use Agreement with the State of Queensland is signed on 15 June 2011. QYAC is registered on 1 June 2011. The Federal Court hands down the consent determination on 4 July 2011. Naree Budjong Djara National Park is declared on 25 March 2011.",
+        "source": "qyac-briefing-2015",
+        "source_2": "qpws-nbd-about",
+        "confidence": "high"
+      }
+    ]
+  },
+
+  "sand_mining": {
+    "summary": "Mineral sand mining was a major island industry for about seventy years and ended in 2019.",
+    "start": {
+      "claim_a": { "text": "The Queensland Government's own transition strategy states that since the 1940s the island's economy has also been supported by sand mining.", "source": "nsi-ets-2016", "confidence": "high" },
+      "claim_b": { "text": "Mining literature records the first operator, Titanium and Zirconium Industries, a subsidiary of Zinc Corporation, beginning on the ocean beaches in 1949, with the first commercial shipment in 1950, and Consolidated Rutile from 1963.", "source": "general knowledge", "confidence": "low", "note": "Consistent across several secondary sources but no single authoritative primary source was checked. Treat the decade as reliable and the individual company dates as not." }
+    },
+    "end": {
+      "text": "Sand mining substantially ceased on Minjerribah at the end of 2019. The North Stradbroke Island Protection and Sustainability Act 2011 set an end date of 2019. Amendments in 2013 would have allowed the Enterprise mine to seek renewal to 2035. The North Stradbroke Island Protection and Sustainability and Other Acts Amendment Bill 2015 passed in 2016 and restored the 2019 end date on a restricted mine path. Enterprise, the last operating mine, ceased in December 2019.",
+      "source": "nsi-ets-2016",
+      "source_2": "qld-legislation-nsipas",
+      "confidence": "high"
+    },
+    "footprint_at_2016": {
+      "text": "The transition strategy states that sand mining leases prevented public access to about 40 per cent of the island, 20 per cent of which was also national park, and that North Stradbroke Island was the only place in Queensland with an active mining lease over a national park.",
+      "source": "nsi-ets-2016",
+      "confidence": "high"
+    },
+    "quandamooka_position": {
+      "text": "QYAC's 2015 briefing to the Queensland parliament asked members to support repeal of the North Stradbroke Island Protection and Sustainability and Another Act Amendment Act 2013 as a matter of priority. QYAC stated that the 2013 Act tore up the agreement the Quandamooka People had with the State for the management and development of their traditional lands, and that their rights as native title holders were ignored.",
+      "source": "qyac-briefing-2015",
+      "confidence": "high",
+      "handling_rule": "This is a publicly stated QYAC position on a specific past Act and may be cited as such, with the date. It is not a licence to infer a QYAC view on any other lever in data/civic.json."
+    },
+    "rehabilitation": {
+      "status": "not verified",
+      "why": "Current mine rehabilitation obligations, progress and handback arrangements were not established. Do not model rehabilitation outcomes as fact."
+    }
+  },
+
+  "economic_transition": {
+    "strategy": {
+      "name": "North Stradbroke Island Economic Transition Strategy",
+      "published": "September 2016",
+      "publisher": "Queensland Government, Department of State Development",
+      "purpose": "To support the island's transition away from sand mining and expand existing industries, principally tourism, education and research.",
+      "funding_as_published": "$20 million over five years to build on the island's capacity and economy, plus $5 million for a Workers Assistance Scheme to help mine workers into new employment.",
+      "governance": "A North Stradbroke Island Economic Transition Strategy Implementation Committee of island stakeholders was to oversee delivery.",
+      "source": "nsi-ets-2016",
+      "confidence": "high",
+      "licence_note": "The strategy is published under a Creative Commons Attribution 3.0 Australia licence by the State of Queensland, Department of State Development, September 2016."
+    },
+    "successor": {
+      "name": "Minjerribah Futures",
+      "note": "The Queensland Government reissued the transition programme as Minjerribah Futures. Published totals vary by scope and date and were not reconciled: figures found include a $33.62 million programme of 23 delivered projects, and an allocation increased to $39.4 million reported in 2024. The Queensland Audit Office reported on the management of Minjerribah Futures funding, including that $8.74 million was paid to QYAC by four state departments between 1 July 2016 and 31 December 2021.",
+      "source": "qao-minjerribah-futures",
+      "source_2": "detsi-minjerribah-futures",
+      "confidence": "medium",
+      "handling_rule": "Do not put a single headline dollar figure on screen. If a figure is shown, show the scope, the period and the source with it. Current programme status as at August 2026 was not verified."
+    },
+    "qyac_capacity_finding": {
+      "text": "The Queensland Audit Office finding about QYAC being assigned several complex projects at once with limited staff is recorded in data/civic.json, where it drives a delivery mechanic. It is an audit finding about state agencies' management of funding, not a criticism of QYAC, and must not be presented as one.",
+      "source": "qao-minjerribah-futures",
+      "confidence": "medium"
+    }
+  },
+
+  "cooperative_dolphin_fishing": {
+    "what_the_record_says": "The published historical record describes cooperative fishing between Aboriginal people and dolphins at several places in eastern Australia, including in Moreton Bay and at Amity Point on Minjerribah. In the accounts, people signalled from the shore and dolphins drove fish toward the nets. Neil's 2002 review in Anthrozoos assembles published eyewitness accounts and Aboriginal accounts, and concludes the practice was geographically widespread in eastern Australia, involved bottlenose dolphins and orcas, and carried emotional and spiritual significance beyond food.",
+    "citation": "Neil, D.T. (2002). Cooperative fishing interactions between Aboriginal Australians and dolphins in eastern Australia. Anthrozoos 15(1), 3 to 18.",
+    "source": "neil-2002-anthrozoos",
+    "confidence": "medium",
+    "also_recorded_in": "data/ecology.json under sp-indo-pacific-bottlenose-dolphin.cultural_reference, with a handling rule blocking it from player-facing copy.",
+    "player_facing": false,
+    "handling_rule": "This is a living relationship recorded largely in colonial-era sources. This project does not depict it, does not animate it, does not make it a mechanic and does not write dialogue about it. It stays in the data with its citation, blocked from player-facing copy, until a human has resolved with QYAC whether it appears at all, in whose words, and with what framing. Queued in docs/CULTURAL-REVIEW.md.",
+    "not_recorded": "Public sources state that the Quandamooka People regard the dolphin as significant. No description of that significance is recorded here, because none was found in an authoritative source and it is not an agent's to summarise."
+  },
+
+  "prohibitions": {
+    "note": "Machine-checkable rules. `check.type` tells a build script how to test the rule. `severity: blocking` means the build fails. These are minimums, not a substitute for review by QYAC.",
+    "rules": [
+      {
+        "id": "no-invented-language",
+        "rule": "No Aboriginal language word may appear anywhere in the repository unless it is in lore.language.allowlist.",
+        "scope": ["src/**", "data/**", "docs/**", "index.html", "assets/**"],
+        "check": { "type": "token_allowlist", "allowlist_paths": ["language.allowlist[*].word", "language.allowlist[*].variants[*].spelling", "language.allowlist[*].published_meanings[*].gloss", "peoples.clans.groups[*].spellings[*].spelling"], "case_insensitive": true, "scan_hint": "Tokenise on word boundaries. The known set already present in this repository, as at 7 August 2026, is: Minjerribah, Quandamooka, Yoolooburrabee, Goompi, Gumpi, Koompe, Pulan, Bulan, Mooloomba, Mulumba, Bummiera, Bummeria, Kaboora, Karboora, Capembah, Capeembah, Naree Budjong Djara, Moorgumpin, Mulgumpin, Moongalba, Terangeri, Yalingbila, Bibula, Jandai, QUAMPI, Yulu-Burri-Ba, Nunukul, Ngugi, Ngughi, Goenpul, Gorenpul, Noonuccal, Oodgeroo. Anything outside that set is a new word and must be sourced before it ships." },
+        "severity": "blocking",
+        "rationale": "The most likely way this project causes harm is by putting a word into the world that no Quandamooka person ever said.",
+        "source": "docs/CONTRACT.md"
+      },
+      {
+        "id": "no-banned-tokens",
+        "rule": "None of lore.language.banned_tokens.tokens may appear anywhere in the repository.",
+        "scope": ["src/**", "data/**", "docs/**", "index.html", "assets/**", "tools/**", "tests/**"],
+        "check": { "type": "forbidden_tokens", "tokens_path": "language.banned_tokens.tokens[*].token", "case_insensitive": true, "exempt_files": ["data/lore.json", "docs/CULTURAL-REVIEW.md", "docs/DATA-NOTES.md"] },
+        "severity": "blocking",
+        "rationale": "These were invented by an earlier pass. The exemption exists so the record of the mistake survives.",
+        "source": "this pack"
+      },
+      {
+        "id": "no-invented-ceremony",
+        "rule": "No ceremony, ritual, dance, song, initiation, smoking, mourning or welcome may be depicted, named, animated, scheduled, simulated or written as dialogue.",
+        "scope": ["src/**", "data/**", "assets/**"],
+        "check": { "type": "forbidden_tokens", "tokens": ["ceremony", "ceremonial", "corroboree", "smoking ceremony", "welcome to country", "initiation", "sacred site", "songline", "dreaming", "dreamtime", "totem", "sorry business"], "case_insensitive": true, "exempt_files": ["data/lore.json", "docs/CULTURAL-REVIEW.md"], "note": "A hit is not automatically a violation. It is a stop-and-ask. The right resolution is usually to delete the line." },
+        "severity": "blocking",
+        "rationale": "QYAC's native title rights include the right to conduct ceremonies. A simulation does not get to depict them.",
+        "source": "qyac-briefing-2015"
+      },
+      {
+        "id": "no-sacred-or-restricted-sites",
+        "rule": "No sacred, restricted, secret, gendered or otherwise culturally restricted site may be placed in the world, given a coordinate, given a marker, given a name in the map layer, or generated procedurally. This includes middens and burial places.",
+        "scope": ["data/geography.json", "data/places.json", "data/ecology.json", "src/world/**", "src/render/layers/**"],
+        "check": { "type": "manual_plus_tokens", "tokens": ["midden", "burial", "sacred", "restricted area", "men's", "women's business", "bora"], "case_insensitive": true, "exempt_files": ["data/lore.json", "docs/CULTURAL-REVIEW.md", "docs/DATA-NOTES.md"] },
+        "severity": "blocking",
+        "rationale": "Publishing a location is the harm. It cannot be undone by a later apology.",
+        "source": "docs/CONTRACT.md"
+      },
+      {
+        "id": "no-aboriginal-characters-with-invented-culture",
+        "rule": "No simulated resident may be assigned Aboriginality, a clan, a family group, a totem, a language, cultural knowledge, cultural obligations, a cultural role or culturally framed dialogue.",
+        "scope": ["data/residents.json", "data/narrative.json", "src/systems/agents/**", "src/systems/narrative/**"],
+        "check": { "type": "field_absent", "fields": ["aboriginality", "indigenous", "clan", "mob", "totem", "family_group", "cultural_role", "language_group"], "in": ["data/residents.json", "data/narrative.json"] },
+        "severity": "blocking",
+        "rationale": "Quandamooka People live on this island in real households. A generated character with generated culture is a fabrication about real neighbours. The twin can and should have residents; it cannot have generated Aboriginal cultural identity.",
+        "source": "docs/CONTRACT.md",
+        "note": "Real named public figures and organisations acting in a documented public capacity, such as QYAC as a corporate actor, are a different thing and are handled by qyac-as-civic-actor-only."
+      },
+      {
+        "id": "qyac-as-civic-actor-only",
+        "rule": "QYAC may appear only as a civic and corporate actor doing things it publicly does: native title holder, joint manager of Naree Budjong Djara National Park, operator of Minjerribah Camping, bushfire management lead, cultural heritage body, employer. QYAC must never be given a simulated opinion, vote, mood, negotiating position or line of dialogue.",
+        "scope": ["data/civic.json", "src/systems/civic/**", "src/ui/panels/**"],
+        "check": { "type": "manual", "reviewer_question": "Does any QYAC-attributed string in the build state a view? If yes, is that view in lore.qyac_public_positions with a citation and a date?" },
+        "severity": "blocking",
+        "rationale": "Putting words in the Traditional Owners' mouths about a policy lever is the single most embarrassing failure available to this project.",
+        "source": "data/civic.json cultural care note"
+      },
+      {
+        "id": "no-quandamooka-position-without-citation",
+        "rule": "The twin must not represent a Quandamooka or QYAC view on any policy lever unless that view has been publicly stated by QYAC and is recorded in lore.qyac_public_positions with a source URL and the date it was stated.",
+        "scope": ["data/civic.json", "src/systems/civic/**", "src/ui/panels/**", "src/systems/narrative/**"],
+        "check": { "type": "cross_reference", "rule": "every civic lever with a qyac_position field must carry a matching id in lore.qyac_public_positions" },
+        "severity": "blocking",
+        "rationale": "Silence is accurate. An invented position is not.",
+        "source": "task brief"
+      },
+      {
+        "id": "no-cultural-content-without-source",
+        "rule": "Every cultural statement rendered to a player must resolve to an entry in this pack with a source and a confidence of medium or better.",
+        "scope": ["src/ui/**", "src/systems/narrative/**", "data/**"],
+        "check": { "type": "cross_reference", "rule": "player-facing cultural strings must carry a lore_ref resolving into data/lore.json" },
+        "severity": "blocking",
+        "rationale": "The contract already says this. This makes it testable.",
+        "source": "docs/CONTRACT.md"
+      },
+      {
+        "id": "no-low-confidence-to-player",
+        "rule": "Nothing in this pack with confidence low may be rendered to a player.",
+        "scope": ["src/ui/**", "src/systems/narrative/**"],
+        "check": { "type": "field_gate", "field": "confidence", "forbidden_values": ["low"], "when": "player_facing is true" },
+        "severity": "blocking",
+        "rationale": "Low confidence here means an agent could not verify it. That is not something to show a local reader.",
+        "source": "this pack"
+      },
+      {
+        "id": "acknowledgement-present",
+        "rule": "One of lore.acknowledgement.game_wording.long or .short must be present in the built page at load, not behind a menu.",
+        "scope": ["index.html", "src/ui/**"],
+        "check": { "type": "string_present", "one_of_paths": ["acknowledgement.game_wording.long.text", "acknowledgement.game_wording.short.text"] },
+        "severity": "blocking",
+        "rationale": "A digital twin of Quandamooka Country that does not acknowledge Quandamooka Country has failed before it renders a frame.",
+        "source": "task brief"
+      },
+      {
+        "id": "no-gamified-culture",
+        "rule": "No cultural element may be a resource, a score, a currency, a collectible, an unlock, a skill tree node, a tech tree node, an achievement or a win condition.",
+        "scope": ["src/systems/**", "data/**"],
+        "check": { "type": "manual", "reviewer_question": "Can a player gain, spend, lose or optimise anything cultural? If yes, remove it." },
+        "severity": "blocking",
+        "rationale": "Culture is not a mechanic.",
+        "source": "task brief"
+      },
+      {
+        "id": "no-generated-aboriginal-art",
+        "rule": "No generated, synthesised or imitated Aboriginal visual art, pattern, motif, ochre design, flag or symbol may be produced as an asset by any agent.",
+        "scope": ["assets/**", "src/render/**"],
+        "check": { "type": "manual", "reviewer_question": "Was any visual motif in the build made by a model rather than licensed from a Quandamooka artist?" },
+        "severity": "blocking",
+        "rationale": "QYAC has its own artists and its own arts strategy. This project buys or asks; it does not imitate.",
+        "source": "qyac-sustainability"
+      },
+      {
+        "id": "language-words-need-a-flagged-source",
+        "rule": "Every allowlist word used in the build must render alongside, or be one click from, the source that publishes it.",
+        "scope": ["src/ui/**"],
+        "check": { "type": "manual", "reviewer_question": "Can a player see where each Quandamooka name came from?" },
+        "severity": "advisory",
+        "rationale": "Spellings vary. Showing the source is honest and it teaches the player something true.",
+        "source": "nsi-museum-language-map"
+      }
+    ]
+  },
+
+  "qyac_public_positions": {
+    "note": "The only Quandamooka positions this project may represent. Each must be a public QYAC statement with a source and a date. This list is deliberately short. An empty area is not an invitation to fill it.",
+    "positions": [
+      {
+        "id": "pos-2013-act-repeal",
+        "topic": "sand mining legislation",
+        "stated": "2015-05",
+        "position": "QYAC asked the Queensland parliament to support repeal of the North Stradbroke Island Protection and Sustainability and Another Act Amendment Act 2013 as a matter of priority.",
+        "source": "qyac-briefing-2015",
+        "confidence": "high",
+        "currency": "historical. This was a 2015 ask about a 2013 Act, and the 2016 amendment addressed it. Do not present it as a current position."
+      },
+      {
+        "id": "pos-one-mile-infrastructure",
+        "topic": "One Mile housing and infrastructure",
+        "stated": "2015-05",
+        "position": "QYAC asked for funding so One Mile residents would have access to clean water, sewerage, electricity and waste management, with a preliminary estimate of about $20 million.",
+        "source": "qyac-briefing-2015",
+        "confidence": "high",
+        "currency": "historical. Current status not verified."
+      },
+      {
+        "id": "pos-economic-transition-funding",
+        "topic": "economic transition",
+        "stated": "2015-05",
+        "position": "QYAC asked for restoration of more than $20 million in state funding over five years for a North Stradbroke Island Economic Transition Strategy, so the island could transition to an eco-cultural tourism destination, with QYAC chairing the process.",
+        "source": "qyac-briefing-2015",
+        "confidence": "high",
+        "currency": "historical. The strategy was published in September 2016."
+      },
+      {
+        "id": "pos-joint-management-funding",
+        "topic": "Naree Budjong Djara National Park",
+        "stated": "2015-05",
+        "position": "QYAC asked that the state continue $2 million per annum for joint management of Naree Budjong Djara National Park, dedicated in future Queensland Parks and Wildlife Service budgets over five years and delivered in accordance with the Indigenous Joint Management Agreement, including continuity of the joint manager position at QYAC.",
+        "source": "qyac-briefing-2015",
+        "confidence": "high",
+        "currency": "historical. Current funding not verified."
+      },
+      {
+        "id": "pos-sustainability-vision",
+        "topic": "sustainability",
+        "stated": "in QYAC's Quandamooka Country Sustainability Strategy",
+        "position": "QYAC's published vision statement commits to working towards a zero net waste and emissions future and to becoming the most sustainably managed sand islands in the world.",
+        "source": "qyac-sustainability",
+        "confidence": "high",
+        "currency": "current as published. The strategy also lists actions including seasonal limits on four-wheel-drive beach permits. Individual actions must be cited to the strategy, not generalised."
+      }
+    ],
+    "explicitly_unknown": [
+      "QYAC's current view on the Dunwich ferry terminal, Toondah Harbour, ferry fares or the passenger crossing.",
+      "QYAC's current view on visitor caps, camping numbers, short-stay letting or rates policy.",
+      "QYAC's current view on the subterranean works this project imagines. That is this project's invention and QYAC has said nothing about it.",
+      "QYAC's view on this project existing at all."
+    ]
+  },
+
+  "sources": {
+    "qyac-home": { "url": "https://qyac.net.au/", "what": "QYAC website home page", "read": "2026-08-07" },
+    "qyac-native-title": { "url": "https://qyac.net.au/native-title/", "what": "QYAC's own native title page: determination names, dates, areas and the pending coast claim", "read": "2026-08-07" },
+    "qyac-briefing-2015": { "url": "https://qyac.net.au/wp-content/uploads/2023/08/Quandamooka_Briefing_2015.pdf", "what": "Through native title, to a glad tomorrow. QYAC 2015 issues briefing for the Queensland government and parliament. Published by QYAC, May 2015.", "read": "2026-08-07" },
+    "qyac-sustainability": { "url": "https://qyac.net.au/wp-content/uploads/2023/08/Sustainability-Strategy-Digital.pdf", "what": "Jara marumba yaga: Make good Country. Quandamooka Country Sustainability Strategy, QYAC. Contains QYAC's own acknowledgement, vision and clan spellings.", "read": "2026-08-07" },
+    "qyac-arts-strategy": { "url": "https://qyac.net.au/wp-content/uploads/2023/08/Quandamooka-Strategy-DIGITAL.pdf", "what": "Quandamooka Arts and Culture Strategy, QYAC. Not read in full. Listed because any art question should start here.", "read": "not read" },
+    "nsi-ets-2016": { "url": "https://qyac.net.au/wp-content/uploads/2023/08/nsi-economic-transition-strategy.pdf", "what": "North Stradbroke Island Economic Transition Strategy, Queensland Government Department of State Development, September 2016, CC BY 3.0 AU", "read": "2026-08-07" },
+    "detsi-minjerribah-futures": { "url": "https://www.detsi.qld.gov.au/tourism/tourism-development/first-nations/minjerribah-futures", "what": "Queensland Government Minjerribah Futures programme page", "read": "2026-08-07 via search summary only, page returned 403 to direct fetch" },
+    "detsi-native-title": { "url": "https://www.detsi.qld.gov.au/tourism/tourism-development/first-nations/minjerribah-futures/native-title", "what": "Queensland Government native title page for Minjerribah Futures", "read": "2026-08-07 via search summary only, page returned 403 to direct fetch" },
+    "qao-minjerribah-futures": { "url": "https://www.qao.qld.gov.au/reports-resources/reports-parliament/managing-minjerribah-futures-funding", "what": "Queensland Audit Office, Managing Minjerribah Futures funding", "read": "2026-08-07 via search summary only" },
+    "qpws-nbd-about": { "url": "https://parks.qld.gov.au/parks/naree-budjong-djara/about", "what": "Queensland Parks and Wildlife Service, Naree Budjong Djara National Park", "read": "2026-08-07 via search summary only, direct fetch returned 403" },
+    "qpws-nbd-culture": { "url": "https://parks.qld.gov.au/parks/naree-budjong-djara/about/culture", "what": "Queensland Parks and Wildlife Service nature, culture and history page. Source for the published glosses place of many mosquitoes and people of the bay.", "read": "2026-08-07 via search summary only, direct fetch returned 403" },
+    "nsi-museum-language-map": { "url": "https://www.stradbrokemuseum.com.au/exhibitions-events/quandamooka-language-map", "what": "North Stradbroke Island Museum Quandamooka Language Map, researched with Quandamooka families and State Library of Queensland support. Source for Pulan Pulan, Goompi, Mooloomba, Bummiera, Kaboora, Minjerribah and Terangeri, and for the statement that spellings vary and are not universal.", "read": "2026-08-07" },
+    "mmeic-dictionary": { "url": "https://mmeicac.com.au/index.php/product/jandai-language-dictionary/", "what": "Jandai Language Dictionary, Minjerribah Moorgumpin Elders-in-Council, first published 2011", "read": "2026-08-07 via search summary only" },
+    "stradbrokeisland-quandamooka": { "url": "https://stradbrokeisland.com/about-stradbroke/quandamooka-country/", "what": "Island tourism site Quandamooka Country page. Source for the Nughi, Nunukul and Gorenpul spellings.", "read": "2026-08-07" },
+    "aigi-qyac-decision-making": { "url": "https://aigi.org.au/resource/example-qyacs-traditional-decision-making-processes", "what": "Australian Indigenous Governance Institute case example. Source for the twelve families and twelve apical ancestors board structure.", "read": "2026-08-07" },
+    "wallen-wallen-nature-1986": { "url": "https://www.nature.com/articles/323618a0", "what": "Neal, R. and Stock, E. (1986). Pleistocene occupation in the south-east Queensland coastal region. Nature 323, 618.", "read": "2026-08-07 abstract and citing literature only" },
+    "eastern-seaboard-2024": { "url": "https://www.nature.com/articles/s41598-024-52000-y", "what": "Early human occupation of Australia's eastern seaboard. Scientific Reports, 2024. Source for the 21,800 plus or minus 400 BP figure and the revised luminescence range at Wallen Wallen Creek.", "read": "2026-08-07 via search summary only" },
+    "neil-2002-anthrozoos": { "url": "https://www.tandfonline.com/doi/abs/10.2752/089279302786992694", "what": "Neil, D.T. (2002). Cooperative fishing interactions between Aboriginal Australians and dolphins in eastern Australia. Anthrozoos 15(1), 3 to 18.", "read": "2026-08-07 abstract and summary only" },
+    "uq-yalingbila-bibula": { "url": "https://moreton-bay.research.uq.edu.au/about/cultural-heritage/yalingbila-bibula-whale-hill", "what": "University of Queensland Moreton Bay Research Station page on Yalingbila Bibula, Whale on the Hill, a QYAC, UQ and Queensland Government partnership at Mooloomba. Source for yalingbila meaning whale.", "read": "2026-08-07 via search summary only" },
+    "qhr-dunwich-cemetery": { "url": "https://apps.des.qld.gov.au/heritage-register/detail/?id=600773", "what": "Queensland Heritage Register entry 600773, Dunwich Cemetery. Source for the quarantine station, the Emigrant and the convict out-station.", "read": "2026-08-07 via search summary only, the register has since moved and the direct fetch redirected" },
+    "queenslandplaces-stradbroke": { "url": "https://queenslandplaces.com.au/stradbroke-island", "what": "Queensland Places, Centre for the Government of Queensland, University of Queensland. Source for the convict out-station and Passionist mission dates.", "read": "2026-08-07 via search summary only" },
+    "wikipedia-myora": { "url": "https://en.wikipedia.org/wiki/Myora_Mission", "what": "Secondary source for Myora Mission dates, citing Walker 1998, Anderson 2001 and Keats 1966", "read": "2026-08-07" },
+    "uq-walker-thesis": { "url": "https://espace.library.uq.edu.au/view/UQ:328089", "what": "Faith Walker, thesis on the Myora Aboriginal Mission on Stradbroke Island 1892 to 1940, University of Queensland, 1998. The scholarly source behind most published Myora history. Not read.", "read": "not read" },
+    "wikipedia-dunwich-asylum": { "url": "https://en.wikipedia.org/wiki/Dunwich_Benevolent_Asylum", "what": "Secondary source for the Dunwich Benevolent Asylum, 1865 to 1946", "read": "2026-08-07 via search summary only" },
+    "qld-heritage-asylum-ward": { "url": "https://www.qld.gov.au/environment/land/heritage/council/media-releases/former-dunwich-benevolent-asylum-ward-is-heritage-listed", "what": "Queensland Government media release on the heritage listing of a former Dunwich Benevolent Asylum ward", "read": "2026-08-07 via search summary only" },
+    "qld-legislation-nsipas": { "url": "https://www.legislation.qld.gov.au/view/whole/html/inforce/2021-09-23/act-2011-011", "what": "North Stradbroke Island Protection and Sustainability Act 2011 as in force", "read": "2026-08-07 via search summary only" },
+    "jajoo-warrngara-seasonal-cycles": { "url": "https://jajoowarrngara.org/resource/seasonal-cycles/", "what": "Jajoo Warrngara: The Culture Classroom, Sharing Stories Foundation. Quandamooka Seasonal Cycles, presented by Quandamooka Traditional Custodian Elisha Kissick. Video is behind a subscription; season names could not be read.", "read": "2026-08-07, contents not accessible" },
+    "bom-indigenous-calendars": { "url": "https://www.bom.gov.au/iwk/", "what": "Bureau of Meteorology Indigenous Weather Knowledge seasonal calendars. Checked for a Quandamooka calendar. There is none.", "read": "2026-08-07" },
+    "aiatsis-ntpd-1883": { "url": "https://aiatsis.gov.au/ntpd-resource/1883", "what": "AIATSIS Native Title Publications Database record for Anderson on behalf of the Quandamooka People (Mulgumpin/Moreton Island Claim) v State of Queensland (No 2) [2019] FCA 2001", "read": "2026-08-07 via search summary only" },
+    "emigrant-ship-project": { "url": "https://www.emigrantship.com.au/the-doctors", "what": "The Emigrant: Ship of Death, a documentary project on the 1850 quarantine at Dunwich. Source for the 8 August 1850 arrival and Dr Ballow's death on 29 September 1850.", "read": "2026-08-07 via search summary only" },
+    "npaq-nbd": { "url": "https://npaq.org.au/ngaliya-maguydan-our-story-naree-budjong-djara-my-mother-earth-national-park/", "what": "National Parks Association of Queensland account of Naree Budjong Djara National Park, corroborating the 25 March 2011 declaration", "read": "2026-08-07 via search summary only" },
+    "quampi-icn": { "url": "https://gateway.icn.org.au/project/4448/quandamooka-art-museum-and-performance-institute-quampi", "what": "Industry Capability Network project record for the Quandamooka Art, Museum and Performance Institute. Source for the QUAMPI expansion and the Deanbilla Bay, Gumpi site.", "read": "2026-08-07 via search summary only" },
+    "detsi-quampi": { "url": "https://www.detsi.qld.gov.au/tourism/tourism-development/first-nations/minjerribah-futures/quampi", "what": "Queensland Government page for QUAMPI, Quandamooka Arts and Culture Centre", "read": "2026-08-07 via search summary only" },
+    "repo-data-notes": { "what": "C:/Users/sbt41/githublocal/minjerribah-living-twin/docs/DATA-NOTES.md, the places and civic pack notes, which already record several spelling variations and unresolved cultural questions", "read": "2026-08-07" },
+    "repo-ecology": { "what": "C:/Users/sbt41/githublocal/minjerribah-living-twin/data/ecology.json, which holds the dolphin cultural reference and the fire regime cultural burning note with their own handling rules", "read": "2026-08-07" }
+  },
+
+  "open_questions_ref": "docs/CULTURAL-REVIEW.md holds the full list, each naming the file and line it affects."
+}

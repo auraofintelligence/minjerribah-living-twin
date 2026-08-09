@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minjerribah Living Twin: build progress</title>
+<style>
+  :root{
+    --bg:#0b0f12; --panel:#141a1f; --edge:#232c34; --text:#e7e0d2; --dim:#8e9aa3;
+    --sea:#3fb6c4; --sun:#f0b429; --leaf:#8fbf5a; --coral:#e2725b; --sand:#e8dcc4;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#f6f2e8; --panel:#fffdf7; --edge:#e0d8c6; --text:#1b2126; --dim:#6b7680; }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font:15px/1.6 'Inter','Segoe UI',system-ui,sans-serif;padding:2rem 1.25rem 5rem}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{border-bottom:1px solid var(--edge);padding-bottom:1.4rem;margin-bottom:1.8rem}
+  h1{font-size:clamp(1.3rem,3.4vw,1.9rem);font-weight:300;letter-spacing:.02em}
+  h1 b{font-weight:600;color:var(--sea)}
+  .sub{color:var(--dim);font-size:.85rem;margin-top:.35rem}
+  .headline{margin-top:1rem;font-size:1.05rem;color:var(--sand);background:linear-gradient(90deg,rgba(63,182,196,.14),transparent);border-left:3px solid var(--sea);padding:.7rem 1rem;border-radius:0 6px 6px 0}
+  @media (prefers-color-scheme: light){ .headline{color:#1b2126} }
+  .meta{display:flex;flex-wrap:wrap;gap:1.4rem;margin-top:1rem;font-size:.8rem;color:var(--dim)}
+  .meta a{color:var(--sun);text-decoration:none;border-bottom:1px dotted}
+  .bar{height:8px;background:var(--edge);border-radius:99px;overflow:hidden;margin:1.6rem 0 .5rem}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--sea),var(--leaf),var(--sun));transition:width .6s ease}
+  .barlabel{font-size:.75rem;color:var(--dim);display:flex;justify-content:space-between}
+  h2{font-size:.75rem;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin:2.4rem 0 .9rem;font-weight:500}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.7rem}
+  .slice{background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:.85rem .95rem;display:flex;flex-direction:column;gap:.45rem}
+  .slice .top{display:flex;align-items:baseline;gap:.5rem}
+  .slice .name{font-weight:600;font-size:.95rem;flex:1}
+  .pill{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;padding:.2rem .5rem;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
+  .s-todo{color:var(--dim)} .s-building{color:var(--sun)} .s-review{color:var(--sea)}
+  .s-passed{color:var(--leaf)} .s-failed{color:var(--coral)}
+  .slice .note{font-size:.8rem;color:var(--dim);line-height:1.5}
+  .rounds{display:flex;gap:3px;margin-top:.1rem}
+  .rounds i{width:14px;height:5px;border-radius:2px;background:var(--edge)}
+  .rounds i.lost{background:var(--coral)} .rounds i.won{background:var(--leaf)}
+  .verdict{font-size:.78rem;padding:.45rem .6rem;border-radius:6px;background:rgba(226,114,91,.1);border-left:2px solid var(--coral);color:var(--text)}
+  .verdict.won{background:rgba(143,191,90,.1);border-left-color:var(--leaf)}
+  ol.log{list-style:none;border-left:1px solid var(--edge);padding-left:1.1rem;display:flex;flex-direction:column;gap:.75rem}
+  ol.log li{position:relative;font-size:.86rem}
+  ol.log li::before{content:'';position:absolute;left:-1.36rem;top:.5rem;width:7px;height:7px;border-radius:99px;background:var(--sea)}
+  ol.log .at{color:var(--dim);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;display:block}
+  footer{margin-top:3rem;padding-top:1.2rem;border-top:1px solid var(--edge);font-size:.75rem;color:var(--dim)}
+  .live{display:inline-flex;align-items:center;gap:.4rem}
+  .live i{width:7px;height:7px;border-radius:99px;background:var(--leaf);animation:p 2s infinite}
+  @keyframes p{0%,100%{opacity:1}50%{opacity:.25}}
+  .stale i{background:var(--coral);animation:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Minjerribah <b>Living Twin</b></h1>
+    <div class="sub" id="engine"></div>
+    <div class="headline" id="headline">loading…</div>
+    <div class="meta">
+      <span class="live" id="live"><i></i><span id="livetext">live</span></span>
+      <span id="waveName"></span>
+      <span>Play: <a id="playUrl" href="http://localhost:4271/">localhost:4271</a></span>
+    </div>
+    <div class="bar"><i id="fill" style="width:0%"></i></div>
+    <div class="barlabel"><span id="passedCount">0 slices passed</span><span id="pct">0%</span></div>
+  </header>
+
+  <h2>Slices</h2>
+  <div class="grid" id="slices"></div>
+
+  <h2>Log</h2>
+  <ol class="log" id="log"></ol>
+
+  <footer>
+    Built on Quandamooka Country. Each slice is built by one agent and judged blind against its reference
+    game by a separate critic that inspects the running build, not the builder's report.
+    <span id="stamp"></span>
+  </footer>
+</div>
+<script>
+const STATUSES = ['todo','building','review','passed','failed'];
+let lastRaw = '';
+async function poll(){
+  try{
+    const r = await fetch('status.json?t=' + Date.now(), {cache:'no-store'});
+    const raw = await r.text();
+    if (raw === lastRaw) { markLive(true); return; }
+    lastRaw = raw;
+    render(JSON.parse(raw));
+    markLive(true);
+  }catch(e){ markLive(false); }
+}
+function markLive(ok){
+  const l = document.getElementById('live');
+  l.classList.toggle('stale', !ok);
+  document.getElementById('livetext').textContent = ok ? 'live' : 'offline';
+  document.getElementById('stamp').textContent = ' Last read ' + new Date().toLocaleTimeString('en-AU');
+}
+function render(d){
+  document.getElementById('engine').textContent = (d.engine||'') + (d.updated? ' · ' + d.updated : '');
+  document.getElementById('headline').textContent = d.headline || '';
+  document.getElementById('waveName').textContent = 'Wave ' + (d.wave??0) + (d.waveName? ' · ' + d.waveName : '');
+  if (d.playUrl){ const a=document.getElementById('playUrl'); a.href=d.playUrl; a.textContent=d.playUrl.replace(/^https?:\/\//,''); }
+
+  const slices = d.slices || [];
+  const passed = slices.filter(s=>s.status==='passed').length;
+  const pct = slices.length ? Math.round(passed/slices.length*100) : 0;
+  document.getElementById('fill').style.width = pct + '%';
+  document.getElementById('passedCount').textContent = passed + ' of ' + slices.length + ' slices passed blind review';
+  document.getElementById('pct').textContent = pct + '%';
+
+  const wrap = document.getElementById('slices');
+  wrap.innerHTML = '';
+  for (const s of slices){
+    const card = document.createElement('div'); card.className='slice';
+    const top = document.createElement('div'); top.className='top';
+    const name = document.createElement('span'); name.className='name'; name.textContent = s.name;
+    const pill = document.createElement('span'); pill.className='pill s-'+(s.status||'todo'); pill.textContent = s.status||'todo';
+    top.append(name, pill); card.append(top);
+    if (s.reference){ const n=document.createElement('div'); n.className='note'; n.textContent='vs ' + s.reference; card.append(n); }
+    if (s.rounds){
+      const r=document.createElement('div'); r.className='rounds';
+      for(let i=0;i<s.rounds;i++){ const x=document.createElement('i'); x.className = (i===s.rounds-1 && s.status==='passed')?'won':'lost'; r.append(x); }
+      card.append(r);
+    }
+    if (s.verdict){ const v=document.createElement('div'); v.className='verdict' + (s.status==='passed'?' won':''); v.textContent=s.verdict; card.append(v); }
+    wrap.append(card);
+  }
+
+  const log = document.getElementById('log');
+  log.innerHTML='';
+  for (const e of (d.log||[]).slice().reverse()){
+    const li=document.createElement('li');
+    const at=document.createElement('span'); at.className='at'; at.textContent=e.at||'';
+    li.append(at, document.createTextNode(e.text));
+    log.append(li);
+  }
+}
+poll(); setInterval(poll, 3000);
+</script>
+</body>
+</html>

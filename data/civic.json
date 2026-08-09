@@ -1,0 +1,1664 @@
+{
+"pack": "civic",
+"version": "1.0.0",
+"generated": "2026-08-07",
+"island": "Minjerribah / North Stradbroke Island, Quandamooka Country, Queensland, Australia",
+"language": "Australian English",
+"currency": "A$",
+"about": "The civic machine of Minjerribah as a policy graph. Institutions, the instruments that bind them, the constituencies that react, the metrics that move, and the levers that move them. The design point is that almost nothing here is the player's to decide alone. This island is governed by a council whose seat also covers a mainland suburb, a state government two departments deep, a Registered Native Title Body Corporate with determined native title over the whole island, a jointly managed national park, and three private transport operators. A player who wants a thing must usually persuade somebody else to do it.",
+"honesty": [
+  "No lever here is a promise that a system implements it. This is content, not code.",
+  "Where a real plan, budget line or statute exists, it is cited. Where a lever is a modelling construct with no current proposal behind it, status says so and confidence is low.",
+  "Every cost is an estimate unless a published figure is cited, and published figures carry the year they were published. Construction costs on an island move fast.",
+  "Magnitudes are modelling values on a shared scale. They are not measured elasticities. Nobody has given this project measured elasticities for this island.",
+  "who_decides is the most important field in the file. It is deliberately, frequently, not the player.",
+  "Ferry, barge, bus and parking capacity numbers belong in data/transport.json, not here. This pack references them and does not restate them.",
+  "Nothing cultural is generated here. QYAC appears as a civic and corporate actor with sourced public functions and nothing more."
+],
+"confidence_scale": {
+  "high": "A named public source states this directly, or it is a matter of public record such as a statute or a determination.",
+  "medium": "A credible public source supports it but the figure, date or scope may have moved, or it is inferred from two sources that agree.",
+  "low": "Plausible and useful for the simulation, but not verified. Do not show it to a player as fact."
+},
+"field_guide": {
+  "levers[].id": "stable slug, safe as a key",
+  "levers[].who_decides": "one or more institution ids from this file's institutions list. The decision maker, not the funder and not the lobbyist.",
+  "levers[].player_role": "player_decides | player_funds | player_advocates | player_observes. The honest answer to 'can I just do this'.",
+  "levers[].status": "in_place | funded | proposed | under_study | modelled_option | contested. modelled_option means nobody has actually proposed it and this pack invented the framing, not the facts.",
+  "levers[].cost_aud": "capital is a one-off in A$; recurring_per_year is ongoing in A$; basis says where the number came from.",
+  "levers[].lead_time_months": "from decision to the effect starting to appear, not to ribbon cutting.",
+  "levers[].effects[]": "{target, magnitude, delay_months, confidence}. target is a metric id from this file's metrics list.",
+  "levers[].effects[].magnitude": "signed, -1 to +1, as a fraction of that metric's plausible full swing on this island. +0.1 is a real but modest shift. +0.6 is transformative. Sign is in the metric's own units, so a positive magnitude on a metric whose direction is 'lower_is_better' is a worsening.",
+  "levers[].side_effects[]": "second-order consequences a player should be able to discover rather than be told. Same shape as effects plus a description.",
+  "levers[].who_supports / who_opposes": "interest_group ids. Empty is allowed and means genuinely nobody organised cares much.",
+  "levers[].source": "URL, repo path, or 'general knowledge'",
+  "interest_groups[].size": "share of the island's civic weight, 0 to 1, across residents plus the non-resident groups that show up to consultation. The set does not sum to 1 because people belong to several groups at once and because visitors are not residents.",
+  "interest_groups[].base_mood": "-1 furious to +1 delighted, at the pack's baseline state with no levers pulled.",
+  "metrics[].baseline": "the value the simulation should start from. index means a 0 to 1 modelling index with no published measurement behind it.",
+  "metrics[].direction": "higher_is_better | lower_is_better | context. context means the value is neither good nor bad on its own."
+},
+"source_registry": {
+  "rcc-div2": "https://www.redland.qld.gov.au/info/20142/mayor_and_councillors/374/division_2_cleveland_north_stradbroke_island",
+  "qyac-native-title": "https://qyac.net.au/native-title/",
+  "qao-minjerribah-futures": "https://www.qao.qld.gov.au/reports-resources/reports-parliament/managing-minjerribah-futures-funding",
+  "qld-visitor-stats-2019": "https://statements.qld.gov.au/statements/88156",
+  "qld-water-reserves-2023": "https://statements.qld.gov.au/statements/99314",
+  "qld-gumpi-masterplan": "https://statements.qld.gov.au/statements/92792",
+  "parks-nbd-about": "https://parks.qld.gov.au/parks/naree-budjong-djara/about",
+  "parks-nbd-plan": "https://parks.qld.gov.au/parks/naree-budjong-djara/about/naree-budjong-djara-management-plan",
+  "parks-minjerribah-camping": "https://parks.qld.gov.au/parks/minjerribah/camping",
+  "parks-vap-map": "https://parks.des.qld.gov.au/__data/assets/pdf_file/0022/166243/nth-stradbroke-island.pdf",
+  "rcc-amity-semp-faq": "https://yoursay.redland.qld.gov.au/amity-point-shoreline-erosion/widgets/281431/faqs",
+  "rcc-amity-semp": "https://www.redland.qld.gov.au/info/20182/marine_facilities_permits_and_licences/1239/amity_point_semp_northern_reach",
+  "rcc-chas": "https://yoursay.redland.qld.gov.au/CHAS/widgets/245401/faqs",
+  "rcc-waste-centres": "https://www.redland.qld.gov.au/info/20189/recycling_and_waste_centres",
+  "rcc-short-term-accom": "https://www.redland.qld.gov.au/Planning-building-and-development/Short-term-accommodation-and-Airbnb",
+  "rcc-lhap": "https://www.redland.qld.gov.au/files/assets/public/v/1/about-council/documents/local_housing_action_plan__a11195661_.pdf",
+  "rcc-planned-burns": "https://www.redland.qld.gov.au/PlannedBurns",
+  "rcc-koala-monitoring-2020": "https://www.redland.qld.gov.au/files/assets/public/v/1/environment-and-sustainability/documents/minjerribah_koala_monitoring_report_2020.pdf",
+  "rcc-toondah-pda": "https://www.redland.qld.gov.au/Business-and-investment/Priority-Development-Areas/Toondah-Harbour-PDA",
+  "rcc-panorama-walk": "https://yoursay.redland.qld.gov.au/snapper-street-pedestrian-link",
+  "rcc-plwwtp-2016": "https://www.redlandscoasttoday.com.au/2016/11/new-wastewater-treatment-plant-opened/",
+  "rcc-ontap-2017": "https://news.redland.qld.gov.au/on-tap-june-2017/",
+  "rcc-islands-budget-2025": "https://www.redlandscoasttoday.com.au/2025/06/islands-receive-6-95m-boost-for-infrastructure/",
+  "rbn-waste-bill": "https://redlandbaysidenews.com.au/revealed-redlands-600-waste-bill-rising-landfill-crisis-and-controversial-changes-ahead/",
+  "rbn-ferry-fares": "https://redlandbaysidenews.com.au/stradbroke-ferry-fares/",
+  "rbn-bus-improvements": "https://redlandbaysidenews.com.au/bus-network-improvements-to-boost-connections-on-north-stradbroke-island/",
+  "rbn-walker-exit": "https://redlandbaysidenews.com.au/exclusive-walker-walks-away-from-toondah-after-decade-long-development-saga/",
+  "sibelco-rehab": "https://www.sibelco.com/en/news/sibelco-signs-historic-rehabilitation-agreement-for-north-stradbroke-island",
+  "detsi-dog-attacks-2024": "https://www.detsi.qld.gov.au/our-department/news-media/mediareleases/2024/koalas-killed-seriously-injured-domestic-dogs",
+  "qra-cultural-burning": "https://qra.qld.gov.au/news/traditional-burning-techniques-used-build-bushfire-resilience-minjerribah",
+  "seqwater-planned-burns": "https://www.seqwater.com.au/project/planned-burns",
+  "abs-quickstats-nsi": "https://www.abs.gov.au/census/find-census-data/quickstats/2021/301021550",
+  "repo-residents": "C:/Users/sbt41/githublocal/minjerribah-living-twin/data/residents.json",
+  "repo-businesses": "C:/Users/sbt41/githublocal/minjerribah-living-twin/data/businesses.json",
+  "repo-geography": "C:/Users/sbt41/githublocal/minjerribah-living-twin/data/geography.json",
+  "repo-data-notes": "C:/Users/sbt41/githublocal/minjerribah-living-twin/docs/DATA-NOTES.md",
+  "brief": "Task brief supplied by the author, not independently verified"
+},
+"jurisdiction": {
+  "summary": "Three townships, one council division shared with a mainland suburb, roughly half the island in a jointly managed national park, native title determined over the whole island in 2011, and every road on and off the island in somebody else's hands.",
+  "layers": [
+    { "layer": "Local government", "body": "redland-city-council", "covers": "Roads in the townships, waste, water and wastewater through Redland Water, parks and foreshore, local laws including dogs and camping on council land, the planning scheme, rates.", "source": "rcc-div2", "confidence": "high" },
+    { "layer": "Local representation", "body": "rcc-division-2", "covers": "One councillor. Division 2 covers Cleveland on the mainland and North Stradbroke Island together, so the island's representative also answers to a mainland suburb with far more voters.", "source": "rcc-div2", "confidence": "high", "why_it_matters": "This single fact shapes every island grievance about being outvoted." },
+    { "layer": "State", "body": "qld-government", "covers": "The statute that ended mining, the transition funding, national park, marine park, coastal management, planning appeals, health, schools, police, public transport contracts.", "source": "qao-minjerribah-futures", "confidence": "high" },
+    { "layer": "Native title", "body": "qyac", "covers": "Determined native title over Minjerribah since 4 July 2011, the ILUAs that set how those rights are exercised, joint management of the national park, and the island's camping and vehicle access business.", "source": "qyac-native-title", "confidence": "high" },
+    { "layer": "Park management", "body": "joint-management", "covers": "Naree Budjong Djara National Park and the Minjerribah Recreation Area, jointly managed by QYAC and QPWS under an Indigenous Management Agreement.", "source": "parks-nbd-about", "confidence": "high" },
+    { "layer": "Private operators on a public function", "body": "sealink", "covers": "The vehicle barge and a passenger service between Cleveland and Dunwich. Commercial pricing, commercial timetable, no ballot, no resident quota published.", "source": "rbn-ferry-fares", "confidence": "medium" }
+  ]
+},
+"institutions": [
+  { "id": "redland-city-council", "label": "Redland City Council", "kind": "local government", "role": "Roads, parks, foreshore, waste, water and wastewater, planning scheme, local laws, rates. The island is one part of a city whose population is overwhelmingly on the mainland.", "seats_on_island": "Division 2, shared with Cleveland.", "source": "rcc-div2", "confidence": "high" },
+  { "id": "rcc-division-2", "label": "Division 2 councillor", "kind": "elected representative", "role": "The island's single voice in the council chamber, in a division that also covers Cleveland on the mainland.", "source": "rcc-div2", "confidence": "high", "note": "The pack deliberately does not name the sitting councillor. Names change; the structure does not." },
+  { "id": "redland-water", "label": "Redland Water", "kind": "council business unit", "role": "Reticulated water and the sewerage network in the townships, and the Point Lookout wastewater treatment plant.", "source": "rcc-plwwtp-2016", "confidence": "high" },
+  { "id": "seqwater", "label": "Seqwater", "kind": "state bulk water authority", "role": "Bulk water for the island townships, drawn from bores and treated at small local plants. The island is not on the South East Queensland Water Grid.", "source": "rcc-ontap-2017", "confidence": "high" },
+  { "id": "qld-government", "label": "Queensland Government", "kind": "state government", "role": "The statute that ended mining, the transition funding, the national park, coastal and marine management, planning appeals, health, schools, police, public transport contracts.", "source": "qao-minjerribah-futures", "confidence": "high" },
+  { "id": "detsi", "label": "Department of the Environment, Tourism, Science and Innovation", "kind": "state department", "role": "Administers Minjerribah Futures and holds the parks and environment functions. The department has been renamed and restructured more than once during the transition, which the audit office found disrupted the program.", "source": "qao-minjerribah-futures", "confidence": "high" },
+  { "id": "qpws", "label": "Queensland Parks and Wildlife Service", "kind": "state agency", "role": "Joint manager of Naree Budjong Djara National Park and the Minjerribah Recreation Area with QYAC.", "source": "parks-nbd-about", "confidence": "high" },
+  { "id": "joint-management", "label": "Joint management, QYAC and QPWS", "kind": "joint arrangement", "role": "Indigenous Joint Management Areas run under an Indigenous Management Agreement. Fire, pests, weeds, cultural heritage, assets and visitor management on park.", "source": "parks-nbd-about", "confidence": "high", "note": "For any lever on park, this is the decision maker, not the council and not the player." },
+  { "id": "qyac", "label": "Quandamooka Yoolooburrabee Aboriginal Corporation", "kind": "Registered Native Title Body Corporate", "role": "Holds and manages the native title rights and interests of the Quandamooka People recognised on 4 July 2011. Joint manager of the national park. Operator of Minjerribah Camping. Around 550 members, the largest membership of any prescribed body corporate in Australia.", "source": "qyac-native-title", "confidence": "high", "capacity_note": "The Queensland Audit Office found QYAC was assigned multiple complex construction projects at once, with fewer than 100 staff, without an adequate capacity assessment. Capacity is a real constraint in this simulation, not a slur.", "capacity_source": "qao-minjerribah-futures" },
+  { "id": "minjerribah-camping", "label": "Minjerribah Camping", "kind": "QYAC business", "role": "Runs the island's camping grounds and issues the vehicle access permits for the Minjerribah Recreation Area, including Main Beach and Flinders Beach.", "source": "parks-minjerribah-camping", "confidence": "high" },
+  { "id": "tmr-translink", "label": "Transport and Main Roads, TransLink", "kind": "state agency", "role": "Contracts the island bus services and sets the fare policy that applies to them.", "source": "rbn-bus-improvements", "confidence": "high" },
+  { "id": "transit-systems", "label": "Bay Island Transit Systems", "kind": "contracted bus operator", "role": "Runs island bus routes 880 between Dunwich and Point Lookout and 881 between One Mile, Dunwich and Amity Point, under the TransLink contract at the 50 cent fare.", "source": "rbn-bus-improvements", "confidence": "medium" },
+  { "id": "edq", "label": "Economic Development Queensland", "kind": "state development agency", "role": "Administers the Toondah Harbour Priority Development Area on the mainland side, which contains the vehicle ferry terminal the island depends on.", "source": "rcc-toondah-pda", "confidence": "medium" },
+  { "id": "sealink", "label": "SeaLink South East Queensland", "kind": "private transport operator", "role": "Vehicle barge and passenger service, Cleveland to Dunwich.", "source": "rbn-ferry-fares", "confidence": "high" },
+  { "id": "stradbroke-flyer", "label": "Stradbroke Flyer Gold Cat", "kind": "private transport operator", "role": "Passenger water taxi, Cleveland to One Mile at Dunwich. A second operator on the same crossing.", "source": "repo-businesses", "confidence": "high" },
+  { "id": "sibelco", "label": "Sibelco Australia", "kind": "former mine operator", "role": "Ran the island's sand mining to its close and signed a rehabilitation agreement in December 2019 committing to work with QYAC on restoring and surrendering former mining land.", "source": "sibelco-rehab", "confidence": "high" },
+  { "id": "private-landowners", "label": "Private landowners", "kind": "private parties", "role": "At Amity Point, owners of land behind the central reach of the foreshore carry the construction and maintenance cost of works that protect their own property.", "source": "rcc-amity-semp-faq", "confidence": "high" },
+  { "id": "australian-government", "label": "Australian Government", "kind": "federal government", "role": "Native title law, environmental approvals under national environment law, housing and closing the gap funding, Ramsar obligations in Moreton Bay.", "source": "general knowledge", "confidence": "medium" },
+  { "id": "community", "label": "No formal decision maker", "kind": "none", "role": "Some things on this island happen because volunteers do them, or do not happen because nobody is left to. Used where a lever has no institutional owner.", "source": "repo-businesses", "confidence": "medium", "note": "The Amity Point Progress Association has wound up, so Amity Point has no local progress association to consult." }
+],
+"instruments": [
+  { "id": "nsipsa-2011", "label": "North Stradbroke Island Protection and Sustainability Act 2011", "kind": "state statute", "what_it_does": "Set the framework for phasing out sand mining on the island. Amended in 2016 to bring the end date back to the end of 2019.", "why_it_matters": "It is the reason the island has an economy in transition rather than a mine.", "source": "qao-minjerribah-futures", "confidence": "high" },
+  { "id": "native-title-2011", "label": "Quandamooka People #1 and #2 determination", "kind": "Federal Court determination", "date": "2011-07-04", "what_it_does": "Recognised native title over 54,408 hectares: 2,264 hectares exclusive possession, 22,639 hectares onshore non-exclusive, 29,505 hectares offshore non-exclusive. Delaney on behalf of the Quandamooka People v State of Queensland [2011] FCA 741.", "source": "qyac-native-title", "confidence": "high" },
+  { "id": "iluas-2011", "label": "The Quandamooka Indigenous Land Use Agreements", "kind": "registered ILUAs", "what_it_does": "Two agreements setting how native title rights and interests are exercised on the ground, including the joint management arrangements. The Quandamooka and State of Queensland ILUA was registered by the National Native Title Tribunal on 8 December 2011.", "source": "qyac-native-title", "confidence": "medium", "gap": "The full text and the specific schedules that govern camping, tourism and land dealings were not read for this pack." },
+  { "id": "nbd-management-plan", "label": "Naree Budjong Djara management plan", "kind": "park management plan", "what_it_does": "Sets how QYAC and QPWS jointly manage the national park and the visitor experience within it. Naree Budjong Djara means My Mother Earth.", "source": "parks-nbd-plan", "confidence": "high" },
+  { "id": "ets-2016", "label": "North Stradbroke Island Economic Transition Strategy", "kind": "state strategy", "date": "2016", "what_it_does": "The original transition package, 23 projects, designed to move the island off sand mining.", "source": "qao-minjerribah-futures", "confidence": "high" },
+  { "id": "minjerribah-futures", "label": "Minjerribah Futures", "kind": "state program", "date": "2019 onward", "what_it_does": "The successor program to the transition strategy. Approved funding rose from an initial $20 million to $39.4 million as at 30 April 2024, of which $30.6 million had been spent. $8.74 million went directly to QYAC between July 2016 and December 2021.", "source": "qao-minjerribah-futures", "confidence": "high", "audit_findings": "The strategy assumed $36.6 million in private investment that never arrived, which forced the state to raise its own contribution. Governance was found to be complex and inconsistent, with inadequate community oversight." },
+  { "id": "gumpi-master-plan", "label": "Gumpi (Dunwich) Master Plan", "kind": "state led master plan", "date": "consulted 2021", "what_it_does": "Sets future residential, commercial, community, environmental and industrial land uses at Dunwich, infrastructure upgrades and the gateway role. A temporary local planning instrument covered 25 land parcels across Gumpi, Pulan Pulan and Mulumba.", "source": "qld-gumpi-masterplan", "confidence": "medium", "gap": "Whether the master plan has been given effect in the current Redland City Plan was not confirmed." },
+  { "id": "amity-semp", "label": "Amity Point Shoreline Erosion Management Plan", "kind": "council plan", "what_it_does": "A 20 year plan splitting the Amity Point foreshore into three reaches. Northern reach: surveys and coastal process studies. Central reach: formalising and maintaining the rock flow slide barrier. Southern reach: a buried seawall and sand nourishment.", "source": "rcc-amity-semp-faq", "confidence": "high" },
+  { "id": "chas", "label": "Coastal Hazard Adaptation Strategy", "kind": "council strategy", "what_it_does": "A 20 to 100 year plan for erosion, sea level rise and storm tide across the whole city coastline. The 2016 current hazards phase identified Amity Point as the only area at high risk of coastal erosion.", "source": "rcc-chas", "confidence": "high" },
+  { "id": "erosion-prone-area", "label": "Declared erosion prone area", "kind": "state declaration", "what_it_does": "Amity Point is a declared erosion prone area under the Coastal Protection and Management Act 1995, which constrains what can be built and where.", "source": "rcc-chas", "confidence": "high" },
+  { "id": "water-reserves-2023", "label": "Quandamooka water reserves", "kind": "state water instrument", "date": "2023-12-06", "what_it_does": "Established two water reserves totalling 61,190 megalitres for the Quandamooka People, split evenly between environmental and cultural use and economic use and land rehabilitation, from water previously allocated to sand mining.", "source": "qld-water-reserves-2023", "confidence": "high" },
+  { "id": "sibelco-rehab-agreement", "label": "Sibelco rehabilitation agreement", "kind": "private agreement", "date": "2019-12", "what_it_does": "Commits Sibelco to work with QYAC on rehabilitating and surrendering former mining land on the island.", "source": "sibelco-rehab", "confidence": "high" },
+  { "id": "toondah-pda", "label": "Toondah Harbour Priority Development Area", "kind": "state declared PDA", "what_it_does": "The mainland end of the island's vehicle ferry link, declared a Priority Development Area in 2013. The private development partner withdrew its federal application in April 2024, days after the federal environment minister announced a proposed refusal. As reported in April 2026, the Priority Development Area remains in place but has no private sector partner and the redevelopment pathway is unclear.", "source": "rbn-walker-exit", "confidence": "medium", "why_it_matters": "The island's front door on the mainland has no development partner and no settled plan. Every access lever runs through this uncertainty. The withdrawn proposal had included a new ferry terminal, so the terminal upgrade went with it." },
+  { "id": "lhap", "label": "Redland Local Housing Action Plan", "kind": "council plan", "what_it_does": "Council's housing actions, which record that businesses on the island struggle to recruit because there is nowhere for workers to live, and that the island housing co-operative had no vacancies across its portfolio.", "source": "rcc-lhap", "confidence": "medium", "gap": "The plan PDF returned 403 to this agent and was read only through search result extracts. Figures should be checked against the document itself." }
+],
+"interest_groups": [
+  { "id": "quandamooka-families", "label": "Quandamooka families", "defined_in": "data/residents.json", "size": 0.16, "base_mood": -0.05,
+    "about": "Traditional Owner households and the community around QYAC, QALSMA, Yulu-Burri-Ba and MMEIC. 16.1 per cent of residents island-wide and 30.5 per cent in Dunwich, so weight is township-dependent and must never be averaged away.",
+    "what_they_want": ["Decisions on Country made with them, not about them", "Jobs and enterprise on Country that outlast a grant cycle", "Housing that families can actually get into", "Rehabilitation of the mined land finished properly", "Joint management resourced, not just signed"],
+    "what_angers_them": ["Being consulted after a decision is made", "Programs designed around agency timelines rather than community capacity", "Visitors treating Country as a backdrop", "Being asked to deliver complex construction with no capacity funding"],
+    "source": "abs-quickstats-nsi", "confidence": "high",
+    "note": "A civic constituency label for the simulation. It is not a cultural authority and does not speak for QYAC." },
+  { "id": "long-term-residents", "label": "Long-term residents", "defined_in": "data/residents.json", "size": 0.34, "base_mood": -0.1,
+    "about": "People who have lived here through the mine closing and the tourism turn.",
+    "what_they_want": ["A ferry they can afford and get on", "Roads and services that hold up in winter as well as January", "To be told before something changes, not after", "The island to stay recognisably itself"],
+    "what_angers_them": ["Consultation that reads as a formality", "Paying city rates for island service levels", "Long weekend traffic and rubbish", "Decisions made in Cleveland by people who have not been over"],
+    "source": "general knowledge", "confidence": "medium" },
+  { "id": "holiday-home-owners", "label": "Holiday home owners", "defined_in": "data/residents.json", "size": 0.18, "base_mood": 0.1,
+    "about": "Ratepayers who are here six to thirty nights a year. Backed by the hardest number in the residents pack: 50.3 per cent of private dwellings unoccupied on census night, 65 per cent at Point Lookout.",
+    "what_they_want": ["Rates that reflect how little service they use", "Quiet, parking, and a clean beach when they arrive", "Freedom to let the house when they are not in it", "Property values held or improved"],
+    "what_angers_them": ["Rates differentials aimed at them", "Short-stay letting caps or registration fees", "Restrictions on what they can build", "Being called part-timers in a council meeting"],
+    "source": "abs-quickstats-nsi", "confidence": "high" },
+  { "id": "renters-and-key-workers", "label": "Renters and key workers", "defined_in": "data/residents.json", "size": 0.14, "base_mood": -0.35,
+    "about": "The chefs, nurses, teachers, cleaners and deckhands who need a bed on the island. 26.4 per cent of occupied dwellings rented island-wide, against half of all dwellings sitting empty.",
+    "what_they_want": ["Any long-term rental at all", "Rules that put empty houses back into the long-term market", "Employer or community housing", "A last boat that gets them home after a dinner service"],
+    "what_angers_them": ["Being moved out every December for the holiday rate", "Housing plans that produce reports and no beds", "Being told the market will sort it out"],
+    "source": "abs-quickstats-nsi", "confidence": "medium" },
+  { "id": "tourism-operators", "label": "Tourism and hospitality operators", "defined_in": "data/residents.json", "size": 0.09, "base_mood": -0.05,
+    "about": "Accommodation, cafes, tours, dive and surf schools, the pub and the clubs.",
+    "what_they_want": ["Visitors spread across the year rather than piled into six weekends", "Staff who can find a bed", "Ferry capacity and predictable fares", "Event permits that do not take a year"],
+    "what_angers_them": ["Caps on visitor numbers", "A new levy on their guests", "Freight costs they cannot pass on", "A shoulder season with no marketing behind it"],
+    "source": "repo-businesses", "confidence": "high" },
+  { "id": "retirees-and-seniors", "label": "Retirees and seniors", "defined_in": "data/residents.json", "size": 0.30, "base_mood": 0.0,
+    "about": "The largest single bloc on the island. Median age 52; 29.5 per cent of residents are 60 to 74.",
+    "what_they_want": ["Health access and a reliable way to get to an appointment", "Footpaths, seats, shade, the pool and the clubs", "Rates relief", "An ambulance that arrives"],
+    "what_angers_them": ["Anything that makes the crossing harder or dearer", "Losing a service they have had for twenty years", "Construction noise and detours"],
+    "source": "abs-quickstats-nsi", "confidence": "high" },
+  { "id": "young-families-and-school", "label": "Young families and the school", "defined_in": "data/residents.json", "size": 0.11, "base_mood": -0.1,
+    "about": "Households with children at Dunwich State School or crossing to Cleveland for high school.",
+    "what_they_want": ["A ferry timetable that matches a school day", "Childcare and youth activities", "Sport, the pool, and somewhere for teenagers to be", "Safe walking and riding routes"],
+    "what_angers_them": ["Ferry cancellations on a school morning", "Losing the school bus", "Nothing for kids in the shoulder season"],
+    "source": "repo-residents", "confidence": "high" },
+  { "id": "tradies-and-builders", "label": "Trades and builders", "defined_in": "data/residents.json", "size": 0.13, "base_mood": -0.15,
+    "about": "Island-based trades plus the mainland crews who barge over. Technicians and trades 12.5 per cent island-wide, labourers 15.8 per cent and 20.9 per cent at Amity Point.",
+    "what_they_want": ["Barge bookings they can rely on and a fare that does not eat the job", "Faster development approvals", "A tip that is open when they finish", "Somewhere to park a ute and trailer"],
+    "what_angers_them": ["Peak surcharges on a working vehicle", "Tip fees for commercial loads", "Building restrictions in overlays"],
+    "source": "abs-quickstats-nsi", "confidence": "medium" },
+  { "id": "environmental-stewards", "label": "Environmental stewards", "defined_in": "data/residents.json", "size": 0.08, "base_mood": -0.2,
+    "about": "Bushcare, wildlife rescue, dune care, the people who count koalas and pull weeds. Wildlife Rescue Minjerribah reports more than 240 injured wildlife cases a year from vehicle strike or domestic pet attack.",
+    "what_they_want": ["Dogs contained and enforcement that means something", "Beach driving kept off the dunes and away from roosting shorebirds", "Koala habitat protected in the planning scheme", "Fire managed for the country, not just for the fence line"],
+    "what_angers_them": ["Development in habitat", "Unenforced rules", "Vehicles on dunes", "Being told wildlife is a lifestyle issue"],
+    "source": "detsi-dog-attacks-2024", "confidence": "medium" },
+  { "id": "fishers-and-boaties", "label": "Fishers and boaties", "defined_in": "data/residents.json", "size": 0.12, "base_mood": 0.0,
+    "about": "Recreational and commercial fishers, the fishing club, marine rescue volunteers, ramp and jetty users.",
+    "what_they_want": ["Ramp access and trailer parking", "Channel markers and dredging where it matters", "Fuel they can afford", "A say before a closure line is drawn"],
+    "what_angers_them": ["New closures announced without local input", "Ramp car parks full of day visitors", "Fees on top of fees"],
+    "source": "repo-businesses", "confidence": "medium" },
+  { "id": "surf-and-beach-users", "label": "Surfers and beach users", "defined_in": "data/residents.json", "size": 0.15, "base_mood": 0.05,
+    "about": "Dawn patrol locals, the surf club, swimmers, and the four-wheel-drive beach crowd. Two constituencies that share a beach and disagree about vehicles on it.",
+    "what_they_want": ["Patrolled beaches through the season", "Parking near the point", "Beach access maintained", "Crowds managed at the gorge walk"],
+    "what_angers_them": ["Losing beach vehicle access", "Carparks full by eight", "Rules written for visitors applied to locals"],
+    "source": "repo-businesses", "confidence": "medium" },
+  { "id": "volunteers-and-emergency", "label": "Volunteers and emergency services", "defined_in": "data/residents.json", "size": 0.07, "base_mood": -0.15,
+    "about": "Rural fire brigade, marine rescue, surf life saving, wildlife rescue, club committees and hall volunteers. On an island with limited paid emergency staffing, the volunteer base is the second half of the emergency system.",
+    "what_they_want": ["Training, equipment and insurance paid for", "Younger members", "Sensible expectations in a peak week", "Somewhere affordable for volunteers to live"],
+    "what_angers_them": ["Being the fallback for a service somebody else cut", "Grant paperwork bigger than the grant", "Burnout treated as normal"],
+    "source": "repo-businesses", "confidence": "medium" },
+  { "id": "ferry-commuters", "label": "Ferry commuters", "defined_in": "data/residents.json", "size": 0.10, "base_mood": -0.25,
+    "about": "Workers and students who cross the bay most days.",
+    "what_they_want": ["The first and last service kept", "A resident fare that reflects that this is their road", "Terminal parking on the mainland", "Honest information when a service is cancelled"],
+    "what_angers_them": ["Being excluded from mainland fare policy", "Peak surcharges on the only way home", "Cancellations with no replacement"],
+    "source": "rbn-ferry-fares", "confidence": "medium" },
+  { "id": "day-visitors", "label": "Day visitors", "size": 0.06, "base_mood": 0.2,
+    "about": "Overwhelmingly locals: about 93 per cent of visitors are domestic and most come from Brisbane and the Redlands. Median day-tripper spend was $120 in the 2018 research round. They vote in Redlands and Brisbane, not on the island, which is exactly why they matter politically.",
+    "what_they_want": ["A cheap easy crossing", "Somewhere to park", "A beach, a swim, fish and chips, home by dark"],
+    "what_angers_them": ["Permits and levies", "Being told the island is full", "Paying for parking"],
+    "source": "qld-visitor-stats-2019", "confidence": "medium",
+    "note": "Not residents. They carry civic weight through mainland politics rather than through island consultation." },
+  { "id": "campers", "label": "Campers", "size": 0.05, "base_mood": 0.1,
+    "about": "Beach camping on Main and Flinders beaches and the township camping grounds, all booked through Minjerribah Camping. A different crowd in January to the one in June.",
+    "what_they_want": ["Sites available when they want them", "Beach vehicle access", "Fires, or a clear rule about fires", "Prices that do not climb every year"],
+    "what_angers_them": ["Sites sold out months ahead", "Permit price rises", "Closures for shorebirds or dune repair", "Being blamed for the illegal campers"],
+    "source": "parks-minjerribah-camping", "confidence": "medium" },
+  { "id": "conservation-groups", "label": "Conservation groups", "size": 0.04, "base_mood": -0.2,
+    "about": "Organised advocacy rather than hands-in-the-dirt stewardship: the groups that campaigned to end mining, that fought the mainland harbour development, and that watch the planning scheme.",
+    "what_they_want": ["Rehabilitation completed and land transferred", "No development in Ramsar wetland or koala habitat", "Strong overlays and real enforcement", "Water left in the aquifer"],
+    "what_angers_them": ["Tourism growth framed as the only economy", "Approvals granted against advice", "Monitoring without consequences"],
+    "source": "rbn-walker-exit", "confidence": "medium" },
+  { "id": "foreshore-landowners", "label": "Amity Point foreshore landowners", "size": 0.02, "base_mood": -0.4,
+    "about": "The households whose back fence is the erosion problem. Under the shoreline plan, works in the central reach that protect private property are paid for and maintained by the owners of that property, not by the council.",
+    "what_they_want": ["Their land to stop disappearing", "Approvals to build protection works", "Council to take on the cost", "Certainty about whether they can insure and sell"],
+    "what_angers_them": ["The word retreat", "Being told the barrier in front of their house is their problem", "Studies instead of works", "Neighbours who cannot fund their section and leave a gap"],
+    "source": "rcc-amity-semp-faq", "confidence": "high",
+    "note": "Small in number, very high in intensity. In a civic model, intensity matters as much as size." },
+  { "id": "council-as-actor", "label": "Redland City Council as an actor", "size": 0.0, "base_mood": -0.1,
+    "about": "Not a constituency. The council's own institutional mood: budget pressure, legal exposure, staff capacity, and how much political appetite exists for an island fight.",
+    "what_they_want": ["Cost recovery", "No new unfunded liability", "Defensible process", "A quiet chamber"],
+    "what_angers_them": ["Being handed a state responsibility with no money", "Litigation risk on the foreshore", "Anything that lifts the waste bill again"],
+    "source": "rbn-waste-bill", "confidence": "medium" },
+  { "id": "state-as-actor", "label": "Queensland Government as an actor", "size": 0.0, "base_mood": 0.0,
+    "about": "Not a constituency. The state's institutional mood: whether the transition is seen as delivered, whether the audit findings still sting, and whether an island of about two thousand people is worth another tranche.",
+    "what_they_want": ["A finished transition story", "Projects that acquit on time", "No further audit findings", "Traditional Owner-led outcomes that hold up"],
+    "what_angers_them": ["Cost overruns", "Programs that stall on capacity", "Being asked to fund council assets"],
+    "source": "qao-minjerribah-futures", "confidence": "medium" }
+],
+"metrics": [
+  { "id": "visitor_volume", "label": "Annual visitors", "unit": "people per year", "baseline": 375000, "direction": "context", "note": "About 375,000 in 2018, up from about 350,000 in 2017. Nobody has given this project a post-2019 figure.", "source": "qld-visitor-stats-2019", "confidence": "medium" },
+  { "id": "peak_day_load", "label": "Peak day load", "unit": "index", "baseline": 0.85, "direction": "lower_is_better", "note": "How close a long weekend gets to the island's practical carrying limit. Modelling index.", "source": "general knowledge", "confidence": "low" },
+  { "id": "day_visitor_share", "label": "Day visitor share", "unit": "share 0-1", "baseline": 0.6, "direction": "context", "note": "Estimate. Day trippers spend less per head and use the same road, carpark and toilet as an overnight guest.", "source": "qld-visitor-stats-2019", "confidence": "low" },
+  { "id": "visitor_satisfaction", "label": "Visitor satisfaction", "unit": "index", "baseline": 0.7, "direction": "higher_is_better", "note": "Repeat visitation was reported at 79 per cent in the 2018 research round, which is the closest published proxy.", "source": "qld-visitor-stats-2019", "confidence": "low" },
+  { "id": "resident_amenity", "label": "Resident amenity", "unit": "index", "baseline": 0.55, "direction": "higher_is_better", "note": "Noise, traffic, parking, queueing, rubbish, and whether a local can get a park at their own beach.", "source": "general knowledge", "confidence": "low" },
+  { "id": "consultation_trust", "label": "Trust in the process", "unit": "index", "baseline": 0.35, "direction": "higher_is_better", "note": "How far residents believe a decision was genuinely open. Starts low: the audit office found community oversight of the transition program was inadequate.", "source": "qao-minjerribah-futures", "confidence": "medium" },
+  { "id": "barge_queue_peak", "label": "Peak barge queue", "unit": "index", "baseline": 0.8, "direction": "lower_is_better", "note": "Vehicles waiting at Dunwich and Cleveland on a long weekend against sailing capacity. Capacity itself lives in data/transport.json.", "source": "general knowledge", "confidence": "low" },
+  { "id": "ferry_cost_burden", "label": "Cost of the crossing", "unit": "index", "baseline": 0.7, "direction": "lower_is_better", "note": "What it costs a household to use its only road. A flat vehicle fare of $59 standard and $69 large was in market to 31 March 2026, with a $20 surcharge on public holidays and the Christmas peak.", "source": "rbn-ferry-fares", "confidence": "medium" },
+  { "id": "island_accessibility", "label": "Ease of getting on and off", "unit": "index", "baseline": 0.55, "direction": "higher_is_better", "source": "general knowledge", "confidence": "low" },
+  { "id": "traffic_volume", "label": "Township traffic", "unit": "index", "baseline": 0.5, "direction": "lower_is_better", "source": "general knowledge", "confidence": "low" },
+  { "id": "parking_pressure", "label": "Parking pressure", "unit": "index", "baseline": 0.7, "direction": "lower_is_better", "note": "Worst at Point Lookout around the gorge walk and Cylinder Beach in a peak week.", "source": "general knowledge", "confidence": "low" },
+  { "id": "camping_capacity", "label": "Camping capacity", "unit": "sites", "baseline": 0.5, "direction": "context", "note": "Index rather than a count. Site totals belong in data/places.json and data/transport.json and were only partly verifiable: the camping operator's own site returned no route to this agent.", "source": "parks-minjerribah-camping", "confidence": "low" },
+  { "id": "illegal_camping", "label": "Illegal camping", "unit": "index", "baseline": 0.35, "direction": "lower_is_better", "source": "general knowledge", "confidence": "low" },
+  { "id": "campground_revenue", "label": "Camping and permit revenue", "unit": "index", "baseline": 0.5, "direction": "higher_is_better", "note": "Goes to QYAC through Minjerribah Camping, so this metric is also a measure of Traditional Owner self-funding.", "source": "parks-minjerribah-camping", "confidence": "medium" },
+  { "id": "rental_supply", "label": "Long-term rental supply", "unit": "index", "baseline": 0.2, "direction": "higher_is_better", "note": "Starts very low. Half the island's dwellings were unoccupied on census night and the island housing co-operative reported no vacancies across its portfolio.", "source": "rcc-lhap", "confidence": "medium" },
+  { "id": "worker_housing", "label": "Worker accommodation", "unit": "beds", "baseline": 0.15, "direction": "higher_is_better", "note": "Index. Council's housing plan records recruitment failing on the island for want of anywhere to live.", "source": "rcc-lhap", "confidence": "medium" },
+  { "id": "housing_affordability", "label": "Housing affordability", "unit": "index", "baseline": 0.25, "direction": "higher_is_better", "source": "abs-quickstats-nsi", "confidence": "low" },
+  { "id": "short_stay_stock", "label": "Short-stay letting stock", "unit": "dwellings", "baseline": 0.6, "direction": "context", "note": "Index. Neither the council nor this pack has a verified count of short-stay listings on the island.", "source": "rcc-short-term-accom", "confidence": "low" },
+  { "id": "population_permanent", "label": "Permanent population", "unit": "people", "baseline": 2156, "direction": "context", "note": "2021 Census usual residents across the island, in 1,976 dwellings.", "source": "abs-quickstats-nsi", "confidence": "high" },
+  { "id": "business_viability", "label": "Business viability", "unit": "index", "baseline": 0.45, "direction": "higher_is_better", "note": "Trade in June against overheads that do not go away in June.", "source": "repo-businesses", "confidence": "low" },
+  { "id": "local_employment", "label": "Island employment", "unit": "index", "baseline": 0.45, "direction": "higher_is_better", "source": "abs-quickstats-nsi", "confidence": "low" },
+  { "id": "quandamooka_employment", "label": "Employment on Country", "unit": "index", "baseline": 0.4, "direction": "higher_is_better", "note": "Ranger, camping, culture, land management and construction jobs held by Quandamooka people.", "source": "qao-minjerribah-futures", "confidence": "low" },
+  { "id": "qyac_capacity", "label": "QYAC delivery capacity", "unit": "index", "baseline": 0.4, "direction": "higher_is_better", "note": "The audit office found QYAC was handed several complex construction projects at once with fewer than 100 staff. Any lever that adds work to QYAC without adding capacity should push this down.", "source": "qao-minjerribah-futures", "confidence": "high" },
+  { "id": "cost_of_living", "label": "Cost of living", "unit": "index", "baseline": 0.7, "direction": "lower_is_better", "note": "Everything on this island arrived on a barge.", "source": "general knowledge", "confidence": "low" },
+  { "id": "freight_cost", "label": "Freight cost", "unit": "index", "baseline": 0.7, "direction": "lower_is_better", "source": "general knowledge", "confidence": "low" },
+  { "id": "council_budget", "label": "Council budget headroom", "unit": "index", "baseline": 0.35, "direction": "higher_is_better", "note": "Redland households were reported paying over $600 a year for waste alone, across nine contractors, eight waste centres and island barge logistics.", "source": "rbn-waste-bill", "confidence": "medium" },
+  { "id": "state_budget", "label": "State appetite", "unit": "index", "baseline": 0.4, "direction": "higher_is_better", "note": "Approved Minjerribah Futures funding rose from $20 million to $39.4 million, with $30.6 million spent as at April 2024. A further tranche is a political question, not a budget line.", "source": "qao-minjerribah-futures", "confidence": "medium" },
+  { "id": "waste_export_tonnes", "label": "Waste leaving the island", "unit": "index", "baseline": 0.6, "direction": "lower_is_better", "source": "rbn-waste-bill", "confidence": "low" },
+  { "id": "waste_cost", "label": "Waste system cost", "unit": "index", "baseline": 0.7, "direction": "lower_is_better", "source": "rbn-waste-bill", "confidence": "medium" },
+  { "id": "litter", "label": "Litter and dumping", "unit": "index", "baseline": 0.4, "direction": "lower_is_better", "source": "general knowledge", "confidence": "low" },
+  { "id": "water_security", "label": "Water security", "unit": "index", "baseline": 0.6, "direction": "higher_is_better", "note": "The townships are off the South East Queensland Water Grid. Bulk water is drawn from bores and treated at small local plants.", "source": "rcc-ontap-2017", "confidence": "high" },
+  { "id": "aquifer_stress", "label": "Aquifer stress", "unit": "index", "baseline": 0.35, "direction": "lower_is_better", "note": "The island's fresh water is the sand itself. The lakes and the wetlands sit on the same water the townships drink.", "source": "qld-water-reserves-2023", "confidence": "medium" },
+  { "id": "wastewater_capacity", "label": "Wastewater headroom", "unit": "index", "baseline": 0.55, "direction": "higher_is_better", "note": "The Point Lookout plant was rebuilt for $13.5 million and opened on 25 November 2016, rated at 1,600 kilolitres a day, more than twice the peak Christmas flow at the time, replacing a plant over 30 years old. Parts of all three townships still run on septic.", "source": "rcc-plwwtp-2016", "confidence": "high" },
+  { "id": "water_quality_nearshore", "label": "Nearshore water quality", "unit": "index", "baseline": 0.7, "direction": "higher_is_better", "source": "general knowledge", "confidence": "low" },
+  { "id": "beach_width_amity", "label": "Amity Point beach width", "unit": "index", "baseline": 0.3, "direction": "higher_is_better", "source": "rcc-amity-semp-faq", "confidence": "medium" },
+  { "id": "erosion_risk_amity", "label": "Amity Point erosion risk", "unit": "index", "baseline": 0.8, "direction": "lower_is_better", "note": "Amity Point was the only area in the city assessed at high risk of coastal erosion in the 2016 current hazards work, and is a declared erosion prone area.", "source": "rcc-chas", "confidence": "high" },
+  { "id": "private_property_risk", "label": "Property at risk", "unit": "index", "baseline": 0.6, "direction": "lower_is_better", "note": "Public and private land has already been lost at Amity Point.", "source": "rcc-chas", "confidence": "high" },
+  { "id": "dune_condition", "label": "Dune condition", "unit": "index", "baseline": 0.55, "direction": "higher_is_better", "source": "general knowledge", "confidence": "low" },
+  { "id": "shorebird_disturbance", "label": "Shorebird disturbance", "unit": "index", "baseline": 0.5, "direction": "lower_is_better", "source": "general knowledge", "confidence": "low" },
+  { "id": "koala_population", "label": "Koala population health", "unit": "index", "baseline": 0.5, "direction": "higher_is_better", "note": "Island koalas carry the lowest genetic diversity of the south-east Queensland populations and are pressured by vehicle strike, dog attack and habitat loss. Council has run drone monitoring on the island.", "source": "rcc-koala-monitoring-2020", "confidence": "medium" },
+  { "id": "wildlife_road_deaths", "label": "Wildlife killed on roads", "unit": "index", "baseline": 0.5, "direction": "lower_is_better", "note": "Wildlife Rescue Minjerribah reports more than 240 injured wildlife cases a year from vehicle strike or domestic pet attack combined.", "source": "detsi-dog-attacks-2024", "confidence": "medium" },
+  { "id": "dog_incidents", "label": "Dog attacks on wildlife", "unit": "index", "baseline": 0.55, "direction": "lower_is_better", "note": "Two koalas were killed and another badly injured by domestic dogs on the island in a cluster reported by the state environment department in 2024.", "source": "detsi-dog-attacks-2024", "confidence": "high" },
+  { "id": "fire_hazard_load", "label": "Fuel load near townships", "unit": "index", "baseline": 0.5, "direction": "lower_is_better", "note": "QYAC leads the island's bushfire management, with Quandamooka Rangers conducting planned burns alongside QPWS.", "source": "qra-cultural-burning", "confidence": "high" },
+  { "id": "smoke_exposure", "label": "Smoke over the townships", "unit": "index", "baseline": 0.3, "direction": "lower_is_better", "source": "seqwater-planned-burns", "confidence": "medium" },
+  { "id": "road_condition", "label": "Road condition", "unit": "index", "baseline": 0.5, "direction": "higher_is_better", "source": "general knowledge", "confidence": "low" },
+  { "id": "beach_access_quality", "label": "Beach vehicle access", "unit": "index", "baseline": 0.6, "direction": "context", "note": "Good for the four-wheel-drive crowd is not good for the dune. Deliberately context rather than better or worse.", "source": "parks-vap-map", "confidence": "medium" },
+  { "id": "emergency_readiness", "label": "Emergency readiness", "unit": "index", "baseline": 0.5, "direction": "higher_is_better", "note": "Heavily volunteer dependent. The volunteer base is ageing.", "source": "repo-businesses", "confidence": "low" },
+  { "id": "health_access", "label": "Health access", "unit": "index", "baseline": 0.45, "direction": "higher_is_better", "source": "repo-businesses", "confidence": "low" },
+  { "id": "school_enrolments", "label": "School enrolments", "unit": "index", "baseline": 0.45, "direction": "higher_is_better", "note": "Downstream of whether working families can find a house.", "source": "repo-residents", "confidence": "low" },
+  { "id": "energy_reliability", "label": "Power reliability", "unit": "index", "baseline": 0.6, "direction": "higher_is_better", "note": "The island is fed from the mainland grid rather than generated on. The pack does not claim the cable route, the feeder arrangement or an outage frequency, because none was verified.", "source": "general knowledge", "confidence": "low" }
+],
+"levers": [
+{
+  "id": "vehicle-barge-peak-sailings",
+  "name": "More barge sailings on a long weekend",
+  "issue": "barge-queue",
+  "description": "Add sailings across the Friday and the Monday of a long weekend so the queue at Toondah and at Dunwich clears instead of rolling over to the next boat.",
+  "who_decides": ["sealink"], "player_role": "player_advocates", "status": "modelled_option",
+  "cost_aud": { "capital": 0, "recurring_per_year": 900000, "basis": "modelling estimate for extra crewed sailings; no operator cost data was available", "confidence": "low" },
+  "lead_time_months": 3,
+  "effects": [
+    { "target": "barge_queue_peak", "magnitude": -0.35, "delay_months": 1, "confidence": "medium" },
+    { "target": "island_accessibility", "magnitude": 0.2, "delay_months": 1, "confidence": "medium" },
+    { "target": "peak_day_load", "magnitude": 0.15, "delay_months": 2, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "More sailings means more cars, so the queue moves but the carparks at Point Lookout fill earlier.", "target": "parking_pressure", "magnitude": 0.12, "delay_months": 2 },
+    { "description": "Residents who wanted the crowd managed find the crowd increased instead.", "target": "resident_amenity", "magnitude": -0.1, "delay_months": 3 }
+  ],
+  "who_supports": ["day-visitors", "tourism-operators", "tradies-and-builders", "campers"],
+  "who_opposes": ["long-term-residents", "environmental-stewards"],
+  "source": "rbn-ferry-fares",
+  "note": "A private operator decides this on commercial grounds. A council or a player can ask. That is the whole point of the lever."
+},
+{
+  "id": "vehicle-booking-priority-for-residents",
+  "name": "Resident priority on peak barge bookings",
+  "issue": "barge-queue",
+  "description": "Hold a share of peak sailings for island residents and island-based trades so a local can still get home on the Sunday of a long weekend.",
+  "who_decides": ["sealink", "qld-government"], "player_role": "player_advocates", "status": "modelled_option",
+  "cost_aud": { "capital": 40000, "recurring_per_year": 60000, "basis": "modelling estimate for booking system changes and verification", "confidence": "low" },
+  "lead_time_months": 6,
+  "effects": [
+    { "target": "resident_amenity", "magnitude": 0.25, "delay_months": 2, "confidence": "medium" },
+    { "target": "barge_queue_peak", "magnitude": -0.05, "delay_months": 2, "confidence": "low" },
+    { "target": "consultation_trust", "magnitude": 0.12, "delay_months": 3, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Visitors turned away at Cleveland arrive angry or do not arrive at all, and the operators feel it in a shoulder week.", "target": "business_viability", "magnitude": -0.08, "delay_months": 4 },
+    { "description": "Proving who is a resident creates a small bureaucracy and a new grievance about who counts.", "target": "consultation_trust", "magnitude": -0.05, "delay_months": 6 }
+  ],
+  "who_supports": ["long-term-residents", "ferry-commuters", "renters-and-key-workers", "tradies-and-builders", "retirees-and-seniors"],
+  "who_opposes": ["day-visitors", "holiday-home-owners", "tourism-operators"],
+  "source": "rbn-ferry-fares",
+  "note": "No published resident quota exists on this route. This is a modelled option, not a current proposal."
+},
+{
+  "id": "resident-ferry-concession",
+  "name": "A resident fare for the crossing",
+  "issue": "cost-of-crossing",
+  "description": "A standing concession on the vehicle and passenger fare for people who live here, on the argument that this crossing is their road rather than a day out.",
+  "who_decides": ["qld-government", "sealink"], "player_role": "player_advocates", "status": "contested",
+  "cost_aud": { "capital": 0, "recurring_per_year": 3500000, "basis": "modelling estimate; the real number depends on whether the state subsidises the operator or regulates the fare", "confidence": "low" },
+  "lead_time_months": 12,
+  "effects": [
+    { "target": "ferry_cost_burden", "magnitude": -0.4, "delay_months": 3, "confidence": "medium" },
+    { "target": "cost_of_living", "magnitude": -0.2, "delay_months": 6, "confidence": "medium" },
+    { "target": "population_permanent", "magnitude": 0.08, "delay_months": 24, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Cheaper crossings mean more resident trips to the mainland, and some island trade moves to Cleveland.", "target": "business_viability", "magnitude": -0.08, "delay_months": 12 },
+    { "description": "Once a concession exists, every change to it becomes a fight.", "target": "consultation_trust", "magnitude": -0.05, "delay_months": 18 }
+  ],
+  "who_supports": ["long-term-residents", "ferry-commuters", "renters-and-key-workers", "young-families-and-school", "retirees-and-seniors", "quandamooka-families"],
+  "who_opposes": ["state-as-actor"],
+  "source": "rbn-ferry-fares",
+  "note": "Islanders have been reported as excluded from the mainland 50 cent public transport fare, which is the live grievance this lever sits on. A petition for cheaper fares has been run publicly."
+},
+{
+  "id": "ferry-into-public-transport-network",
+  "name": "Bring the crossing into the public transport network",
+  "issue": "cost-of-crossing",
+  "description": "Treat the passenger crossing as a contracted public transport service with network fares and network obligations, the way the island bus routes already are.",
+  "who_decides": ["tmr-translink", "qld-government"], "player_role": "player_advocates", "status": "modelled_option",
+  "cost_aud": { "capital": 0, "recurring_per_year": 6000000, "basis": "modelling estimate for a contracted service subsidy", "confidence": "low" },
+  "lead_time_months": 24,
+  "effects": [
+    { "target": "ferry_cost_burden", "magnitude": -0.5, "delay_months": 12, "confidence": "low" },
+    { "target": "island_accessibility", "magnitude": 0.3, "delay_months": 12, "confidence": "low" },
+    { "target": "day_visitor_share", "magnitude": 0.15, "delay_months": 18, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "A cheap foot crossing pushes day visitor numbers up hard, and the island absorbs them without the vehicle constraint that used to hold them back.", "target": "peak_day_load", "magnitude": 0.2, "delay_months": 18 },
+    { "description": "Contracted service standards mean the timetable stops being the operator's to cut.", "target": "consultation_trust", "magnitude": 0.15, "delay_months": 24 }
+  ],
+  "who_supports": ["ferry-commuters", "young-families-and-school", "renters-and-key-workers", "day-visitors"],
+  "who_opposes": ["state-as-actor", "long-term-residents"],
+  "source": "rbn-bus-improvements",
+  "note": "Island bus services run under TransLink with 50 cent fares. The water crossing is the gap. Whether a ferry contract is legally or commercially available was not verified."
+},
+{
+  "id": "toondah-terminal-rebuild",
+  "name": "Rebuild the mainland terminal",
+  "issue": "front-door",
+  "description": "Fix the island's front door: the terminal, the queueing, the parking and the pedestrian link at Toondah Harbour, without the residential development that carried it for a decade.",
+  "who_decides": ["edq", "qld-government", "redland-city-council"], "player_role": "player_advocates", "status": "under_study",
+  "cost_aud": { "capital": 120000000, "recurring_per_year": 2000000, "basis": "modelling estimate for a terminal and queueing rebuild only, excluding any residential or marina component", "confidence": "low" },
+  "lead_time_months": 60,
+  "effects": [
+    { "target": "barge_queue_peak", "magnitude": -0.3, "delay_months": 48, "confidence": "low" },
+    { "target": "island_accessibility", "magnitude": 0.25, "delay_months": 48, "confidence": "low" },
+    { "target": "consultation_trust", "magnitude": 0.1, "delay_months": 24, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Five years of works at the only vehicle terminal makes the crossing worse before it gets better.", "target": "island_accessibility", "magnitude": -0.2, "delay_months": 12 },
+    { "description": "Any works in this location run into internationally protected wetland and migratory shorebird habitat.", "target": "shorebird_disturbance", "magnitude": 0.15, "delay_months": 24 }
+  ],
+  "who_supports": ["ferry-commuters", "tourism-operators", "day-visitors", "tradies-and-builders"],
+  "who_opposes": ["conservation-groups"],
+  "source": "rbn-walker-exit",
+  "note": "The private development partner withdrew its federal application in April 2024, days after the federal environment minister announced a proposed refusal. As reported in April 2026 the Priority Development Area remains in place with no private sector partner and no clear pathway. The withdrawn proposal had carried the new ferry terminal, which makes this the single largest open question in the access system."
+},
+{
+  "id": "dunwich-gateway-works",
+  "name": "Dunwich gateway and foreshore works",
+  "issue": "front-door",
+  "description": "The island side: terminal arrival, foreshore, footpaths and the queueing area at Dunwich, as set up by the Gumpi master plan.",
+  "who_decides": ["redland-city-council", "qld-government", "qyac"], "player_role": "player_funds", "status": "proposed",
+  "cost_aud": { "capital": 18000000, "recurring_per_year": 350000, "basis": "modelling estimate; the master plan does not publish a costed works schedule", "confidence": "low" },
+  "lead_time_months": 36,
+  "effects": [
+    { "target": "resident_amenity", "magnitude": 0.15, "delay_months": 30, "confidence": "low" },
+    { "target": "visitor_satisfaction", "magnitude": 0.2, "delay_months": 30, "confidence": "low" },
+    { "target": "barge_queue_peak", "magnitude": -0.1, "delay_months": 30, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Every gateway project on this island is also a cultural interpretation project, and that is QYAC's call to lead, which takes time the construction program does not allow for.", "target": "qyac_capacity", "magnitude": -0.12, "delay_months": 6 },
+    { "description": "A nicer arrival raises day visitor volume without adding a single carpark at the other end of the island.", "target": "parking_pressure", "magnitude": 0.1, "delay_months": 36 }
+  ],
+  "who_supports": ["tourism-operators", "quandamooka-families", "long-term-residents"],
+  "who_opposes": [],
+  "source": "qld-gumpi-masterplan",
+  "confidence": "medium"
+},
+{
+  "id": "island-bus-frequency",
+  "name": "More island buses, more of the year",
+  "issue": "getting-around",
+  "description": "Lift service frequency between Dunwich, Amity Point and Point Lookout so arriving without a car is a real choice rather than a gamble.",
+  "who_decides": ["tmr-translink"], "player_role": "player_advocates", "status": "in_place",
+  "cost_aud": { "capital": 0, "recurring_per_year": 1400000, "basis": "modelling estimate for additional contracted services", "confidence": "low" },
+  "lead_time_months": 9,
+  "effects": [
+    { "target": "traffic_volume", "magnitude": -0.12, "delay_months": 6, "confidence": "medium" },
+    { "target": "island_accessibility", "magnitude": 0.2, "delay_months": 3, "confidence": "high" },
+    { "target": "parking_pressure", "magnitude": -0.1, "delay_months": 9, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Buses only help if the boat and the bus meet. A timetable that misses the barge by ten minutes is worse than no bus.", "target": "consultation_trust", "magnitude": -0.08, "delay_months": 3 },
+    { "description": "Car-free day visitors spend less per head but leave less mess and take no parking space.", "target": "day_visitor_share", "magnitude": 0.08, "delay_months": 12 }
+  ],
+  "who_supports": ["day-visitors", "young-families-and-school", "retirees-and-seniors", "renters-and-key-workers"],
+  "who_opposes": [],
+  "source": "rbn-bus-improvements",
+  "note": "Real and recent, from 1 December 2025: 41 new weekly services on route 880 between Dunwich and Point Lookout with an earlier first departure and a later last return, a further 91 weekly services in peak holiday seasons, route 881 extended from One Mile through Dunwich to Amity Point with 112 weekly services, and a new stop at the Quandamooka arts and culture centre. Fifty cent fares apply."
+},
+{
+  "id": "day-visitor-vehicle-cap",
+  "name": "Cap day visitor vehicles in peak periods",
+  "issue": "visitors-versus-amenity",
+  "description": "Limit how many non-resident vehicles can land on a peak day, so the island's roads and carparks are sized to the island rather than to demand.",
+  "who_decides": ["qld-government", "sealink"], "player_role": "player_advocates", "status": "modelled_option",
+  "cost_aud": { "capital": 250000, "recurring_per_year": 400000, "basis": "modelling estimate for administration and enforcement", "confidence": "low" },
+  "lead_time_months": 18,
+  "effects": [
+    { "target": "peak_day_load", "magnitude": -0.4, "delay_months": 6, "confidence": "medium" },
+    { "target": "resident_amenity", "magnitude": 0.3, "delay_months": 6, "confidence": "medium" },
+    { "target": "parking_pressure", "magnitude": -0.25, "delay_months": 6, "confidence": "medium" },
+    { "target": "business_viability", "magnitude": -0.2, "delay_months": 12, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "The cap redistributes rather than removes: the days either side of the cap fill up instead.", "target": "traffic_volume", "magnitude": 0.1, "delay_months": 12 },
+    { "description": "A public island that turns people away becomes a political story on the mainland, where most of the voters are.", "target": "state_budget", "magnitude": -0.15, "delay_months": 12 }
+  ],
+  "who_supports": ["long-term-residents", "environmental-stewards", "conservation-groups", "retirees-and-seniors"],
+  "who_opposes": ["day-visitors", "tourism-operators", "holiday-home-owners", "council-as-actor"],
+  "source": "brief",
+  "confidence": "low",
+  "note": "Nobody has proposed this. It is here because it is the lever residents describe wanting when they describe a long weekend, and because its trade-offs are honest."
+},
+{
+  "id": "dunwich-queue-holding-area",
+  "name": "A proper holding area for the barge queue",
+  "issue": "barge-queue",
+  "description": "Get the departing vehicle queue off the Dunwich streets and into a marshalled area with shade, toilets and a live boarding call.",
+  "who_decides": ["redland-city-council", "sealink"], "player_role": "player_funds", "status": "modelled_option",
+  "cost_aud": { "capital": 4500000, "recurring_per_year": 120000, "basis": "modelling estimate for land, pavement, shade and amenities", "confidence": "low" },
+  "lead_time_months": 24,
+  "effects": [
+    { "target": "resident_amenity", "magnitude": 0.2, "delay_months": 20, "confidence": "medium" },
+    { "target": "traffic_volume", "magnitude": -0.15, "delay_months": 20, "confidence": "medium" },
+    { "target": "visitor_satisfaction", "magnitude": 0.15, "delay_months": 20, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "A comfortable queue is a longer tolerated queue, so the operator has less pressure to add sailings.", "target": "barge_queue_peak", "magnitude": 0.08, "delay_months": 24 },
+    { "description": "Land at Dunwich is scarce and contested; using it for cars is a choice against using it for housing.", "target": "worker_housing", "magnitude": -0.05, "delay_months": 24 }
+  ],
+  "who_supports": ["long-term-residents", "tourism-operators", "day-visitors"],
+  "who_opposes": ["quandamooka-families", "conservation-groups"],
+  "source": "brief", "confidence": "low"
+},
+{
+  "id": "mainland-park-and-ride",
+  "name": "Park and ride on the mainland side",
+  "issue": "front-door",
+  "description": "Make it easy to leave the car at Cleveland: secure parking, a shuttle, and a fare that makes walking on cheaper than driving on.",
+  "who_decides": ["redland-city-council", "edq", "tmr-translink"], "player_role": "player_advocates", "status": "modelled_option",
+  "cost_aud": { "capital": 9000000, "recurring_per_year": 500000, "basis": "modelling estimate", "confidence": "low" },
+  "lead_time_months": 30,
+  "effects": [
+    { "target": "peak_day_load", "magnitude": -0.15, "delay_months": 24, "confidence": "low" },
+    { "target": "traffic_volume", "magnitude": -0.2, "delay_months": 24, "confidence": "low" },
+    { "target": "parking_pressure", "magnitude": -0.15, "delay_months": 24, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Only works if the island bus meets the boat. Without that it is a carpark nobody uses.", "target": "island_accessibility", "magnitude": -0.05, "delay_months": 24 },
+    { "description": "Cleveland residents get the carpark and the traffic, and they are in the same council division as the island.", "target": "consultation_trust", "magnitude": -0.1, "delay_months": 18 }
+  ],
+  "who_supports": ["long-term-residents", "environmental-stewards", "day-visitors"],
+  "who_opposes": ["council-as-actor"],
+  "source": "brief", "confidence": "low"
+},
+{
+  "id": "campground-site-cap",
+  "name": "Cap camping sites across the island",
+  "issue": "camping-capacity",
+  "description": "Hold total camping sites at or below today's number instead of adding sites into the peak, and take the pressure through pricing and season instead.",
+  "who_decides": ["qyac", "minjerribah-camping"], "player_role": "player_advocates", "status": "modelled_option",
+  "cost_aud": { "capital": 0, "recurring_per_year": 0, "basis": "a cap costs nothing to declare and costs forgone revenue to hold", "confidence": "medium" },
+  "lead_time_months": 6,
+  "effects": [
+    { "target": "peak_day_load", "magnitude": -0.15, "delay_months": 6, "confidence": "medium" },
+    { "target": "dune_condition", "magnitude": 0.1, "delay_months": 24, "confidence": "low" },
+    { "target": "campground_revenue", "magnitude": -0.15, "delay_months": 12, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Sites that sell out earlier push the overflow into illegal camping on road reserves and tracks.", "target": "illegal_camping", "magnitude": 0.2, "delay_months": 12 },
+    { "description": "Camping revenue is QYAC revenue, so a cap is also a cut to Traditional Owner self-funding.", "target": "qyac_capacity", "magnitude": -0.1, "delay_months": 12 }
+  ],
+  "who_supports": ["long-term-residents", "environmental-stewards", "conservation-groups"],
+  "who_opposes": ["campers", "tourism-operators"],
+  "source": "parks-minjerribah-camping", "confidence": "low"
+},
+{
+  "id": "beach-camping-permit-numbers",
+  "name": "Set beach camping numbers on Main and Flinders",
+  "issue": "camping-capacity",
+  "description": "How many parties can camp on the open beach at once. The beach camping areas sit inside the Minjerribah Recreation Area, so this is a joint management decision.",
+  "who_decides": ["joint-management", "minjerribah-camping"], "player_role": "player_advocates", "status": "in_place",
+  "cost_aud": { "capital": 0, "recurring_per_year": 180000, "basis": "modelling estimate for ranger patrol time at a higher compliance level", "confidence": "low" },
+  "lead_time_months": 6,
+  "effects": [
+    { "target": "dune_condition", "magnitude": 0.15, "delay_months": 18, "confidence": "medium" },
+    { "target": "shorebird_disturbance", "magnitude": -0.15, "delay_months": 12, "confidence": "medium" },
+    { "target": "campground_revenue", "magnitude": -0.1, "delay_months": 12, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Fewer beach sites means more pressure on the township grounds, which are next door to houses.", "target": "resident_amenity", "magnitude": -0.08, "delay_months": 12 },
+    { "description": "Tighter numbers only bind if somebody drives the beach and checks, which is ranger time nobody has funded.", "target": "illegal_camping", "magnitude": 0.12, "delay_months": 6 }
+  ],
+  "who_supports": ["environmental-stewards", "conservation-groups", "long-term-residents"],
+  "who_opposes": ["campers", "surf-and-beach-users"],
+  "source": "parks-vap-map", "confidence": "medium"
+},
+{
+  "id": "illegal-camping-enforcement",
+  "name": "Enforce against illegal camping",
+  "issue": "camping-capacity",
+  "description": "Patrol the road reserves, carparks and tracks where people sleep in vans without a booking, and actually issue the notices.",
+  "who_decides": ["redland-city-council", "joint-management"], "player_role": "player_funds", "status": "in_place",
+  "cost_aud": { "capital": 90000, "recurring_per_year": 320000, "basis": "modelling estimate for two additional compliance officers through the peak season", "confidence": "low" },
+  "lead_time_months": 4,
+  "effects": [
+    { "target": "illegal_camping", "magnitude": -0.35, "delay_months": 4, "confidence": "medium" },
+    { "target": "litter", "magnitude": -0.2, "delay_months": 6, "confidence": "medium" },
+    { "target": "resident_amenity", "magnitude": 0.15, "delay_months": 6, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Some of the vans are workers with a job on the island and nowhere to live, so enforcement lands on the housing problem rather than on tourism.", "target": "worker_housing", "magnitude": -0.1, "delay_months": 6 },
+    { "description": "Enforcement without an alternative shifts the same vans to the next street.", "target": "consultation_trust", "magnitude": -0.05, "delay_months": 6 }
+  ],
+  "who_supports": ["long-term-residents", "holiday-home-owners", "campers", "environmental-stewards"],
+  "who_opposes": ["renters-and-key-workers"],
+  "source": "brief", "confidence": "low",
+  "note": "That some illegal campers are island workers is an inference from the housing evidence, not a counted fact."
+},
+{
+  "id": "shoulder-season-pricing",
+  "name": "Price the shoulder season down and the peak up",
+  "issue": "visitors-versus-amenity",
+  "description": "Use camping and permit pricing to move visitors out of six brutal weekends and into the forty other weeks, when the businesses need them and the island can carry them.",
+  "who_decides": ["qyac", "minjerribah-camping"], "player_role": "player_advocates", "status": "modelled_option",
+  "cost_aud": { "capital": 20000, "recurring_per_year": 90000, "basis": "modelling estimate for systems and marketing", "confidence": "low" },
+  "lead_time_months": 9,
+  "effects": [
+    { "target": "peak_day_load", "magnitude": -0.2, "delay_months": 12, "confidence": "medium" },
+    { "target": "business_viability", "magnitude": 0.2, "delay_months": 18, "confidence": "medium" },
+    { "target": "campground_revenue", "magnitude": 0.1, "delay_months": 18, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "A busier winter means the island never gets its quiet months back, which is the thing long-term residents most quietly value.", "target": "resident_amenity", "magnitude": -0.12, "delay_months": 24 },
+    { "description": "Year-round trade makes year-round jobs, which makes the housing shortage bite harder.", "target": "rental_supply", "magnitude": -0.08, "delay_months": 24 }
+  ],
+  "who_supports": ["tourism-operators", "renters-and-key-workers", "council-as-actor"],
+  "who_opposes": ["long-term-residents", "campers"],
+  "source": "brief", "confidence": "low"
+},
+{
+  "id": "vehicle-access-permit-price",
+  "name": "Set the vehicle access permit price",
+  "issue": "beach-driving",
+  "description": "What it costs to drive on Main Beach and Flinders Beach. The permit is the only real lever on how many vehicles are on the sand at once.",
+  "who_decides": ["joint-management", "minjerribah-camping"], "player_role": "player_advocates", "status": "in_place",
+  "cost_aud": { "capital": 0, "recurring_per_year": 0, "basis": "a price change is revenue, not cost", "confidence": "high" },
+  "lead_time_months": 3,
+  "effects": [
+    { "target": "beach_access_quality", "magnitude": -0.15, "delay_months": 6, "confidence": "medium" },
+    { "target": "dune_condition", "magnitude": 0.1, "delay_months": 18, "confidence": "low" },
+    { "target": "campground_revenue", "magnitude": 0.12, "delay_months": 6, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Price rises land hardest on island families who drive the beach as ordinary transport, not as recreation.", "target": "resident_amenity", "magnitude": -0.1, "delay_months": 6 },
+    { "description": "A dearer permit makes driving without one more attractive, and enforcement is a long beach.", "target": "illegal_camping", "magnitude": 0.08, "delay_months": 12 }
+  ],
+  "who_supports": ["environmental-stewards", "conservation-groups"],
+  "who_opposes": ["surf-and-beach-users", "campers", "fishers-and-boaties", "long-term-residents"],
+  "source": "parks-vap-map", "confidence": "medium",
+  "note": "Permits are sold by Minjerribah Camping online and in person. Current prices were not readable by this agent: the operator's site refused the connection. Do not put a dollar figure in the game until somebody checks it."
+},
+{
+  "id": "beach-driving-seasonal-closures",
+  "name": "Close sections of beach in the shorebird season",
+  "issue": "beach-driving",
+  "description": "Keep vehicles off the sections where migratory shorebirds roost, in the months they are here, with signage and ranger presence rather than a gate.",
+  "who_decides": ["joint-management"], "player_role": "player_advocates", "status": "modelled_option",
+  "cost_aud": { "capital": 60000, "recurring_per_year": 140000, "basis": "modelling estimate for signage, fencing and patrols", "confidence": "low" },
+  "lead_time_months": 6,
+  "effects": [
+    { "target": "shorebird_disturbance", "magnitude": -0.35, "delay_months": 6, "confidence": "medium" },
+    { "target": "beach_access_quality", "magnitude": -0.2, "delay_months": 6, "confidence": "high" },
+    { "target": "dune_condition", "magnitude": 0.1, "delay_months": 18, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Traffic concentrates onto the sections still open, so the damage moves rather than falls.", "target": "dune_condition", "magnitude": -0.08, "delay_months": 12 },
+    { "description": "Closures announced without local input are the fastest way to lose the fishing and four-wheel-drive crowd on every other question.", "target": "consultation_trust", "magnitude": -0.15, "delay_months": 3 }
+  ],
+  "who_supports": ["environmental-stewards", "conservation-groups"],
+  "who_opposes": ["fishers-and-boaties", "surf-and-beach-users", "campers"],
+  "source": "brief", "confidence": "low",
+  "note": "The species and roost locations belong in data/ecology.json. This pack does not name a beach section, because none was verified."
+},
+{
+  "id": "point-lookout-parking-management",
+  "name": "Manage parking at Point Lookout",
+  "issue": "visitors-versus-amenity",
+  "description": "Time limits, resident permits, or paid parking around the gorge walk and Cylinder Beach, where the carparks are full by mid-morning through the season.",
+  "who_decides": ["redland-city-council"], "player_role": "player_decides", "status": "modelled_option",
+  "cost_aud": { "capital": 600000, "recurring_per_year": 250000, "basis": "modelling estimate for signage, machines or permit administration and enforcement", "confidence": "low" },
+  "lead_time_months": 12,
+  "effects": [
+    { "target": "parking_pressure", "magnitude": -0.3, "delay_months": 9, "confidence": "medium" },
+    { "target": "resident_amenity", "magnitude": 0.2, "delay_months": 9, "confidence": "medium" },
+    { "target": "council_budget", "magnitude": 0.08, "delay_months": 18, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Displaced cars park on residential streets and verges, and the complaint moves one block inland.", "target": "resident_amenity", "magnitude": -0.1, "delay_months": 12 },
+    { "description": "Paid parking at a public beach on a public island is the kind of decision that defines a council term.", "target": "consultation_trust", "magnitude": -0.15, "delay_months": 6 }
+  ],
+  "who_supports": ["long-term-residents", "retirees-and-seniors", "surf-and-beach-users"],
+  "who_opposes": ["day-visitors", "holiday-home-owners", "tourism-operators"],
+  "source": "brief", "confidence": "low",
+  "note": "This is one of the few levers on this list a council genuinely controls on its own, which is exactly why it attracts the heat."
+},
+{
+  "id": "gorge-walk-visitor-flow",
+  "name": "Manage the crowd on the gorge walk",
+  "issue": "visitors-versus-amenity",
+  "description": "One-way flow, timed entry at peak, better dispersal onto the coastal walk, and interpretation that QYAC leads rather than a council sign writer.",
+  "who_decides": ["redland-city-council", "qyac"], "player_role": "player_funds", "status": "proposed",
+  "cost_aud": { "capital": 2500000, "recurring_per_year": 150000, "basis": "modelling estimate for path works, wayfinding and interpretation", "confidence": "low" },
+  "lead_time_months": 24,
+  "effects": [
+    { "target": "visitor_satisfaction", "magnitude": 0.2, "delay_months": 24, "confidence": "low" },
+    { "target": "dune_condition", "magnitude": 0.1, "delay_months": 24, "confidence": "low" },
+    { "target": "parking_pressure", "magnitude": -0.05, "delay_months": 24, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Dispersing the crowd onto the coastal link spreads the wear onto headland vegetation that was never carrying it.", "target": "dune_condition", "magnitude": -0.06, "delay_months": 30 },
+    { "description": "Interpretation done properly needs QYAC time, and QYAC time is the scarcest resource in this whole file.", "target": "qyac_capacity", "magnitude": -0.08, "delay_months": 6 }
+  ],
+  "who_supports": ["tourism-operators", "day-visitors", "quandamooka-families"],
+  "who_opposes": ["long-term-residents"],
+  "source": "rcc-panorama-walk", "confidence": "medium",
+  "note": "The Minjerribah Panorama Coastal Walk is a real council project delivered with QYAC, linking Point Lookout village to Cylinder Beach. The timed-entry and one-way elements described here are modelled options on top of it, not part of that project."
+},
+{
+  "id": "visitor-levy-on-accommodation",
+  "name": "A visitor levy on paid accommodation",
+  "issue": "who-pays",
+  "description": "A per-night charge on paid stays, hypothecated to the things visitors wear out: toilets, carparks, tracks, rubbish and ranger time.",
+  "who_decides": ["qld-government"], "player_role": "player_advocates", "status": "modelled_option",
+  "cost_aud": { "capital": 300000, "recurring_per_year": 250000, "basis": "modelling estimate for collection and administration", "confidence": "low" },
+  "lead_time_months": 24,
+  "effects": [
+    { "target": "council_budget", "magnitude": 0.25, "delay_months": 24, "confidence": "low" },
+    { "target": "resident_amenity", "magnitude": 0.15, "delay_months": 36, "confidence": "low" },
+    { "target": "business_viability", "magnitude": -0.1, "delay_months": 12, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "A levy on paid beds is invisible to the day visitor who drives on, uses the toilet block and drives off, which is most of the load.", "target": "day_visitor_share", "magnitude": 0.1, "delay_months": 24 },
+    { "description": "Hypothecated money has a way of becoming general revenue by the third budget.", "target": "consultation_trust", "magnitude": -0.12, "delay_months": 36 }
+  ],
+  "who_supports": ["long-term-residents", "council-as-actor", "environmental-stewards"],
+  "who_opposes": ["tourism-operators", "holiday-home-owners", "campers"],
+  "source": "brief", "confidence": "low",
+  "note": "A local government in Queensland cannot simply impose a bed tax. This needs the state, which is why player_role is advocate."
+},
+{
+  "id": "short-stay-letting-registration",
+  "name": "Register every short-stay letting",
+  "issue": "housing",
+  "description": "Make every whole-house holiday letting register with the council, with a contact who answers the phone at midnight and a fee that funds compliance.",
+  "who_decides": ["redland-city-council"], "player_role": "player_decides", "status": "modelled_option",
+  "cost_aud": { "capital": 350000, "recurring_per_year": 400000, "basis": "modelling estimate for a register, one compliance officer and a complaints line", "confidence": "low" },
+  "lead_time_months": 18,
+  "effects": [
+    { "target": "resident_amenity", "magnitude": 0.15, "delay_months": 18, "confidence": "medium" },
+    { "target": "short_stay_stock", "magnitude": -0.05, "delay_months": 24, "confidence": "low" },
+    { "target": "council_budget", "magnitude": 0.05, "delay_months": 24, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "A register is the precondition for every other housing lever, because right now nobody knows how many there are.", "target": "consultation_trust", "magnitude": 0.1, "delay_months": 18 },
+    { "description": "Owners who let a few weeks a year to cover rates find the paperwork not worth it, and some of those houses simply sit empty instead of returning to long-term rental.", "target": "rental_supply", "magnitude": 0.02, "delay_months": 30 }
+  ],
+  "who_supports": ["long-term-residents", "renters-and-key-workers", "environmental-stewards"],
+  "who_opposes": ["holiday-home-owners", "tourism-operators"],
+  "source": "rcc-short-term-accom", "confidence": "low",
+  "note": "Council publishes guidance on short-term accommodation and Airbnb; whether a registration scheme exists on the island was not confirmed. Brisbane consulted on a short stay accommodation local law in 2025, which is the nearest live precedent."
+},
+{
+  "id": "short-stay-cap-by-township",
+  "name": "Cap short-stay lettings by township",
+  "issue": "housing",
+  "description": "Set a ceiling on the share of dwellings in each township that can be let short-stay, with Point Lookout hitting the ceiling first.",
+  "who_decides": ["redland-city-council", "qld-government"], "player_role": "player_advocates", "status": "modelled_option",
+  "cost_aud": { "capital": 200000, "recurring_per_year": 350000, "basis": "modelling estimate for administration, appeals and legal exposure", "confidence": "low" },
+  "lead_time_months": 30,
+  "effects": [
+    { "target": "rental_supply", "magnitude": 0.2, "delay_months": 30, "confidence": "low" },
+    { "target": "short_stay_stock", "magnitude": -0.25, "delay_months": 30, "confidence": "medium" },
+    { "target": "housing_affordability", "magnitude": 0.12, "delay_months": 36, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Capped supply raises the nightly rate on the beds that remain, so visitor spend per head rises while visitor numbers fall.", "target": "business_viability", "magnitude": -0.1, "delay_months": 24 },
+    { "description": "Owners appeal, and a small council spends years defending a scheme amendment.", "target": "council_budget", "magnitude": -0.12, "delay_months": 24 }
+  ],
+  "who_supports": ["renters-and-key-workers", "long-term-residents", "young-families-and-school"],
+  "who_opposes": ["holiday-home-owners", "tourism-operators", "council-as-actor"],
+  "source": "brief", "confidence": "low",
+  "note": "Half the island's private dwellings were unoccupied on census night and 65 per cent at Point Lookout. That is the number this lever is aimed at. Whether a cap would actually convert those houses to rentals is genuinely unknown."
+},
+{
+  "id": "worker-accommodation-build",
+  "name": "Build worker accommodation",
+  "issue": "housing",
+  "description": "Purpose-built beds for the chefs, nurses, rangers, deckhands and cleaners the island cannot recruit because there is nowhere for them to live.",
+  "who_decides": ["redland-city-council", "qld-government", "qyac"], "player_role": "player_funds", "status": "proposed",
+  "cost_aud": { "capital": 14000000, "recurring_per_year": 450000, "basis": "modelling estimate for roughly 40 beds including island construction premium and barge freight", "confidence": "low" },
+  "lead_time_months": 42,
+  "effects": [
+    { "target": "worker_housing", "magnitude": 0.45, "delay_months": 36, "confidence": "medium" },
+    { "target": "business_viability", "magnitude": 0.2, "delay_months": 42, "confidence": "medium" },
+    { "target": "local_employment", "magnitude": 0.2, "delay_months": 42, "confidence": "medium" },
+    { "target": "health_access", "magnitude": 0.1, "delay_months": 48, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Employer-tied housing means losing the job means losing the bed, which is its own kind of insecurity.", "target": "consultation_trust", "magnitude": -0.05, "delay_months": 48 },
+    { "description": "Every tonne of material comes over on the barge, so the build costs more and takes longer than the mainland comparison the budget was written against.", "target": "council_budget", "magnitude": -0.15, "delay_months": 24 }
+  ],
+  "who_supports": ["renters-and-key-workers", "tourism-operators", "volunteers-and-emergency", "quandamooka-families", "young-families-and-school"],
+  "who_opposes": ["holiday-home-owners"],
+  "source": "rcc-lhap", "confidence": "medium"
+},
+{
+  "id": "community-housing-expansion",
+  "name": "Expand community housing",
+  "issue": "housing",
+  "description": "Add to the island's community housing portfolio, which has run at no vacancy across the whole portfolio.",
+  "who_decides": ["qld-government", "australian-government", "redland-city-council"], "player_role": "player_advocates", "status": "proposed",
+  "cost_aud": { "capital": 22000000, "recurring_per_year": 600000, "basis": "modelling estimate for around 30 dwellings at island construction cost", "confidence": "low" },
+  "lead_time_months": 48,
+  "effects": [
+    { "target": "rental_supply", "magnitude": 0.3, "delay_months": 42, "confidence": "medium" },
+    { "target": "housing_affordability", "magnitude": 0.25, "delay_months": 48, "confidence": "medium" },
+    { "target": "school_enrolments", "magnitude": 0.15, "delay_months": 60, "confidence": "low" },
+    { "target": "quandamooka_employment", "magnitude": 0.1, "delay_months": 48, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Land suitable for housing at Dunwich is also the land wanted for the gateway, the depot and the queue.", "target": "worker_housing", "magnitude": -0.05, "delay_months": 24 },
+    { "description": "New dwellings need water and sewer connections in townships where parts still run on septic.", "target": "wastewater_capacity", "magnitude": -0.1, "delay_months": 42 }
+  ],
+  "who_supports": ["renters-and-key-workers", "quandamooka-families", "young-families-and-school", "long-term-residents"],
+  "who_opposes": ["holiday-home-owners"],
+  "source": "rcc-lhap", "confidence": "medium",
+  "note": "Council's housing plan records the island housing co-operative holding a portfolio of about 44 properties with no vacancies. The figure was read through a search extract, not from the plan itself."
+},
+{
+  "id": "gumpi-land-release",
+  "name": "Release the master-planned land at Dunwich",
+  "issue": "housing",
+  "description": "Give effect to the Gumpi master plan land uses so residential, commercial and community land can actually be built on rather than studied.",
+  "who_decides": ["qld-government", "redland-city-council", "qyac"], "player_role": "player_advocates", "status": "under_study",
+  "cost_aud": { "capital": 8000000, "recurring_per_year": 200000, "basis": "modelling estimate for enabling infrastructure, not the buildings", "confidence": "low" },
+  "lead_time_months": 48,
+  "effects": [
+    { "target": "rental_supply", "magnitude": 0.15, "delay_months": 48, "confidence": "low" },
+    { "target": "worker_housing", "magnitude": 0.15, "delay_months": 48, "confidence": "low" },
+    { "target": "local_employment", "magnitude": 0.15, "delay_months": 36, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Growth at Dunwich is growth against koala habitat and against the aquifer that supplies the town.", "target": "koala_population", "magnitude": -0.1, "delay_months": 60 },
+    { "description": "Land dealings on Country need QYAC agreement, and that is a process with its own timeline.", "target": "qyac_capacity", "magnitude": -0.1, "delay_months": 12 }
+  ],
+  "who_supports": ["renters-and-key-workers", "tradies-and-builders", "tourism-operators"],
+  "who_opposes": ["conservation-groups", "environmental-stewards"],
+  "source": "qld-gumpi-masterplan", "confidence": "medium"
+},
+{
+  "id": "rates-differential-unoccupied",
+  "name": "A rates differential on long-empty dwellings",
+  "issue": "housing",
+  "description": "Charge a higher general rate on dwellings that sit empty most of the year, on the argument that an empty house uses the road, the water main and the tip anyway.",
+  "who_decides": ["redland-city-council"], "player_role": "player_decides", "status": "modelled_option",
+  "cost_aud": { "capital": 120000, "recurring_per_year": 180000, "basis": "modelling estimate for assessment and objections handling", "confidence": "low" },
+  "lead_time_months": 12,
+  "effects": [
+    { "target": "council_budget", "magnitude": 0.15, "delay_months": 12, "confidence": "medium" },
+    { "target": "rental_supply", "magnitude": 0.1, "delay_months": 36, "confidence": "low" },
+    { "target": "short_stay_stock", "magnitude": 0.1, "delay_months": 24, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "The obvious way to avoid the differential is to let the house short-stay, which is the opposite of what the lever wanted.", "target": "rental_supply", "magnitude": -0.08, "delay_months": 24 },
+    { "description": "Holiday home owners are ratepayers with time, money and lawyers, and they vote in the same division.", "target": "consultation_trust", "magnitude": -0.1, "delay_months": 12 }
+  ],
+  "who_supports": ["long-term-residents", "renters-and-key-workers", "council-as-actor"],
+  "who_opposes": ["holiday-home-owners"],
+  "source": "brief", "confidence": "low",
+  "note": "Whether Queensland local government rating powers support a differential framed this way was not verified. Treat as a design idea, not advice."
+},
+{
+  "id": "secondary-dwelling-fast-track",
+  "name": "Fast-track granny flats for long-term letting",
+  "issue": "housing",
+  "description": "Make a secondary dwelling easy and cheap to approve on an island block, on the condition it is let long-term rather than by the night.",
+  "who_decides": ["redland-city-council"], "player_role": "player_decides", "status": "modelled_option",
+  "cost_aud": { "capital": 80000, "recurring_per_year": 150000, "basis": "modelling estimate for assessment resourcing and a fee waiver pool", "confidence": "low" },
+  "lead_time_months": 12,
+  "effects": [
+    { "target": "rental_supply", "magnitude": 0.18, "delay_months": 24, "confidence": "low" },
+    { "target": "worker_housing", "magnitude": 0.15, "delay_months": 24, "confidence": "low" },
+    { "target": "local_employment", "magnitude": 0.08, "delay_months": 18, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "More dwellings on the same block on septic is a wastewater problem before it is a housing solution.", "target": "wastewater_capacity", "magnitude": -0.12, "delay_months": 24 },
+    { "description": "The long-term letting condition is only worth what the enforcement behind it is worth.", "target": "short_stay_stock", "magnitude": 0.08, "delay_months": 36 }
+  ],
+  "who_supports": ["renters-and-key-workers", "tradies-and-builders", "long-term-residents"],
+  "who_opposes": ["environmental-stewards"],
+  "source": "brief", "confidence": "low"
+},
+{
+  "id": "amity-southern-buried-seawall",
+  "name": "Build the buried seawall at Amity Point",
+  "issue": "amity-erosion",
+  "description": "The southern reach recommendation from the shoreline plan: a buried seawall with sand over it, so the beach looks like a beach until the day it has to hold.",
+  "who_decides": ["redland-city-council"], "player_role": "player_decides", "status": "funded",
+  "cost_aud": { "capital": 11000000, "recurring_per_year": 250000, "basis": "modelling estimate; council has budgeted for design and approvals but no published construction figure was found", "confidence": "low" },
+  "lead_time_months": 42,
+  "effects": [
+    { "target": "erosion_risk_amity", "magnitude": -0.35, "delay_months": 42, "confidence": "medium" },
+    { "target": "private_property_risk", "magnitude": -0.3, "delay_months": 42, "confidence": "medium" },
+    { "target": "council_budget", "magnitude": -0.2, "delay_months": 12, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "A wall holds the land and loses the beach in front of it over time, which is the trade nobody wants to say out loud at the meeting.", "target": "beach_width_amity", "magnitude": -0.2, "delay_months": 84 },
+    { "description": "Rock may come from council's own island quarry, which is cheaper but ties the project to a supply council cannot guarantee the price of.", "target": "council_budget", "magnitude": 0.05, "delay_months": 24 }
+  ],
+  "who_supports": ["long-term-residents", "holiday-home-owners", "foreshore-landowners"],
+  "who_opposes": ["conservation-groups", "environmental-stewards"],
+  "source": "rcc-amity-semp-faq", "confidence": "high",
+  "note": "Council has allocated funding towards design and approvals for a buried seawall on the foreshore near the campground. The construction cost above is this pack's estimate, not council's."
+},
+{
+  "id": "amity-beach-nourishment",
+  "name": "Nourish the beach at Amity Point",
+  "issue": "amity-erosion",
+  "description": "Put sand back, repeatedly. Cheap to start, never finished, and the only option that keeps a beach in front of the houses.",
+  "who_decides": ["redland-city-council"], "player_role": "player_decides", "status": "proposed",
+  "cost_aud": { "capital": 1800000, "recurring_per_year": 900000, "basis": "modelling estimate for an initial placement and repeat campaigns", "confidence": "low" },
+  "lead_time_months": 18,
+  "effects": [
+    { "target": "beach_width_amity", "magnitude": 0.4, "delay_months": 18, "confidence": "medium" },
+    { "target": "erosion_risk_amity", "magnitude": -0.15, "delay_months": 18, "confidence": "medium" },
+    { "target": "resident_amenity", "magnitude": 0.15, "delay_months": 18, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "The sand leaves. This is a recurring cost forever, and the first time a budget skips a campaign the gains are gone.", "target": "council_budget", "magnitude": -0.15, "delay_months": 36 },
+    { "description": "Placement works disturb the nearshore and the seagrass edge while they run.", "target": "water_quality_nearshore", "magnitude": -0.1, "delay_months": 18 }
+  ],
+  "who_supports": ["long-term-residents", "holiday-home-owners", "surf-and-beach-users", "tourism-operators"],
+  "who_opposes": ["council-as-actor"],
+  "source": "rcc-amity-semp-faq", "confidence": "high"
+},
+{
+  "id": "amity-flow-slide-barrier",
+  "name": "Formalise and maintain the flow slide barrier",
+  "issue": "amity-erosion",
+  "description": "The central reach recommendation: turn the ad hoc rock along the foreshore into a maintained structure, with the cost split between council assets and private land behind it.",
+  "who_decides": ["redland-city-council", "private-landowners"], "player_role": "player_decides", "status": "in_place",
+  "cost_aud": { "capital": 6500000, "recurring_per_year": 400000, "basis": "modelling estimate; the split between council and private landowners is set by whose asset is protected", "confidence": "low" },
+  "lead_time_months": 30,
+  "effects": [
+    { "target": "erosion_risk_amity", "magnitude": -0.25, "delay_months": 30, "confidence": "high" },
+    { "target": "private_property_risk", "magnitude": -0.25, "delay_months": 30, "confidence": "high" },
+    { "target": "road_condition", "magnitude": 0.1, "delay_months": 30, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Landowners who cannot fund their section leave a gap, and the sea finds the gap.", "target": "private_property_risk", "magnitude": 0.15, "delay_months": 48 },
+    { "description": "A hard edge in the central reach steepens the problem at the ends of it.", "target": "erosion_risk_amity", "magnitude": 0.08, "delay_months": 60 }
+  ],
+  "who_supports": ["foreshore-landowners", "long-term-residents", "council-as-actor"],
+  "who_opposes": ["conservation-groups"],
+  "source": "rcc-amity-semp-faq", "confidence": "high",
+  "note": "Council is responsible for its own land and assets and for the sections of barrier that protect local roads and parks. Private landowners bear construction and maintenance for works protecting their properties. That split is the drama."
+},
+{
+  "id": "amity-managed-retreat",
+  "name": "Managed retreat at Amity Point",
+  "issue": "amity-erosion",
+  "description": "Buy back and remove the most exposed properties over time instead of defending them, and let the shoreline move.",
+  "who_decides": ["redland-city-council", "qld-government"], "player_role": "player_advocates", "status": "modelled_option",
+  "cost_aud": { "capital": 45000000, "recurring_per_year": 200000, "basis": "modelling estimate for voluntary acquisition of a small number of foreshore properties at island values", "confidence": "low" },
+  "lead_time_months": 120,
+  "effects": [
+    { "target": "private_property_risk", "magnitude": -0.5, "delay_months": 120, "confidence": "medium" },
+    { "target": "erosion_risk_amity", "magnitude": -0.1, "delay_months": 120, "confidence": "low" },
+    { "target": "council_budget", "magnitude": -0.45, "delay_months": 36, "confidence": "medium" },
+    { "target": "dune_condition", "magnitude": 0.2, "delay_months": 120, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Announcing retreat as an option collapses property values before a single house is bought, which is why councils do not say the word.", "target": "consultation_trust", "magnitude": -0.3, "delay_months": 3 },
+    { "description": "Amity Point has no progress association left to negotiate through, so the conversation happens house by house.", "target": "consultation_trust", "magnitude": -0.1, "delay_months": 12 }
+  ],
+  "who_supports": ["conservation-groups", "environmental-stewards"],
+  "who_opposes": ["foreshore-landowners", "holiday-home-owners", "long-term-residents", "council-as-actor"],
+  "source": "rcc-chas", "confidence": "low",
+  "note": "Retreat is a standard option in coastal adaptation strategy and is not a current Amity Point proposal. Modelled here because a civic game that only offers armouring is lying about the choice. The Amity Point Progress Association wound up in 2024, per docs/DATA-NOTES.md."
+},
+{
+  "id": "amity-coastal-research",
+  "name": "Fund the coastal process research",
+  "issue": "amity-erosion",
+  "description": "Keep surveying the northern reach and keep funding the university work on why the flow slides happen, so the next decision is made on evidence rather than on the last big storm.",
+  "who_decides": ["redland-city-council"], "player_role": "player_funds", "status": "in_place",
+  "cost_aud": { "capital": 0, "recurring_per_year": 300000, "basis": "modelling estimate for surveys and a research partnership", "confidence": "low" },
+  "lead_time_months": 12,
+  "effects": [
+    { "target": "erosion_risk_amity", "magnitude": -0.05, "delay_months": 48, "confidence": "medium" },
+    { "target": "consultation_trust", "magnitude": 0.15, "delay_months": 12, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Research is also the respectable way to defer a decision for another four years, and residents know it.", "target": "consultation_trust", "magnitude": -0.15, "delay_months": 48 }
+  ],
+  "who_supports": ["environmental-stewards", "conservation-groups", "council-as-actor"],
+  "who_opposes": ["foreshore-landowners"],
+  "source": "rcc-amity-semp-faq", "confidence": "high",
+  "note": "Council is funding research with the University of Queensland into the flow slide mechanism, and the northern reach recommendation is surveys and coastal process studies."
+},
+{
+  "id": "dune-restoration-program",
+  "name": "Dune restoration and formed beach accesses",
+  "issue": "coast-and-dunes",
+  "description": "Fence, plant and formalise the walking accesses so people stop cutting new tracks over the foredune at every beach entrance.",
+  "who_decides": ["redland-city-council", "joint-management"], "player_role": "player_funds", "status": "in_place",
+  "cost_aud": { "capital": 900000, "recurring_per_year": 220000, "basis": "modelling estimate for accesses, fencing, plants and volunteer support", "confidence": "low" },
+  "lead_time_months": 18,
+  "effects": [
+    { "target": "dune_condition", "magnitude": 0.3, "delay_months": 30, "confidence": "medium" },
+    { "target": "erosion_risk_amity", "magnitude": -0.05, "delay_months": 60, "confidence": "low" },
+    { "target": "shorebird_disturbance", "magnitude": -0.1, "delay_months": 24, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Formed accesses concentrate foot traffic, which is better for the dune and worse for the two spots where everybody now walks.", "target": "resident_amenity", "magnitude": -0.05, "delay_months": 24 },
+    { "description": "The planting only survives if volunteers keep watering it through the first summer, and the volunteer base is ageing.", "target": "emergency_readiness", "magnitude": -0.05, "delay_months": 12 }
+  ],
+  "who_supports": ["environmental-stewards", "surf-and-beach-users", "long-term-residents"],
+  "who_opposes": [],
+  "source": "brief", "confidence": "low"
+},
+{
+  "id": "storm-tide-readiness",
+  "name": "Storm tide and evacuation readiness",
+  "issue": "hazard",
+  "description": "Plan for the day the barge cannot run and the island has to look after itself: shelter, supplies, comms and a rehearsed plan for each township.",
+  "who_decides": ["redland-city-council", "qld-government"], "player_role": "player_funds", "status": "in_place",
+  "cost_aud": { "capital": 2200000, "recurring_per_year": 300000, "basis": "modelling estimate for shelter upgrades, generators, comms and exercises", "confidence": "low" },
+  "lead_time_months": 24,
+  "effects": [
+    { "target": "emergency_readiness", "magnitude": 0.35, "delay_months": 18, "confidence": "medium" },
+    { "target": "resident_amenity", "magnitude": 0.08, "delay_months": 24, "confidence": "low" },
+    { "target": "consultation_trust", "magnitude": 0.12, "delay_months": 12, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Readiness that depends on volunteers ages with the volunteers.", "target": "emergency_readiness", "magnitude": -0.1, "delay_months": 60 },
+    { "description": "A hardened hall is also the hall the community loses for three months while it is upgraded.", "target": "resident_amenity", "magnitude": -0.05, "delay_months": 6 }
+  ],
+  "who_supports": ["volunteers-and-emergency", "long-term-residents", "retirees-and-seniors", "quandamooka-families"],
+  "who_opposes": [],
+  "source": "brief", "confidence": "low",
+  "note": "Redland City Council maintains a public disaster plan covering its islands. This pack does not restate its content because it was not read in full."
+},
+{
+  "id": "transfer-station-upgrade",
+  "name": "Upgrade the transfer station and extend its hours",
+  "issue": "waste",
+  "description": "Longer opening, better sorting bays and a proper hardstand at the island recycling and waste centre, so a load gets separated instead of all going in the one bin.",
+  "who_decides": ["redland-city-council"], "player_role": "player_decides", "status": "proposed",
+  "cost_aud": { "capital": 3800000, "recurring_per_year": 380000, "basis": "modelling estimate for civil works and additional staffed hours", "confidence": "low" },
+  "lead_time_months": 24,
+  "effects": [
+    { "target": "waste_export_tonnes", "magnitude": -0.15, "delay_months": 24, "confidence": "medium" },
+    { "target": "litter", "magnitude": -0.15, "delay_months": 18, "confidence": "medium" },
+    { "target": "waste_cost", "magnitude": -0.08, "delay_months": 36, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Longer hours are longer wages, and the saving on export tonnage takes years to catch up with them.", "target": "council_budget", "magnitude": -0.1, "delay_months": 12 },
+    { "description": "Easier tipping means more tipping, including mainland loads brought over by trades.", "target": "waste_export_tonnes", "magnitude": 0.06, "delay_months": 24 }
+  ],
+  "who_supports": ["long-term-residents", "tradies-and-builders", "environmental-stewards", "holiday-home-owners"],
+  "who_opposes": ["council-as-actor"],
+  "source": "rcc-waste-centres", "confidence": "medium",
+  "note": "Non-commercial residential use by island residents is free. Commercial users and non-residents pay. Opening hours were not verified and are not stated here."
+},
+{
+  "id": "waste-barge-frequency",
+  "name": "Change how often waste leaves the island",
+  "issue": "waste",
+  "description": "Every skip of rubbish goes on a barge. More runs means less smell and fewer overflowing bays; fewer runs means a smaller bill and a fuller yard.",
+  "who_decides": ["redland-city-council"], "player_role": "player_decides", "status": "in_place",
+  "cost_aud": { "capital": 0, "recurring_per_year": 700000, "basis": "modelling estimate for additional contracted barge movements", "confidence": "low" },
+  "lead_time_months": 6,
+  "effects": [
+    { "target": "waste_cost", "magnitude": 0.2, "delay_months": 3, "confidence": "medium" },
+    { "target": "litter", "magnitude": -0.15, "delay_months": 3, "confidence": "medium" },
+    { "target": "resident_amenity", "magnitude": 0.1, "delay_months": 3, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Redland's waste system already runs nine contractors, eight waste centres and island barge logistics, and every household pays for it whether they use it or not.", "target": "council_budget", "magnitude": -0.12, "delay_months": 6 },
+    { "description": "More heavy vehicle movements through Dunwich on the way to the ramp.", "target": "traffic_volume", "magnitude": 0.08, "delay_months": 3 }
+  ],
+  "who_supports": ["long-term-residents", "tourism-operators"],
+  "who_opposes": ["council-as-actor"],
+  "source": "rbn-waste-bill", "confidence": "medium"
+},
+{
+  "id": "island-reuse-and-repair",
+  "name": "A reuse shop and repair space at the tip",
+  "issue": "waste",
+  "description": "Take the good stuff off the pile before it gets on the barge, and sell it back on the island.",
+  "who_decides": ["redland-city-council", "qyac"], "player_role": "player_funds", "status": "modelled_option",
+  "cost_aud": { "capital": 850000, "recurring_per_year": 220000, "basis": "modelling estimate for a shed, hardstand and two positions", "confidence": "low" },
+  "lead_time_months": 18,
+  "effects": [
+    { "target": "waste_export_tonnes", "magnitude": -0.12, "delay_months": 18, "confidence": "medium" },
+    { "target": "cost_of_living", "magnitude": -0.08, "delay_months": 24, "confidence": "low" },
+    { "target": "local_employment", "magnitude": 0.06, "delay_months": 18, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "A tip shop on an island where everything costs a barge trip becomes a genuine social hub, which is worth more than the tonnage.", "target": "resident_amenity", "magnitude": 0.12, "delay_months": 24 },
+    { "description": "It competes, quietly, with the island's own retailers.", "target": "business_viability", "magnitude": -0.05, "delay_months": 24 }
+  ],
+  "who_supports": ["long-term-residents", "renters-and-key-workers", "environmental-stewards", "quandamooka-families"],
+  "who_opposes": [],
+  "source": "brief", "confidence": "low"
+},
+{
+  "id": "green-waste-mulched-on-island",
+  "name": "Mulch green waste on the island",
+  "issue": "waste",
+  "description": "Chip and compost garden waste here instead of barging it to the mainland, and give the mulch back for dune work, parks and gardens.",
+  "who_decides": ["redland-city-council"], "player_role": "player_decides", "status": "modelled_option",
+  "cost_aud": { "capital": 1400000, "recurring_per_year": 260000, "basis": "modelling estimate for a chipper, pad and operator", "confidence": "low" },
+  "lead_time_months": 18,
+  "effects": [
+    { "target": "waste_export_tonnes", "magnitude": -0.2, "delay_months": 18, "confidence": "medium" },
+    { "target": "waste_cost", "magnitude": -0.12, "delay_months": 30, "confidence": "low" },
+    { "target": "dune_condition", "magnitude": 0.05, "delay_months": 36, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "A green waste pile in a fire-prone landscape is a fuel load with a fence around it.", "target": "fire_hazard_load", "magnitude": 0.1, "delay_months": 18 },
+    { "description": "Free mulch encourages more clearing, some of it in habitat.", "target": "koala_population", "magnitude": -0.04, "delay_months": 36 }
+  ],
+  "who_supports": ["environmental-stewards", "long-term-residents", "tradies-and-builders"],
+  "who_opposes": ["volunteers-and-emergency"],
+  "source": "brief", "confidence": "low"
+},
+{
+  "id": "commercial-waste-charging",
+  "name": "Change what commercial loads pay at the tip",
+  "issue": "waste",
+  "description": "The fee a builder or a business pays to tip on the island, against the cost of getting that same load onto a barge.",
+  "who_decides": ["redland-city-council"], "player_role": "player_decides", "status": "in_place",
+  "cost_aud": { "capital": 0, "recurring_per_year": 0, "basis": "revenue lever, not a spending one", "confidence": "high" },
+  "lead_time_months": 3,
+  "effects": [
+    { "target": "waste_cost", "magnitude": -0.15, "delay_months": 6, "confidence": "medium" },
+    { "target": "council_budget", "magnitude": 0.1, "delay_months": 6, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Every dollar on a commercial load is a dollar of temptation to dump it in the bush instead.", "target": "litter", "magnitude": 0.2, "delay_months": 6 },
+    { "description": "Trades pass it straight through to island customers, who already pay a barge premium on everything.", "target": "cost_of_living", "magnitude": 0.08, "delay_months": 12 }
+  ],
+  "who_supports": ["council-as-actor"],
+  "who_opposes": ["tradies-and-builders", "tourism-operators", "long-term-residents"],
+  "source": "rcc-waste-centres", "confidence": "medium"
+},
+{
+  "id": "sewer-network-extension",
+  "name": "Extend the sewer to properties still on septic",
+  "issue": "water-and-wastewater",
+  "description": "Connect more of Dunwich, Amity Point and Point Lookout to the sewer instead of leaving them on septic systems over a shallow water table beside the bay.",
+  "who_decides": ["redland-water", "redland-city-council"], "player_role": "player_funds", "status": "in_place",
+  "cost_aud": { "capital": 16000000, "recurring_per_year": 400000, "basis": "modelling estimate scaled from council's earlier $5 million three-year Point Lookout extension program", "confidence": "low" },
+  "lead_time_months": 48,
+  "effects": [
+    { "target": "water_quality_nearshore", "magnitude": 0.25, "delay_months": 48, "confidence": "medium" },
+    { "target": "aquifer_stress", "magnitude": -0.1, "delay_months": 48, "confidence": "low" },
+    { "target": "wastewater_capacity", "magnitude": -0.15, "delay_months": 48, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Connection charges land on households who did not ask for the works and were managing fine.", "target": "cost_of_living", "magnitude": 0.12, "delay_months": 36 },
+    { "description": "Sewer is the quiet precondition for density, so this lever unlocks housing levers that were previously impossible.", "target": "rental_supply", "magnitude": 0.08, "delay_months": 72 }
+  ],
+  "who_supports": ["environmental-stewards", "renters-and-key-workers", "tourism-operators"],
+  "who_opposes": ["holiday-home-owners", "retirees-and-seniors"],
+  "source": "rcc-ontap-2017", "confidence": "medium",
+  "note": "Parts of all three townships not served by the network use septic systems. Council previously ran a $5 million three-year program to extend the Point Lookout network, and a project to lift Dunwich connections above 75 per cent of properties from a base of 128 connected."
+},
+{
+  "id": "recycled-water-scheme",
+  "name": "Use treated wastewater instead of drinking water",
+  "issue": "water-and-wastewater",
+  "description": "Put treated effluent from the Point Lookout plant onto ovals, gardens and dust suppression, so the bores are not being drawn down to water a football field.",
+  "who_decides": ["redland-water"], "player_role": "player_funds", "status": "modelled_option",
+  "cost_aud": { "capital": 5500000, "recurring_per_year": 250000, "basis": "modelling estimate for storage, pipework and a small reticulation network", "confidence": "low" },
+  "lead_time_months": 36,
+  "effects": [
+    { "target": "aquifer_stress", "magnitude": -0.2, "delay_months": 36, "confidence": "medium" },
+    { "target": "water_security", "magnitude": 0.15, "delay_months": 36, "confidence": "medium" },
+    { "target": "water_quality_nearshore", "magnitude": 0.1, "delay_months": 36, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Recycled water schemes need somewhere to put the water in a wet winter, and that is a storage nobody budgeted for.", "target": "council_budget", "magnitude": -0.08, "delay_months": 36 },
+    { "description": "Public acceptance of recycled water is its own campaign, and a badly run one poisons the next twenty years.", "target": "consultation_trust", "magnitude": -0.08, "delay_months": 24 }
+  ],
+  "who_supports": ["environmental-stewards", "surf-and-beach-users", "conservation-groups"],
+  "who_opposes": ["council-as-actor"],
+  "source": "rcc-plwwtp-2016", "confidence": "low",
+  "note": "The Point Lookout plant was rebuilt for $13.5 million and opened in November 2016 with capacity for future peak demand. Whether it currently produces recycled water was not verified."
+},
+{
+  "id": "borefield-monitoring",
+  "name": "Monitor the borefield and the lakes properly",
+  "issue": "water-security",
+  "description": "Instrument the aquifer, publish the numbers, and set trigger levels, so a dry year is seen coming rather than announced.",
+  "who_decides": ["seqwater", "qld-government", "qyac"], "player_role": "player_advocates", "status": "in_place",
+  "cost_aud": { "capital": 1200000, "recurring_per_year": 350000, "basis": "modelling estimate for bores, telemetry and analysis", "confidence": "low" },
+  "lead_time_months": 18,
+  "effects": [
+    { "target": "water_security", "magnitude": 0.2, "delay_months": 24, "confidence": "medium" },
+    { "target": "aquifer_stress", "magnitude": -0.08, "delay_months": 36, "confidence": "low" },
+    { "target": "consultation_trust", "magnitude": 0.15, "delay_months": 12, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Publishing the numbers means publishing the bad years too, and the first bad year becomes a story about the lakes.", "target": "state_budget", "magnitude": -0.05, "delay_months": 36 },
+    { "description": "Good data makes the case for the water reserves being real allocations rather than paper ones.", "target": "quandamooka_employment", "magnitude": 0.05, "delay_months": 48 }
+  ],
+  "who_supports": ["environmental-stewards", "conservation-groups", "quandamooka-families", "long-term-residents"],
+  "who_opposes": [],
+  "source": "qld-water-reserves-2023", "confidence": "medium",
+  "note": "Two water reserves totalling 61,190 megalitres were established for the Quandamooka People in December 2023 from water previously allocated to sand mining, split evenly between environmental and cultural use and economic use and rehabilitation."
+},
+{
+  "id": "peak-water-restrictions",
+  "name": "Peak period water restrictions",
+  "issue": "water-security",
+  "description": "Restrict outdoor water use through the weeks when the island's population triples and the bores work hardest.",
+  "who_decides": ["redland-water", "seqwater"], "player_role": "player_advocates", "status": "modelled_option",
+  "cost_aud": { "capital": 40000, "recurring_per_year": 90000, "basis": "modelling estimate for communications and compliance", "confidence": "low" },
+  "lead_time_months": 6,
+  "effects": [
+    { "target": "aquifer_stress", "magnitude": -0.15, "delay_months": 3, "confidence": "medium" },
+    { "target": "water_security", "magnitude": 0.1, "delay_months": 3, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Restrictions that bind on residents and not on visitor accommodation are read as exactly what they are.", "target": "consultation_trust", "magnitude": -0.15, "delay_months": 3 },
+    { "description": "Gardens and street trees die in the summer they are needed most for shade.", "target": "resident_amenity", "magnitude": -0.1, "delay_months": 6 }
+  ],
+  "who_supports": ["environmental-stewards", "conservation-groups"],
+  "who_opposes": ["holiday-home-owners", "long-term-residents", "tourism-operators"],
+  "source": "brief", "confidence": "low"
+},
+{
+  "id": "east-coast-road-renewal",
+  "name": "Renew the main island road",
+  "issue": "roads",
+  "description": "Resurfacing, shoulders and drainage on the road between the townships, which carries every barge load, every bus and every tourist that lands.",
+  "who_decides": ["redland-city-council"], "player_role": "player_decides", "status": "in_place",
+  "cost_aud": { "capital": 6000000, "recurring_per_year": 700000, "basis": "modelling estimate for a renewal program plus ongoing maintenance", "confidence": "low" },
+  "lead_time_months": 30,
+  "effects": [
+    { "target": "road_condition", "magnitude": 0.35, "delay_months": 24, "confidence": "medium" },
+    { "target": "resident_amenity", "magnitude": 0.12, "delay_months": 24, "confidence": "medium" },
+    { "target": "council_budget", "magnitude": -0.15, "delay_months": 12, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "A better road is a faster road, and faster roads on this island kill more wildlife.", "target": "wildlife_road_deaths", "magnitude": 0.15, "delay_months": 30 },
+    { "description": "Roadworks on the only route between townships means detours nobody has an alternative to.", "target": "island_accessibility", "magnitude": -0.15, "delay_months": 6 }
+  ],
+  "who_supports": ["long-term-residents", "tradies-and-builders", "ferry-commuters", "tourism-operators"],
+  "who_opposes": ["environmental-stewards"],
+  "source": "repo-geography", "confidence": "medium",
+  "note": "Road names and alignments are in data/geography.json. This lever deliberately names no road segment that has not been verified there."
+},
+{
+  "id": "wildlife-speed-and-crossings",
+  "name": "Lower speeds and build wildlife crossings",
+  "issue": "wildlife",
+  "description": "Night speed limits, signage that means something, and fauna crossings where the koalas and kangaroos actually cross.",
+  "who_decides": ["redland-city-council"], "player_role": "player_decides", "status": "modelled_option",
+  "cost_aud": { "capital": 1600000, "recurring_per_year": 90000, "basis": "modelling estimate for signage, treatments and a small number of crossing structures", "confidence": "low" },
+  "lead_time_months": 24,
+  "effects": [
+    { "target": "wildlife_road_deaths", "magnitude": -0.3, "delay_months": 18, "confidence": "medium" },
+    { "target": "koala_population", "magnitude": 0.15, "delay_months": 48, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "A slower island road adds minutes to a barge run, and people who are late for a boat do not slow down.", "target": "consultation_trust", "magnitude": -0.08, "delay_months": 12 },
+    { "description": "Crossings only work where the animals already move, and the mapping to prove that costs more than the sign.", "target": "council_budget", "magnitude": -0.06, "delay_months": 12 }
+  ],
+  "who_supports": ["environmental-stewards", "conservation-groups", "young-families-and-school", "retirees-and-seniors"],
+  "who_opposes": ["tradies-and-builders"],
+  "source": "detsi-dog-attacks-2024", "confidence": "medium",
+  "note": "Wildlife Rescue Minjerribah reports more than 240 injured wildlife cases a year from vehicle strike or domestic pet attack combined. The split between the two causes was not published."
+},
+{
+  "id": "footpath-and-bike-network",
+  "name": "Footpaths and a safe bike route",
+  "issue": "roads",
+  "description": "Connect the townships and the beaches on foot and by bike so a kid, a pram or a walking frame is not on the road shoulder.",
+  "who_decides": ["redland-city-council"], "player_role": "player_decides", "status": "in_place",
+  "cost_aud": { "capital": 4200000, "recurring_per_year": 160000, "basis": "modelling estimate for a staged path network", "confidence": "low" },
+  "lead_time_months": 36,
+  "effects": [
+    { "target": "resident_amenity", "magnitude": 0.2, "delay_months": 30, "confidence": "medium" },
+    { "target": "traffic_volume", "magnitude": -0.1, "delay_months": 36, "confidence": "low" },
+    { "target": "health_access", "magnitude": 0.06, "delay_months": 36, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Paths through vegetation are clearing, however narrow, and this island's vegetation is habitat.", "target": "koala_population", "magnitude": -0.05, "delay_months": 36 },
+    { "description": "A good path becomes the tourist route, and the quiet street stops being quiet.", "target": "resident_amenity", "magnitude": -0.06, "delay_months": 48 }
+  ],
+  "who_supports": ["young-families-and-school", "retirees-and-seniors", "long-term-residents", "day-visitors"],
+  "who_opposes": [],
+  "source": "rcc-panorama-walk", "confidence": "medium"
+},
+{
+  "id": "beach-track-maintenance",
+  "name": "Maintain the beach access tracks",
+  "issue": "beach-driving",
+  "description": "Grade and stabilise the sand tracks onto the beaches, because a chewed-out track is how a dune gets cut in half.",
+  "who_decides": ["joint-management", "redland-city-council"], "player_role": "player_funds", "status": "in_place",
+  "cost_aud": { "capital": 400000, "recurring_per_year": 300000, "basis": "modelling estimate for plant time and matting", "confidence": "low" },
+  "lead_time_months": 9,
+  "effects": [
+    { "target": "beach_access_quality", "magnitude": 0.25, "delay_months": 6, "confidence": "medium" },
+    { "target": "dune_condition", "magnitude": 0.12, "delay_months": 18, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Easier tracks bring more vehicles, and the improvement is spent within two seasons.", "target": "beach_access_quality", "magnitude": -0.1, "delay_months": 24 },
+    { "description": "Every hour of ranger plant time on tracks is an hour not spent on weeds, fire or compliance.", "target": "qyac_capacity", "magnitude": -0.06, "delay_months": 6 }
+  ],
+  "who_supports": ["surf-and-beach-users", "fishers-and-boaties", "campers"],
+  "who_opposes": ["conservation-groups"],
+  "source": "parks-vap-map", "confidence": "medium"
+},
+{
+  "id": "island-energy-resilience",
+  "name": "Island energy resilience",
+  "issue": "utilities",
+  "description": "Solar and storage at the places that must keep running when the mainland supply drops: the water plants, the sewage plant, the halls used as shelters, the clinic.",
+  "who_decides": ["qld-government", "redland-city-council"], "player_role": "player_funds", "status": "modelled_option",
+  "cost_aud": { "capital": 7500000, "recurring_per_year": 180000, "basis": "modelling estimate for behind-the-meter solar and battery at critical sites", "confidence": "low" },
+  "lead_time_months": 30,
+  "effects": [
+    { "target": "energy_reliability", "magnitude": 0.3, "delay_months": 30, "confidence": "low" },
+    { "target": "emergency_readiness", "magnitude": 0.2, "delay_months": 30, "confidence": "low" },
+    { "target": "water_security", "magnitude": 0.1, "delay_months": 30, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Batteries in a fire landscape need their own separation and their own fire plan.", "target": "fire_hazard_load", "magnitude": 0.05, "delay_months": 30 },
+    { "description": "Critical-site resilience does nothing for a household whose power is off, which is who complains.", "target": "consultation_trust", "magnitude": -0.05, "delay_months": 30 }
+  ],
+  "who_supports": ["volunteers-and-emergency", "long-term-residents", "environmental-stewards"],
+  "who_opposes": [],
+  "source": "brief", "confidence": "low",
+  "note": "The island's supply arrangement from the mainland grid was not verified in detail, so this lever describes site resilience rather than a network change."
+},
+{
+  "id": "koala-habitat-overlay",
+  "name": "Protect koala habitat in the planning scheme",
+  "issue": "wildlife",
+  "description": "Map the habitat and put a real overlay over it, so clearing for a new house is assessed rather than assumed.",
+  "who_decides": ["redland-city-council", "qld-government"], "player_role": "player_decides", "status": "proposed",
+  "cost_aud": { "capital": 700000, "recurring_per_year": 120000, "basis": "modelling estimate for mapping, scheme amendment and assessment resourcing", "confidence": "low" },
+  "lead_time_months": 30,
+  "effects": [
+    { "target": "koala_population", "magnitude": 0.25, "delay_months": 60, "confidence": "medium" },
+    { "target": "rental_supply", "magnitude": -0.06, "delay_months": 48, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Every housing lever in this file gets harder the day this one passes. That tension is the game.", "target": "worker_housing", "magnitude": -0.08, "delay_months": 48 },
+    { "description": "An overlay without enforcement is a map, and clearing happens on weekends.", "target": "consultation_trust", "magnitude": -0.08, "delay_months": 24 }
+  ],
+  "who_supports": ["conservation-groups", "environmental-stewards", "long-term-residents"],
+  "who_opposes": ["tradies-and-builders", "holiday-home-owners"],
+  "source": "rcc-koala-monitoring-2020", "confidence": "medium",
+  "note": "Council has run drone koala monitoring on the island. Island koalas carry the lowest genetic diversity of the south-east Queensland populations, which makes habitat loss here harder to recover from than on the mainland."
+},
+{
+  "id": "dog-control-enforcement",
+  "name": "Enforce dog control",
+  "issue": "wildlife",
+  "description": "Registration checks, containment orders, trapping of roaming dogs, and penalties that actually issue.",
+  "who_decides": ["redland-city-council", "joint-management"], "player_role": "player_decides", "status": "in_place",
+  "cost_aud": { "capital": 70000, "recurring_per_year": 260000, "basis": "modelling estimate for island-based inspector time and equipment", "confidence": "low" },
+  "lead_time_months": 6,
+  "effects": [
+    { "target": "dog_incidents", "magnitude": -0.35, "delay_months": 9, "confidence": "medium" },
+    { "target": "koala_population", "magnitude": 0.15, "delay_months": 36, "confidence": "medium" },
+    { "target": "wildlife_road_deaths", "magnitude": -0.1, "delay_months": 12, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Enforcement against neighbours in a town of a few hundred people is personal in a way it never is in a city.", "target": "consultation_trust", "magnitude": -0.15, "delay_months": 6 },
+    { "description": "Fewer roaming dogs also means fewer dogs chasing roos into traffic, which shows up in the road numbers before it shows up in the koala numbers.", "target": "wildlife_road_deaths", "magnitude": -0.05, "delay_months": 12 }
+  ],
+  "who_supports": ["environmental-stewards", "conservation-groups", "quandamooka-families", "retirees-and-seniors"],
+  "who_opposes": ["long-term-residents"],
+  "source": "detsi-dog-attacks-2024", "confidence": "high",
+  "note": "Two koalas were killed and another badly injured by domestic dogs in a cluster reported by the state environment department in 2024. Council has run trapping programs alongside state agencies, and has authorised staff at island organisations to help its dog inspectors."
+},
+{
+  "id": "off-lead-area-review",
+  "name": "Review the off-lead areas",
+  "issue": "wildlife",
+  "description": "Where a dog can legally be off a lead, and where it cannot, on beaches shared with roosting birds and a koala population.",
+  "who_decides": ["redland-city-council"], "player_role": "player_decides", "status": "modelled_option",
+  "cost_aud": { "capital": 60000, "recurring_per_year": 40000, "basis": "modelling estimate for signage and consultation", "confidence": "low" },
+  "lead_time_months": 12,
+  "effects": [
+    { "target": "shorebird_disturbance", "magnitude": -0.2, "delay_months": 12, "confidence": "medium" },
+    { "target": "dog_incidents", "magnitude": -0.1, "delay_months": 12, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Dog owners are a constituency that turns up to every meeting for a decade about this one thing.", "target": "consultation_trust", "magnitude": -0.15, "delay_months": 6 },
+    { "description": "Restricting the popular beach concentrates dogs onto the remaining one.", "target": "resident_amenity", "magnitude": -0.06, "delay_months": 12 }
+  ],
+  "who_supports": ["environmental-stewards", "conservation-groups"],
+  "who_opposes": ["long-term-residents", "holiday-home-owners", "surf-and-beach-users"],
+  "source": "brief", "confidence": "low",
+  "note": "Existing off-lead area locations were not verified and are not named here."
+},
+{
+  "id": "wildlife-rescue-support",
+  "name": "Fund the wildlife rescue volunteers",
+  "issue": "wildlife",
+  "description": "Vehicles, fuel, cages, vet costs and training for the volunteers who pick up every hit koala and every dog-mauled roo on this island.",
+  "who_decides": ["redland-city-council", "qld-government"], "player_role": "player_funds", "status": "modelled_option",
+  "cost_aud": { "capital": 120000, "recurring_per_year": 180000, "basis": "modelling estimate for a small volunteer service", "confidence": "low" },
+  "lead_time_months": 6,
+  "effects": [
+    { "target": "koala_population", "magnitude": 0.08, "delay_months": 12, "confidence": "low" },
+    { "target": "emergency_readiness", "magnitude": 0.1, "delay_months": 6, "confidence": "low" },
+    { "target": "consultation_trust", "magnitude": 0.1, "delay_months": 6, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Funding the rescue can become the reason not to fix the cause, and the volunteers are the first to say so.", "target": "wildlife_road_deaths", "magnitude": 0.05, "delay_months": 24 }
+  ],
+  "who_supports": ["environmental-stewards", "volunteers-and-emergency", "long-term-residents", "young-families-and-school"],
+  "who_opposes": [],
+  "source": "detsi-dog-attacks-2024", "confidence": "medium"
+},
+{
+  "id": "planned-burn-extent",
+  "name": "How much of the island gets burnt",
+  "issue": "fire",
+  "description": "The size of the annual planned burn program: hazard reduction around the townships and the fire-prone edges, run by the Quandamooka Rangers with QPWS.",
+  "who_decides": ["joint-management", "qyac"], "player_role": "player_advocates", "status": "in_place",
+  "cost_aud": { "capital": 350000, "recurring_per_year": 900000, "basis": "modelling estimate for crews, plant and contractors across a season", "confidence": "low" },
+  "lead_time_months": 12,
+  "effects": [
+    { "target": "fire_hazard_load", "magnitude": -0.3, "delay_months": 12, "confidence": "high" },
+    { "target": "emergency_readiness", "magnitude": 0.15, "delay_months": 12, "confidence": "medium" },
+    { "target": "smoke_exposure", "magnitude": 0.25, "delay_months": 3, "confidence": "high" }
+  ],
+  "side_effects": [
+    { "description": "The complaints arrive in the week of the burn; the benefit arrives in a summer that then does not happen, so nobody credits it.", "target": "consultation_trust", "magnitude": -0.1, "delay_months": 3 },
+    { "description": "Burning is skilled work with a narrow weather window, and doing more of it needs people and gear that are not on the island in June.", "target": "qyac_capacity", "magnitude": -0.12, "delay_months": 6 }
+  ],
+  "who_supports": ["volunteers-and-emergency", "long-term-residents", "holiday-home-owners", "quandamooka-families"],
+  "who_opposes": ["retirees-and-seniors", "tourism-operators"],
+  "source": "qra-cultural-burning", "confidence": "high",
+  "note": "QYAC leads the island's bushfire management, and the Quandamooka Rangers conduct planned burns and wildfire response with QPWS. This lever models the scale of that program. It does not depict, name or animate cultural burning practice, which is a QYAC decision and is queued in docs/CULTURAL-REVIEW.md."
+},
+{
+  "id": "burn-notification-and-timing",
+  "name": "Notify and time the burns around the community",
+  "issue": "fire",
+  "description": "Tell people before the smoke arrives, avoid the school run and the long weekend, and give anyone with a lung condition a day's warning.",
+  "who_decides": ["joint-management", "seqwater", "redland-city-council"], "player_role": "player_funds", "status": "in_place",
+  "cost_aud": { "capital": 30000, "recurring_per_year": 60000, "basis": "modelling estimate for notification systems and coordination", "confidence": "low" },
+  "lead_time_months": 6,
+  "effects": [
+    { "target": "smoke_exposure", "magnitude": -0.1, "delay_months": 6, "confidence": "medium" },
+    { "target": "consultation_trust", "magnitude": 0.2, "delay_months": 6, "confidence": "medium" },
+    { "target": "health_access", "magnitude": 0.05, "delay_months": 6, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Narrowing the acceptable days narrows an already narrow weather window, and some burns simply do not happen.", "target": "fire_hazard_load", "magnitude": 0.12, "delay_months": 12 }
+  ],
+  "who_supports": ["retirees-and-seniors", "young-families-and-school", "tourism-operators", "long-term-residents"],
+  "who_opposes": [],
+  "source": "seqwater-planned-burns", "confidence": "medium",
+  "note": "Seqwater publishes planned burn notices for its island landholding, including expected smoke direction. Multiple agencies burn on this island, which is exactly why coordination is a lever."
+},
+{
+  "id": "feral-and-weed-control",
+  "name": "Feral animal and weed control",
+  "issue": "wildlife",
+  "description": "Foxes, feral cats, roaming dogs and the weed fronts. Slow, unglamorous, and the difference between a national park and a paddock.",
+  "who_decides": ["joint-management", "redland-city-council"], "player_role": "player_funds", "status": "in_place",
+  "cost_aud": { "capital": 200000, "recurring_per_year": 550000, "basis": "modelling estimate for a sustained control program", "confidence": "low" },
+  "lead_time_months": 12,
+  "effects": [
+    { "target": "koala_population", "magnitude": 0.1, "delay_months": 36, "confidence": "low" },
+    { "target": "shorebird_disturbance", "magnitude": -0.15, "delay_months": 24, "confidence": "medium" },
+    { "target": "quandamooka_employment", "magnitude": 0.08, "delay_months": 12, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Baiting and trapping near townships needs domestic pets contained first, which sends this straight back into the dog fight.", "target": "consultation_trust", "magnitude": -0.08, "delay_months": 12 },
+    { "description": "Stop for one budget cycle and the fronts come back further ahead than where they started.", "target": "dune_condition", "magnitude": -0.1, "delay_months": 36 }
+  ],
+  "who_supports": ["environmental-stewards", "conservation-groups", "quandamooka-families"],
+  "who_opposes": [],
+  "source": "parks-nbd-about", "confidence": "medium",
+  "note": "Joint management rangers lead fire, pests and weeds, cultural heritage and asset work on park. Species detail belongs in data/ecology.json."
+},
+{
+  "id": "mine-rehabilitation-pace",
+  "name": "The pace of mine rehabilitation and handback",
+  "issue": "post-mining",
+  "description": "How fast the former mining land is rehabilitated, surrendered and added to the park or returned to Traditional Owners.",
+  "who_decides": ["qld-government", "sibelco", "qyac"], "player_role": "player_observes", "status": "in_place",
+  "cost_aud": { "capital": 0, "recurring_per_year": 0, "basis": "borne by the former operator under its rehabilitation obligations, not by council or the player", "confidence": "medium" },
+  "lead_time_months": 60,
+  "effects": [
+    { "target": "quandamooka_employment", "magnitude": 0.15, "delay_months": 24, "confidence": "medium" },
+    { "target": "aquifer_stress", "magnitude": -0.1, "delay_months": 60, "confidence": "low" },
+    { "target": "local_employment", "magnitude": 0.1, "delay_months": 24, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Rehabilitation work is the closest thing the island has to a post-mining trades pipeline, and it ends.", "target": "local_employment", "magnitude": -0.15, "delay_months": 96 },
+    { "description": "Land added to the park is land that cannot be built on, which the housing levers then have to work around.", "target": "rental_supply", "magnitude": -0.05, "delay_months": 60 }
+  ],
+  "who_supports": ["quandamooka-families", "conservation-groups", "environmental-stewards", "tradies-and-builders"],
+  "who_opposes": [],
+  "source": "sibelco-rehab", "confidence": "medium",
+  "note": "Sibelco signed a rehabilitation agreement in December 2019 committing to work with QYAC on rehabilitating and surrendering former mining land. Reported figures at the time included a commitment covering over 12,000 hectares and more than 2,200 hectares of lease already surrendered. Current progress was not verified for this pack."
+},
+{
+  "id": "ranger-program-funding",
+  "name": "Fund the ranger program properly",
+  "issue": "post-mining",
+  "description": "More Quandamooka rangers, funded for longer than a grant cycle, doing the fire, weeds, compliance, cultural heritage and visitor work the island already relies on.",
+  "who_decides": ["qld-government", "australian-government", "qyac"], "player_role": "player_advocates", "status": "in_place",
+  "cost_aud": { "capital": 400000, "recurring_per_year": 1800000, "basis": "modelling estimate for an expanded ranger team with vehicles and plant", "confidence": "low" },
+  "lead_time_months": 18,
+  "effects": [
+    { "target": "quandamooka_employment", "magnitude": 0.3, "delay_months": 12, "confidence": "medium" },
+    { "target": "qyac_capacity", "magnitude": 0.25, "delay_months": 18, "confidence": "medium" },
+    { "target": "fire_hazard_load", "magnitude": -0.15, "delay_months": 24, "confidence": "medium" },
+    { "target": "illegal_camping", "magnitude": -0.15, "delay_months": 12, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Rangers need somewhere to live, and the island does not have it, so the jobs go to people who commute or do not go at all.", "target": "worker_housing", "magnitude": -0.15, "delay_months": 12 },
+    { "description": "A well-resourced ranger service becomes the agency everyone calls for everything, including things it was never funded for.", "target": "qyac_capacity", "magnitude": -0.08, "delay_months": 36 }
+  ],
+  "who_supports": ["quandamooka-families", "environmental-stewards", "conservation-groups", "long-term-residents"],
+  "who_opposes": [],
+  "source": "parks-nbd-about", "confidence": "medium"
+},
+{
+  "id": "cultural-tourism-investment",
+  "name": "Invest in Traditional Owner led tourism",
+  "issue": "post-mining",
+  "description": "Back the cultural and eco-tourism the transition was always supposed to build, on QYAC's terms and at QYAC's pace.",
+  "who_decides": ["qyac", "qld-government"], "player_role": "player_funds", "status": "in_place",
+  "cost_aud": { "capital": 12000000, "recurring_per_year": 800000, "basis": "modelling estimate; individual project budgets under Minjerribah Futures were not itemised for this pack", "confidence": "low" },
+  "lead_time_months": 48,
+  "effects": [
+    { "target": "quandamooka_employment", "magnitude": 0.3, "delay_months": 36, "confidence": "medium" },
+    { "target": "visitor_satisfaction", "magnitude": 0.25, "delay_months": 48, "confidence": "medium" },
+    { "target": "business_viability", "magnitude": 0.15, "delay_months": 48, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Handing several complex construction projects to one organisation at once is exactly what the audit office found went wrong last time.", "target": "qyac_capacity", "magnitude": -0.25, "delay_months": 12 },
+    { "description": "Successful cultural tourism raises visitor numbers, which lands straight back on the barge queue and the carparks.", "target": "peak_day_load", "magnitude": 0.12, "delay_months": 60 }
+  ],
+  "who_supports": ["quandamooka-families", "tourism-operators", "state-as-actor"],
+  "who_opposes": ["long-term-residents"],
+  "source": "qao-minjerribah-futures", "confidence": "high",
+  "note": "The audit office found the transition strategy assumed $36.6 million of private investment that never arrived, and that QYAC was assigned several complex construction projects at once with fewer than 100 staff and no adequate capacity assessment. Any version of this lever that ignores capacity repeats the finding."
+},
+{
+  "id": "local-procurement-and-training",
+  "name": "Buy local and train local",
+  "issue": "post-mining",
+  "description": "Write island employment and island suppliers into every contract council and the state let on this island, and fund the training that makes it possible.",
+  "who_decides": ["redland-city-council", "qld-government", "qyac"], "player_role": "player_decides", "status": "modelled_option",
+  "cost_aud": { "capital": 250000, "recurring_per_year": 700000, "basis": "modelling estimate for procurement administration and training subsidy", "confidence": "low" },
+  "lead_time_months": 18,
+  "effects": [
+    { "target": "local_employment", "magnitude": 0.25, "delay_months": 24, "confidence": "medium" },
+    { "target": "quandamooka_employment", "magnitude": 0.2, "delay_months": 24, "confidence": "medium" },
+    { "target": "business_viability", "magnitude": 0.15, "delay_months": 24, "confidence": "medium" }
+  ],
+  "side_effects": [
+    { "description": "Local content requirements raise the tendered price, and the difference comes out of the same capital budget that was buying the thing.", "target": "council_budget", "magnitude": -0.12, "delay_months": 24 },
+    { "description": "The island has a small pool of qualified trades, so a big program simply bids against itself.", "target": "freight_cost", "magnitude": 0.05, "delay_months": 24 }
+  ],
+  "who_supports": ["quandamooka-families", "tradies-and-builders", "renters-and-key-workers", "long-term-residents"],
+  "who_opposes": ["council-as-actor"],
+  "source": "brief", "confidence": "low"
+},
+{
+  "id": "freight-and-cost-of-living",
+  "name": "Do something about the cost of a barge trip on everything",
+  "issue": "cost-of-living",
+  "description": "Freight relief, a consolidated island delivery run, or a community bulk buy: anything that stops every carton of milk carrying a boat fare.",
+  "who_decides": ["qld-government", "sealink", "community"], "player_role": "player_advocates", "status": "modelled_option",
+  "cost_aud": { "capital": 300000, "recurring_per_year": 1200000, "basis": "modelling estimate for a freight subsidy or a consolidated run", "confidence": "low" },
+  "lead_time_months": 18,
+  "effects": [
+    { "target": "cost_of_living", "magnitude": -0.2, "delay_months": 12, "confidence": "low" },
+    { "target": "freight_cost", "magnitude": -0.25, "delay_months": 12, "confidence": "low" },
+    { "target": "business_viability", "magnitude": 0.12, "delay_months": 18, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "A subsidy on freight is a subsidy to whoever controls the freight, unless the pass-through is policed.", "target": "consultation_trust", "magnitude": -0.1, "delay_months": 24 },
+    { "description": "Cheaper freight makes it cheaper to bring everything from the mainland, including the things the island could make or grow.", "target": "local_employment", "magnitude": -0.05, "delay_months": 36 }
+  ],
+  "who_supports": ["long-term-residents", "renters-and-key-workers", "tourism-operators", "retirees-and-seniors", "quandamooka-families"],
+  "who_opposes": ["state-as-actor"],
+  "source": "brief", "confidence": "low"
+},
+{
+  "id": "next-transition-tranche",
+  "name": "Ask the state for the next transition tranche",
+  "issue": "post-mining",
+  "description": "Go back for another round of transition funding, with the audit findings on the table and a governance model that answers them.",
+  "who_decides": ["qld-government"], "player_role": "player_advocates", "status": "proposed",
+  "cost_aud": { "capital": 0, "recurring_per_year": 0, "basis": "the ask itself costs nothing; the delivery is priced in the levers it funds", "confidence": "high" },
+  "lead_time_months": 24,
+  "effects": [
+    { "target": "state_budget", "magnitude": -0.2, "delay_months": 24, "confidence": "medium" },
+    { "target": "council_budget", "magnitude": 0.2, "delay_months": 30, "confidence": "low" },
+    { "target": "qyac_capacity", "magnitude": 0.1, "delay_months": 30, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "The last program was found to have complex, inconsistent governance and inadequate community oversight, so the next one arrives with conditions attached.", "target": "consultation_trust", "magnitude": 0.1, "delay_months": 36 },
+    { "description": "A state that believes the transition is finished reads the ask as a failure to acquit the last one.", "target": "state_budget", "magnitude": -0.1, "delay_months": 12 }
+  ],
+  "who_supports": ["quandamooka-families", "tourism-operators", "long-term-residents", "council-as-actor"],
+  "who_opposes": ["state-as-actor"],
+  "source": "qao-minjerribah-futures", "confidence": "high"
+},
+{
+  "id": "consultation-model",
+  "name": "Change how the island is consulted",
+  "issue": "who-decides",
+  "description": "A standing island reference group that meets on the island, sees drafts before they are decided, and gets an answer in writing.",
+  "who_decides": ["redland-city-council", "qld-government", "qyac"], "player_role": "player_decides", "status": "modelled_option",
+  "cost_aud": { "capital": 60000, "recurring_per_year": 180000, "basis": "modelling estimate for secretariat, sitting fees and travel", "confidence": "low" },
+  "lead_time_months": 9,
+  "effects": [
+    { "target": "consultation_trust", "magnitude": 0.35, "delay_months": 12, "confidence": "medium" },
+    { "target": "resident_amenity", "magnitude": 0.05, "delay_months": 24, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Every lever in this file gets slower once there is a group that must be consulted on it.", "target": "council_budget", "magnitude": -0.06, "delay_months": 12 },
+    { "description": "A reference group that is overruled twice is worse than no reference group at all.", "target": "consultation_trust", "magnitude": -0.4, "delay_months": 36 },
+    { "description": "Amity Point has no progress association left, so getting a representative voice from that township takes deliberate effort.", "target": "consultation_trust", "magnitude": -0.05, "delay_months": 6 }
+  ],
+  "who_supports": ["long-term-residents", "quandamooka-families", "environmental-stewards", "volunteers-and-emergency", "retirees-and-seniors"],
+  "who_opposes": ["council-as-actor"],
+  "source": "qao-minjerribah-futures", "confidence": "medium",
+  "note": "The audit office found governance arrangements complex and inconsistent, lacking adequate community oversight. This lever is the direct answer to that finding."
+},
+{
+  "id": "health-and-clinic-hours",
+  "name": "Extend health services on the island",
+  "issue": "services",
+  "description": "More clinic hours, better after-hours cover and telehealth that works, on an island with a median age of 52 and a boat between it and a hospital.",
+  "who_decides": ["qld-government", "australian-government"], "player_role": "player_advocates", "status": "modelled_option",
+  "cost_aud": { "capital": 900000, "recurring_per_year": 1300000, "basis": "modelling estimate for extended clinic staffing and equipment", "confidence": "low" },
+  "lead_time_months": 24,
+  "effects": [
+    { "target": "health_access", "magnitude": 0.35, "delay_months": 18, "confidence": "medium" },
+    { "target": "emergency_readiness", "magnitude": 0.15, "delay_months": 18, "confidence": "low" },
+    { "target": "population_permanent", "magnitude": 0.05, "delay_months": 60, "confidence": "low" }
+  ],
+  "side_effects": [
+    { "description": "Clinical staff need housing, and the housing is the bottleneck, not the funding.", "target": "worker_housing", "magnitude": -0.12, "delay_months": 18 },
+    { "description": "Better island health services reduce the trips to the mainland that keep the ferry timetable justified.", "target": "island_accessibility", "magnitude": -0.04, "delay_months": 48 }
+  ],
+  "who_supports": ["retirees-and-seniors", "long-term-residents", "quandamooka-families", "young-families-and-school", "volunteers-and-emergency"],
+  "who_opposes": [],
+  "source": "repo-businesses", "confidence": "low",
+  "note": "Service providers on the island are listed in data/businesses.json. Staffing levels, rosters and after-hours arrangements were not verified and are not stated."
+}
+],
+"issues": [
+  { "id": "barge-queue", "label": "The barge queue on a long weekend", "one_line": "One vehicle route, a private operator, and a Sunday afternoon when the whole island wants to leave at once.", "primary_tension": "More sailings solve the queue and worsen everything the queue was accidentally protecting.", "levers": ["vehicle-barge-peak-sailings", "vehicle-booking-priority-for-residents", "dunwich-queue-holding-area"] },
+  { "id": "cost-of-crossing", "label": "What it costs to get home", "one_line": "The island's only road has a fare on it, and the mainland's cheap public transport fare does not apply.", "primary_tension": "Somebody has to pay: the operator, the state, or the household.", "levers": ["resident-ferry-concession", "ferry-into-public-transport-network"] },
+  { "id": "front-door", "label": "The island's front door", "one_line": "The mainland terminal has no development partner and no settled plan, and the island end is still a master plan.", "primary_tension": "Fixing access invites more of what access already delivers.", "levers": ["toondah-terminal-rebuild", "dunwich-gateway-works", "mainland-park-and-ride"] },
+  { "id": "getting-around", "label": "Getting around without a car", "one_line": "Twenty-odd kilometres between the boat and the surf, and a bus that has to meet both.", "primary_tension": "Buses only work if the timetable respects the boat.", "levers": ["island-bus-frequency"] },
+  { "id": "visitors-versus-amenity", "label": "Visitor numbers versus resident amenity", "one_line": "Around 375,000 visitors a year against about 2,150 residents, most of it landing in six weekends.", "primary_tension": "Every business needs the peak and every resident dreads it.", "levers": ["day-visitor-vehicle-cap", "shoulder-season-pricing", "point-lookout-parking-management", "gorge-walk-visitor-flow"] },
+  { "id": "camping-capacity", "label": "Camping capacity and illegal camping", "one_line": "Bookings that sell out months ahead, and vans sleeping on road reserves in between.", "primary_tension": "Capping sites protects the dunes and pushes people into the bush.", "levers": ["campground-site-cap", "beach-camping-permit-numbers", "illegal-camping-enforcement"] },
+  { "id": "beach-driving", "label": "Four-wheel-drive beach access", "one_line": "A vehicle access permit, two beaches, tide windows, and a dune underneath all of it.", "primary_tension": "The beach is a road for some people and a habitat for others, and both are right.", "levers": ["vehicle-access-permit-price", "beach-driving-seasonal-closures", "beach-track-maintenance"] },
+  { "id": "who-pays", "label": "Who pays for the visitors", "one_line": "Toilets, carparks, tracks and rubbish are paid for by residents and used by everybody.", "primary_tension": "The people who cost the most are the hardest to charge.", "levers": ["visitor-levy-on-accommodation"] },
+  { "id": "housing", "label": "Short-stay letting, rentals and worker housing", "one_line": "Half the dwellings empty on census night, no vacancies in community housing, and businesses that cannot recruit.", "primary_tension": "Every dwelling is somebody's investment and somebody else's home.", "levers": ["short-stay-letting-registration", "short-stay-cap-by-township", "worker-accommodation-build", "community-housing-expansion", "gumpi-land-release", "rates-differential-unoccupied", "secondary-dwelling-fast-track"] },
+  { "id": "amity-erosion", "label": "Amity Point erosion", "one_line": "The only part of the city assessed at high risk of coastal erosion, with land already lost and a 20 year plan split into three reaches.", "primary_tension": "Armour, nourish or retreat, and each one takes something from somebody.", "levers": ["amity-southern-buried-seawall", "amity-beach-nourishment", "amity-flow-slide-barrier", "amity-managed-retreat", "amity-coastal-research"] },
+  { "id": "coast-and-dunes", "label": "Dunes and beach access", "one_line": "Every informal track over a foredune is a future blowout.", "primary_tension": "Making access easy makes damage easy.", "levers": ["dune-restoration-program"] },
+  { "id": "hazard", "label": "Storm tide and being cut off", "one_line": "The day the barge cannot run, the island is on its own.", "primary_tension": "Readiness is expensive and invisible until it is not.", "levers": ["storm-tide-readiness"] },
+  { "id": "waste", "label": "Getting the rubbish off the island", "one_line": "Every skip goes on a barge, and Redland households already pay over $600 a year for waste.", "primary_tension": "Cheaper waste means more waste sitting on the island for longer.", "levers": ["transfer-station-upgrade", "waste-barge-frequency", "island-reuse-and-repair", "green-waste-mulched-on-island", "commercial-waste-charging"] },
+  { "id": "water-and-wastewater", "label": "Sewage and the sea", "one_line": "A rebuilt plant at Point Lookout, septic systems across all three townships, and a bay on the other side of the dune.", "primary_tension": "Connecting people to sewer is expensive, unpopular, and the precondition for everything else.", "levers": ["sewer-network-extension", "recycled-water-scheme"] },
+  { "id": "water-security", "label": "Water security", "one_line": "The townships are off the water grid and drink what the sand holds.", "primary_tension": "The same water supplies the town, the lakes and the wetlands.", "levers": ["borefield-monitoring", "peak-water-restrictions"] },
+  { "id": "roads", "label": "Roads, paths and maintenance", "one_line": "One main road between three townships, carrying everything that lands.", "primary_tension": "A better road is a faster road.", "levers": ["east-coast-road-renewal", "footpath-and-bike-network"] },
+  { "id": "wildlife", "label": "Dogs, cars and wildlife", "one_line": "More than 240 injured wildlife cases a year on this island from vehicle strike and domestic pet attack, and a koala population with the lowest genetic diversity in the region.", "primary_tension": "Enforcement in a small town is personal.", "levers": ["koala-habitat-overlay", "dog-control-enforcement", "off-lead-area-review", "wildlife-rescue-support", "wildlife-speed-and-crossings", "feral-and-weed-control"] },
+  { "id": "fire", "label": "Hazard reduction versus smoke", "one_line": "QYAC leads the island's fire management, and the smoke arrives over the same townships the burn is protecting.", "primary_tension": "The complaint is immediate and the benefit is a fire that never happens.", "levers": ["planned-burn-extent", "burn-notification-and-timing"] },
+  { "id": "utilities", "label": "Power and critical services", "one_line": "Supply comes from the mainland, and the water plants, the sewage plant and the shelters all run on it.", "primary_tension": "Resilience at critical sites does nothing for a household with no power.", "levers": ["island-energy-resilience"] },
+  { "id": "post-mining", "label": "Life after the mine", "one_line": "Mining ended in 2019 under a 2011 statute, and the transition program has been audited once already.", "primary_tension": "The transition asked one organisation to build a new economy while also being the native title holder, the joint manager and the camping operator.", "levers": ["mine-rehabilitation-pace", "ranger-program-funding", "cultural-tourism-investment", "local-procurement-and-training", "next-transition-tranche"] },
+  { "id": "cost-of-living", "label": "The cost of living on an island", "one_line": "Everything arrived on a barge and the price says so.", "primary_tension": "Cheaper freight makes it cheaper to import what the island could make.", "levers": ["freight-and-cost-of-living"] },
+  { "id": "who-decides", "label": "Who actually decides", "one_line": "One councillor shared with a mainland suburb, two state departments, a native title body corporate, a joint management arrangement and three private operators.", "primary_tension": "Almost nothing on this island is decided by the people who live on it.", "levers": ["consultation-model"] },
+  { "id": "services", "label": "Health and services", "one_line": "Median age 52, and a boat between the island and a hospital.", "primary_tension": "Funding a service is easy; housing the person who delivers it is not.", "levers": ["health-and-clinic-hours"] }
+],
+"sim_defaults": {
+  "tick_minutes": 10,
+  "policy_review_interval_days": 30,
+  "mood_decay_per_month": 0.05,
+  "mood_note": "Group mood drifts back toward base_mood at this rate. A win fades. A grievance fades slower: use half this rate for negative movements.",
+  "effect_ramp": "Apply an effect as a linear ramp from delay_months to delay_months plus half the lead time, not as a step. Nothing on this island happens on the day it is announced.",
+  "consultation_trust_rule": "Any lever with player_role of player_decides that is enacted without the consultation-model lever active should apply an extra -0.05 to consultation_trust. Being right is not the same as being consulted.",
+  "qyac_capacity_rule": "If more than two levers whose who_decides includes qyac are in delivery at once, halve the magnitude of all their effects and double their lead_time_months. This is the audit office finding, expressed as a rule.",
+  "seasonality": "Peak load runs the Queensland school holidays, Easter and every long weekend. Winter is whale season and a quieter kind of busy. The island at census time in August is the island at its emptiest.",
+  "rng_stream": "civic",
+  "clock": "world.clock. No lever in this file may be evaluated against wall time."
+},
+"gaps": [
+  "No lever cost in this file was quoted by the body that would pay it, except where a published figure is cited in the note.",
+  "The camping operator's website refused the connection from this agent, so campground site counts and current permit and camping prices are unverified and no dollar figure is stated for them.",
+  "The Redland Local Housing Action Plan PDF, the Amity Point SEMP northern reach page and the council operational plan performance reports all returned 403 to this agent. Their figures reached this pack through search extracts only.",
+  "The two Quandamooka ILUAs were not read. Their schedules govern camping, tourism and land dealings, and several levers here assume a decision path that those documents may set differently.",
+  "No current visitor number after 2018 was found. Everything downstream of visitor_volume inherits that gap.",
+  "Whether the Gumpi master plan has been given effect in the current Redland City Plan was not confirmed."
+]
+}
