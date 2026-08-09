@@ -218,3 +218,45 @@ thing, and both halves are now on disk.
 
 Take one narrow slice, source it properly, and let it be right. The corpus will still be there for
 the wave after.
+
+## The Quandamooka Country Events Engine, and how to connect to it
+
+Added 10 August 2026, after the owner pointed out that this repository is refreshed often. It is, and
+that changes how a connector should treat it. Read this before writing `tools/connectors/events-engine.mjs`.
+
+**Where it is:** `C:\Users\sbt41\githublocal\quandamooka-country-events-engine`
+
+**It is a live-ish feed, not a static pack.** The git history carries repeated `Refresh public event
+atlas sources` commits: six between 12 June and 3 July 2026, so roughly weekly. The local working copy
+lags the remote. A connector must pull before it syncs, and must record which commit it read, not just
+the date it ran.
+
+**It carries its own freshness and its own honesty flag, so do not invent replacements.**
+The data lives in `assets/site-data.js` as `window.QCEE_DATA` (plus `noticeboard-data.js` and
+`place-data-extra.js`), and the project object already publishes:
+
+- `lastPublicSearch`, currently "3 July 2026"
+- `dataStatus`, currently "Draft event atlas. Confirm dates, permissions and contacts..."
+
+Carry both straight through into the record envelope as the freshness and the confidence. A twin that
+computes its own confidence for this source, while the source is already telling you it is a draft, is
+overstating. If `dataStatus` says draft, every record from that sync is draft, and the interface says so.
+
+**`docs/PUBLIC_BOUNDARY.md` in that repository is a BLOCKING rule for this connector**, on the same
+footing as `data/lore.json`. It is the owner's own publication contract for this material and it is
+better written than anything we would have invented. Its keep-private list includes sensitive cultural
+material, protected places, unapproved images or names, and incident details that identify people.
+Nothing on that list enters the twin through this connector, whatever the data file happens to contain.
+
+Its "required wording stance" is worth reading in full because four of its five lines are rules this
+project already holds under different names:
+
+- do not imply official authority unless it has been granted
+- **do not treat guessed catalogue data as consent**
+- do not frame one person as director of the ecosystem
+- **do not describe a proposed capability as if it already exists**
+- use clear source status when dates, permissions or listings need confirmation
+
+The second and fourth are exactly our no-fabrication and proposed-stays-proposed rules, arrived at
+independently. Where that document and ours differ on this material, that one wins: it is closer to the
+source and closer to the people the material is about.

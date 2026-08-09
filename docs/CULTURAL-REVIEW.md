@@ -450,3 +450,38 @@ Two things follow. First, a rule that is written down but not executed is not a 
 recorded, agreed and violated inside the same repository, by an agent that had read the file.
 Second, the harness should be written before the next pack lands, and it should run over
 `data/**` as hard as over `src/**`, because the pack is where this came in.
+
+### D2. The harness, written 10 August 2026
+
+It exists now. `node tools/gate-audit.mjs` reads the thirteen rules out of this pack's
+`prohibitions` block and runs them, over `data/**`, `src/**`, `docs/**`, `tools/**`, `index.html`
+and `assets/**` according to each rule's own scope. Ten of the thirteen have executable checks.
+The three the pack marks `manual` are printed as questions on every run rather than dropped, and a
+rule with no implementation reports itself as unimplemented instead of quietly passing, so adding a
+rule to this pack cannot silently do nothing.
+
+What the first full run found, on twelve packs and about eighty thousand lines: no banned token
+anywhere, which is the wave 7 fault confirmed closed by a check rather than by a memory; the
+acknowledgement in `index.html` still character for character what
+`acknowledgement.game_wording.short` says; twenty-eight token hits under `no-invented-ceremony` and
+`no-sacred-or-restricted-sites`, every one of them a file stating the prohibition or enforcing it,
+each now recorded in `tools/ingest/ledger.json` with a reason and a frozen count so a
+twenty-ninth fails the build; and four `indigenous` fields in `data/residents.json` that are
+published Australian Bureau of Statistics proportions for a township rather than a field on a
+person, exempted by pointer with that reason written down.
+
+Two things it raised that belong to a reviewer rather than to a tool:
+
+1. `data/ecology.json` carries the word *sacred* twice, in the aquifer record's `community_concern`
+   field and its source, reporting a Redland City Bulletin headline about residents fearing lagoons
+   drying. It names no place, carries no coordinate and takes no position, so it does not breach
+   `no-sacred-or-restricted-sites` as that rule is written. It is a word that could reach a player
+   through an ecology readout, and whether it should is a question for this queue.
+2. `lore.sand_mining.quandamooka_position` states a QYAC position, cites `qyac-briefing-2015`, and
+   is a second copy of `pos-2013-act-repeal` in `qyac_public_positions` with no link between them.
+   Nothing is wrong with either copy today. Two copies of a QYAC statement can drift apart, and a
+   `position_ref` field on the first would stop that. The gate raises it as an advisory and does not
+   change the pack, because an ingest tool editing the lore pack by itself is not a thing this
+   project should have.
+
+`docs/INGEST.md` is how the harness works and how to extend it.

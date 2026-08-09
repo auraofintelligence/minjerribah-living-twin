@@ -1,0 +1,667 @@
+{
+  "about": "Minimal per-pack schemas. Each names the top-level fields a pack must carry, the collections it must contain, and the fields every record in a collection must have. They were written from what the twelve packs already are, so they lock the shape rather than inventing one. A lane that produces a pack missing a collection something reads is stopped before the pack is written.",
+  "min_records_note": "min_records is a floor at about four fifths of the count when the schema was written, not an exact count. It catches a collection emptying or being gutted, which is how a pack silently stops feeding a system, without failing every time somebody legitimately removes one record.",
+  "packs": {
+    "geography": {
+      "pack": "geography",
+      "required": [
+        "pack",
+        "version",
+        "island",
+        "coastline",
+        "roads"
+      ],
+      "collections": {
+        "coastline.landmarks": {
+          "min_records": 11,
+          "record_required": [
+            "id",
+            "name",
+            "coordinates",
+            "source"
+          ]
+        },
+        "elevation_points": {
+          "min_records": 13,
+          "record_required": [
+            "id",
+            "name",
+            "coordinates",
+            "elevation_m",
+            "source",
+            "confidence"
+          ]
+        },
+        "water_bodies": {
+          "min_records": 5,
+          "record_required": [
+            "id",
+            "name",
+            "geometry",
+            "source",
+            "confidence"
+          ]
+        },
+        "roads": {
+          "min_records": 36,
+          "record_required": [
+            "id",
+            "name",
+            "geometry",
+            "surface",
+            "source",
+            "confidence"
+          ]
+        },
+        "protected_areas": {
+          "min_records": 3,
+          "record_required": [
+            "id",
+            "name",
+            "geometry",
+            "source",
+            "confidence"
+          ]
+        },
+        "rehabilitation_areas": {
+          "min_records": 4,
+          "record_required": [
+            "id",
+            "name",
+            "geometry",
+            "source",
+            "confidence"
+          ]
+        },
+        "vegetation_zones": {
+          "min_records": 6,
+          "record_required": [
+            "id",
+            "name",
+            "geometry",
+            "source",
+            "confidence"
+          ]
+        }
+      }
+    },
+    "places": {
+      "pack": "places",
+      "required": [
+        "pack",
+        "version",
+        "crs",
+        "places"
+      ],
+      "collections": {
+        "places": {
+          "min_records": 46,
+          "record_required": [
+            "id",
+            "name",
+            "type",
+            "township",
+            "lat",
+            "lon",
+            "coordinate_source",
+            "coordinate_confidence",
+            "confidence",
+            "source"
+          ]
+        }
+      }
+    },
+    "businesses": {
+      "pack": "businesses",
+      "required": [
+        "pack",
+        "version",
+        "currency",
+        "businesses"
+      ],
+      "collections": {
+        "businesses": {
+          "min_records": 80,
+          "record_required": [
+            "id",
+            "name",
+            "type",
+            "township",
+            "status",
+            "lat",
+            "lon",
+            "confidence",
+            "source"
+          ]
+        }
+      }
+    },
+    "ecology": {
+      "pack": "ecology",
+      "required": [
+        "pack",
+        "version",
+        "confidence_scale",
+        "species",
+        "habitats"
+      ],
+      "collections": {
+        "habitats": {
+          "min_records": 12,
+          "record_required": [
+            "id",
+            "name",
+            "description"
+          ]
+        },
+        "species": {
+          "min_records": 40,
+          "record_required": [
+            "id",
+            "common_name",
+            "scientific_name",
+            "group",
+            "habitats",
+            "sim_role",
+            "source"
+          ]
+        },
+        "plants": {
+          "min_records": 11,
+          "record_required": [
+            "id",
+            "common_name",
+            "scientific_name",
+            "source"
+          ]
+        },
+        "weeds": {
+          "min_records": 7,
+          "record_required": [
+            "id",
+            "common_name",
+            "scientific_name",
+            "source"
+          ]
+        },
+        "processes": {
+          "min_records": 7,
+          "record_required": [
+            "id",
+            "name",
+            "sim_role",
+            "source"
+          ]
+        },
+        "seasonal_calendar": {
+          "min_records": 3,
+          "record_required": [
+            "label",
+            "months",
+            "ecology"
+          ]
+        }
+      }
+    },
+    "civic": {
+      "pack": "civic",
+      "required": [
+        "pack",
+        "version",
+        "confidence_scale",
+        "source_registry",
+        "levers",
+        "issues"
+      ],
+      "collections": {
+        "institutions": {
+          "min_records": 15,
+          "record_required": [
+            "id",
+            "label",
+            "kind",
+            "role",
+            "source",
+            "confidence"
+          ]
+        },
+        "instruments": {
+          "min_records": 11,
+          "record_required": [
+            "id",
+            "label",
+            "kind",
+            "what_it_does",
+            "source",
+            "confidence"
+          ]
+        },
+        "interest_groups": {
+          "min_records": 15,
+          "record_required": [
+            "id",
+            "label",
+            "about",
+            "source",
+            "confidence"
+          ]
+        },
+        "metrics": {
+          "min_records": 40,
+          "record_required": [
+            "id",
+            "label",
+            "unit",
+            "baseline",
+            "direction",
+            "source",
+            "confidence"
+          ]
+        },
+        "levers": {
+          "min_records": 49,
+          "record_required": [
+            "id",
+            "name",
+            "issue",
+            "status",
+            "who_decides",
+            "cost_aud",
+            "lead_time_months",
+            "effects",
+            "source"
+          ]
+        },
+        "issues": {
+          "min_records": 18,
+          "record_required": [
+            "id",
+            "label",
+            "one_line",
+            "levers"
+          ]
+        }
+      }
+    },
+    "residents": {
+      "pack": "residents",
+      "required": [
+        "pack",
+        "version",
+        "census_baseline",
+        "household_archetypes",
+        "occupations"
+      ],
+      "collections": {
+        "interest_groups": {
+          "min_records": 10,
+          "record_required": [
+            "id",
+            "label",
+            "about",
+            "source",
+            "confidence"
+          ]
+        },
+        "household_archetypes": {
+          "min_records": 24,
+          "record_required": [
+            "id",
+            "label",
+            "composition",
+            "township",
+            "tenure",
+            "source",
+            "confidence"
+          ]
+        },
+        "occupations": {
+          "min_records": 34,
+          "record_required": [
+            "id",
+            "label",
+            "what_it_is",
+            "pay_band",
+            "source",
+            "confidence"
+          ]
+        },
+        "visitor_archetypes": {
+          "min_records": 7,
+          "record_required": [
+            "id",
+            "label",
+            "stay",
+            "spend",
+            "source",
+            "confidence"
+          ]
+        }
+      }
+    },
+    "transport": {
+      "pack": "transport",
+      "required": [
+        "pack",
+        "version",
+        "confidence_scale",
+        "source_registry",
+        "terminals",
+        "services"
+      ],
+      "collections": {
+        "terminals": {
+          "min_records": 4,
+          "record_required": [
+            "id",
+            "name",
+            "operator",
+            "lat",
+            "lon",
+            "coordinate_source",
+            "source",
+            "confidence"
+          ]
+        },
+        "services": {
+          "min_records": 9,
+          "record_required": [
+            "id",
+            "name",
+            "operator",
+            "type",
+            "status",
+            "capacity",
+            "source",
+            "confidence"
+          ]
+        },
+        "road_segments": {
+          "min_records": 11,
+          "record_required": [
+            "id",
+            "name",
+            "length_km",
+            "surface",
+            "source",
+            "confidence"
+          ]
+        },
+        "parking": {
+          "min_records": 2,
+          "record_required": [
+            "id",
+            "name",
+            "capacity",
+            "source",
+            "confidence"
+          ]
+        },
+        "projects": {
+          "min_records": 1,
+          "record_required": [
+            "id",
+            "name",
+            "status",
+            "source",
+            "confidence"
+          ]
+        },
+        "structural_facts": {
+          "min_records": 6,
+          "record_required": [
+            "id",
+            "claim",
+            "consequence_for_sim",
+            "source",
+            "confidence"
+          ]
+        }
+      }
+    },
+    "events": {
+      "pack": "events",
+      "required": [
+        "pack",
+        "version",
+        "events",
+        "periods",
+        "left_out"
+      ],
+      "collections": {
+        "events": {
+          "min_records": 21,
+          "record_required": [
+            "id",
+            "name",
+            "category",
+            "date_rule",
+            "attendance",
+            "status",
+            "source",
+            "confidence"
+          ]
+        },
+        "periods": {
+          "min_records": 4,
+          "record_required": [
+            "id",
+            "name",
+            "kind",
+            "source",
+            "confidence"
+          ]
+        },
+        "rhythms": {
+          "min_records": 7,
+          "record_required": [
+            "id",
+            "name",
+            "kind",
+            "cycle",
+            "source",
+            "confidence"
+          ]
+        },
+        "visitor_archetypes": {
+          "min_records": 8,
+          "record_required": [
+            "id",
+            "name",
+            "arrives_by",
+            "typical_stay_hours"
+          ]
+        }
+      }
+    },
+    "subterranean": {
+      "pack": "subterranean",
+      "required": [
+        "pack",
+        "version",
+        "status",
+        "confidence_scale",
+        "buildings",
+        "processes"
+      ],
+      "collections": {
+        "resources": {
+          "min_records": 120,
+          "record_required": [
+            "id",
+            "name",
+            "class",
+            "unit"
+          ]
+        },
+        "buildings": {
+          "min_records": 34,
+          "record_required": [
+            "id",
+            "name",
+            "tier",
+            "existence",
+            "processes"
+          ]
+        },
+        "processes": {
+          "min_records": 61,
+          "record_required": [
+            "id",
+            "name",
+            "building",
+            "inputs",
+            "outputs",
+            "register",
+            "source",
+            "confidence"
+          ]
+        },
+        "tech_tree": {
+          "min_records": 3,
+          "record_required": [
+            "id",
+            "name",
+            "tier",
+            "register",
+            "unlock_conditions"
+          ]
+        },
+        "closed_loops": {
+          "min_records": 4,
+          "record_required": [
+            "id",
+            "name",
+            "path",
+            "closes"
+          ]
+        },
+        "reality_gates": {
+          "min_records": 9,
+          "record_required": [
+            "id",
+            "name",
+            "held_by"
+          ]
+        }
+      }
+    },
+    "narrative": {
+      "pack": "narrative",
+      "required": [
+        "pack",
+        "version",
+        "confidence_scale",
+        "tone_guide",
+        "seeds"
+      ],
+      "collections": {
+        "seeds": {
+          "min_records": 28,
+          "record_required": [
+            "id",
+            "title",
+            "register",
+            "cast",
+            "beats",
+            "trigger",
+            "source",
+            "confidence"
+          ]
+        },
+        "registers": {
+          "min_records": 8,
+          "record_required": [
+            "id",
+            "label"
+          ]
+        }
+      }
+    },
+    "soundscape": {
+      "pack": "soundscape",
+      "required": [
+        "pack",
+        "version",
+        "voices",
+        "buses"
+      ],
+      "collections": {
+        "voices": {
+          "min_records": 28,
+          "record_required": [
+            "id",
+            "label",
+            "bus",
+            "character",
+            "confidence"
+          ]
+        },
+        "buses": {
+          "min_records": 4,
+          "record_required": [
+            "id",
+            "label",
+            "what"
+          ]
+        }
+      }
+    },
+    "lore": {
+      "pack": "lore",
+      "required": [
+        "pack",
+        "version",
+        "status",
+        "acknowledgement",
+        "language",
+        "prohibitions"
+      ],
+      "collections": {
+        "history.timeline": {
+          "min_records": 11,
+          "record_required": [
+            "id",
+            "when",
+            "what",
+            "source",
+            "confidence"
+          ]
+        },
+        "prohibitions.rules": {
+          "min_records": 10,
+          "record_required": [
+            "id",
+            "rule",
+            "scope",
+            "check",
+            "severity",
+            "rationale"
+          ]
+        },
+        "qyac_public_positions.positions": {
+          "min_records": 4,
+          "record_required": [
+            "id",
+            "topic",
+            "position",
+            "stated",
+            "source",
+            "confidence"
+          ]
+        },
+        "native_title.determinations": {
+          "min_records": 1,
+          "record_required": [
+            "id",
+            "name",
+            "court",
+            "date",
+            "source",
+            "confidence"
+          ]
+        }
+      }
+    }
+  }
+}

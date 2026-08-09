@@ -1,0 +1,867 @@
+{
+  "pack": "_provenance",
+  "schema": "minjerribah-provenance/1",
+  "version": 1,
+  "generated": "2026-08-10",
+  "fingerprint": "b2c36fc9579b",
+  "about": "The pack registry. One entry per data pack, carrying its version, the lane it came through, the documents behind it, when it was ingested, by what extractor, a checksum over the file, and the spread of confidence inside it. src/world/data.js loads what this file lists, so adding a pack means adding it here. docs/INGEST.md is the contract; tools/gate-audit.mjs enforces it.",
+  "offline_note": "This is a committed file, not a lookup. The running twin fetches these paths off its own origin and nothing else, ever. Ingestion is an offline step that produces committed, versioned, checksummed data.",
+  "confidence_scale": {
+    "values": [
+      "high",
+      "medium",
+      "low"
+    ],
+    "note": "The one scale. Each pack defines these three words in its own terms in its own confidence_scale block, because what counts as a high-confidence tide table is not what counts as a high-confidence species record. Nothing may add a fourth word, and a rating that is null is not a rating."
+  },
+  "statuses": {
+    "committed": "A fact about the island as it is, from a citable source.",
+    "contributed": "Supplied by a contributor through the contribution lane, attributed, and not yet verified by a second source.",
+    "proposed": "Something somebody has proposed, modelled or is studying. It stays marked proposed wherever it is rendered, forever. A plan never becomes a fact by being modelled.",
+    "withdrawn": "A contributor withdrew this record. The id survives with the marker so the record disappears honestly rather than silently."
+  },
+  "lanes": {
+    "research": {
+      "built": true,
+      "tool": null,
+      "produces": "a pack written by hand from public sources, with per-record source and confidence",
+      "note": "The lane every pack in this repository came through: an agent reading public sources and writing JSON. It is not repeatable by machine and there is no extractor code behind it, which is exactly the gap the other lanes close. No new pack should use this lane."
+    },
+    "document": {
+      "built": true,
+      "tool": "tools/ingest/lane-document.mjs",
+      "produces": "candidate records from a named published document, each with a page locator and a verbatim quote",
+      "note": "Named documents for a named purpose. It never writes a pack: it writes candidates that a person reads and promotes with tools/ingest/promote.mjs."
+    },
+    "contribution": {
+      "built": true,
+      "tool": "tools/ingest/lane-contribution.mjs",
+      "produces": "contributed records with attribution, consent, visibility and a coarsened location",
+      "note": "Normalises an intake batch into envelope records. Which lanes in docs/PARTICIPATION.md open first, and the consent wording, are the owner's call and are not built here."
+    },
+    "era": {
+      "built": false,
+      "tool": "tools/ingest/lane-era.mjs",
+      "produces": "nothing yet",
+      "reason": "Deliberately not built. A historical layer needs georeferenced historical maps and aerial photography, and this project has none in hand. Guessing a coastline for 1896 would put a fabricated island under a real event, which is worse than an honest gap."
+    },
+    "scenario": {
+      "built": "partial",
+      "tool": "tools/ingest/lane-scenario.mjs",
+      "produces": "a scenario definition stamped with the seed and the pack fingerprint so it replays",
+      "note": "The stamping half is built, because it is registry work. Running a scenario and writing its report belongs to the scenario system, not to ingest."
+    }
+  },
+  "documents": {
+    "rcc-properly-made-submission": {
+      "id": "rcc-properly-made-submission",
+      "title": "Making a properly made submission, fact sheet",
+      "publisher": "Redland City Council",
+      "published": "",
+      "kind": "pdf",
+      "local_path": "C:/Users/sbt41/OneDrive/Documents/Sorting_Files/RCC/RCC_fact_sheet_-_making_a_properly_made_submission.pdf",
+      "in_repo": false,
+      "pages": 1,
+      "sha256": "9fb83130f731faf4cf7bc155d11271e750538ee4d32ed00657f5e8f42392cc59",
+      "read_on": "2026-08-09",
+      "licence_note": "A public document held by its publisher. This repository records where the copy that was read lives and what it says, and does not republish it."
+    },
+    "rcc-city-plan-v13": {
+      "id": "rcc-city-plan-v13",
+      "title": "Redland City Plan version 13",
+      "publisher": "Redland City Council",
+      "published": "",
+      "kind": "pdf",
+      "local_path": "C:/Users/sbt41/OneDrive/Documents/Sorting_Files/RCC/RCC_redland_city_plan_version_13.pdf",
+      "in_repo": false,
+      "pages": 484,
+      "sha256": "899417864b4fbb0f5e8bd5157c37b5007cadb2e2f078fb1d5c2285962d86310b",
+      "read_on": "2026-08-09",
+      "licence_note": "A public document held by its publisher. This repository records where the copy that was read lives and what it says, and does not republish it."
+    }
+  },
+  "packs": [
+    {
+      "id": "businesses",
+      "file": "data/businesses.json",
+      "version": "1.0.0",
+      "lane": "research",
+      "envelope": "legacy",
+      "pack_status": "committed",
+      "sources": [
+        "operator-websites",
+        "rcc-listings",
+        "owner-corrections"
+      ],
+      "ingested_at": "2026-08-06",
+      "extractor": {
+        "id": "agent-research",
+        "version": "2026-08"
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "108e49ec115e673c2e2e6528de3cb140d70997e41316a3532ab0c01ed2d02a20"
+      },
+      "bytes": 137699,
+      "records": 101,
+      "confidence": {
+        "high": 46,
+        "medium": 36,
+        "low": 19,
+        "unrated": 0
+      },
+      "collections": [
+        {
+          "path": "businesses",
+          "records": 101
+        }
+      ],
+      "player_facing_collections": [
+        "businesses"
+      ],
+      "accepted_debt": {
+        "missing_source": 0,
+        "missing_confidence": 0,
+        "low_in_player_collection": 19
+      },
+      "note": "Real operating businesses and organisations. Luke's own corrections are folded in with a note explaining why, so a later agent does not re-add a closed business from a stale listing."
+    },
+    {
+      "id": "civic",
+      "file": "data/civic.json",
+      "version": "1.0.0",
+      "lane": "research",
+      "envelope": "legacy",
+      "pack_status": "committed",
+      "sources": [
+        "rcc-publications",
+        "qld-legislation",
+        "qao-reports",
+        "abs"
+      ],
+      "ingested_at": "2026-08-07",
+      "extractor": {
+        "id": "agent-research",
+        "version": "2026-08"
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "e5587cee9c3e75a95a38ad15cc481dd0fdcddc222a69177dacda66c6e6923d01"
+      },
+      "bytes": 164054,
+      "records": 187,
+      "confidence": {
+        "high": 47,
+        "medium": 59,
+        "low": 52,
+        "unrated": 29
+      },
+      "collections": [
+        {
+          "path": "institutions",
+          "records": 19
+        },
+        {
+          "path": "instruments",
+          "records": 14
+        },
+        {
+          "path": "interest_groups",
+          "records": 19
+        },
+        {
+          "path": "issues",
+          "records": 23
+        },
+        {
+          "path": "levers",
+          "records": 62
+        },
+        {
+          "path": "metrics",
+          "records": 50
+        }
+      ],
+      "player_facing_collections": [
+        "levers",
+        "issues",
+        "institutions",
+        "instruments",
+        "interest_groups",
+        "metrics"
+      ],
+      "accepted_debt": {
+        "missing_source": 23,
+        "missing_confidence": 29,
+        "low_in_player_collection": 52
+      },
+      "note": "Council, agencies, instruments, 62 researched levers and 23 live issues. The levers carry who_decides, which is the part the civic board is built on."
+    },
+    {
+      "id": "ecology",
+      "file": "data/ecology.json",
+      "version": "1.0.0",
+      "lane": "research",
+      "envelope": "legacy",
+      "pack_status": "committed",
+      "sources": [
+        "qld-parks",
+        "detsi",
+        "peer-reviewed",
+        "rcc-koala-plan"
+      ],
+      "ingested_at": "2026-08-06",
+      "extractor": {
+        "id": "agent-research",
+        "version": "2026-08"
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "bea43e5b2a0c297f883bf031b68e2ed3ba2223f8033ded650716fced13077db2"
+      },
+      "bytes": 130950,
+      "records": 105,
+      "confidence": {
+        "high": 0,
+        "medium": 5,
+        "low": 1,
+        "unrated": 99
+      },
+      "collections": [
+        {
+          "path": "habitats",
+          "records": 16
+        },
+        {
+          "path": "habitats[].members",
+          "records": 6
+        },
+        {
+          "path": "plants",
+          "records": 14
+        },
+        {
+          "path": "processes",
+          "records": 9
+        },
+        {
+          "path": "species",
+          "records": 51
+        },
+        {
+          "path": "weeds",
+          "records": 9
+        }
+      ],
+      "player_facing_collections": [
+        "species",
+        "habitats",
+        "plants",
+        "weeds"
+      ],
+      "accepted_debt": {
+        "missing_source": 7,
+        "missing_confidence": 99,
+        "low_in_player_collection": 2
+      },
+      "note": "Species, habitats, seasonal behaviour and thresholds. Three records carry a handling_rule that blocks them from player-facing copy; src/world/data.js now executes that field."
+    },
+    {
+      "id": "events",
+      "file": "data/events.json",
+      "version": "1.0.0",
+      "lane": "research",
+      "envelope": "legacy",
+      "pack_status": "committed",
+      "sources": [
+        "event-organiser-listings",
+        "rcc-events-strategy"
+      ],
+      "ingested_at": "2026-08-07",
+      "extractor": {
+        "id": "agent-research",
+        "version": "2026-08"
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "3c7127e4cc06affe3cf530142aacbd36bf06c00f5f6891e3c905eaaa0c54bf6b"
+      },
+      "bytes": 133135,
+      "records": 51,
+      "confidence": {
+        "high": 18,
+        "medium": 20,
+        "low": 3,
+        "unrated": 10
+      },
+      "collections": [
+        {
+          "path": "events",
+          "records": 27
+        },
+        {
+          "path": "periods",
+          "records": 5
+        },
+        {
+          "path": "rhythms",
+          "records": 9
+        },
+        {
+          "path": "visitor_archetypes",
+          "records": 10
+        }
+      ],
+      "player_facing_collections": [
+        "events",
+        "periods",
+        "rhythms"
+      ],
+      "accepted_debt": {
+        "missing_source": 10,
+        "missing_confidence": 10,
+        "low_in_player_collection": 3
+      },
+      "note": "Real recurring events and festivals as civic load: dates, crowds, ferries, bins and money. The left_out block records what was deliberately not written into the pack."
+    },
+    {
+      "id": "geography",
+      "file": "data/geography.json",
+      "version": "1.0.0",
+      "lane": "research",
+      "envelope": "legacy",
+      "pack_status": "committed",
+      "sources": [
+        "osm",
+        "aster-gdem",
+        "qld-globe"
+      ],
+      "ingested_at": "2026-08-06",
+      "extractor": {
+        "id": "agent-research",
+        "version": "2026-08"
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "7d1f5d58187fe87d37ab76037dea2b1b2445479b1de4ffa72e6c3962e979e041"
+      },
+      "bytes": 223304,
+      "records": 101,
+      "confidence": {
+        "high": 29,
+        "medium": 35,
+        "low": 23,
+        "unrated": 14
+      },
+      "collections": [
+        {
+          "path": "coastline.landmarks",
+          "records": 14
+        },
+        {
+          "path": "elevation_points",
+          "records": 17
+        },
+        {
+          "path": "protected_areas",
+          "records": 4
+        },
+        {
+          "path": "rehabilitation_areas",
+          "records": 5
+        },
+        {
+          "path": "roads",
+          "records": 46
+        },
+        {
+          "path": "vegetation_zones",
+          "records": 8
+        },
+        {
+          "path": "water_bodies",
+          "records": 7
+        }
+      ],
+      "player_facing_collections": [
+        "roads",
+        "water_bodies",
+        "protected_areas",
+        "coastline.landmarks"
+      ],
+      "accepted_debt": {
+        "missing_source": 0,
+        "missing_confidence": 14,
+        "low_in_player_collection": 5
+      },
+      "note": "Coastline, elevation control points, roads, lakes and vegetation zones. The island geometry in this pack is the strongest single asset in the repository and it came from outside the owner's document corpus, which holds no GIS at all."
+    },
+    {
+      "id": "lore",
+      "file": "data/lore.json",
+      "version": "0.1.0",
+      "lane": "research",
+      "envelope": "legacy",
+      "pack_status": "not_reviewed_by_traditional_owners",
+      "sources": [
+        "qyac-briefing-2015",
+        "qyac-sustainability",
+        "nsi-museum-language-map",
+        "qpws",
+        "federal-court"
+      ],
+      "ingested_at": "2026-08-07",
+      "extractor": {
+        "id": "agent-research",
+        "version": "2026-08"
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "0d3e65ceee59c1711b729c81a83a669f96ba1f17e6c36acb139111ed12b016d0"
+      },
+      "bytes": 72593,
+      "records": 40,
+      "confidence": {
+        "high": 19,
+        "medium": 8,
+        "low": 0,
+        "unrated": 13
+      },
+      "collections": [
+        {
+          "path": "history.timeline",
+          "records": 14
+        },
+        {
+          "path": "native_title.agreements",
+          "records": 2
+        },
+        {
+          "path": "native_title.determinations",
+          "records": 2
+        },
+        {
+          "path": "native_title.pending",
+          "records": 1
+        },
+        {
+          "path": "peoples.clans.groups",
+          "records": 3
+        },
+        {
+          "path": "prohibitions.rules",
+          "records": 13
+        },
+        {
+          "path": "qyac_public_positions.positions",
+          "records": 5
+        }
+      ],
+      "player_facing_collections": [
+        "language.allowlist",
+        "history.timeline",
+        "qyac_public_positions.positions"
+      ],
+      "accepted_debt": {
+        "missing_source": 3,
+        "missing_confidence": 13,
+        "low_in_player_collection": 0
+      },
+      "note": "Acknowledgement, protocol notes, cultural guidance and its sources, plus the thirteen prohibitions this gate executes. QYAC has not seen this project and the pack says so."
+    },
+    {
+      "id": "narrative",
+      "file": "data/narrative.json",
+      "version": "1.0.0",
+      "lane": "research",
+      "envelope": "legacy",
+      "pack_status": "committed",
+      "sources": [
+        "island-pattern-observation",
+        "other-packs"
+      ],
+      "ingested_at": "2026-08-07",
+      "extractor": {
+        "id": "agent-research",
+        "version": "2026-08"
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "6141964e9dfb0037e6bc3101155b6b42a9bc56dc9cfb731eb4ed49550a70580d"
+      },
+      "bytes": 454992,
+      "records": 211,
+      "confidence": {
+        "high": 22,
+        "medium": 11,
+        "low": 3,
+        "unrated": 175
+      },
+      "collections": [
+        {
+          "path": "beat_grammar.stages",
+          "records": 5
+        },
+        {
+          "path": "cast_model.roles",
+          "records": 25
+        },
+        {
+          "path": "director.selection.score_terms",
+          "records": 7
+        },
+        {
+          "path": "registers",
+          "records": 10
+        },
+        {
+          "path": "relationship_model.change_rules",
+          "records": 10
+        },
+        {
+          "path": "relationship_model.dimensions",
+          "records": 4
+        },
+        {
+          "path": "seeds",
+          "records": 36
+        },
+        {
+          "path": "seeds[].branches[].options",
+          "records": 114
+        }
+      ],
+      "player_facing_collections": [
+        "seeds",
+        "registers"
+      ],
+      "accepted_debt": {
+        "missing_source": 175,
+        "missing_confidence": 175,
+        "low_in_player_collection": 3
+      },
+      "note": "Drama beats, character seeds and storyline grammar. Wave 7 removed five invented season names from 28 seeds here; the check that would have caught it is now no-banned-tokens."
+    },
+    {
+      "id": "places",
+      "file": "data/places.json",
+      "version": "0.1.0",
+      "lane": "research",
+      "envelope": "legacy",
+      "pack_status": "committed",
+      "sources": [
+        "osm",
+        "qld-parks",
+        "nsi-museum",
+        "repo-events-engine",
+        "repo-plfc-kmz"
+      ],
+      "ingested_at": "2026-08-06",
+      "extractor": {
+        "id": "agent-research",
+        "version": "2026-08"
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "d90a777b3070a844224b4a6cc4d7db09acbad1a2452008f3006e827cc07f3755"
+      },
+      "bytes": 68736,
+      "records": 58,
+      "confidence": {
+        "high": 51,
+        "medium": 5,
+        "low": 2,
+        "unrated": 0
+      },
+      "collections": [
+        {
+          "path": "places",
+          "records": 58
+        }
+      ],
+      "player_facing_collections": [
+        "places"
+      ],
+      "accepted_debt": {
+        "missing_source": 0,
+        "missing_confidence": 0,
+        "low_in_player_collection": 2
+      },
+      "note": "Named places with coordinates, two confidence fields per record: whether the place exists under that name, and how precise the coordinate is. Carries its own source_registry."
+    },
+    {
+      "id": "residents",
+      "file": "data/residents.json",
+      "version": "1.0.0",
+      "lane": "research",
+      "envelope": "legacy",
+      "pack_status": "committed",
+      "sources": [
+        "abs-census-2021",
+        "qld-employment-data"
+      ],
+      "ingested_at": "2026-08-06",
+      "extractor": {
+        "id": "agent-research",
+        "version": "2026-08"
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "1513a09894ac90ac5f6f2d2e0ecef8b7776c89e3295acfb3ce831496328aa8c6"
+      },
+      "bytes": 237303,
+      "records": 98,
+      "confidence": {
+        "high": 17,
+        "medium": 68,
+        "low": 13,
+        "unrated": 0
+      },
+      "collections": [
+        {
+          "path": "census_baseline.townships",
+          "records": 3
+        },
+        {
+          "path": "household_archetypes",
+          "records": 30
+        },
+        {
+          "path": "interest_groups",
+          "records": 13
+        },
+        {
+          "path": "occupations",
+          "records": 43
+        },
+        {
+          "path": "visitor_archetypes",
+          "records": 9
+        }
+      ],
+      "player_facing_collections": [
+        "occupations",
+        "interest_groups"
+      ],
+      "accepted_debt": {
+        "missing_source": 0,
+        "missing_confidence": 0,
+        "low_in_player_collection": 4
+      },
+      "note": "Household archetypes, occupations, name pools and the census baseline. No person and no household carries an Aboriginality field: see docs/CULTURAL-REVIEW.md R2."
+    },
+    {
+      "id": "soundscape",
+      "file": "data/soundscape.json",
+      "version": "1.0.0",
+      "lane": "research",
+      "envelope": "legacy",
+      "pack_status": "committed",
+      "sources": [
+        "ecology-pack",
+        "field-recordings-cited"
+      ],
+      "ingested_at": "2026-08-08",
+      "extractor": {
+        "id": "agent-research",
+        "version": "2026-08"
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "8d47db3629047ec1b85a59a6f724d5dcec3cdc7225bdfd4bb69c11fb6a35ad06"
+      },
+      "bytes": 17890,
+      "records": 40,
+      "confidence": {
+        "high": 27,
+        "medium": 3,
+        "low": 5,
+        "unrated": 5
+      },
+      "collections": [
+        {
+          "path": "buses",
+          "records": 5
+        },
+        {
+          "path": "voices",
+          "records": 35
+        }
+      ],
+      "player_facing_collections": [
+        "voices"
+      ],
+      "accepted_debt": {
+        "missing_source": 5,
+        "missing_confidence": 5,
+        "low_in_player_collection": 5
+      },
+      "note": "Every voice the island can make, and where the claim it belongs here comes from."
+    },
+    {
+      "id": "subterranean",
+      "file": "data/subterranean.json",
+      "version": "1.0.0",
+      "lane": "research",
+      "envelope": "legacy",
+      "pack_status": "proposed",
+      "sources": [
+        "owner-repos",
+        "textbook-chemistry",
+        "industry-practice"
+      ],
+      "ingested_at": "2026-08-07",
+      "extractor": {
+        "id": "agent-research",
+        "version": "2026-08"
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "d6f1e5f23a0dd22b0bf9fe0d6d33ac9797b62d35d698e759d2200f5098b68b7e"
+      },
+      "bytes": 202882,
+      "records": 292,
+      "confidence": {
+        "high": 38,
+        "medium": 23,
+        "low": 16,
+        "unrated": 215
+      },
+      "collections": [
+        {
+          "path": "buildings",
+          "records": 43
+        },
+        {
+          "path": "closed_loops",
+          "records": 6
+        },
+        {
+          "path": "processes",
+          "records": 77
+        },
+        {
+          "path": "reality_gates",
+          "records": 12
+        },
+        {
+          "path": "resources",
+          "records": 150
+        },
+        {
+          "path": "tech_tree",
+          "records": 4
+        }
+      ],
+      "player_facing_collections": [
+        "buildings",
+        "processes",
+        "tech_tree",
+        "reality_gates"
+      ],
+      "accepted_debt": {
+        "missing_source": 214,
+        "missing_confidence": 215,
+        "low_in_player_collection": 16
+      },
+      "note": "The below-sand works. The pack is marked proposed at the top level and nothing in it is built, approved, funded, sited or consented. Its resources block is a materials table, not a set of claims about this island, which is why 150 of its records carry no source."
+    },
+    {
+      "id": "transport",
+      "file": "data/transport.json",
+      "version": "1.0.0",
+      "lane": "research",
+      "envelope": "legacy",
+      "pack_status": "committed",
+      "sources": [
+        "operator-timetables",
+        "translink",
+        "rcc-transport-strategy"
+      ],
+      "ingested_at": "2026-08-07",
+      "extractor": {
+        "id": "agent-research",
+        "version": "2026-08"
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "60ebce856d7131d44503aadd5e03f2e2e4400364a6238f98434b2a7b5b78b400"
+      },
+      "bytes": 116243,
+      "records": 72,
+      "confidence": {
+        "high": 41,
+        "medium": 13,
+        "low": 7,
+        "unrated": 11
+      },
+      "collections": [
+        {
+          "path": "emergency_transport.assets",
+          "records": 3
+        },
+        {
+          "path": "emergency_transport.transfer_paths",
+          "records": 4
+        },
+        {
+          "path": "parking",
+          "records": 3
+        },
+        {
+          "path": "projects",
+          "records": 2
+        },
+        {
+          "path": "road_segments",
+          "records": 14
+        },
+        {
+          "path": "scenarios",
+          "records": 1
+        },
+        {
+          "path": "services",
+          "records": 12
+        },
+        {
+          "path": "services[].capacity.vessels",
+          "records": 4
+        },
+        {
+          "path": "services[].queue_model.stages",
+          "records": 9
+        },
+        {
+          "path": "services[].schedule.seasonal_variants",
+          "records": 2
+        },
+        {
+          "path": "services[].schedule.variants",
+          "records": 4
+        },
+        {
+          "path": "structural_facts",
+          "records": 8
+        },
+        {
+          "path": "terminals",
+          "records": 6
+        }
+      ],
+      "player_facing_collections": [
+        "services",
+        "terminals",
+        "road_segments",
+        "parking",
+        "projects"
+      ],
+      "accepted_debt": {
+        "missing_source": 22,
+        "missing_confidence": 11,
+        "low_in_player_collection": 3
+      },
+      "note": "Ferries, barges, buses, roads, parking and capacity, with its own source_registry and confidence scale. The barge timetable is committed data and never a live feed."
+    }
+  ]
+}

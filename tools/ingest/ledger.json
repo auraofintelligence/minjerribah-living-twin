@@ -1,0 +1,153 @@
+{
+  "about": "The accepted-debt ledger. Every entry is a judgement somebody made once, in writing, with a reason, and the gate holds the repository to the count that was agreed. A count that grows fails the gate and names the new line. Nothing here is a permission; it is a record that a specific number of specific hits were looked at on a specific day and found to be what they claim to be.",
+  "how_to_use": "Do not add an entry to make a failure go away. Read the finding first. Most token hits under the cultural rules are the prohibition being stated or enforced, and those belong here. A hit that is the thing the rule forbids belongs in a deletion, not here.",
+  "reviewed_on": "2026-08-10",
+  "reviewed_by": "the ingest spine pass, wave 8",
+  "accepted": [
+    {
+      "check": "no-invented-ceremony",
+      "file": "data/events.json",
+      "token": "ceremony",
+      "count": 6,
+      "reason": "The events pack uses the word correctly, in its own notes, to record what has deliberately been left out: the named days within the Quandamooka Festival season, and the absence of any local NAIDOC programme. src/ui/panels/events.js substitutes the word before any of those notes reaches a screen. See docs/CULTURAL-REVIEW.md G2."
+    },
+    {
+      "check": "no-invented-ceremony",
+      "file": "data/narrative.json",
+      "token": "ceremony",
+      "count": 3,
+      "reason": "Three statements of the rule inside the pack's own tone guide and cultural_care block, each saying that no seed generates it."
+    },
+    {
+      "check": "no-invented-ceremony",
+      "file": "data/narrative.json",
+      "token": "sacred site",
+      "count": 1,
+      "reason": "One line in the pack's cultural_care statement listing what the pack does not contain."
+    },
+    {
+      "check": "no-invented-ceremony",
+      "file": "data/places.json",
+      "token": "ceremony",
+      "count": 1,
+      "reason": "The pack's cultural_care note, stating that no story, ceremony or site significance is invented."
+    },
+    {
+      "check": "no-invented-ceremony",
+      "file": "data/residents.json",
+      "token": "ceremony",
+      "count": 1,
+      "reason": "The pack's honesty note, stating that nothing cultural is asserted about the households it models."
+    },
+    {
+      "check": "no-invented-ceremony",
+      "file": "data/soundscape.json",
+      "token": "ceremony",
+      "count": 2,
+      "reason": "The pack's no_cultural_sound note, stating that nothing in it refers to Quandamooka song or cultural performance, and pointing at the rule by name."
+    },
+    {
+      "check": "no-invented-ceremony",
+      "file": "src/audio/audio.js",
+      "token": "ceremony",
+      "count": 2,
+      "reason": "The file's cultural care header, stating what the audio system is not and citing the rule."
+    },
+    {
+      "check": "no-invented-ceremony",
+      "file": "src/systems/narrative/chronicle.js",
+      "token": "ceremony",
+      "count": 2,
+      "reason": "The chronicle's own guard. CEREMONY_TOKENS is the list it greps every published line against, so it has to contain the words in order to refuse them."
+    },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/chronicle.js", "token": "ceremonial", "count": 1, "reason": "The chronicle's own guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/chronicle.js", "token": "corroboree", "count": 1, "reason": "The chronicle's own guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/chronicle.js", "token": "dreaming", "count": 1, "reason": "The chronicle's own guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/chronicle.js", "token": "dreamtime", "count": 1, "reason": "The chronicle's own guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/chronicle.js", "token": "initiation", "count": 1, "reason": "The chronicle's own guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/chronicle.js", "token": "sacred site", "count": 1, "reason": "The chronicle's own guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/chronicle.js", "token": "songline", "count": 1, "reason": "The chronicle's own guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/chronicle.js", "token": "sorry business", "count": 1, "reason": "The chronicle's own guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/chronicle.js", "token": "totem", "count": 1, "reason": "The chronicle's own guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/chronicle.js", "token": "welcome to country", "count": 1, "reason": "The chronicle's own guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/director.js", "token": "ceremony", "count": 2, "reason": "The director's matching guard list, and the comment above it." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/director.js", "token": "ceremonial", "count": 1, "reason": "The director's guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/director.js", "token": "corroboree", "count": 1, "reason": "The director's guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/director.js", "token": "initiation", "count": 1, "reason": "The director's guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/director.js", "token": "songline", "count": 1, "reason": "The director's guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/director.js", "token": "totem", "count": 1, "reason": "The director's guard list." },
+    { "check": "no-invented-ceremony", "file": "src/systems/narrative/director.js", "token": "welcome to country", "count": 1, "reason": "The director's guard list." },
+    {
+      "check": "no-invented-ceremony",
+      "file": "src/ui/panels/events.js",
+      "token": "ceremony",
+      "count": 1,
+      "reason": "The substitution table itself. This panel is the reason the word never reaches a screen; it has to name the word to replace it. docs/CULTURAL-REVIEW.md G2 asks whether substituting is the right call at all."
+    },
+    {
+      "check": "no-invented-ceremony",
+      "file": "src/ui/panels/onboarding.js",
+      "token": "welcome to country",
+      "count": 1,
+      "reason": "A comment explaining the difference between a Welcome, which is given by Traditional Owners, and an acknowledgement, which is what this project gives."
+    },
+    {
+      "check": "no-sacred-or-restricted-sites",
+      "file": "data/ecology.json",
+      "token": "sacred",
+      "count": 2,
+      "reason": "The aquifer record's community_concern field and its source, quoting a Redland City Bulletin headline about residents fearing lagoons drying. It reports a published community concern, names no place, carries no coordinate and takes no position. It is the closest thing in the packs to a live question rather than a settled one, and it is named in the wave 8 handover for a cultural reviewer to look at, because it is a word that could reach a player through an ecology readout."
+    }
+  ],
+  "no_accepted_spellings": "There is deliberately no australian-english entry here. Every American spelling the check found on 10 August 2026 turned out to be a device meter, behind-the-meter solar, or the Australian Labor Party, so the patterns were narrowed until the check was right rather than the hits accepted. A spelling finding should be fixed, not ledgered.",
+  "pointers": [
+    {
+      "check": "no-aboriginal-characters-with-invented-culture",
+      "file": "data/residents.json",
+      "pointer": "census_baseline.island.indigenous",
+      "reason": "The published Australian Bureau of Statistics proportion for the island at the 2021 census. It is an aggregate fact about a place, not a field on a person. The prohibition is about assigning Aboriginality to a simulated resident, and no resident or household in this build carries such a field; see docs/CULTURAL-REVIEW.md R2. Removing the census figure would falsify the townships, which is the opposite of what the rule protects."
+    },
+    {
+      "check": "no-aboriginal-characters-with-invented-culture",
+      "file": "data/residents.json",
+      "pointer": "census_baseline.townships[0].indigenous",
+      "reason": "Published ABS census proportion for a township. An aggregate fact about a place, not a field on a person."
+    },
+    {
+      "check": "no-aboriginal-characters-with-invented-culture",
+      "file": "data/residents.json",
+      "pointer": "census_baseline.townships[1].indigenous",
+      "reason": "Published ABS census proportion for a township. An aggregate fact about a place, not a field on a person."
+    },
+    {
+      "check": "no-aboriginal-characters-with-invented-culture",
+      "file": "data/residents.json",
+      "pointer": "census_baseline.townships[2].indigenous",
+      "reason": "Published ABS census proportion for a township. An aggregate fact about a place, not a field on a person."
+    },
+    {
+      "check": "status-vocabulary",
+      "file": "data/ecology.json",
+      "pointer": "processes[2]",
+      "reason": "The status field holds a paragraph of legal status rather than a record status: the erosion-prone area declaration and the shoreline erosion management plan. It is accurate prose in the wrong field, so src/world/data.js cannot classify it and the record renders with no marker. The fix belongs to whoever owns the ecology pack: move the paragraph to legal_status and put a classifiable word in status. Held at one so nothing else joins it."
+    },
+    {
+      "check": "status-vocabulary",
+      "file": "data/transport.json",
+      "pointer": "scenarios[0]",
+      "reason": "status holds the sentence MODELLED. Not measured. Read the inputs table before using any number here. Same fault as the ecology one: an honest sentence in a field that is supposed to be a word."
+    },
+    {
+      "check": "status-vocabulary",
+      "file": "data/transport.json",
+      "pointer": "projects[0]",
+      "reason": "status holds a sentence describing a funded concept design with consultation closed. This is the one of the four worth acting on first: it is a real proposal that the runtime cannot tell is a proposal, so it renders without the Proposed marker. Named in the wave 8 handover."
+    },
+    {
+      "check": "status-vocabulary",
+      "file": "data/transport.json",
+      "pointer": "projects[1]",
+      "reason": "status holds a sentence describing a development partner withdrawing while the priority development area stays in place. Same fault as projects[0], and the same consequence: a proposal with no marker."
+    }
+  ]
+}
