@@ -112,10 +112,38 @@ models. Highest value:
 - `RCC_shapingseq-2023-Low.pdf` and `QLD-ministers-guidelines-and-rules-book2020.pdf`: the state
   instruments above the city plan, including the statutory process for amending a scheme.
 
+**Read RCC with its counterpart, because the pair is the civic layer's spine.** RCC is the system as
+it exists: how funding, planning and decisions actually work today. Its counterpart is
+`SORT\Local_Government_Funding_Inquiry_Submission.md`, which is where the owner's plan diverges from
+that system and introduces the C-hour. It opens by diagnosing local government's structural deficit
+as an incomplete ledger, then proposes the community sovereign wealth fund, a regenerative asset
+carve-out, sovereign digital twins of council assets, and the L0 to L2 governance topology. Read
+alone, RCC teaches the twin how councils work. Read alone, the submission is a proposal with no
+ground under it. Read together, they give the civic layer both halves: the existing constraint and
+the specific point where the proposed alternative enters. That divergence point is the thing worth
+simulating, and `docs/DIRECTION.md` §The economic layer is where its mechanics are already written
+down.
+
+**The tool that would read RCC properly does not exist yet.** Two plans for a legal retrieval system
+over these statutes sit in the corpus, `SORT\Legal_RAG_LLM_Plan_AUS-QLD-Redlands.md` and
+`SORT\Building_an_Australian_Legal_RAG_System.md`, and neither has been built. Do not cite either as
+though a working system stands behind it. For this twin the honest use of RCC is direct extraction
+into fact-checked data packs, the same as every other pack: pull the island lines, cite the document
+and page, carry a confidence rating. A retrieval system is a separate project, not a prerequisite.
+
 **`02_Processed_MD\PDFs_to_Sort`, 262 to 300 markdown files.** The main body: island entity
 ecosystems, the everything-app blueprints, subterranean and sand works, island clubs and events,
 council engagement, narrative and micro-drama engines, the braided economy. This is where most of
 the curated set above came from, and there is a great deal more of it.
+
+**This directory has not finished being cleaned, so keep a wave's diet narrow.** Conversion quality
+varies, some documents are duplicated under near-identical names, tables arrive flattened, and
+several files restate each other at different stages of the owner's thinking. Point a wave at named
+documents for a named purpose. Do not point one at the full architecture and ask it to synthesise:
+it will produce something confident and wrong, because the corpus contradicts itself in places by
+design, being years of thinking rather than a settled specification. The curated set above and the
+RCC directory are the clean paths in. When in doubt, ask the owner which document is current rather
+than inferring it from a file date.
 
 **`02_Processed_MD\PDFs_to_Sort_styled_claude`. Skip it.** Every one of its 86 top-level files is a
 duplicate of a file in `PDFs_to_Sort`, with zero unique content, plus a `_changes` folder of diffs.
@@ -178,5 +206,15 @@ These are not negotiable and they matter more than coverage.
 
 If a wave is choosing where to start, the highest return in the corpus is not more theory. It is
 `RCC`, because it converts the civic layer from plausible to sourced: real zones, a real disaster
-plan, a real species list, real budget structure, and a real submission process. Everything else here
-is design direction. That directory is evidence.
+plan, a real species list, real budget structure, and a real submission process. Most of the rest
+here is design direction. That directory is evidence.
+
+Then read `SORT\Local_Government_Funding_Inquiry_Submission.md` against it, because that is the
+single point where the owner's plan diverges from the system RCC describes. A civic simulation that
+models only the existing rules is an accurate museum. One that models only the proposal is a
+daydream. The twin's job is the join: show how the island runs under the rules as they are, then let
+a player run the divergence and watch what changes. That is the whole argument for building this
+thing, and both halves are now on disk.
+
+Take one narrow slice, source it properly, and let it be right. The corpus will still be there for
+the wave after.
