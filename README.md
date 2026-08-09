@@ -154,6 +154,8 @@ known traps, and what to do next.
 | `docs/CULTURAL-REVIEW.md` | Open questions for QYAC. Not approvals. |
 | `docs/DATA-NOTES.md` | What each data pack could not verify. |
 | `docs/CAPTURE-CONTRACT.md` | How real-world scanned assets arrive, what they contain, and what to decide before loading one. |
+| `docs/DIRECTION.md` | What this twin is, inside the larger body of work: the founding brief, where the twin sits, and the direction future waves follow. |
+| `docs/PARTICIPATION.md` | The contribution design, none of it built: the lanes, the trust spine, consent, and the floor. The direction the founding brief never contained. |
 
 ## Credit
 
