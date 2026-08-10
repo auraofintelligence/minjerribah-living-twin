@@ -315,6 +315,54 @@ async function main() {
         totalVertices: stage.scene.getTotalVertices()
       };
     },
+    /**
+     * What is between the pointer and the island.
+     *
+     * This exists because the same failure has now cost three rounds of guessing, and it is
+     * invisible by construction: an element with opacity 0 or a transparent background, sitting
+     * over the canvas with pointer-events auto, swallows every click while looking like nothing at
+     * all. The island appears frozen, the interface appears dead, and only the keyboard still
+     * works, because key handlers are on document and never meet the shield.
+     *
+     * Call it with no arguments to test the centre of the screen, or with a point.
+     * It names every element the pointer would hit before the canvas, and says which one is the
+     * culprit. Run it in your own browser and paste the answer: it is quicker than any description.
+     */
+    whatIsBlocking(x = Math.round(innerWidth / 2), y = Math.round(innerHeight / 2)) {
+      const stack = document.elementsFromPoint(x, y);
+      const canvasAt = stack.findIndex((e) => e.id === 'stage');
+      const rows = stack.slice(0, canvasAt < 0 ? 8 : canvasAt).map((e) => {
+        const cs = getComputedStyle(e);
+        const r = e.getBoundingClientRect();
+        const coverage = (r.width * r.height) / (innerWidth * innerHeight);
+        return {
+          el: e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') +
+              (e.className ? '.' + String(e.className).trim().split(/\s+/).join('.') : ''),
+          pointerEvents: cs.pointerEvents,
+          zIndex: cs.zIndex,
+          opacity: cs.opacity,
+          visibility: cs.visibility,
+          coversScreenPct: Math.round(coverage * 100),
+          // The signature of the bug: big, on top, takes clicks, and you cannot see it.
+          suspect: coverage > 0.5 && cs.pointerEvents !== 'none' &&
+                   (Number(cs.opacity) < 0.05 || cs.visibility === 'hidden')
+        };
+      });
+      const culprit = rows.find((r) => r.suspect) || rows[0] || null;
+      return {
+        point: { x, y },
+        canvasReached: canvasAt >= 0,
+        inTheWay: rows,
+        culprit: culprit ? culprit.el : null,
+        verdict: canvasAt === 0
+          ? 'nothing is in the way: the pointer reaches the island directly'
+          : canvasAt < 0
+            ? 'the island is not under this point at all'
+            : rows.some((r) => r.suspect)
+              ? 'an invisible element is swallowing clicks: see culprit'
+              : 'something is in the way but it is visible, so it is probably meant to be'
+      };
+    },
     version: '0.1.0'
   };
 
@@ -335,6 +383,26 @@ async function main() {
     });
     addEventListener('resize', () => stage.engine.resize());
   }
+  // Watch for click shields rather than waiting for somebody to report a dead interface.
+  //
+  // An element that covers the screen, sits above the canvas, takes pointer events and cannot be
+  // seen is the one failure in this build that gives a user no information at all: the island looks
+  // frozen and only the keyboard answers. It has happened three times, from three different files,
+  // so it is now checked rather than remembered. Cheap: a handful of elements, twice a second, and
+  // it stops the moment it has nothing to say.
+  if (!headless) {
+    let quiet = 0;
+    const watch = setInterval(() => {
+      const r = window.TWIN.whatIsBlocking();
+      const bad = r.inTheWay.filter((x) => x.suspect);
+      if (!bad.length) { if (++quiet > 20) clearInterval(watch); return; }
+      quiet = 0;
+      console.warn('[shield] an invisible element is swallowing clicks over the island:',
+        bad.map((b) => `${b.el} (z ${b.zIndex}, opacity ${b.opacity}, covers ${b.coversScreenPct}%)`).join(', '),
+        '\nRun TWIN.whatIsBlocking() for the full stack.');
+    }, 500);
+  }
+
   world.bus.emit('app:ready', {});
 }
 

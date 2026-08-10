@@ -103,25 +103,48 @@ export function representativePoint(geometry) {
 
 const NAME_NOISE = new Set(['the', 'a', 'an', 'of', 'and', 'at', 'on', 'in', 'inc', 'pty', 'ltd', 'co', 'qld']);
 
+/** Two spellings of the same word across the packs and the map. Declared, and deliberately short. */
+const NAME_SYNONYMS = [
+  [/\bcampgrounds?\b/g, 'camping ground'],
+  [/\bcar ?parks?\b/g, 'car park'],
+  [/\btoilets?\b/g, 'toilet'],
+  [/\bfoodworks\b/g, 'foodworks']
+];
+
 /** A name reduced to comparable tokens. Deterministic, and it never drops a word that carries a place. */
 export function nameTokens(name) {
-  return String(name)
+  let s = String(name)
     .toLowerCase()
     .replace(/&/g, ' and ')
     .replace(/[‘’']/g, '')
     .replace(/[^a-z0-9]+/g, ' ')
-    .trim()
-    .split(' ')
-    .filter((t) => t && !NAME_NOISE.has(t));
+    .trim();
+  for (const [rx, to] of NAME_SYNONYMS) s = s.replace(rx, to);
+  return s.split(' ').filter((t) => t && !NAME_NOISE.has(t));
+}
+
+/**
+ * The part of a placemark name that says what the thing is.
+ *
+ * This author uses a semicolon the way a signpost does: the thing, then where it is. "Bus Stop;
+ * Manta Lodge YHA" is a bus stop, not a lodge, and matching on the whole string paired it with
+ * `businesses/manta-lodge-scuba-centre` at a containment score of 0.85 and then offered to move the
+ * lodge to the bus stop. "Brown Lake; Picnic Area and Park" is Brown Lake. Taking the leading
+ * segment is the author's own convention read back, and the full name is kept on the record.
+ */
+export function matchName(name) {
+  const head = String(name).split(/\s*;\s*/)[0].trim();
+  return head.length >= 3 ? head : String(name).trim();
 }
 
 /**
  * How alike two names are, from 0 to 1.
  *
- * Jaccard over the token sets, lifted when one name contains the other whole. "Loaves Bakery" and
- * "Loaves Bakery" is 1. "FoodWorks Dunwich" and "Stradbroke Island FoodWorks" is low on Jaccard and
- * has to be, because "FoodWorks Point Lookout" is a different shop in a different township and a
- * matcher that merged them would put the wrong pin on the wrong building.
+ * Jaccard over the token sets, lifted when one name contains the other whole. The lift is the part
+ * that needs guarding: a single shared token is contained in everything. "Dunwich" is inside
+ * "Dunwich RSL", "Dunwich Post Office" and "Dunwich Police Station", and an unguarded containment
+ * score of 0.85 had this lane offering to move the township of Dunwich to the post office. So the
+ * lift only applies when the shorter name is at least two words long.
  */
 export function nameScore(a, b) {
   const A = new Set(nameTokens(a));
@@ -130,14 +153,34 @@ export function nameScore(a, b) {
   let shared = 0;
   for (const t of A) if (B.has(t)) shared++;
   const jaccard = shared / (A.size + B.size - shared);
-  const containment = shared / Math.min(A.size, B.size);
-  return Math.max(jaccard, containment * 0.85);
+  const smaller = Math.min(A.size, B.size);
+  const containment = smaller >= 2 ? (shared / smaller) * 0.85 : 0;
+  return Math.max(jaccard, containment);
 }
+
+/**
+ * Feature types whose recorded coordinate is a representative point rather than a doorway.
+ *
+ * A beach is 600 m long and a national park is 27 km. A pin 140 m along Main Beach does not correct
+ * `places/main-beach`; it corroborates it. Getting this wrong turned twelve honest corroborations
+ * into corrections, which is the sort of report that trains a reader to stop believing the column.
+ */
+const EXTENDED_TYPES = new Set([
+  'township', 'beach', 'lake', 'national_park', 'conservation_park', 'headland', 'gorge', 'walk',
+  'campground', 'beach_camping', 'spring', 'rock', 'park', 'hazard_zone', 'sports_field', 'cemetery',
+  'historic_site', 'lighthouse', 'lookout', 'mine_rehabilitation_area', 'water_body'
+]);
 
 const STRONG_NAME = 0.55;
 const WEAK_NAME = 0.30;
 const SAME_SPOT_M = 75;
+const SAME_EXTENDED_M = 600;
 const NEAR_SPOT_M = 600;
+const WEAK_CLOSE_M = 80;
+
+function sameSpotTolerance(record) {
+  return EXTENDED_TYPES.has(String(record.type || '').toLowerCase()) ? SAME_EXTENDED_M : SAME_SPOT_M;
+}
 
 // ------------------------------------------------------------------------------------------------
 // The screens
@@ -175,13 +218,38 @@ function hitsCulturalToken(text, tokens) {
   return null;
 }
 
+/** Is a lat/lon inside a KML ring? Ray casting, in lon/lat space, which is fine at this scale. */
+export function pointInRing(point, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0];
+    const yi = ring[i][1];
+    const xj = ring[j][0];
+    const yj = ring[j][1];
+    const crosses = (yi > point.lat) !== (yj > point.lat)
+      && point.lon < ((xj - xi) * (point.lat - yi)) / (yj - yi) + xi;
+    if (crosses) inside = !inside;
+  }
+  return inside;
+}
+
+/** How close two placemarks have to be before they are drawings of the same thing. */
+const SAME_GROUND_M = 25;
+
 /**
  * What is held, and why.
  *
  * Two passes, because the second is the one that matters. The first finds the wording. The second
- * finds every other placemark drawn over the same ground, within 150 m, and holds that too: the
- * harm the sacred-sites prohibition names is publishing a location, and a polygon that outlines the
- * clearing a held pin sits in publishes exactly that location under a different label.
+ * finds every other placemark drawn over the same ground and holds that too: the harm the
+ * sacred-sites prohibition names is publishing a location, and a polygon outlining the clearing a
+ * held pin sits in publishes exactly that location under a different label.
+ *
+ * "The same ground" is deliberately tight. Twenty five metres is about a hand's width on a web map
+ * at the zoom people draw at, and a point falling inside a held polygon is the same thing said
+ * geometrically. Anything looser starts holding the neighbours: an earlier draft used 150 m and held
+ * the whole waste transfer station, four real public facilities, because a proposal pinned nearby
+ * happened to contain a word. A screen that quietly swallows the street around it is not protecting
+ * anybody; it is just refusing more.
  */
 export function screenCulture(items, tokens) {
   const held = new Map(); // index -> { reason, token }
@@ -212,12 +280,17 @@ export function screenCulture(items, tokens) {
         if (!held.has(other.index)) continue;
         const q = representativePoint(other.geometry);
         if (!q) continue;
-        if (metresBetween(p, q) <= 150) {
+        const close = metresBetween(p, q) <= SAME_GROUND_M;
+        const inside = other.geometry && other.geometry.type === 'Polygon' && pointInRing(p, other.geometry.outer);
+        if (close || inside) {
           held.set(it.index, {
             reason: 'same-ground',
             token: null,
-            detail: 'it marks the same ground as a placemark held above, so publishing it would publish '
-              + 'that location under a different label'
+            detail: inside
+              ? 'its position falls inside a placemark held above, so publishing it would publish that '
+                + 'location under a different label'
+              : 'it marks the same ground as a placemark held above, within '
+                + `${SAME_GROUND_M} m, so publishing it would publish that location under a different label`
           });
           grew = true;
           break;
@@ -322,11 +395,33 @@ const DISPUTED_STATUS = new Set(['closed', 'closed-unconfirmed', 'trading-unconf
  * nothing else. Then status is checked, and a status disagreement promotes the verdict to CONFLICTS
  * whatever the position said, because that is the thing a reader most needs to see.
  */
+/**
+ * Is this placemark a proposal rather than an observation?
+ *
+ * The author marks his own proposals: every one of them is named "Dream Space" something, or is
+ * written in the first person about what a place could become. A proposal is not evidence about
+ * where anything is, so it never corrects and never conflicts with a sourced record. It names what
+ * it is about and stays marked proposed, forever, wherever it is rendered.
+ */
+export function isProposal(pin) {
+  return /^dream space/i.test(pin.name)
+    || /\bwould you like to\b|\bI imagine\b|\bI envision\b|\bcharacter overlay\b|\bI dream\b/i.test(pin.description || '');
+}
+
 export function reconcileOne(pin, records) {
   const p = pin.point;
+  const subject = matchName(pin.name);
   const scored = records.map((r) => {
-    let score = nameScore(pin.name, r.name);
-    for (const alias of r.aliases) score = Math.max(score, nameScore(pin.name, alias));
+    let score = nameScore(subject, r.name);
+    for (const alias of r.aliases) score = Math.max(score, nameScore(subject, alias));
+    // A township is the one type where a containing name means the opposite of a match: everything
+    // in Dunwich has Dunwich in its name. Nothing pairs with a township unless the names are the
+    // same words.
+    if (String(r.type).toLowerCase() === 'township') {
+      const A = nameTokens(subject).sort().join(' ');
+      const B = nameTokens(r.name).sort().join(' ');
+      score = A === B ? 1 : 0;
+    }
     const dist = (p && r.lat !== null && r.lon !== null) ? metresBetween(p, { lat: r.lat, lon: r.lon }) : null;
     return { record: r, score, dist };
   });
@@ -345,17 +440,26 @@ export function reconcileOne(pin, records) {
   const winsOn = [];
 
   const best = byName[0] || null;
+  // A weak name match standing on the same doorstep is the same thing under different wording.
+  // "FoodWorks Dunwich" against "Stradbroke Island FoodWorks", 15 m apart, is one shop.
+  const weakAndClose = byName
+    .filter((s) => s.dist !== null && s.dist <= WEAK_CLOSE_M)
+    .sort((a, b) => a.dist - b.dist)[0] || null;
+
   if (best && best.score >= STRONG_NAME) {
+    const tolerance = sameSpotTolerance(best.record);
     against = best;
     if (best.dist === null) {
       verdict = 'CORRECTS';
       winsOn.push('position');
       reason = `The name matches ${best.record.pack}/${best.record.id}, which carries no coordinate at all. `
         + 'His pin supplies the position that record has been missing.';
-    } else if (best.dist <= SAME_SPOT_M) {
+    } else if (best.dist <= tolerance) {
       verdict = 'CONFIRMS';
-      reason = `The name matches ${best.record.pack}/${best.record.id} and his pin is ${Math.round(best.dist)} m from it, `
-        + 'which is inside the precision either source claims.';
+      reason = `The name matches ${best.record.pack}/${best.record.id} and his pin is ${Math.round(best.dist)} m from it`
+        + (tolerance > SAME_SPOT_M
+          ? ', which is inside the extent of a feature whose recorded coordinate is one representative point.'
+          : ', which is inside the precision either source claims.');
     } else if (best.dist <= NEAR_SPOT_M) {
       verdict = 'CORRECTS';
       winsOn.push('position');
@@ -368,16 +472,35 @@ export function reconcileOne(pin, records) {
         + `${Math.round(best.dist)} m away, which is too far to be the same thing on an island where `
         + 'names repeat between townships. Treated as new and worth a person\'s eye.';
     }
-  } else if (best && nearest && best.record.id === nearest.record.id && nearest.dist !== null && nearest.dist <= 60) {
+  } else if (weakAndClose) {
     verdict = 'CONFIRMS';
-    against = best;
-    reason = `A partial name match to ${best.record.pack}/${best.record.id} and ${Math.round(nearest.dist)} m from it. `
-      + 'Same spot, different wording for the same thing.';
+    against = weakAndClose;
+    reason = `A partial name match to ${weakAndClose.record.pack}/${weakAndClose.record.id} and `
+      + `${Math.round(weakAndClose.dist)} m from it. Same spot, different wording for the same thing.`;
   } else {
     reason = nearest && nearest.dist !== null
       ? `Nothing in the packs matches this name. The nearest record of any kind is ${nearest.record.pack}/${nearest.record.id}, `
         + `${Math.round(nearest.dist)} m away, and it is a different thing.`
       : 'Nothing in the packs matches this name and nothing is near it.';
+  }
+
+  // A proposal is about a place; it is not evidence about where that place is. Whatever the names
+  // and the distances said above, the verdict is NEW and the match is recorded as what it is about.
+  if (isProposal(pin)) {
+    const about = against || nearest;
+    return {
+      verdict: 'NEW',
+      against: null,
+      about: about
+        ? { pack: about.record.pack, collection: about.record.collection, id: about.record.id, name: about.record.name }
+        : null,
+      distance_m: about && about.dist !== null && about.dist !== undefined ? Math.round(about.dist) : null,
+      wins_on: [],
+      reason: 'A proposal by the contributor, not an observation. It does not correct or contradict '
+        + (about ? `${about.record.pack}/${about.record.id}, which it is about. ` : 'anything in the packs. ')
+        + 'A plan never becomes a fact by being modelled, so it carries the Proposed marker wherever it '
+        + 'is rendered and nothing is applied anywhere from it.'
+    };
   }
 
   // The mine folder. His categories are evidence: a pin filed under "Private Mine Leases" asserts a
@@ -461,7 +584,7 @@ export function toRecord(pin, batch, reconciliation) {
     : { lat: pin.point.lat, lon: pin.point.lon, precision_m: 0, coarsened: false };
 
   const q = quoteText([pin.folder, pin.name, pin.description]);
-  const proposal = /^dream space/i.test(pin.name) || /\bwould you like to\b|\bI imagine\b|\bI envision\b|\bcharacter overlay\b/i.test(pin.description);
+  const proposal = isProposal(pin);
 
   const record = {
     id: `map-${slug(pin.folder)}-${slug(pin.name)}-${shortHash(`${pin.folder}|${pin.name}|${pin.index}`, 6)}`,
@@ -582,10 +705,19 @@ export function runLane(file, opts = {}) {
   for (const item of parsed.placemarks) {
     if (held.has(item.index)) {
       const h = held.get(item.index);
+      const carried = findContactDetails([item.name, item.description].join('\n'));
+      const heldId = `held-${shortHash(`${item.folder}|${item.name}|${item.index}`, 8)}`;
+      if (carried.length) {
+        out.stripped.push({
+          where: `held placemark ${heldId}`,
+          kinds: [...new Set(carried.map((x) => x.label))].sort(),
+          count: carried.length
+        });
+      }
       out.heldItems.push({
         // No name and no coordinate. A held item is held; a file that recorded what it was called and
         // where it was would be publishing the thing the hold exists to prevent.
-        id: `held-${shortHash(`${item.folder}|${item.name}|${item.index}`, 8)}`,
+        id: heldId,
         folder: item.folder,
         geometry: item.geometry ? item.geometry.type : 'none',
         reason: h.reason,
