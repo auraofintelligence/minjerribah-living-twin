@@ -1,0 +1,27 @@
+{
+  "_readme": "The shape a real observation arrives in, with every field a person has to fill before the emitter will write a sendable draft. It is deliberately shipped EMPTY: filling it in here would be fabricating a sighting, a person and a consent, and this repository does not do that. Copy it, fill it from something somebody actually saw, and run the emitter. It will list what is still missing.",
+  "kind": "twin-observation",
+  "origin": "observation",
+  "id": "",
+  "case_id": "",
+  "observed_by": "",
+  "contact_phone": "",
+  "observed_at": "",
+  "group": "",
+  "species": "",
+  "count": 1,
+  "status": "",
+  "cause": "",
+  "mobility": "",
+  "danger": "",
+  "urgency": "",
+  "place": "",
+  "lat": null,
+  "lng": null,
+  "notes": "",
+  "consent": {
+    "given": false,
+    "share_with": "",
+    "note": "The person who saw it says this may be passed on, to whom, and for what. Consent is per record and purpose-bound. It is not assumed and it is not inherited from a previous report."
+  }
+}

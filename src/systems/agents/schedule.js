@@ -13,7 +13,10 @@
 //   stopped the boats then somebody who crossed this morning does not come back tonight.
 //   The school. Dunwich State School on Bingle Road is Prep to Year 6 and it is the only school on
 //   the island, so the primary run converges on Dunwich from all three townships and every
-//   secondary student is on a boat before seven.
+//   secondary student is on a boat before seven. The school publishes its own times: the office is
+//   open between 8.30am and 3.30pm, school starts at 9.00am and concludes at 3.00pm, with breaks at
+//   10.45 and 1.00. Children are placed at the school from twenty to nine, which is the gate rather
+//   than the bell, and the pack carries the published times with their source.
 //   Shift work. The occupations pack publishes shift windows and a seasonal multiplier for each
 //   occupation, and a winter risk where hours are cut. A cook works sixty hours in January and
 //   twenty in June, and that difference is the rent.
@@ -22,10 +25,21 @@
 //   rural fire brigade turns out when the fire danger says so, and it pulls people off paid work.
 //   Bin night. Redland City Council collects on the island on Mondays, so the bins go out on Sunday
 //   afternoon, and a Monday public holiday is the specific failure.
+//   The doors. A shift is a shift at a place that opens, so a cook is not rostered at the brewery on
+//   a Tuesday when the brewery publishes Tuesday as closed, and nobody starts at the pub at eight
+//   when the pub publishes ten. The published week comes out of data/businesses.json through
+//   src/systems/economy/hours.js, which is a pure helper the way calendar.js is: no system imports
+//   another system here.
+//   The show holiday, which is the island's own and is not Brisbane's. Redland City asked the state
+//   to gazette the Monday before People's Day as its Ekka holiday, so the island shuts on the Monday
+//   while Brisbane works, and then Brisbane shuts on the Wednesday and comes over. That asymmetry is
+//   a real, published, once-a-year shape on this island's trade and nothing in the twin knew it.
 //
 // It publishes the day's context for needs.js and for anything else that wants to know what today
 // is doing: the sailings, whether the buses are running, whether the beach is drivable, whether the
 // markets are on. It never mutates a need and it never chooses an action.
+
+import { compileHours, weekFor, dayFor } from '../economy/hours.js';
 
 const HHMM = /^(\d{1,2}):(\d{2})$/;
 const mins = (s) => {
@@ -37,6 +51,57 @@ const DOW = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
 /** Which occupations are paid by the tourist year rather than the ordinary one. */
 const SEASONAL = /hospitality|cafe|bar|housekeeper|cleaner|campground|grocery|retail|tour|dive|surf|letting|publican|venue|deckhand|attendant|skipper|bus-driver/;
+
+/** Somebody is in before the doors and still there after them. Modelled, and small on purpose. */
+const PREP_MIN = 45;
+const PACK_DOWN_MIN = 45;
+
+/**
+ * The island's own show holiday.
+ *
+ * Redland City, which is where Minjerribah is, does not take Brisbane's Ekka day. In 2013 the
+ * council asked the state to gazette the Monday before People's Day as its Ekka public holiday, in
+ * its own words "to give residents and businesses certainty", and it has kept that Monday since,
+ * including in 2020 when Brisbane's moved to a Friday and Redlands did not move at all. So the
+ * island has a public holiday on the Monday and the mainland it sells to has one on the Wednesday,
+ * and a Wednesday day-trip crowd lands on an island working an ordinary Wednesday.
+ *
+ * Half of this is derived and half of it is not, and the split is deliberate. The show itself does
+ * not sit on a rule a calendar can compute: People's Day was the third Wednesday of August in 2023
+ * and the second in 2025, and in 2020 it moved to a Friday entirely. So the mainland date is read
+ * from a published list, year by year, and a year nobody has read is left empty and says so rather
+ * than guessing a public holiday onto a real island. The island's own date is then derived from the
+ * council's published rule, the Monday before People's Day, which has held every year that has been
+ * checked: 2020, 2025 and 2026.
+ *
+ * Sources: the Queensland Government's gazetted show holiday list for the City of Brisbane entry,
+ * Redland City Council's own show holiday notices for the rule and for 2026.
+ */
+const EKKA_PEOPLES_DAY = {
+  2026: { date: '2026-08-12', read: 'https://www.qld.gov.au/recreation/travel/holidays/show' },
+  2027: { date: '2027-08-11', read: 'https://publicholidays.com.au/royal-queensland-show/' },
+  2028: { date: '2028-08-16', read: 'https://publicholidays.com.au/royal-queensland-show/' }
+};
+/** Read from a council notice rather than derived. Where a year is here, it wins. */
+const REDLANDS_SHOW_HOLIDAY_READ = { 2026: '2026-08-10' };
+
+const DAY_MS = 86400000;
+
+function showHolidayDates(year) {
+  const peoples = EKKA_PEOPLES_DAY[year];
+  if (!peoples) return null;
+  const d = new Date(peoples.date + 'T00:00:00Z');
+  // The Monday of that week: People's Day is a Wednesday every year that has been read.
+  const monday = new Date(d.getTime() - ((d.getUTCDay() + 6) % 7) * DAY_MS);
+  const derived = monday.toISOString().slice(0, 10);
+  const read = REDLANDS_SHOW_HOLIDAY_READ[year] || null;
+  return {
+    island: read || derived,
+    islandBasis: read ? 'read from a Redland City Council notice' : 'derived from the council’s published rule, the Monday before People’s Day',
+    mainland: peoples.date,
+    source: peoples.read
+  };
+}
 
 export function registerSchedule(world) {
   const rng = world.rng.stream('schedule');
@@ -59,12 +124,75 @@ export function registerSchedule(world) {
     onPatrol: 0,
     volunteers: {},
     plannedToday: 0,
+    /** The island's own show holiday and the mainland's, which fall on different days. */
+    showHoliday: { island: false, mainland: false, known: false },
+    /** How many rosters the published doors actually bound today, and how many they cancelled. */
+    doors: { clamped: 0, cancelled: 0, venuesWithPublishedHours: 0 },
+    hoursBasis: null,
     notes: []
   });
 
   let R = null;
   let cal = null;
   const ferry = { outbound: [], inbound: [], lastOut: null, lastHome: null, firstOut: null };
+  /** businessId -> { compiled, week }. Compiled once at init, the week rechosen once a day. */
+  const venueHours = new Map();
+
+  function readVenues(w) {
+    const pack = w.data.businesses;
+    const list = (pack && pack.businesses) || [];
+    for (const b of list) {
+      if (b.status === 'closed' || b.status === 'proposed') continue;
+      venueHours.set(b.id, { compiled: compileHours(b.typical_hours, b.hours_posture), week: null });
+    }
+    state.hoursBasis = {
+      reviewed: (pack && pack.hours_last_reviewed) || null,
+      note: 'A roster is only clamped to a door where the door is published and where the place has a '
+        + 'door to clamp to. Where the pack’s hours are an estimate the occupation’s own shift window '
+        + 'stands, and an Elders’ council, an ambulance station, a hall or a ferry line is never '
+        + 'treated as having a door at all.'
+    };
+  }
+
+  function refreshVenueWeeks(w, info) {
+    const month = w.clock.month;
+    const dayInfo = info.month === undefined ? Object.assign({ month }, info) : info;
+    let closedToday = 0;
+    for (const [, v] of venueHours) {
+      v.week = weekFor(v.compiled, dayInfo, month);
+      if (v.compiled.answersOpenShut) {
+        let anyOpen = false;
+        for (let d = 0; d < 7; d++) { const day = dayFor(v.week, d); if (day && day.windows.length) { anyOpen = true; break; } }
+        if (!anyOpen) closedToday++;
+      }
+    }
+    return closedToday;
+  }
+
+  /** The island's show holiday and the mainland's, which are not the same day. See SHOW_HOLIDAYS. */
+  function showHolidayFor(info, year) {
+    const s = showHolidayDates(year);
+    if (!s) {
+      return {
+        island: false, mainland: false, known: false,
+        why: `No gazetted People’s Day date has been read for ${year}. The Royal Queensland Show does not `
+          + 'sit on a rule a calendar can compute, so this is left empty rather than guessed.'
+      };
+    }
+    return {
+      known: true,
+      island: info.iso === s.island,
+      mainland: info.iso === s.mainland,
+      islandName: 'Redlands Coast show holiday',
+      mainlandName: 'Royal Queensland Show, City of Brisbane',
+      islandDate: s.island,
+      islandBasis: s.islandBasis,
+      mainlandDate: s.mainland,
+      source: s.source,
+      why: 'Redland City takes the Monday before People’s Day and Brisbane takes the Wednesday, so the '
+        + 'island shuts first and then the mainland comes over on its own day off.'
+    };
+  }
 
   /* -------------------------------------------------------------- the timetable
 
@@ -295,19 +423,62 @@ export function registerSchedule(world) {
 
   function pickShift(p, w, dow) {
     const shifts = (p.shifts || []).filter((s) => mins(s.from) != null && mins(s.to) != null);
+    let from, to, label;
     if (!shifts.length) {
       // No published shift window: an ordinary island working day.
-      return { from: 7 * 60 + 30, to: 15 * 60 + 30, label: 'a working day' };
+      from = 7 * 60 + 30; to = 15 * 60 + 30; label = 'a working day';
+    } else {
+      const allowed = shifts.filter((s) => !s.days || s.days.includes(DOW[dow]));
+      const pool = allowed.length ? allowed : shifts;
+      // A person keeps to the same shift most of the week and swaps occasionally, which is what a
+      // two-shift roster on a ferry or in a kitchen actually looks like.
+      const idx = ((p.id * 7919) + Math.floor((w.clock.epochDay + w.clock.dayIndex) / 3)) % pool.length;
+      const s = pool[idx];
+      from = mins(s.from); to = mins(s.to);
+      if (to <= from) to += 24 * 60;            // a bar shift that finishes after midnight
+      to = Math.min(1439, to);
+      label = s.label;
     }
-    const allowed = shifts.filter((s) => !s.days || s.days.includes(DOW[dow]));
-    const pool = allowed.length ? allowed : shifts;
-    // A person keeps to the same shift most of the week and swaps occasionally, which is what a
-    // two-shift roster on a ferry or in a kitchen actually looks like.
-    const idx = ((p.id * 7919) + Math.floor((w.clock.epochDay + w.clock.dayIndex) / 3)) % pool.length;
-    const s = pool[idx];
-    let from = mins(s.from), to = mins(s.to);
-    if (to <= from) to += 24 * 60;            // a bar shift that finishes after midnight
-    return { from, to: Math.min(1439, to), label: s.label };
+    return clampToDoors(p, dow, from, to, label);
+  }
+
+  /**
+   * A shift at a place that opens.
+   *
+   * The occupations pack publishes shift windows by trade, not by employer, so a cook at the
+   * brewery got a five-o'clock dinner shift on a Tuesday and the brewery publishes Tuesday as
+   * closed. Nobody saw it, because the pub and the shop had their own idea of when they were open
+   * and nothing joined the two. Now the employer's published week is the outer bound: somebody is
+   * in three quarters of an hour before the doors and stays about that long after, and on a day the
+   * place does not open there is no shift at all.
+   *
+   * It only ever tightens a roster against hours the business published or a listing published.
+   * Where the pack's hours are an estimate the trade's own shift window is left alone, because
+   * clamping a real person's working day to a guess would be the guess doing damage.
+   *
+   * And where the employer is not a shopfront at all it is left alone too, which is a correction.
+   * The test used to be `isEstimate`, so a record carrying no week for a good reason fell through
+   * to the clamp and read as a place that never opens: everybody working for the Elders' council,
+   * the ambulance station, a hall or a ferry line would have had every shift of their working life
+   * cancelled. `answersOpenShut` is the same question asked properly, and a null is not a shut door.
+   */
+  function clampToDoors(p, dow, from, to, label) {
+    const h = p.employerId ? venueHours.get(p.employerId) : null;
+    if (!h || !h.week || !h.compiled.answersOpenShut) return { from, to: Math.min(1439, to), label };
+    const day = dayFor(h.week, dow);
+    if (!day || !day.windows.length) { doorsCancelled++; return null; }   // the place is shut today
+    doorsClamped++;
+    const opens = day.windows[0].open - PREP_MIN;
+    const shuts = Math.min(1439, day.windows[day.windows.length - 1].close + PACK_DOWN_MIN);
+    let a = Math.max(from, opens);
+    let b = Math.min(to, shuts);
+    if (b - a < 90) {
+      // The trade's window and the door's window barely overlap. Trust the door, because it is the
+      // published one, and give them the shorter of a normal shift or the whole trading day.
+      a = opens;
+      b = Math.min(shuts, opens + Math.max(180, to - from));
+    }
+    return { from: Math.max(0, a), to: Math.min(1439, b), label };
   }
 
   function shiftReason(p, shift, today) {
@@ -323,6 +494,8 @@ export function registerSchedule(world) {
   let planning = false;
   let lastDay = -1;
   let today = null;
+  let doorsClamped = 0;
+  let doorsCancelled = 0;
 
   return world.register({
     id: 'schedule',
@@ -334,6 +507,7 @@ export function registerSchedule(world) {
       if (!R || !R.ready) return;
       cal = R.calendar;
       readTimetable(w);
+      readVenues(w);
       assignVolunteers();
 
       // Who has a child at the island school, which is what makes the morning run an island-wide
@@ -347,8 +521,15 @@ export function registerSchedule(world) {
 
       today = cal.day(w.clock.date);
       state.day = today;
+      refreshVenueWeeks(w, today);
+      state.showHoliday = showHolidayFor(today, w.clock.date.getUTCFullYear());
       const wk = weekIndex(w);
+      doorsClamped = 0; doorsCancelled = 0;
       for (const p of R.people) { p._workDays = workDaysThisWeek(p, today, wk); p.plan = planFor(p, w, today, wk); }
+      state.doors = {
+        clamped: doorsClamped, cancelled: doorsCancelled,
+        venuesWithPublishedHours: Array.from(venueHours.values()).filter((v) => !v.compiled.isEstimate).length
+      };
       state.ready = true;
       state.plannedToday = R.people.length;
       w.bus.emit('schedule:ready', { sailings: ferry.outbound.length + ferry.inbound.length, volunteers: state.volunteers });
@@ -366,6 +547,10 @@ export function registerSchedule(world) {
         lastDay = w.clock.dayIndex;
         today = cal.day(w.clock.date);
         state.day = today;
+        // Which week every venue on the island is running today, before anybody is rostered into it.
+        refreshVenueWeeks(w, today);
+        state.showHoliday = showHolidayFor(today, w.clock.date.getUTCFullYear());
+        doorsClamped = 0; doorsCancelled = 0;
         planning = true;
         planCursor = 0;
         const dow = w.clock.dayOfWeek;
@@ -387,7 +572,14 @@ export function registerSchedule(world) {
           p.plan = planFor(p, w, today, wk);
         }
         planCursor = end;
-        if (planCursor >= R.people.length) { planning = false; state.plannedToday = R.people.length; }
+        if (planCursor >= R.people.length) {
+          planning = false;
+          state.plannedToday = R.people.length;
+          state.doors = {
+            clamped: doorsClamped, cancelled: doorsCancelled,
+            venuesWithPublishedHours: state.doors.venuesWithPublishedHours
+          };
+        }
       }
 
       // --- context the rest of the slice reads
@@ -468,7 +660,13 @@ export function registerSchedule(world) {
         boats: state.boatsRunning,
         binNight: state.binNight,
         marketDay: state.marketDay,
-        beachDriving: state.beachDrivingOpen
+        beachDriving: state.beachDrivingOpen,
+        // What the published doors did to today's rosters, and the island's own show holiday.
+        shiftsClampedToPublishedHours: state.doors.clamped,
+        shiftsCancelledByAClosedDay: state.doors.cancelled,
+        showHolidayIsland: !!state.showHoliday.island,
+        showHolidayMainland: !!state.showHoliday.mainland,
+        showHolidayKnown: !!state.showHoliday.known
       };
     },
 

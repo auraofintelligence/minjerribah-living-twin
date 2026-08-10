@@ -96,6 +96,22 @@ an organisation that is not in a pack. */
 
 const A = (o) => o;
 
+/**
+ * Is a kind of venue actually trading near this person right now?
+ *
+ * `c.openKinds` is filled once a tick from the businesses system's live open set, per township and
+ * per kind of venue, over the same shortlist of nearby places `resolvePlace` would choose from. It
+ * is null when no businesses system is loaded, and then every door is open, which is exactly what
+ * this file did before there were any doors and is a better failure than an island where nothing
+ * is. This is called from a gate and from a residual and the two must agree, which
+ * `node tools/gate-audit.mjs` checks by running a sim-week both ways.
+ */
+const venueOpen = (c, p, kind) => {
+  if (!c.openKinds) return true;
+  const per = c.openKinds[p.townshipId];
+  return per ? per[kind] : true;
+};
+
 const ACTIONS = [
   /* ---- the house ---- */
   A({
@@ -260,28 +276,28 @@ const ACTIONS = [
   A({
     id: 'coffee-and-a-chat', crowdShy: true, label: 'out for a coffee', at: 'cafe', mode: 'walk', dur: [30, 60],
     gains: { fun: 0.5, social: 0.95, hunger: 0.35, islandFatigue: -0.006 },
-    gate: (p, c) => c.hour >= 6 && c.hour < 14 && p.age >= 14,
+    gate: (p, c) => c.hour >= 6 && c.hour < 14 && p.age >= 14 && venueOpen(c, p, 'cafe'),
     bonus: (p) => p.traits.sociable * 0.9,
     why: () => 'the coffee is an excuse and everybody knows it'
   }),
   A({
     id: 'counter-lunch', crowdShy: true, label: 'having lunch out', at: 'pub', mode: 'drive', dur: [50, 90],
     gains: { hunger: 1.35, social: 0.65, fun: 0.55 },
-    gate: (p, c) => c.hour >= 11 && c.hour < 15 && p.age >= 16,
+    gate: (p, c) => c.hour >= 11 && c.hour < 15 && p.age >= 16 && venueOpen(c, p, 'pub'),
     bonus: (p, c) => (c.weekend ? 0.6 : 0) + p.traits.sociable * 0.4,
     why: () => 'could not be bothered cooking'
   }),
   A({
     id: 'a-night-at-the-club', crowdShy: true, label: 'down at the club', at: 'club', mode: 'drive', dur: [90, 210],
     gains: { social: 1.35, fun: 1.2, hunger: 0.55, islandFatigue: -0.015 },
-    gate: (p, c) => c.hour >= 16 && c.hour < 23 && p.age >= 18,
+    gate: (p, c) => c.hour >= 16 && c.hour < 23 && p.age >= 18 && venueOpen(c, p, 'club'),
     bonus: (p, c) => p.traits.sociable * 1.1 + (c.friday || c.saturday ? 0.9 : 0) + p.n[FATIGUE] * 0.8,
     why: (p) => (p.n[FATIGUE] > 0.55 ? 'needed to be somewhere that was not the house' : 'the usual crowd would be there')
   }),
   A({
     id: 'the-shop-run', crowdShy: true, label: 'up at the shop', at: 'shop', mode: 'drive', dur: [25, 55],
     gains: { hunger: 0.25, comfort: 0.35, social: 0.4 },
-    gate: (p, c) => c.hour >= 7 && c.hour < 19 && p.age >= 15,
+    gate: (p, c) => c.hour >= 7 && c.hour < 19 && p.age >= 15 && venueOpen(c, p, 'shop'),
     bonus: (p, c) => (c.peak ? -0.4 : 0.2),
     why: (p, c) => (c.peak ? 'the shop is picked over in January and it still has to be done' : 'out of everything')
   }),
@@ -547,7 +563,22 @@ const WHO = {
   'looking-for-work': (p) => p.occupationId === 'unemployed',
   'a-working-bee': (p) => p.age >= 16
 };
-for (const a of ACTIONS) { a.when = WHEN[a.id] || null; a.who = WHO[a.id] || null; }
+/** The four actions that happen inside somebody's business, and which kind of door that is. */
+const VENUE_KIND = {
+  'the-shop-run': 'shop',
+  'a-night-at-the-club': 'club',
+  'coffee-and-a-chat': 'cafe',
+  'counter-lunch': 'pub'
+};
+
+for (const a of ACTIONS) {
+  a.when = WHEN[a.id] || null;
+  a.who = WHO[a.id] || null;
+  a.venueKind = VENUE_KIND[a.id] || null;
+  // Sitting down to a counter lunch needs somebody in the kitchen, which is not the same question
+  // as whether the bar is open and is the one people on this island actually get caught by.
+  a.needsKitchen = a.id === 'counter-lunch';
+}
 for (let i = 0; i < ACTIONS.length; i++) ACTIONS[i].index = i;
 
 /**
@@ -576,10 +607,12 @@ const RESIDUAL = {
   'bins-out': null,               // c.binNight && p.age >= 12 && c.hour >= 17
   'ring-the-mainland': null,      // !c.night && p.age >= 16
   'looking-for-work': null,       // p.occupationId === 'unemployed' && c.workHours && !c.weekend
-  'coffee-and-a-chat': null,      // c.hour >= 6 && c.hour < 14 && p.age >= 14
-  'counter-lunch': null,          // c.hour >= 11 && c.hour < 15 && p.age >= 16
-  'a-night-at-the-club': null,    // c.hour >= 16 && c.hour < 23 && p.age >= 18
-  'the-shop-run': null,           // c.hour >= 7 && c.hour < 19 && p.age >= 15
+  // The four that need somebody to be behind a counter. WHEN and WHO cover the clock and the age;
+  // what is left is the door, which is per township and so cannot live in WHEN.
+  'coffee-and-a-chat': (p, c) => venueOpen(c, p, 'cafe'),
+  'counter-lunch': (p, c) => venueOpen(c, p, 'pub'),
+  'a-night-at-the-club': (p, c) => venueOpen(c, p, 'club'),
+  'the-shop-run': (p, c) => venueOpen(c, p, 'shop'),
   'the-markets': null,            // c.marketDay && c.hour >= 8 && c.hour < 14
   'bowls-or-a-game': null,        // c.daylight && p.age >= 45 && !c.raining
   'a-working-bee': null,          // c.weekend && c.daylight && c.hour >= 7 && c.hour < 13 && p.age >= 16 && !c.raining
@@ -651,6 +684,9 @@ export function registerNeeds(world) {
     ready: false,
     tracked: 0,
     decisionsLastTick: 0,
+    /** Residents a closing time moved on today. Real hours, felt by a real person. */
+    turnedOutByClosingLastTick: 0,
+    turnedOutByClosingToday: 0,
     mean: {},
     unmetTop: [],
     islandFatigue: { mean: 0, worstTownship: null, over70: 0 },
@@ -757,6 +793,19 @@ export function registerNeeds(world) {
     ctx.schoolHoliday = !!cal.isSchoolHoliday;
     ctx.publicHoliday = !!cal.isPublicHoliday;
     ctx.marketDay = !!sched.marketDay;
+
+    // --- the doors.
+    //
+    // Until this pass a resident walked into the bakery at nine at night and the simulation let
+    // them, because nothing joined the trading hours in data/businesses.json to the person deciding
+    // to go out. `openIds` is the businesses system's live set, rebuilt in place each tick, and
+    // `kitchenOpenIds` is the narrower question of whether anybody is still cooking. Read
+    // defensively: with no businesses system loaded every door is treated as open, which is the
+    // behaviour this file had before and is a better failure than an island where nothing is.
+    const biz = w.read('businesses');
+    ctx.openBiz = (biz && biz.openIds) || null;
+    ctx.kitchenBiz = (biz && biz.kitchenOpenIds) || null;
+    refreshOpenKinds(ctx);
     // Routes 880 and 881 run to meet the ferries. A household with no car depends on them, and the
     // pack's own pressure point for a car-less household is that a missed lift is a missed day.
     ctx.busRunning = sched.busRunning !== undefined ? !!sched.busRunning : (hour >= 6.5 && hour <= 18.5);
@@ -797,6 +846,101 @@ export function registerNeeds(world) {
   /** townshipId -> kind -> [places], nearest first. Built once at init, never at decision time:
    *  resolving a place was five per cent of the whole profile when it was a string key on a Map. */
   const kindLists = {};
+
+  /* -------------------------------------------------------------- open doors
+
+  The four actions that need a business to be trading, and how far somebody will look before giving
+  up on one. Four is the same shortlist resolvePlace already uses, so the answer to "is anything
+  open" is the answer for the places this person would actually consider, not for the island. */
+
+  const VENUE_ACTIONS = [
+    { id: 'the-shop-run', kind: 'shop', needsKitchen: false },
+    { id: 'a-night-at-the-club', kind: 'club', needsKitchen: false },
+    { id: 'coffee-and-a-chat', kind: 'cafe', needsKitchen: false },
+    { id: 'counter-lunch', kind: 'pub', needsKitchen: true }
+  ];
+  const VENUE_SHORTLIST = 4;
+  /** townshipId -> { shop, club, cafe, pub }. Preallocated: this is rebuilt every tick. */
+  const openKinds = {};
+  /** The default when no businesses system is loaded: every door open, which is what this file did
+   *  before there were any doors. */
+  const ALL_OPEN = { shop: true, club: true, cafe: true, pub: true };
+
+  const bizIdOf = (rec) => (rec && rec.kind === 'business' ? rec.id.slice(4) : null);
+
+  function refreshOpenKinds(ctx) {
+    if (!ctx.openBiz) { ctx.openKinds = null; return; }
+    for (const t of Object.keys(kindLists)) {
+      let per = openKinds[t];
+      if (!per) per = openKinds[t] = { shop: false, club: false, cafe: false, pub: false };
+      for (const v of VENUE_ACTIONS) {
+        const list = kindLists[t][v.kind];
+        let any = false;
+        const n = list ? Math.min(list.length, VENUE_SHORTLIST) : 0;
+        for (let i = 0; i < n; i++) {
+          const id = bizIdOf(list[i]);
+          if (id === null) { any = true; break; }             // not a business: no hours to keep
+          if (!ctx.openBiz.has(id)) continue;
+          // A counter lunch needs somebody in the kitchen. Where a venue publishes no kitchen of
+          // its own the doors are the whole answer, which is why this asks for a false rather than
+          // for a true: `kitchenOpenIds` only ever holds the venues that publish one.
+          if (v.needsKitchen && !ctx.kitchenBiz.has(id) && kitchenIsSeparate(id)) continue;
+          any = true;
+          break;
+        }
+        per[v.kind] = any;
+      }
+    }
+    ctx.openKinds = openKinds;
+  }
+
+  /** Does this business publish a kitchen week of its own? Answered once and remembered. */
+  const separateKitchens = new Set();
+  let kitchensRead = false;
+  function kitchenIsSeparate(id) { return separateKitchens.has(id); }
+  function readKitchens(w) {
+    if (kitchensRead) return;
+    kitchensRead = true;
+    const list = (w.data.businesses && w.data.businesses.businesses) || [];
+    for (const b of list) if (b.typical_hours && b.typical_hours.kitchen) separateKitchens.add(b.id);
+  }
+
+  /**
+   * The nearest one that is actually trading.
+   *
+   * A person has a regular and keeps to it, which is what `resolvePlace` already does and is what
+   * people do. But a regular that is shut is not where they go: they go to the next one along, and
+   * if none of the ones they would consider is open they do not go at all, which is the whole
+   * difference between a simulation of an island and a simulation of a shopping centre. The
+   * shortlist is built once per person per action and then only walked.
+   */
+  function openOption(a, p, c, entry) {
+    if (!c.openBiz) return entry;
+    let opts = entry.options;
+    if (opts === undefined) {
+      const per = kindLists[p.townshipId];
+      const list = (per && per[a.at]) || [];
+      const n = Math.min(list.length, VENUE_SHORTLIST);
+      opts = entry.options = [];
+      if (n > 0) {
+        // The same starting point resolvePlace uses, so their regular is still first in the queue.
+        const start = (p.id + a.salt) % n;
+        for (let k = 0; k < n; k++) {
+          const rec = list[(start + k) % n];
+          const dx = rec.x - p.homeX, dz = rec.z - p.homeZ;
+          opts.push({ place: rec, km: Math.sqrt(dx * dx + dz * dz) * 0.001, biz: bizIdOf(rec) });
+        }
+      }
+    }
+    for (let k = 0; k < opts.length; k++) {
+      const o = opts[k];
+      if (o.biz === null) return o;                          // not a business: nothing to be shut
+      if (!c.openBiz.has(o.biz)) continue;
+      if (a.needsKitchen && separateKitchens.has(o.biz) && !c.kitchenBiz.has(o.biz)) continue;
+      return o;
+    }
+    return null;
+  }
 
   function buildKindLists(townships) {
     for (const t of townships) {
@@ -938,6 +1082,13 @@ export function registerNeeds(world) {
           entry = cache[a.index] = { place: resolved, km: Math.sqrt(dx0 * dx0 + dz0 * dz0) * 0.001 };
         }
         if (entry === null) continue;
+        // A shut door sends them along the street, or home. Only for the four venue actions, and
+        // only when a businesses system is loaded to answer the question.
+        if (a.venueKind) {
+          const openOne = openOption(a, p, c, entry);
+          if (!openOne) continue;
+          entry = openOne;
+        }
         // `tie` and `work` move with the person's life rather than with the map.
         if (a.at === 'tie' || a.at === 'work') {
           const live = resolvePlace(a, p);
@@ -1018,6 +1169,9 @@ export function registerNeeds(world) {
     p.sleeping = !!a.sleeping;
     p.untilTick = tick + Math.max(1, Math.round(dur / 10));
     p.onIsland = a.mode !== 'offisland';
+    // Which business they are actually standing in, when it is one. Held so that a place shutting
+    // under somebody is something they notice: see the decide block in tick().
+    p.venueBiz = a.venueKind && place && place.kind === 'business' ? place.id.slice(4) : null;
     if (place) { p.tx = place.x; p.tz = place.z; }
     const last = p.lastActionIds;
     last[3] = last[2]; last[2] = last[1]; last[1] = last[0]; last[0] = a.id;
@@ -1080,6 +1234,7 @@ export function registerNeeds(world) {
       }
 
       buildKindLists(Object.keys(R.byTownshipSeat));
+      readKitchens(w);
 
       ensure(R.slotCapacity);
       const c = buildContext(w);
@@ -1099,12 +1254,14 @@ export function registerNeeds(world) {
     tick(w) {
       if (!R || !R.ready) return;
       const tick = w.clock.tick;
+      if (w.clock.minuteOfDay === 0) state.turnedOutByClosingToday = 0;
       const c = buildContext(w);
       refreshLive(c);
       ensure(R.slotCapacity);
 
       const people = R.people;
       let decisions = 0;
+      let turnedOut = 0;
       const dt = 1 / 3;   // twenty minutes: each person is updated on alternate ticks
 
       // What the island is grinding on today, hoisted out of the loop: the visitor load, the cost
@@ -1169,8 +1326,19 @@ export function registerNeeds(world) {
         //    survives. This is what spreads the cost: roughly one person in eight decides a tick.
         // A sleeper wakes when they have had enough, not when the timer says so. Without this a
         // person who went to bed at three in the morning is still in it at eleven.
-        if (tick >= p.untilTick || n[BLADDER] < 0.07 || n[HUNGER] < 0.05 || (n[ENERGY] < 0.05 && !asleep)
+        // They are sitting in a place that has just shut. Somebody says something and everybody
+        // gets up, which is a decision now rather than a person standing in a dark bakery for
+        // another forty minutes because a timer had not run out.
+        const shutUnderThem = p.venueBiz !== null && p.venueBiz !== undefined
+          && c.openBiz && !c.openBiz.has(p.venueBiz);
+
+        if (tick >= p.untilTick || shutUnderThem || n[BLADDER] < 0.07 || n[HUNGER] < 0.05 || (n[ENERGY] < 0.05 && !asleep)
           || (asleep && n[ENERGY] > 0.97 && c.daylight)) {
+          if (shutUnderThem) {
+            p.venueBiz = null;
+            p.resumeAction = null;
+            turnedOut++;
+          }
           // A ten minute errand does not restart the afternoon. Somebody who breaks off the couch
           // for the bathroom goes back to the couch, which is both what happens and about a third
           // of all the decisions on this island if it is not handled.
@@ -1215,6 +1383,8 @@ export function registerNeeds(world) {
       }
 
       state.decisionsLastTick = decisions;
+      state.turnedOutByClosingLastTick = turnedOut;
+      state.turnedOutByClosingToday += turnedOut;
       state.tracked = people.length;
 
       if (w.clock.minuteOfDay === 200) lanesDirty = true;
@@ -1225,6 +1395,8 @@ export function registerNeeds(world) {
       return {
         tracked: state.tracked,
         decisions: state.decisionsLastTick,
+        // People who were in a shop, a cafe or a club when it shut and had to do something else.
+        turnedOutByClosing: state.turnedOutByClosingToday,
         mean: state.mean,
         fatigueMean: state.islandFatigue.mean,
         fatigueOver70: state.islandFatigue.over70,

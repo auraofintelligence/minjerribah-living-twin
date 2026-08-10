@@ -1755,9 +1755,20 @@ function attachRig(world, state, places, dwell) {
 #cam-photo input[type=range]{width:210px;accent-color:var(--sun,#f0b429);cursor:pointer}
 #cam-photo .clk{font:400 13px/1 var(--f-num,monospace);color:var(--t-hi,#f2ebdc);min-width:64px;text-align:center}
 #cam-photo button{appearance:none;background:var(--s-sunk,rgba(6,9,11,.5));border:1px solid var(--edge-strong,rgba(232,220,196,.26));
-  color:var(--t,#ddd4c2);font:600 11px/1 var(--f-ui,system-ui);letter-spacing:.08em;padding:7px 12px;border-radius:var(--r-pill,99px);cursor:pointer}
+  color:var(--t,#ddd4c2);font:600 11px/1 var(--f-ui,system-ui);letter-spacing:.08em;padding:7px 12px;border-radius:var(--r-pill,99px);
+  cursor:pointer;white-space:nowrap}
 #cam-photo button:hover{background:rgba(63,182,196,.16);border-color:var(--sea,#3fb6c4);color:var(--t-hi,#f2ebdc)}
 #cam-photo button.shutter{background:var(--sand,#e8dcc4);border-color:var(--sand,#e8dcc4);color:#0a0d10}
+#cam-photo button[hidden]{display:none}
+/* Photo mode hides the bar, so it carries the bar's own statement about what kind of moment this
+   is. Same three words, same tones: sea for live, sun for a moment nobody has been to, iron for a
+   simulation running forward. */
+#cam-photo .when{font:700 9px/1.5 var(--f-ui,system-ui);letter-spacing:.14em;text-transform:uppercase;
+  padding:5px 9px;border-radius:var(--r-pill,99px);white-space:nowrap;
+  border:1px solid var(--edge,rgba(232,220,196,.13));color:var(--t-faint,#6d767c)}
+#cam-photo .when.live{color:var(--sea,#3fb6c4);border-color:rgba(63,182,196,.42);background:rgba(63,182,196,.1)}
+#cam-photo .when.scrub{color:var(--sun,#f0b429);border-color:rgba(240,180,41,.45);background:rgba(240,180,41,.1)}
+#cam-photo .when.sim{color:var(--t,#ddd4c2)}
 .cam-hidden{opacity:0!important;pointer-events:none!important}
 @media (max-width:900px){#cam-rail button span{display:none}#cam-rail button{padding:6px 8px}#cam-read{gap:8px;bottom:56px}}
 `;
@@ -1797,6 +1808,8 @@ function attachRig(world, state, places, dwell) {
   <label for="cam-tod">Time</label>
   <input id="cam-tod" type="range" min="0" max="1430" step="10" value="320">
   <span class="clk" id="cam-clk">5:20am</span>
+  <span class="when" id="cam-when"></span>
+  <button data-act="now" id="cam-now">Back to now</button>
   <button data-act="bars">Bars</button>
   <button class="shutter" data-act="shot">Capture</button>
   <button data-act="exit">Done</button>
@@ -1820,6 +1833,8 @@ function attachRig(world, state, places, dwell) {
     const photoEl = $('#cam-photo');
     const todEl = $('#cam-tod');
     const clkEl = $('#cam-clk');
+    const whenEl = $('#cam-when');
+    const nowBtn = $('#cam-now');
 
     railBtns.forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode)));
 
@@ -1840,6 +1855,33 @@ function attachRig(world, state, places, dwell) {
     photoEl.querySelector('[data-act="bars"]').addEventListener('click', () => ui.letterbox(!state.letterbox));
     photoEl.querySelector('[data-act="shot"]').addEventListener('click', () => ui.download());
     todEl.addEventListener('input', () => scrubTime(Number(todEl.value)));
+    nowBtn.addEventListener('click', () => {
+      if (world.time) world.time.toPresent();
+      ui.paintPhotoTime();
+    });
+
+    /**
+     * Photo mode hides the whole interface, including the bar that says what kind of moment you
+     * are looking at, so photo mode has to say it itself. Same three words the bar uses, from the
+     * same clock, beside the same date: a photographer must not be the one person on this island
+     * who cannot tell a projection from the real thing.
+     */
+    ui.paintPhotoTime = () => {
+      const c = world.clock;
+      clkEl.textContent = c.format();
+      const scrubbing = c.scrubbing;
+      const word = scrubbing
+        ? (c.viewOffsetMin > 0 ? 'PROJECTION' : 'LOOKING BACK')
+        : (c.mode === 'live' ? 'LIVE' : 'SIMULATED');
+      const tone = scrubbing ? 'scrub' : (c.mode === 'live' ? 'live' : 'sim');
+      const text = word + '  ' + c.formatDate();
+      if (whenEl.textContent !== text) whenEl.textContent = text;
+      if (whenEl.__tone !== tone) { whenEl.__tone = tone; whenEl.className = 'when ' + tone; }
+      const showNow = scrubbing;
+      if (nowBtn.__show !== showNow) { nowBtn.__show = showNow; nowBtn.hidden = !showNow; }
+      const v = String(Math.round(c.minuteOfDay / 10) * 10);
+      if (todEl.value !== v) todEl.value = v;
+    };
 
     ui.refreshBookmarks = () => {
       bmWrap.innerHTML = bookmarks.map((b) =>
@@ -1895,8 +1937,7 @@ function attachRig(world, state, places, dwell) {
       readEl.classList.toggle('cam-hidden', state.photoMode || hudHidden);
       photoEl.classList.toggle('on', state.photoMode);
       if (state.photoMode) {
-        todEl.value = String(Math.round(world.clock.minuteOfDay / 10) * 10);
-        clkEl.textContent = world.clock.format();
+        ui.paintPhotoTime();
         dismissHint();
       }
       world.bus.emit('camera:photo', { on: state.photoMode });
@@ -1943,7 +1984,7 @@ function attachRig(world, state, places, dwell) {
         scaleBarEl.style.width = Math.round(scaleBar.px) + 'px';
         scaleLabEl.textContent = scaleBar.label;
       }
-      if (state.photoMode) clkEl.textContent = world.clock.format();
+      if (state.photoMode) ui.paintPhotoTime();
 
       if (!state.labels || state.photoMode) return;
       const w = stage.engine.getRenderWidth(), h = stage.engine.getRenderHeight();
@@ -2031,21 +2072,25 @@ function attachRig(world, state, places, dwell) {
     ui.onMode('planner');
   }
 
+  /**
+   * The photo-mode time slider. It moves the moment on screen, so it goes through `world.time`
+   * like everything else that moves the moment, and for two reasons rather than tidiness.
+   *
+   * It used to write `world.clock.minuteOfDay` and `dayIndex` straight in. That left the bar
+   * saying LIVE over a moment thirteen hours from the real one, put nothing on the clock record,
+   * and could not be undone, because coming back to the present is a no-op when the clock believes
+   * it is already there. Worse, on a paused island it called `world.step()`, so the photographer
+   * silently made the island live through a tick to take a picture of it.
+   *
+   * Through the time control it is a declared scrub: the sun, the moon and the tide are recomputed
+   * for the moment you slide to, everything the island has to live through stays at the island's
+   * present and is tagged, the moment is on the record, and it is reversible.
+   */
   function scrubTime(minuteOfDay) {
-    const c = world.clock;
-    const target = clamp(Math.round(minuteOfDay), 0, 1430);
-    if (c.paused) {
-      // Land exactly on the requested minute by stepping the last tick, so every system
-      // recomputes for the new time instead of showing stale light on a scrubbed clock.
-      let m = target - 10, shift = 0;
-      if (m < 0) { m += 1440; shift = -1; }
-      c.minuteOfDay = m;
-      c.dayIndex += shift;
-      world.step();
-    } else {
-      c.minuteOfDay = target;
-    }
-    world.bus.emit('clock:scrubbed', { minuteOfDay: target, source: 'camera-photo' });
+    if (!world.time) return;
+    world.time.scrubToMinuteOfDay(minuteOfDay);
+    if (ui.paintPhotoTime) ui.paintPhotoTime();
+    world.bus.emit('clock:scrubbed', { minuteOfDay: world.clock.minuteOfDay, source: 'camera-photo' });
   }
 
   /* ============================================================ bus and api */

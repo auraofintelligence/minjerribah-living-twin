@@ -1,0 +1,1514 @@
+{
+  "feed": "noticeboard",
+  "schema": "minjerribah-connector-feed/1",
+  "version": "1.0.0",
+  "title": "Island organisations, addresses, contacts and what each might publish",
+  "organisation": "Straddie Noticeboard Network, and through it the organisations it names",
+  "about": "Island organisations as the noticeboard network researched them. Only the entities carrying a researched profile with sources become records. Individuals are excluded whole. The rest are the wanted list: real organisations nobody has asked yet.",
+  "sync": {
+    "synced_at": "2026-08-10T05:28:27+10:00",
+    "connector": {
+      "id": "noticeboard",
+      "version": "1.0"
+    },
+    "source": {
+      "kind": "repository",
+      "id": "straddie-noticeboard-network",
+      "path": "C:/Users/sbt41/githublocal/straddie-noticeboard-network",
+      "present": true,
+      "commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2",
+      "commit_date": "2026-06-30",
+      "working_tree": "clean",
+      "files": [
+        "data.js"
+      ]
+    },
+    "source_statement": {
+      "quote": "All entity feed ideas are hypothesised from research notes and require direct approval before public use.",
+      "locator": "straddie-noticeboard-network/data.js project.boundary"
+    },
+    "source_status": "prototype",
+    "cadence": {
+      "every": "monthly",
+      "run_by": "whoever is maintaining the noticeboard network",
+      "reason": "Addresses and phone numbers move a few times a year. The reason to run it monthly is not that the data changes that fast, it is that the wanted list needs a person looking at it often enough to actually go and ask somebody."
+    },
+    "stale_after_days": 60,
+    "counts": {
+      "entities_read": 164,
+      "excluded_people_category": 22,
+      "excluded_individuals": 43,
+      "excluded_individuals_note": "The test that decides this errs toward leaving an entity out. Four trading names in the source read as personal names to it and are not on the wanted list because of that. No record is built from this test: records come only from entities carrying a researched business profile.",
+      "profiled": 9,
+      "proposed_screens": 5,
+      "kept": 14,
+      "held": 0,
+      "wanted": 91,
+      "wanted_flagged_cultural": 2,
+      "already_in_twin_by_name": 40,
+      "not_in_twin_by_name": 59,
+      "matched_hours_basis": {
+        "published": 12,
+        "listed": 3,
+        "estimate": 24,
+        "none": 0,
+        "not trading": 1
+      }
+    },
+    "reconciled_against": "data/businesses.json version 1.1.0"
+  },
+  "confidence_scale": {
+    "high": "Not used by this connector. This is a research repository citing operator websites, so nothing here has been read at first hand and nothing here is high.",
+    "medium": "The source recorded where it read this and quoted what it read. Good enough to act on, and always shown with the date it was synced.",
+    "low": "The source recorded no URL at all. Held rather than carried."
+  },
+  "freshness_rule": "An address moves rarely and a phone number moves sometimes, so 60 days is generous. Hours are not carried at all, at any age, because the source does not have them.",
+  "cultural_flags": [
+    {
+      "id": "nb-want-quandamooka-yoolooburrabee-aboriginal-corporation",
+      "name": "Quandamooka Yoolooburrabee Aboriginal Corporation",
+      "kind": "wanted-list-entry",
+      "why": "A wanted-list entry naming a Traditional Owner organisation. Carried as a name and an unanswered ask only. A human reads this before anything is promoted or sent.",
+      "queue": "docs/CULTURAL-REVIEW.md"
+    },
+    {
+      "id": "nb-want-minjerribah-and-moorgumpin-elders-in-council",
+      "name": "Minjerribah and Moorgumpin Elders in Council",
+      "kind": "wanted-list-entry",
+      "why": "A wanted-list entry naming a Traditional Owner organisation. Carried as a name and an unanswered ask only. A human reads this before anything is promoted or sent.",
+      "queue": "docs/CULTURAL-REVIEW.md"
+    }
+  ],
+  "records": [
+    {
+      "id": "nb-stradbroke-island-management-organisation",
+      "source": "feed:noticeboard@2026-08-10T05:28:27+10:00",
+      "locator": "straddie-noticeboard-network/data.js entityGroups[0].entities[1].profile, commit 8a47bd31d",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-noticeboard/1.0",
+      "status": "committed",
+      "quote": "Queensland Parliament submission dated 16 Mar 2016 lists Stradbroke Island Management Organisation Inc., PO Box 304 Point Lookout QLD 4183 and ABN 89682323435.",
+      "asserts": "real_world",
+      "kind": "organisation-profile",
+      "name": "Stradbroke Island Management Organisation Inc.",
+      "organisation_type": "Environmental and social advocacy",
+      "category": "Environment, wildlife, safety and emergency",
+      "township": "Point Lookout",
+      "twin_business_id": null,
+      "address": "PO Box 304, Point Lookout QLD 4183",
+      "phone": null,
+      "website": null,
+      "abn": "89 682 323 435",
+      "public_status": {
+        "quote": "public records found / current activity needs confirmation"
+      },
+      "typical_hours": null,
+      "hours_basis": null,
+      "hours_basis_vocabulary": [
+        "published",
+        "listed",
+        "estimate"
+      ],
+      "hours_gap": {
+        "quote": "The source records no hours for this organisation."
+      },
+      "also_read": [
+        {
+          "quote": "A 2011 Queensland Parliament PDF links Stradbroke Island Management Organisation with Friends of Stradbroke Island on a North Stradbroke Island protection submission."
+        },
+        {
+          "quote": "Current public contact, committee, website, Google profile and social presence still need direct confirmation before publishing as active."
+        }
+      ],
+      "upstream_sources": [
+        "https://documents.parliament.qld.gov.au/com/FAC-D297/NSIPSRMLAB-B7CE/B12-que-8March2016.pdf",
+        "https://www.parliament.qld.gov.au/docs/find.aspx?id=5311T4261"
+      ],
+      "source_boundary": {
+        "quote": "All entity feed ideas are hypothesised from research notes and require direct approval before public use."
+      },
+      "handling": "The source repository calls its own entity list a conversation map rather than a claim that any group has agreed to take part. Nothing here may be shown as participation, endorsement or consent. Hours are a gap, not a time.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 60,
+        "source_commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2"
+      }
+    },
+    {
+      "id": "nb-rufus-king-seafoods",
+      "source": "feed:noticeboard@2026-08-10T05:28:27+10:00",
+      "locator": "straddie-noticeboard-network/data.js entityGroups[1].entities[6].profile, commit 8a47bd31d",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-noticeboard/1.0",
+      "status": "committed",
+      "quote": "Tripadvisor and MapQuest list Rufus King Seafoods Amity Point as closed.",
+      "asserts": "real_world",
+      "kind": "organisation-profile",
+      "name": "Rufus King Seafoods Amity Point",
+      "organisation_type": "Closed seafood retail",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Amity Point",
+      "twin_business_id": "rufus-king-seafoods",
+      "address": "44 Sovereign Road, Amity QLD 4183",
+      "phone": "(07) 3409 7224",
+      "website": "http://www.rufuskingseafoods.com.au",
+      "abn": null,
+      "public_status": {
+        "quote": "closed / archive only"
+      },
+      "typical_hours": null,
+      "hours_basis": null,
+      "hours_basis_vocabulary": [
+        "published",
+        "listed",
+        "estimate"
+      ],
+      "hours_gap": {
+        "quote": "The source records no hours for this organisation."
+      },
+      "also_read": [
+        {
+          "quote": "Some older seafood/product pages still describe trading hours, so any reactivation needs direct confirmation before publishing."
+        }
+      ],
+      "upstream_sources": [
+        "https://www.tripadvisor.com.au/Restaurant_Review-g2687975-d7022879-Reviews-Rufus_King_Seafoods_Amity_Point-Amity_North_Stradbroke_Island_Redland_City_Brisb.html",
+        "https://www.mapquest.com/au/queensland/rufus-king-seafoods-amity-point-523474648"
+      ],
+      "source_boundary": {
+        "quote": "All entity feed ideas are hypothesised from research notes and require direct approval before public use."
+      },
+      "handling": "The source repository calls its own entity list a conversation map rather than a claim that any group has agreed to take part. Nothing here may be shown as participation, endorsement or consent. Hours are a gap, not a time.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 60,
+        "source_commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2"
+      }
+    },
+    {
+      "id": "nb-bo-beans-coffee",
+      "source": "feed:noticeboard@2026-08-10T05:28:27+10:00",
+      "locator": "straddie-noticeboard-network/data.js entityGroups[1].entities[7].profile, commit 8a47bd31d",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-noticeboard/1.0",
+      "status": "committed",
+      "quote": "Official site says Bo Beans is at 21 Ballow Street, Amity Point.",
+      "asserts": "real_world",
+      "kind": "organisation-profile",
+      "name": "Bo Beans Coffee",
+      "organisation_type": "Coffee and cafe",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Amity Point",
+      "twin_business_id": "bo-beans-coffee",
+      "address": "21 Ballow Street, Amity Point QLD 4183",
+      "phone": "withheld: personal contact details are not committed to this repository",
+      "website": "https://www.bobeanscoffee.com.au/",
+      "abn": null,
+      "public_status": {
+        "quote": "open / source check needed before publishing hours"
+      },
+      "typical_hours": null,
+      "hours_basis": null,
+      "hours_basis_vocabulary": [
+        "published",
+        "listed",
+        "estimate"
+      ],
+      "hours_gap": {
+        "quote": "Website/contact pages and Stradbroke Island listing describe morning coffee trading; confirm current hours before publishing."
+      },
+      "also_read": [
+        {
+          "quote": "Tourism listing describes coffee, local relationships, accessibility, food/drink and community connection."
+        }
+      ],
+      "upstream_sources": [
+        "https://www.bobeanscoffee.com.au/about",
+        "https://stradbrokeisland.com/bo-beans-coffee/"
+      ],
+      "source_boundary": {
+        "quote": "All entity feed ideas are hypothesised from research notes and require direct approval before public use."
+      },
+      "handling": "The source repository calls its own entity list a conversation map rather than a claim that any group has agreed to take part. Nothing here may be shown as participation, endorsement or consent. Hours are a gap, not a time.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 60,
+        "source_commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2"
+      }
+    },
+    {
+      "id": "nb-the-amity-pavilion",
+      "source": "feed:noticeboard@2026-08-10T05:28:27+10:00",
+      "locator": "straddie-noticeboard-network/data.js entityGroups[1].entities[8].profile, commit 8a47bd31d",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-noticeboard/1.0",
+      "status": "committed",
+      "quote": "Official site lists venue, location, contact and seasonal hours.",
+      "asserts": "real_world",
+      "kind": "organisation-profile",
+      "name": "The Amity Pavilion",
+      "organisation_type": "Pub, restaurant and community venue",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Amity Point",
+      "twin_business_id": "amity-pavilion",
+      "address": "21 Ballow St, Amity QLD 4183",
+      "phone": "(07) 3472 7440",
+      "website": "https://amitypavilion.com.au/",
+      "abn": "48 684 345 524",
+      "public_status": {
+        "quote": "open / source check needed before publishing hours"
+      },
+      "typical_hours": null,
+      "hours_basis": null,
+      "hours_basis_vocabulary": [
+        "published",
+        "listed",
+        "estimate"
+      ],
+      "hours_gap": {
+        "quote": "Website says no reservations required and lists summer venue/kitchen hours; confirm current weekly hours before screen publishing."
+      },
+      "also_read": [
+        {
+          "quote": "ABN Lookup shows business names Amity Pavilion and Amity Tavern North Stradbroke Island current from 23 Jul 2025."
+        }
+      ],
+      "upstream_sources": [
+        "https://amitypavilion.com.au/",
+        "https://abr.business.gov.au/ABN/View?id=48684345524"
+      ],
+      "source_boundary": {
+        "quote": "All entity feed ideas are hypothesised from research notes and require direct approval before public use."
+      },
+      "handling": "The source repository calls its own entity list a conversation map rather than a claim that any group has agreed to take part. Nothing here may be shown as participation, endorsement or consent. Hours are a gap, not a time.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 60,
+        "source_commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2"
+      }
+    },
+    {
+      "id": "nb-amity-point-general-dealers",
+      "source": "feed:noticeboard@2026-08-10T05:28:27+10:00",
+      "locator": "straddie-noticeboard-network/data.js entityGroups[1].entities[10].profile, commit 8a47bd31d",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-noticeboard/1.0",
+      "status": "committed",
+      "quote": "Stradbroke Island listing describes groceries, fuel, bait, tackle, newspapers, hot food, drinks and camping supplies.",
+      "asserts": "real_world",
+      "kind": "organisation-profile",
+      "name": "Amity Point General Dealers",
+      "organisation_type": "Grocery",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Amity Point",
+      "twin_business_id": "amity-point-general-dealers",
+      "address": "9 Ballow Street, Amity Point QLD 4183",
+      "phone": "(07) 3409 7212",
+      "website": null,
+      "abn": "58 375 193 894",
+      "public_status": {
+        "quote": "open / source check needed before publishing hours"
+      },
+      "typical_hours": null,
+      "hours_basis": null,
+      "hours_basis_vocabulary": [
+        "published",
+        "listed",
+        "estimate"
+      ],
+      "hours_gap": {
+        "quote": "Public directory listings commonly show 6:30am-6:00pm, seven days; confirm before publishing."
+      },
+      "also_read": [
+        {
+          "quote": "Yellow Pages listing gives ABN and regular hours."
+        }
+      ],
+      "upstream_sources": [
+        "https://stradbrokeisland.com/amity-point-general-dealers/",
+        "https://www.yellowpages.com.au/amity-qld/bpp/amity-point-general-dealers-580783109"
+      ],
+      "source_boundary": {
+        "quote": "All entity feed ideas are hypothesised from research notes and require direct approval before public use."
+      },
+      "handling": "The source repository calls its own entity list a conversation map rather than a claim that any group has agreed to take part. Nothing here may be shown as participation, endorsement or consent. Hours are a gap, not a time.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 60,
+        "source_commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2"
+      }
+    },
+    {
+      "id": "nb-australia-post-amity-point-lpo",
+      "source": "feed:noticeboard@2026-08-10T05:28:27+10:00",
+      "locator": "straddie-noticeboard-network/data.js entityGroups[1].entities[11].profile, commit 8a47bd31d",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-noticeboard/1.0",
+      "status": "committed",
+      "quote": "Business Recycling includes an AusPost locate URL for Amity Point LPO at 9A Ballow Street.",
+      "asserts": "real_world",
+      "kind": "organisation-profile",
+      "name": "Australia Post Amity Point LPO",
+      "organisation_type": "Postal and parcel service",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Amity Point",
+      "twin_business_id": "australia-post-amity-point-lpo",
+      "address": "9A Ballow Street, Amity QLD 4183",
+      "phone": "(07) 3409 7220",
+      "website": "https://auspost.com.au/locate/post-office/qld/amity/4183/amity-point-lpo-432903",
+      "abn": null,
+      "public_status": {
+        "quote": "open / source check needed before publishing hours"
+      },
+      "typical_hours": null,
+      "hours_basis": null,
+      "hours_basis_vocabulary": [
+        "published",
+        "listed",
+        "estimate"
+      ],
+      "hours_gap": {
+        "quote": "Third-party post-office directories list weekday trading and weekend closure; confirm against AusPost before publishing."
+      },
+      "also_read": [
+        {
+          "quote": "Post office directories list parcel, PO box, Bank@Post and identity/document services, but current service availability should be verified."
+        }
+      ],
+      "upstream_sources": [
+        "https://businessrecycling.com.au/business/7897",
+        "https://www.postopeninghours.com/Post%20Office%20Amity%20Point%20LPO%20%28QLD%29/4183/Amity/qXrmHrWi9jdgTO0p"
+      ],
+      "source_boundary": {
+        "quote": "All entity feed ideas are hypothesised from research notes and require direct approval before public use."
+      },
+      "handling": "The source repository calls its own entity list a conversation map rather than a claim that any group has agreed to take part. Nothing here may be shown as participation, endorsement or consent. Hours are a gap, not a time.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 60,
+        "source_commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2"
+      }
+    },
+    {
+      "id": "nb-australia-post-dunwich-lpo",
+      "source": "feed:noticeboard@2026-08-10T05:28:27+10:00",
+      "locator": "straddie-noticeboard-network/data.js entityGroups[1].entities[12].profile, commit 8a47bd31d",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-noticeboard/1.0",
+      "status": "committed",
+      "quote": "Opening Hours AU and Localmint list Australia Post Dunwich LPO at 3 Welsby Street with phone (07) 3409 9010.",
+      "asserts": "real_world",
+      "kind": "organisation-profile",
+      "name": "Australia Post Dunwich LPO",
+      "organisation_type": "Postal and parcel service",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Dunwich",
+      "twin_business_id": "australia-post-dunwich-lpo",
+      "address": "3 Welsby Street, Dunwich QLD 4183",
+      "phone": "(07) 3409 9010",
+      "website": "https://auspost.com.au/",
+      "abn": null,
+      "public_status": {
+        "quote": "open / source check needed before publishing hours"
+      },
+      "typical_hours": null,
+      "hours_basis": null,
+      "hours_basis_vocabulary": [
+        "published",
+        "listed",
+        "estimate"
+      ],
+      "hours_gap": {
+        "quote": "Public directories list weekday trading and weekend closure; confirm against AusPost before publishing."
+      },
+      "also_read": [
+        {
+          "quote": "Directory hours conflict between 9am-4pm and 9am-5pm, so hours must be checked directly before screen publishing."
+        }
+      ],
+      "upstream_sources": [
+        "https://www.openinghoursau.com/australia-post-dunwich-qld",
+        "https://www.localmint.com/au/australia-post-dunwich-lpo-hours-836934"
+      ],
+      "source_boundary": {
+        "quote": "All entity feed ideas are hypothesised from research notes and require direct approval before public use."
+      },
+      "handling": "The source repository calls its own entity list a conversation map rather than a claim that any group has agreed to take part. Nothing here may be shown as participation, endorsement or consent. Hours are a gap, not a time.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 60,
+        "source_commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2"
+      }
+    },
+    {
+      "id": "nb-australia-post-point-lookout-lpo",
+      "source": "feed:noticeboard@2026-08-10T05:28:27+10:00",
+      "locator": "straddie-noticeboard-network/data.js entityGroups[1].entities[13].profile, commit 8a47bd31d",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-noticeboard/1.0",
+      "status": "committed",
+      "quote": "Chamber of Commerce and Opening Hours AU list Australia Post Point Lookout LPO at Centrepoint Shopping Village / 2 Meegera Place with phone (07) 3409 8210.",
+      "asserts": "real_world",
+      "kind": "organisation-profile",
+      "name": "Australia Post Point Lookout LPO",
+      "organisation_type": "Postal and parcel service",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Point Lookout",
+      "twin_business_id": "australia-post-point-lookout-lpo",
+      "address": "Centrepoint Shopping Village, Shop 3, 2 Meegera Place, Point Lookout QLD 4183",
+      "phone": "(07) 3409 8210",
+      "website": "https://auspost.com.au/locate/showpop/443389",
+      "abn": null,
+      "public_status": {
+        "quote": "open / source check needed before publishing hours"
+      },
+      "typical_hours": null,
+      "hours_basis": null,
+      "hours_basis_vocabulary": [
+        "published",
+        "listed",
+        "estimate"
+      ],
+      "hours_gap": {
+        "quote": "Public directories list Monday-Friday trading and weekend closure; confirm against AusPost before publishing."
+      },
+      "also_read": [
+        {
+          "quote": "The Chamber listing includes an AusPost showpop URL for this LPO, but current hours and services still need direct confirmation."
+        }
+      ],
+      "upstream_sources": [
+        "https://australia.chamberofcommerce.com/business-directory/queensland/point-lookout/mailing-service/4639791-australia-post-point-lookout-lpo",
+        "https://www.openinghoursau.com/australia-post-point-lookout-qld"
+      ],
+      "source_boundary": {
+        "quote": "All entity feed ideas are hypothesised from research notes and require direct approval before public use."
+      },
+      "handling": "The source repository calls its own entity list a conversation map rather than a claim that any group has agreed to take part. Nothing here may be shown as participation, endorsement or consent. Hours are a gap, not a time.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 60,
+        "source_commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2"
+      }
+    },
+    {
+      "id": "nb-amity-point-progress-association",
+      "source": "feed:noticeboard@2026-08-10T05:28:27+10:00",
+      "locator": "straddie-noticeboard-network/data.js entityGroups[2].entities[7].profile, commit 8a47bd31d",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-noticeboard/1.0",
+      "status": "committed",
+      "quote": "ABN Lookup shows ABN status cancelled from 10 Oct 2024.",
+      "asserts": "real_world",
+      "kind": "organisation-profile",
+      "name": "Amity Point Progress Association Inc",
+      "organisation_type": "Closed community advocacy group",
+      "category": "Civic, care and community organisations",
+      "township": "Amity Point",
+      "twin_business_id": null,
+      "address": null,
+      "phone": null,
+      "website": null,
+      "abn": "31 108 354 328",
+      "public_status": {
+        "quote": "closed / archive only"
+      },
+      "typical_hours": null,
+      "hours_basis": null,
+      "hours_basis_vocabulary": [
+        "published",
+        "listed",
+        "estimate"
+      ],
+      "hours_gap": {
+        "quote": "The source records no hours for this organisation."
+      },
+      "also_read": [
+        {
+          "quote": "Older council and heritage sources remain useful historical context, not current publishing approval."
+        }
+      ],
+      "upstream_sources": [
+        "https://abr.business.gov.au/ABN/View?abn=31108354328",
+        "https://www.redland.qld.gov.au/files/4dcd54d5-16ad-4779-a484-789d4a6b9864/Heritage_Card_31__Amity_Point_Public_Hall.pdf"
+      ],
+      "source_boundary": {
+        "quote": "All entity feed ideas are hypothesised from research notes and require direct approval before public use."
+      },
+      "handling": "The source repository calls its own entity list a conversation map rather than a claim that any group has agreed to take part. Nothing here may be shown as participation, endorsement or consent. Hours are a gap, not a time.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 60,
+        "source_commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2"
+      }
+    },
+    {
+      "id": "nb-screen-plfc-wall-01",
+      "source": "feed:noticeboard@2026-08-10T05:28:27+10:00",
+      "locator": "straddie-noticeboard-network/data.js deviceLocations, commit 8a47bd31d",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-noticeboard/1.0",
+      "status": "proposed",
+      "kind": "proposed-screen",
+      "label": "PLFC wall installation",
+      "township": "Point Lookout",
+      "shape": "custom wide wall",
+      "role": "club results, events, sponsor thanks, safety notes",
+      "note": "Proposed. No screen described here exists on the island today, and nothing in this twin may render one as though it did.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 60,
+        "source_commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2"
+      }
+    },
+    {
+      "id": "nb-screen-dunwich-ferry-kiosk-01",
+      "source": "feed:noticeboard@2026-08-10T05:28:27+10:00",
+      "locator": "straddie-noticeboard-network/data.js deviceLocations, commit 8a47bd31d",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-noticeboard/1.0",
+      "status": "proposed",
+      "kind": "proposed-screen",
+      "label": "Dunwich ferry kiosk",
+      "township": "Dunwich",
+      "shape": "portrait public kiosk",
+      "role": "transport, visitor guidance, emergency fallback",
+      "note": "Proposed. No screen described here exists on the island today, and nothing in this twin may render one as though it did.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 60,
+        "source_commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2"
+      }
+    },
+    {
+      "id": "nb-screen-amity-community-screen-01",
+      "source": "feed:noticeboard@2026-08-10T05:28:27+10:00",
+      "locator": "straddie-noticeboard-network/data.js deviceLocations, commit 8a47bd31d",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-noticeboard/1.0",
+      "status": "proposed",
+      "kind": "proposed-screen",
+      "label": "Amity community screen",
+      "township": "Amity Point",
+      "shape": "shopfront or community hall screen",
+      "role": "local notices, fishing, cricket, erosion and events",
+      "note": "Proposed. No screen described here exists on the island today, and nothing in this twin may render one as though it did.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 60,
+        "source_commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2"
+      }
+    },
+    {
+      "id": "nb-screen-point-lookout-counter-01",
+      "source": "feed:noticeboard@2026-08-10T05:28:27+10:00",
+      "locator": "straddie-noticeboard-network/data.js deviceLocations, commit 8a47bd31d",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-noticeboard/1.0",
+      "status": "proposed",
+      "kind": "proposed-screen",
+      "label": "Point Lookout counter tablet",
+      "township": "Point Lookout",
+      "shape": "small tablet",
+      "role": "QR handoff, specials, today-only notices",
+      "note": "Proposed. No screen described here exists on the island today, and nothing in this twin may render one as though it did.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 60,
+        "source_commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2"
+      }
+    },
+    {
+      "id": "nb-screen-ready-set-media-desk-01",
+      "source": "feed:noticeboard@2026-08-10T05:28:27+10:00",
+      "locator": "straddie-noticeboard-network/data.js deviceLocations, commit 8a47bd31d",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-noticeboard/1.0",
+      "status": "proposed",
+      "kind": "proposed-screen",
+      "label": "Ready S.E.T. media desk",
+      "township": "mobile / co-op",
+      "shape": "publisher workstation",
+      "role": "drafting, approval, scheduling, asset packaging",
+      "note": "Proposed. No screen described here exists on the island today, and nothing in this twin may render one as though it did.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 60,
+        "source_commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2"
+      }
+    }
+  ],
+  "held": [],
+  "wanted": [
+    {
+      "id": "nb-want-friends-of-stradbroke-island",
+      "organisation": "Friends of Stradbroke Island",
+      "category": "Environment, wildlife, safety and emergency",
+      "township": "Minjerribah",
+      "twin_business_id": "friends-of-stradbroke-island",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "campaign updates, working bees, environmental education, policy notices",
+      "who_would_have_to_agree": "Friends of Stradbroke Island"
+    },
+    {
+      "id": "nb-want-wildlife-rescue-minjerribah",
+      "organisation": "Wildlife Rescue Minjerribah",
+      "category": "Environment, wildlife, safety and emergency",
+      "township": "Point Lookout",
+      "twin_business_id": "wildlife-rescue-minjerribah",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "wildlife alerts, rescue guidance, volunteer needs, hotline reminders",
+      "who_would_have_to_agree": "Wildlife Rescue Minjerribah"
+    },
+    {
+      "id": "nb-want-point-lookout-surf-life-saving-club",
+      "organisation": "Point Lookout Surf Life Saving Club",
+      "category": "Environment, wildlife, safety and emergency",
+      "township": "Point Lookout",
+      "twin_business_id": "point-lookout-slsc",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "patrol status, beach safety, events, volunteer training",
+      "who_would_have_to_agree": "Point Lookout Surf Life Saving Club"
+    },
+    {
+      "id": "nb-want-volunteer-marine-rescue-north-stradbroke",
+      "organisation": "Volunteer Marine Rescue North Stradbroke",
+      "category": "Environment, wildlife, safety and emergency",
+      "township": "Dunwich",
+      "twin_business_id": "vmr-north-stradbroke",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "marine safety, radio checks, training days, fundraising",
+      "who_would_have_to_agree": "Volunteer Marine Rescue North Stradbroke"
+    },
+    {
+      "id": "nb-want-rural-fire-brigade",
+      "organisation": "Rural Fire Brigade",
+      "category": "Environment, wildlife, safety and emergency",
+      "township": "Point Lookout / Dunwich / Amity",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "fire safety, preparedness days, volunteer call-outs, incident-safe public alerts",
+      "who_would_have_to_agree": "Rural Fire Brigade"
+    },
+    {
+      "id": "nb-want-point-lookout-bushcare",
+      "organisation": "Point Lookout Bushcare",
+      "category": "Environment, wildlife, safety and emergency",
+      "township": "Point Lookout",
+      "twin_business_id": "point-lookout-bushcare",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "working bees, weed alerts, volunteer rosters, before-and-after stories",
+      "who_would_have_to_agree": "Point Lookout Bushcare"
+    },
+    {
+      "id": "nb-want-wildcare-straddie",
+      "organisation": "Wildcare Straddie",
+      "category": "Environment, wildlife, safety and emergency",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "wildlife education, care needs, rescue-safe public guidance",
+      "who_would_have_to_agree": "Wildcare Straddie"
+    },
+    {
+      "id": "nb-want-straddie-brewing-co",
+      "organisation": "Straddie Brewing Co.",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Dunwich",
+      "twin_business_id": "straddie-brewing-co",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "live music, biodiversity pop-ups, taps, food trucks, event nights",
+      "who_would_have_to_agree": "Straddie Brewing Co."
+    },
+    {
+      "id": "nb-want-stradbroke-island-beach-hotel",
+      "organisation": "Stradbroke Island Beach Hotel",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Point Lookout",
+      "twin_business_id": "stradbroke-island-beach-hotel",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "events, dining times, accommodation alerts, New Year's Eve notices",
+      "who_would_have_to_agree": "Stradbroke Island Beach Hotel"
+    },
+    {
+      "id": "nb-want-taste-of-straddie",
+      "organisation": "Taste of Straddie",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "local flavour features, tastings, producer stories, seasonal specials",
+      "who_would_have_to_agree": "Taste of Straddie"
+    },
+    {
+      "id": "nb-want-the-point-bar-and-bistro",
+      "organisation": "The Point Bar and Bistro",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Point Lookout Surf Club",
+      "twin_business_id": "the-point-bar-and-bistro",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "meal specials, surf-club events, safety-aware visitor notices",
+      "who_would_have_to_agree": "The Point Bar and Bistro"
+    },
+    {
+      "id": "nb-want-whale-tail-gelati-and-coffee-bar",
+      "organisation": "Whale Tail Gelati and Coffee Bar",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "flavours, coffee hours, whale-season signals, family-friendly notices",
+      "who_would_have_to_agree": "Whale Tail Gelati and Coffee Bar"
+    },
+    {
+      "id": "nb-want-stradbroke-island-foodworks",
+      "organisation": "Stradbroke Island Foodworks",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Dunwich",
+      "twin_business_id": "foodworks-dunwich",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "essential stock notes, opening changes, supply disruptions, community drives",
+      "who_would_have_to_agree": "Stradbroke Island Foodworks"
+    },
+    {
+      "id": "nb-want-spar-express-dunwich",
+      "organisation": "Spar Express Dunwich",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Dunwich",
+      "twin_business_id": "spar-express-dunwich",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "stock updates, opening hours, quick specials, ferry-delay supply notes",
+      "who_would_have_to_agree": "Spar Express Dunwich"
+    },
+    {
+      "id": "nb-want-stradbroke-island-butchery",
+      "organisation": "Stradbroke Island Butchery",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Dunwich",
+      "twin_business_id": "stradbroke-island-butchery",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "weekly cuts, BBQ packs, community fundraiser packs, order deadlines",
+      "who_would_have_to_agree": "Stradbroke Island Butchery"
+    },
+    {
+      "id": "nb-want-straddie-servo-and-hardware",
+      "organisation": "Straddie Servo and Hardware",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Dunwich",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "fuel availability, gas bottle notes, hardware stock, storm prep reminders",
+      "who_would_have_to_agree": "Straddie Servo and Hardware"
+    },
+    {
+      "id": "nb-want-stradbroke-pharmacy",
+      "organisation": "Stradbroke Pharmacy",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Dunwich",
+      "twin_business_id": "stradbroke-pharmacy",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "opening changes, health reminders, script collection notices, heatwave notes",
+      "who_would_have_to_agree": "Stradbroke Pharmacy"
+    },
+    {
+      "id": "nb-want-point-lookout-pharmacy",
+      "organisation": "Point Lookout Pharmacy",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Point Lookout",
+      "twin_business_id": "point-lookout-pharmacy",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "opening changes, sunscreen and first-aid prompts, visitor health notes",
+      "who_would_have_to_agree": "Point Lookout Pharmacy"
+    },
+    {
+      "id": "nb-want-point-lookout-news-agent",
+      "organisation": "Point Lookout News Agent",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Point Lookout",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "newspapers, parcels, lotto reminders, local notice drops",
+      "who_would_have_to_agree": "Point Lookout News Agent"
+    },
+    {
+      "id": "nb-want-straddie-super-sports",
+      "organisation": "Straddie Super Sports",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Dunwich",
+      "twin_business_id": "straddie-super-sports",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "gear specials, event packs, junior sport notices, repair windows",
+      "who_would_have_to_agree": "Straddie Super Sports"
+    },
+    {
+      "id": "nb-want-bob-minty-surfboards",
+      "organisation": "Bob Minty Surfboards",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "board repairs, surf notes, product drops, local rider stories",
+      "who_would_have_to_agree": "Bob Minty Surfboards"
+    },
+    {
+      "id": "nb-want-noreen-s-seaside-shop",
+      "organisation": "Noreen's Seaside Shop",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Minjerribah",
+      "twin_business_id": "noreens-seaside-shop",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "gift features, opening hours, visitor-friendly local finds",
+      "who_would_have_to_agree": "Noreen's Seaside Shop"
+    },
+    {
+      "id": "nb-want-straddie-market-co",
+      "organisation": "Straddie Market Co.",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "market days, stallholder call-outs, produce highlights",
+      "who_would_have_to_agree": "Straddie Market Co."
+    },
+    {
+      "id": "nb-want-st-stradbroke-wine-bar-and-cellar-door",
+      "organisation": "St Stradbroke Wine Bar and Cellar Door",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Minjerribah",
+      "twin_business_id": "st-stradbroke",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "tastings, cellar specials, small-event calendar",
+      "who_would_have_to_agree": "St Stradbroke Wine Bar and Cellar Door"
+    },
+    {
+      "id": "nb-want-cellarbrations-bottle-shop",
+      "organisation": "Cellarbrations Bottle Shop",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "opening hours, specials, responsible drinking notices",
+      "who_would_have_to_agree": "Cellarbrations Bottle Shop"
+    },
+    {
+      "id": "nb-want-st-mark-s-thrift-shop",
+      "organisation": "St Mark's Thrift Shop",
+      "category": "Food, drink, shops and island supplies",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "donation days, volunteer rosters, sale racks, community support notes",
+      "who_would_have_to_agree": "St Mark's Thrift Shop"
+    },
+    {
+      "id": "nb-want-quandamooka-yoolooburrabee-aboriginal-corporation",
+      "organisation": "Quandamooka Yoolooburrabee Aboriginal Corporation",
+      "category": "Civic, care and community organisations",
+      "township": "Dunwich",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": null,
+      "who_would_have_to_agree": "Quandamooka Yoolooburrabee Aboriginal Corporation",
+      "cultural_handling": "This entry names a Traditional Owner organisation. It carries the name and the fact that nobody has asked, and nothing else. Whatever the source repository guessed this organisation might provide is dropped here, because a guess about what a body would supply reads as that body's intention. Nothing may be added to this entry without a person going and asking. The queue is docs/CULTURAL-REVIEW.md."
+    },
+    {
+      "id": "nb-want-straddie-chamber-of-commerce",
+      "organisation": "Straddie Chamber of Commerce",
+      "category": "Civic, care and community organisations",
+      "township": "Point Lookout",
+      "twin_business_id": "straddie-chamber-of-commerce",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "member notices, business workshops, local economy updates, grant alerts",
+      "who_would_have_to_agree": "Straddie Chamber of Commerce"
+    },
+    {
+      "id": "nb-want-north-stradbroke-island-aboriginal-and-islander-housing-society",
+      "organisation": "North Stradbroke Island Aboriginal and Islander Housing Society",
+      "category": "Civic, care and community organisations",
+      "township": "Minjerribah",
+      "twin_business_id": "nsi-aboriginal-and-islander-housing-society",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "public service notices, meeting dates, community program updates",
+      "who_would_have_to_agree": "North Stradbroke Island Aboriginal and Islander Housing Society"
+    },
+    {
+      "id": "nb-want-nareeba-moopi-moopi-pa-aged-care",
+      "organisation": "Nareeba Moopi Moopi Pa Aged Care",
+      "category": "Civic, care and community organisations",
+      "township": "One Mile",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "community visits, volunteer needs, public event notices",
+      "who_would_have_to_agree": "Nareeba Moopi Moopi Pa Aged Care"
+    },
+    {
+      "id": "nb-want-north-stradbroke-island-historical-museum",
+      "organisation": "North Stradbroke Island Historical Museum",
+      "category": "Civic, care and community organisations",
+      "township": "Dunwich",
+      "twin_business_id": "nsi-museum-on-minjerribah",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "exhibitions, opening hours, research calls, volunteer days",
+      "who_would_have_to_agree": "North Stradbroke Island Historical Museum"
+    },
+    {
+      "id": "nb-want-minjerribah-and-moorgumpin-elders-in-council",
+      "organisation": "Minjerribah and Moorgumpin Elders in Council",
+      "category": "Civic, care and community organisations",
+      "township": "Dunwich",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": null,
+      "who_would_have_to_agree": "Minjerribah and Moorgumpin Elders in Council",
+      "cultural_handling": "This entry names a Traditional Owner organisation. It carries the name and the fact that nobody has asked, and nothing else. Whatever the source repository guessed this organisation might provide is dropped here, because a guess about what a body would supply reads as that body's intention. Nothing may be added to this entry without a person going and asking. The queue is docs/CULTURAL-REVIEW.md."
+    },
+    {
+      "id": "nb-want-youthlink",
+      "organisation": "Youthlink",
+      "category": "Civic, care and community organisations",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "youth activities, mentoring sessions, sport and arts invitations",
+      "who_would_have_to_agree": "Youthlink"
+    },
+    {
+      "id": "nb-want-lighthouse-community-church",
+      "organisation": "Lighthouse Community Church",
+      "category": "Civic, care and community organisations",
+      "township": "Dunwich",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "service times, community meals, support notices",
+      "who_would_have_to_agree": "Lighthouse Community Church"
+    },
+    {
+      "id": "nb-want-north-stradbroke-island-buddhist-group",
+      "organisation": "North Stradbroke Island Buddhist Group",
+      "category": "Civic, care and community organisations",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "meditation times, public talks, retreat notices",
+      "who_would_have_to_agree": "North Stradbroke Island Buddhist Group"
+    },
+    {
+      "id": "nb-want-st-peter-chanel-church",
+      "organisation": "St. Peter Chanel Church",
+      "category": "Civic, care and community organisations",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "service times, parish notices, community support",
+      "who_would_have_to_agree": "St. Peter Chanel Church"
+    },
+    {
+      "id": "nb-want-st-paul-of-the-cross-catholic-church",
+      "organisation": "St. Paul of the Cross Catholic Church",
+      "category": "Civic, care and community organisations",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "service times, parish events, community care notices",
+      "who_would_have_to_agree": "St. Paul of the Cross Catholic Church"
+    },
+    {
+      "id": "nb-want-straddie-island-news-facebook-group",
+      "organisation": "Straddie Island News Facebook Group",
+      "category": "Civic, care and community organisations",
+      "township": "Online",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "public-safe story leads, community calls, cross-posted verified notices",
+      "who_would_have_to_agree": "Straddie Island News Facebook Group"
+    },
+    {
+      "id": "nb-want-mal-starkey-seafood-and-charters",
+      "organisation": "Mal Starkey Seafood and Charters",
+      "category": "Tourism, property, charters and transport",
+      "township": "Minjerribah",
+      "twin_business_id": "mal-starkey-seafood",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "charter availability, weather windows, seafood updates, safety notes",
+      "who_would_have_to_agree": "Mal Starkey Seafood and Charters"
+    },
+    {
+      "id": "nb-want-discover-stradbroke-real-estate",
+      "organisation": "Discover Stradbroke Real Estate",
+      "category": "Tourism, property, charters and transport",
+      "township": "Minjerribah",
+      "twin_business_id": "discover-stradbroke-real-estate",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "open homes, rental availability, community notices for guests",
+      "who_would_have_to_agree": "Discover Stradbroke Real Estate"
+    },
+    {
+      "id": "nb-want-dolphin-property-sales",
+      "organisation": "Dolphin Property Sales",
+      "category": "Tourism, property, charters and transport",
+      "township": "Minjerribah",
+      "twin_business_id": "dolphin-property-sales",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "open homes, market updates, buyer information sessions",
+      "who_would_have_to_agree": "Dolphin Property Sales"
+    },
+    {
+      "id": "nb-want-north-stradbroke-island-surf-school",
+      "organisation": "North Stradbroke Island Surf School",
+      "category": "Tourism, property, charters and transport",
+      "township": "Point Lookout",
+      "twin_business_id": "north-stradbroke-island-surf-school",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "lesson times, surf conditions, junior sessions, safety flags",
+      "who_would_have_to_agree": "North Stradbroke Island Surf School"
+    },
+    {
+      "id": "nb-want-yura-tours",
+      "organisation": "Yura Tours",
+      "category": "Tourism, property, charters and transport",
+      "township": "Minjerribah",
+      "twin_business_id": "yura-tours",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "tour availability, booking prompts, cultural respect notes",
+      "who_would_have_to_agree": "Yura Tours"
+    },
+    {
+      "id": "nb-want-goompi-trail",
+      "organisation": "Goompi Trail",
+      "category": "Tourism, property, charters and transport",
+      "township": "Dunwich / Goompi",
+      "twin_business_id": "goompi-trail",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "walk times, heritage learning notes, visitor behaviour prompts",
+      "who_would_have_to_agree": "Goompi Trail"
+    },
+    {
+      "id": "nb-want-sealink-south-east-queensland",
+      "organisation": "SeaLink South East Queensland",
+      "category": "Tourism, property, charters and transport",
+      "township": "Cleveland / Dunwich",
+      "twin_business_id": "sealink-south-east-queensland",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "ferry status, capacity signals, service changes, disruption notices",
+      "who_would_have_to_agree": "SeaLink South East Queensland"
+    },
+    {
+      "id": "nb-want-point-lookout-fishing-club",
+      "organisation": "Point Lookout Fishing Club",
+      "category": "Sport, recreation and clubs",
+      "township": "Point Lookout",
+      "twin_business_id": "point-lookout-fishing-club",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "competition dates, public catch ledger, junior clinics, sponsor thanks, safety notes",
+      "who_would_have_to_agree": "Point Lookout Fishing Club"
+    },
+    {
+      "id": "nb-want-straddie-sharks-allsports-rugby-league-club",
+      "organisation": "Straddie Sharks Allsports Rugby League Club",
+      "category": "Sport, recreation and clubs",
+      "township": "Dunwich",
+      "twin_business_id": "straddie-sharks-all-sports-club",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "fixtures, carnival notices, team calls, fundraiser updates",
+      "who_would_have_to_agree": "Straddie Sharks Allsports Rugby League Club"
+    },
+    {
+      "id": "nb-want-point-lookout-bowls-club",
+      "organisation": "Point Lookout Bowls Club",
+      "category": "Sport, recreation and clubs",
+      "township": "Point Lookout",
+      "twin_business_id": "point-lookout-bowls-club",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "social bowls, meal nights, member events, visitor invitations",
+      "who_would_have_to_agree": "Point Lookout Bowls Club"
+    },
+    {
+      "id": "nb-want-amity-point-cricket-club",
+      "organisation": "Amity Point Cricket Club",
+      "category": "Sport, recreation and clubs",
+      "township": "Amity Point",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "fixtures, training, working bees, junior cricket notices",
+      "who_would_have_to_agree": "Amity Point Cricket Club"
+    },
+    {
+      "id": "nb-want-point-lookout-boardriders",
+      "organisation": "Point Lookout Boardriders",
+      "category": "Sport, recreation and clubs",
+      "township": "Point Lookout",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "comp dates, surf safety, junior programs, club results",
+      "who_would_have_to_agree": "Point Lookout Boardriders"
+    },
+    {
+      "id": "nb-want-stradbroke-trail-riders-horse-club",
+      "organisation": "Stradbroke Trail Riders Horse Club",
+      "category": "Sport, recreation and clubs",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "ride dates, track notices, horse care reminders",
+      "who_would_have_to_agree": "Stradbroke Trail Riders Horse Club"
+    },
+    {
+      "id": "nb-want-north-stradbroke-island-golf-club",
+      "organisation": "North Stradbroke Island Golf Club",
+      "category": "Sport, recreation and clubs",
+      "township": "Dunwich",
+      "twin_business_id": "north-stradbroke-island-golf-club",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "competition days, course conditions, social golf invitations",
+      "who_would_have_to_agree": "North Stradbroke Island Golf Club"
+    },
+    {
+      "id": "nb-want-point-lookout-tennis-club",
+      "organisation": "Point Lookout Tennis Club",
+      "category": "Sport, recreation and clubs",
+      "township": "Point Lookout",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "court availability, social tennis, junior sessions",
+      "who_would_have_to_agree": "Point Lookout Tennis Club"
+    },
+    {
+      "id": "nb-want-amity-fishing-club",
+      "organisation": "Amity Fishing Club",
+      "category": "Sport, recreation and clubs",
+      "township": "Amity Point",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "fishing days, safety notes, member events, catch education",
+      "who_would_have_to_agree": "Amity Fishing Club"
+    },
+    {
+      "id": "nb-want-dunwich-swimming-pool-club",
+      "organisation": "Dunwich Swimming Pool / Club",
+      "category": "Sport, recreation and clubs",
+      "township": "Dunwich",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "pool status, lesson times, swimming club notices",
+      "who_would_have_to_agree": "Dunwich Swimming Pool / Club"
+    },
+    {
+      "id": "nb-want-stradbroke-island-events",
+      "organisation": "Stradbroke Island Events",
+      "category": "Events, festivals and markets",
+      "township": "Point Lookout",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "event calendars, supplier call-outs, bump-in times, visitor notices",
+      "who_would_have_to_agree": "Stradbroke Island Events"
+    },
+    {
+      "id": "nb-want-straddie-salute-triathlon",
+      "organisation": "Straddie Salute Triathlon",
+      "category": "Events, festivals and markets",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "dates, course notes, volunteer needs, road impacts",
+      "who_would_have_to_agree": "Straddie Salute Triathlon"
+    },
+    {
+      "id": "nb-want-redlands-coast-adventurefest",
+      "organisation": "Redlands Coast AdventureFest",
+      "category": "Events, festivals and markets",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "dates, routes, safety notices, visitor guidance",
+      "who_would_have_to_agree": "Redlands Coast AdventureFest"
+    },
+    {
+      "id": "nb-want-stradbroke-chamber-music-festival",
+      "organisation": "Stradbroke Chamber Music Festival",
+      "category": "Events, festivals and markets",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "program, venue changes, artist talks, ticket prompts",
+      "who_would_have_to_agree": "Stradbroke Chamber Music Festival"
+    },
+    {
+      "id": "nb-want-straddie-arts-trail",
+      "organisation": "Straddie Arts Trail",
+      "category": "Events, festivals and markets",
+      "township": "Island-wide",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "studio openings, artist maps, workshops, weather changes",
+      "who_would_have_to_agree": "Straddie Arts Trail"
+    },
+    {
+      "id": "nb-want-quandamooka-festival",
+      "organisation": "Quandamooka Festival",
+      "category": "Events, festivals and markets",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "approved program notices, access notes, cultural respect prompts",
+      "who_would_have_to_agree": "Quandamooka Festival"
+    },
+    {
+      "id": "nb-want-straddie-invitational",
+      "organisation": "Straddie Invitational",
+      "category": "Events, festivals and markets",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "heat schedule, results, surf conditions, club updates",
+      "who_would_have_to_agree": "Straddie Invitational"
+    },
+    {
+      "id": "nb-want-straddie-oyster-festival",
+      "organisation": "Straddie Oyster Festival",
+      "category": "Events, festivals and markets",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "food stalls, program, transport notes, sponsor thanks",
+      "who_would_have_to_agree": "Straddie Oyster Festival"
+    },
+    {
+      "id": "nb-want-straddie-sharks-easter-carnival",
+      "organisation": "Straddie Sharks Easter Carnival",
+      "category": "Events, festivals and markets",
+      "township": "Dunwich",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "fixtures, stalls, fundraising, family notices",
+      "who_would_have_to_agree": "Straddie Sharks Easter Carnival"
+    },
+    {
+      "id": "nb-want-straddie-hotel-new-year-s-eve",
+      "organisation": "Straddie Hotel New Year's Eve",
+      "category": "Events, festivals and markets",
+      "township": "Point Lookout",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "event times, safety notes, transport reminders",
+      "who_would_have_to_agree": "Straddie Hotel New Year's Eve"
+    },
+    {
+      "id": "nb-want-point-lookout-markets",
+      "organisation": "Point Lookout Markets",
+      "category": "Events, festivals and markets",
+      "township": "Point Lookout",
+      "twin_business_id": "point-lookout-markets",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "stallholder list, market dates, weather calls",
+      "who_would_have_to_agree": "Point Lookout Markets"
+    },
+    {
+      "id": "nb-want-grass-roots-live-music",
+      "organisation": "Grass Roots Live Music",
+      "category": "Events, festivals and markets",
+      "township": "Dunwich",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "line-up, set times, venue notices, family-friendly notes",
+      "who_would_have_to_agree": "Grass Roots Live Music"
+    },
+    {
+      "id": "nb-want-twist-weave-workshop",
+      "organisation": "Twist Weave Workshop",
+      "category": "Events, festivals and markets",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "workshop times, booking notes, material needs",
+      "who_would_have_to_agree": "Twist Weave Workshop"
+    },
+    {
+      "id": "nb-want-fight-night-beer-vs-wine",
+      "organisation": "Fight Night: Beer vs Wine",
+      "category": "Events, festivals and markets",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "date, venue, booking link, responsible drinking notes",
+      "who_would_have_to_agree": "Fight Night: Beer vs Wine"
+    },
+    {
+      "id": "nb-want-stradbroke-island-singers",
+      "organisation": "Stradbroke Island Singers",
+      "category": "Artists, makers and creative hubs",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "rehearsals, concerts, community singing invitations",
+      "who_would_have_to_agree": "Stradbroke Island Singers"
+    },
+    {
+      "id": "nb-want-bay-players-theatre-group",
+      "organisation": "Bay Players Theatre Group",
+      "category": "Artists, makers and creative hubs",
+      "township": "Dunwich Community Hall",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "auditions, shows, rehearsal times, volunteer calls",
+      "who_would_have_to_agree": "Bay Players Theatre Group"
+    },
+    {
+      "id": "nb-want-amity-point-community-club",
+      "organisation": "Amity Point Community Club",
+      "category": "Artists, makers and creative hubs",
+      "township": "Amity Point",
+      "twin_business_id": "amity-point-community-club",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "display dates, archive calls, club exhibition notes",
+      "who_would_have_to_agree": "Amity Point Community Club"
+    },
+    {
+      "id": "nb-want-hidden-oasis-art-show",
+      "organisation": "Hidden Oasis Art Show",
+      "category": "Artists, makers and creative hubs",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "fundraiser dates, school support notes, artist call-outs",
+      "who_would_have_to_agree": "Hidden Oasis Art Show"
+    },
+    {
+      "id": "nb-want-starfish-studio",
+      "organisation": "Starfish Studio",
+      "category": "Artists, makers and creative hubs",
+      "township": "Minjerribah",
+      "twin_business_id": "starfish-studio",
+      "what": "This organisation is already in data/businesses.json and the noticeboard has confirmed nothing about it.",
+      "what_the_source_thinks_it_might_share": "studio hours, product drops, artist features",
+      "who_would_have_to_agree": "Starfish Studio"
+    },
+    {
+      "id": "nb-want-russell-specht-carpentry",
+      "organisation": "Russell Specht Carpentry",
+      "category": "Trades, construction and local services",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "availability blocks, repair tips, materials notices, apprentice call-outs",
+      "who_would_have_to_agree": "Russell Specht Carpentry"
+    },
+    {
+      "id": "nb-want-henderson-construction",
+      "organisation": "Henderson Construction",
+      "category": "Trades, construction and local services",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "crew availability, scaffolding windows, safety notices",
+      "who_would_have_to_agree": "Henderson Construction"
+    },
+    {
+      "id": "nb-want-nsi-property-maintenance",
+      "organisation": "NSI Property Maintenance",
+      "category": "Trades, construction and local services",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "maintenance rounds, green-waste reminders, storm clean-up capacity",
+      "who_would_have_to_agree": "NSI Property Maintenance"
+    },
+    {
+      "id": "nb-want-hutch-welding",
+      "organisation": "Hutch Welding",
+      "category": "Trades, construction and local services",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "repair capacity, marine or trailer safety reminders, booking windows",
+      "who_would_have_to_agree": "Hutch Welding"
+    },
+    {
+      "id": "nb-want-straddie-signs",
+      "organisation": "Straddie Signs",
+      "category": "Trades, construction and local services",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "event sign deadlines, sponsor board options, public notice templates",
+      "who_would_have_to_agree": "Straddie Signs"
+    },
+    {
+      "id": "nb-want-mazzoni-plant-hire",
+      "organisation": "Mazzoni Plant Hire",
+      "category": "Trades, construction and local services",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "machine availability, transport limits, wet-weather constraints",
+      "who_would_have_to_agree": "Mazzoni Plant Hire"
+    },
+    {
+      "id": "nb-want-stradbroke-net-marketing",
+      "organisation": "Stradbroke Net Marketing",
+      "category": "Trades, construction and local services",
+      "township": "Point Lookout",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "digital campaign windows, tourism updates, local web support availability",
+      "who_would_have_to_agree": "Stradbroke Net Marketing"
+    },
+    {
+      "id": "nb-want-lanndam-pty-ltd",
+      "organisation": "Lanndam Pty Ltd",
+      "category": "Trades, construction and local services",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "service availability, project notes, public contact windows",
+      "who_would_have_to_agree": "Lanndam Pty Ltd"
+    },
+    {
+      "id": "nb-want-locked-in-services",
+      "organisation": "Locked In Services",
+      "category": "Trades, construction and local services",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "service availability, booking notes, community support offers",
+      "who_would_have_to_agree": "Locked In Services"
+    },
+    {
+      "id": "nb-want-six-by-fifty-pty-ltd",
+      "organisation": "Six by Fifty Pty Ltd",
+      "category": "Trades, construction and local services",
+      "township": "Minjerribah",
+      "twin_business_id": null,
+      "what": "This organisation is named in the noticeboard and is in no pack in this twin.",
+      "what_the_source_thinks_it_might_share": "service availability, public project updates, workshop invitations",
+      "who_would_have_to_agree": "Six by Fifty Pty Ltd"
+    },
+    {
+      "id": "nb-want-hours",
+      "what": "Opening hours, from the operators. Not one organisation in the source repository carries confirmed hours, and several say in their own words that hours need confirming before publishing.",
+      "why_it_matters": "Of the 40 organisations this feed can match to data/businesses.json, 12 have hours the business published itself, 3 have hours a directory published, and 24 are still opening and closing on an estimate. An estimate is a modelling pattern and it is never shown to a player as a fact, which means the twin cannot currently tell anybody whether the bakery is open on a Tuesday in June.",
+      "who_would_have_to_agree": "Each operator, one at a time.",
+      "how_small_it_could_start": "One line per business: the days it opens, the hours, and the date it was said. The twin shows the date beside the hours, always, and says which of the three bases it rests on."
+    }
+  ],
+  "privacy": {
+    "rule": "Named private individuals and personal contact details are not committed to this repository.",
+    "applied": "10 August 2026, before the repository was made public.",
+    "removed_from_wanted": 6,
+    "fields_withheld": 1,
+    "note": "A source organisation may be named. A private person may not, even where a public noticeboard named them. Where a feed would need one person to agree, that is recorded as a role rather than a name."
+  }
+}

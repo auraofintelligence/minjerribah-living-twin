@@ -31,6 +31,7 @@ import {
   clamp, lerp, smoothstep, levers, humanLoad, metric, places, place, ecoGrid, absDay,
   DailyRing, EventLog
 } from '../ecology/ecology-common.js';
+import { makeCalendar } from '../agents/calendar.js';
 
 export { clamp, lerp, smoothstep, levers, humanLoad, metric, places, place, ecoGrid, absDay, DailyRing, EventLog };
 
@@ -120,67 +121,32 @@ export function townshipShares(world) {
 
 /* ------------------------------------------------------------------ named events
 
-data/events.json carries twenty-seven real events with published or estimated attendance, and every
-one of them lists what it needs: bins, toilets, potable water, stage power, ferry seats. Nothing in
-the build reads that list yet. The visitor system drives arrivals off the school calendar and the
-long weekends, which is right, and it does not know that the Quandamooka Festival is on. So a
-festival crowd is genuinely missing from `visitors.onIsland`, and adding its published load here is
-not double counting.
+data/events.json carries thirty-six real events with published or estimated attendance, and every
+one of them lists what it needs: bins, toilets, potable water, stage power, ferry seats.
 
-Only events with a `next_known` window are used. An event whose date rule is "third weekend of
-March, irregular" is not given a date by this file, because inventing one would put a festival on
-the island on a day it was not held. */
+REWRITTEN 10 AUGUST 2026, and the old version is worth recording because it was the only door the
+pack had into the whole simulation. It read each record's `next_known` window and nothing else.
+Every `next_known` in the pack is a 2026 date, and eleven records have none at all, so the weekly
+and the monthly ones had never once fired and every dated one would have stopped on 1 January 2027.
+Four infrastructure systems were reading a list that was empty on most days and would have been
+empty on every day of a second sim-year.
 
-const eventCache = new WeakMap();
+It now resolves each record's own `date_rule` through `src/systems/agents/calendar.js`, the same
+helper the agent systems already import and the same arithmetic the calendar board shows a player,
+so the bins a festival needs and the date the board prints cannot disagree.
 
-function readEventPack(world) {
-  let e = eventCache.get(world);
-  if (e) return e;
-  e = [];
-  const list = (world.data && world.data.events && world.data.events.events) || [];
-  for (const ev of list) {
-    const nk = ev.next_known;
-    if (!nk || !nk.start) continue;
-    if (ev.status && ev.status !== 'current') continue;
-    const start = Date.parse(nk.start + 'T00:00:00Z');
-    const end = Date.parse((nk.end || nk.start) + 'T00:00:00Z');
-    if (!Number.isFinite(start) || !Number.isFinite(end)) continue;
-    const att = ev.attendance || {};
-    const strains = {};
-    for (const s of ev.strains || []) strains[s.system] = s.level;
-    e.push({
-      id: ev.id,
-      name: ev.name,
-      category: ev.category || 'event',
-      startDay: Math.floor(start / 86400000),
-      endDay: Math.floor(end / 86400000),
-      // Attendance across the whole event, spread over its days. `typical` is the pack's own
-      // middle estimate and every one of them is flagged as an estimate with low confidence.
-      peakOnSite: att.typical || att.low || 0,
-      cumulative: att.cumulative_over_event || att.typical || 0,
-      confidence: att.confidence || 'low',
-      extraBins: (ev.needs && ev.needs.waste_extra_bins) || 0,
-      needsWater: !!(ev.needs && ev.needs.potable_water),
-      needsPower: !!(ev.needs && ev.needs.power),
-      strains,
-      places: ev.place_ids || [],
-      // Which township carries it. Every event in the pack lands in one of the three or on a beach
-      // that belongs to one, so an unmatched event is island-wide rather than invented into a town.
-      township: townshipOfPlaces(ev.place_ids || [])
-    });
-  }
-  e.sort((a, b) => (a.startDay - b.startDay) || (a.id < b.id ? -1 : 1));
-  eventCache.set(world, e);
-  return e;
-}
+Read through the calendar rather than through `world.read('events')` on purpose: the infrastructure
+phase runs before the agents phase, so a read model would be one tick stale at midnight, and a
+shared pure helper has no phase at all. */
 
-function townshipOfPlaces(ids) {
-  for (const id of ids) {
-    if (id === 'dunwich' || id === 'one-mile-jetty' || id === 'dunwich-foreshore') return 'dunwich';
-    if (/point-lookout|cylinder|home-beach|deadmans|frenchmans|main-beach|gorge|adder|headland/.test(id)) return 'point-lookout';
-    if (/amity/.test(id)) return 'amity-point';
-  }
-  return 'island-wide';
+const calCache = new WeakMap();
+
+function calendarFor(world) {
+  let c = calCache.get(world);
+  if (c) return c;
+  c = (world.residents && world.residents.calendar) || makeCalendar(world.data && world.data.events);
+  calCache.set(world, c);
+  return c;
 }
 
 /**
@@ -191,15 +157,23 @@ function townshipOfPlaces(ids) {
 export function eventsToday(world) {
   const day = absDay(world.clock);
   const out = { running: [], crowd: 0, extraBins: 0, wasteStrain: 0, waterStrain: 0, powerStrain: 0, byTownship: {} };
-  for (const ev of readEventPack(world)) {
-    if (day < ev.startDay || day > ev.endDay) continue;
-    out.running.push({ id: ev.id, name: ev.name, township: ev.township, crowd: ev.peakOnSite, confidence: ev.confidence });
-    out.crowd += ev.peakOnSite;
-    out.extraBins += ev.extraBins;
-    out.wasteStrain = Math.max(out.wasteStrain, ev.strains.waste || 0);
-    out.waterStrain = Math.max(out.waterStrain, ev.strains.water || 0);
-    out.powerStrain = Math.max(out.powerStrain, ev.strains.power || 0);
-    out.byTownship[ev.township] = (out.byTownship[ev.township] || 0) + ev.peakOnSite;
+  for (const ev of calendarFor(world).eventsOnDay(day)) {
+    const rec = ev.rec;
+    const att = rec.attendance || {};
+    const needs = rec.needs || null;
+    const strains = {};
+    for (const s of rec.strains || []) strains[s.system] = s.level;
+    out.running.push({
+      id: ev.id, name: ev.name, township: ev.township, crowd: ev.peak,
+      confidence: att.confidence || rec.confidence || 'low',
+      dayOfEvent: ev.dayOfEvent, days: ev.days
+    });
+    out.crowd += ev.peak;
+    out.extraBins += (needs && needs.waste_extra_bins) || 0;
+    out.wasteStrain = Math.max(out.wasteStrain, strains.waste || 0);
+    out.waterStrain = Math.max(out.waterStrain, strains.water || 0);
+    out.powerStrain = Math.max(out.powerStrain, strains.power || 0);
+    out.byTownship[ev.township] = (out.byTownship[ev.township] || 0) + ev.peak;
   }
   return out;
 }

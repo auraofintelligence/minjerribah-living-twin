@@ -538,6 +538,28 @@ export function registerFerry(world) {
     const load = (info.loadMultiplier || 1);
     let want = Math.round(base * (0.75 + 0.55 * load) * (0.85 + rng.float() * 0.35));
     if (vis.pressure) want = Math.round(want * clamp(0.8 + vis.pressure * 0.5, 0.8, 2.2));
+
+    // An event does not just add people to a day, it puts them on particular boats. A dawn surf
+    // contest fills the early sailings out of Cleveland and empties the island in one hour after
+    // the last heat; an evening concert cannot draw a day tripper at all, because the last water
+    // taxi home beats the encore. The shape comes from each record's own crowd curve in
+    // data/events.json, resolved by src/systems/agents/calendar.js.
+    const events = info.events || [];
+    if (events.length) {
+      let pull = 0;
+      for (const ev of events) {
+        if (!ev.curve || ev.peak < 100) continue;
+        const rise = ev.curve[Math.max(0, Math.floor(h) - 1)] || 0;
+        const now = ev.curve[Math.min(23, Math.floor(h))] || 0;
+        const later = ev.curve[Math.min(23, Math.floor(h) + 1)] || 0;
+        // Toward the island while the curve is climbing, toward the mainland while it falls.
+        const climbing = Math.max(0, now - rise);
+        const falling = Math.max(0, now - later);
+        const share = s.dir === 'to-island' ? climbing : falling;
+        pull += ev.peak * ev.incrementShare * share * 0.5;
+      }
+      if (pull > 0) want += Math.round(pull);
+    }
     void sched;
 
     const cap = s.capacityPax || flyerSeats;

@@ -26,8 +26,14 @@
 //             by wrapping the info view controller rather than editing it, and it puts everything
 //             back when switched off.
 //
-//   SIMULATION default speed and autosave. Autosave runs on a day boundary from the UI loop, never
-//             on a tick, because the sim is already at 3.9 ms of a 4 ms budget.
+//   SIMULATION what kind of time the island runs in, the moment it opens at, default speed and
+//             autosave. The clock has three declared modes and src/kernel/clock.js is where they
+//             are written down; this tab is where a person chooses between them and reads the
+//             record the choice produced. Autosave runs on a change of the ISLAND'S OWN day, from
+//             the UI loop and never on a tick, because the sim is already at 3.9 ms of a 4 ms
+//             budget. Not on a change of the clock's day: those are the same number until somebody
+//             scrubs, and a save is a record of what the island did, not of where you parked to
+//             look at it.
 //
 //   SAVES     four slots and a file. world.save() and world.load() already work; this is a front
 //             end for them that is honest about size, because a snapshot of two thousand residents
@@ -40,6 +46,7 @@
 
 import { registerPanel, el } from '../mount.js';
 import { infoView } from '../../render/layers/infoview.js';
+import { DEFAULT_START_ISO, liveStartISO, ISLAND_TZ, TICK_MINUTES } from '../../kernel/clock.js';
 
 /* ------------------------------------------------------------------ shared chrome */
 
@@ -69,6 +76,10 @@ const DEFAULTS = {
   colourVision: 'off',          // off | protanopia | deuteranopia | tritanopia
   hints: true,
   startSpeed: 1,                // clock speed index the island opens at
+  // What kind of time the island opens in, and from what moment. Read at boot by src/main.js,
+  // which is the only other file that knows this key exists; the two ends of that contract name
+  // each other in their comments and nowhere keeps a second copy.
+  clock: { mode: 'simulated', startISO: DEFAULT_START_ISO },
   autosaveDays: 7,              // 0 is off
   lastSaveDay: -1
 };
@@ -313,6 +324,21 @@ function mountSettings(root, world) {
 
   function save() { persist(S); }
 
+  /**
+   * Build the island again from a different starting moment. This is a page reload, which is a
+   * boot and not a runtime fetch: the twin still makes no network request while it is running.
+   * Every other parameter already in the address bar is kept, so a seed a critic is working with
+   * survives the change.
+   */
+  function openWith(params) {
+    const p = new URLSearchParams(location.search);
+    for (const [k, v] of Object.entries(params)) {
+      if (v === null || v === undefined) p.delete(k);
+      else p.set(k, v);
+    }
+    location.search = p.toString();
+  }
+
   /* ---- applying settings ------------------------------------------------ */
 
   function applyQuality() {
@@ -515,16 +541,31 @@ function mountSettings(root, world) {
     setTimeout(() => { if (saveNote === msg) { saveNote = ''; if (open) refresh(); } }, 6000);
   }
 
+  /**
+   * A save is a record of what the island did, so it is stamped with where the island got to, not
+   * with where somebody parked the clock to look at it.
+   *
+   * This used to read `formatDate()`, `format()` and `dayIndex`, all of which a scrub moves, while
+   * `tick` does not. One autosave came out as tick 1700 on day 140, which is arithmetically
+   * impossible (140 days is 20,160 ticks) and carried a date eighteen weeks past anything the
+   * island had run, because the clock had been parked there for a screenshot. Every field here now
+   * comes off the island's present, and the scrub is recorded beside them as what it is: a way of
+   * looking, at the time the snapshot was taken.
+   */
   function snapshotBlob() {
+    const c = world.clock;
     const snapshot = world.save();
     return {
       __meta: {
         version: 1,
-        date: world.clock.formatDate(),
-        time: world.clock.format(),
-        tick: world.clock.tick,
-        day: world.clock.dayIndex,
-        season: world.clock.season ? world.clock.season.name : '',
+        date: c.formatLivedDate(),
+        time: c.formatLived(),
+        tick: c.livedTick,
+        day: c.livedDayIndex,
+        season: c.livedSeason ? c.livedSeason.name : '',
+        mode: c.mode,
+        // Absent on a save taken at the island's present, which is nearly all of them.
+        viewedWhenSaved: c.scrubbing ? c.formatMoment() : undefined,
         seed: world.seed,
         residents: (world.read('population') || {}).residents || null
       },
@@ -539,7 +580,7 @@ function mountSettings(root, world) {
     catch (e) { say('Could not build a snapshot: ' + e.message); return; }
     try {
       writeSlot(slot, text, blob.__meta);
-      S.lastSaveDay = world.clock.dayIndex;
+      S.lastSaveDay = world.clock.livedDayIndex;
       save();
       say('Saved to slot ' + slot + ', ' + bytes(text.length) + '.');
     } catch (e) {
@@ -574,7 +615,7 @@ function mountSettings(root, world) {
     // touched, which is the offline rule in the contract.
     const blob = new Blob([text], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = el('a', { href: url, download: 'minjerribah-' + world.clock.dayIndex + '.twin.json' });
+    const a = el('a', { href: url, download: 'minjerribah-' + world.clock.livedDayIndex + '.twin.json' });
     document.body.append(a);
     a.click();
     a.remove();
@@ -603,9 +644,18 @@ function mountSettings(root, world) {
 
   /* ---- autosave ---------------------------------------------------------- */
 
-  let lastDaySeen = world.clock.dayIndex;
+  /**
+   * Autosave runs on a change of the island's own day, which is `livedDayIndex` and not `dayIndex`.
+   *
+   * They are the same number until somebody scrubs, and then they are not: `dayIndex` is where the
+   * clock is parked. Keyed on that, dragging the time ribbon across a midnight fired an autosave,
+   * so a save appeared stamped with a date the island had never reached, written by nobody, with a
+   * tick count that could not belong to the day beside it. Scrubbing is a way of looking. Looking
+   * must not write a save.
+   */
+  let lastDaySeen = world.clock.livedDayIndex;
   function pumpAutosave() {
-    const d = world.clock.dayIndex;
+    const d = world.clock.livedDayIndex;
     if (d === lastDaySeen) return;
     lastDaySeen = d;
     if (!S.autosaveDays) return;
@@ -619,9 +669,9 @@ function mountSettings(root, world) {
       const blob = snapshotBlob();
       const text = JSON.stringify(blob);
       writeSlot(slot, text, blob.__meta);
-      S.lastSaveDay = world.clock.dayIndex;
+      S.lastSaveDay = world.clock.livedDayIndex;
       save();
-      world.bus.emit('ui:autosave', { slot, day: world.clock.dayIndex, bytes: text.length });
+      world.bus.emit('ui:autosave', { slot, day: world.clock.livedDayIndex, bytes: text.length });
     } catch (e) {
       // Turn it off rather than throw every seven days for the rest of the run.
       S.autosaveDays = 0;
@@ -841,6 +891,10 @@ function mountSettings(root, world) {
       }, 'Show the arrival again'),
       el('button', {
         class: 'btn ghost', type: 'button',
+        onclick: () => { world.bus.emit('ui:open', { id: 'howitworks', section: 'what' }); toggle(false); }
+      }, 'How it works'),
+      el('button', {
+        class: 'btn ghost', type: 'button',
         onclick: () => { world.bus.emit('ui:hints', { reset: true, enabled: S.hints }); say('Every hint can appear once more.'); }
       }, 'Let the hints run again')));
     if (saveNote) g.append(el('p', { class: 'st-note good' }, saveNote));
@@ -884,20 +938,168 @@ function mountSettings(root, world) {
   /* --- simulation ------------------------------------------------------- */
 
   VIEWS.sim = () => {
-    const g = group('Time');
-    g.append(row('Speed the island opens at',
+    const c = world.clock;
+    const T = world.time || null;
+    const st = T ? T.status() : null;
+
+    const g = group('What kind of time this is',
+      'The clock has three declared modes and the bar across the top says which one you are in at '
+      + 'all times. Live means the island is at the real Queensland moment. Simulated means a '
+      + 'seeded run forward from a moment somebody chose. Scrub means you have parked the clock '
+      + 'somewhere and are looking, which the ribbon under the bar does and this panel does not '
+      + 'duplicate.');
+
+    g.append(row('Mode, right now',
+      segmented([
+        ['live', 'Live', 'Keep pace with the real Queensland clock'],
+        ['simulated', 'Simulated', 'Run forward from where the island is']
+      ], c.mode, (v) => {
+        if (!T) return;
+        if (v === 'live') {
+          const moved = T.goLive();
+          say(moved.movedMinutes === 0
+            ? 'Live. The island is at the real ' + c.formatMoment() + '.'
+            : 'Live. The clock moved to the real ' + c.formatMoment()
+              + '. Nothing the island had already done was undone; the state you are looking at is the state it had reached.');
+        } else {
+          T.goSimulated('chosen in Settings');
+          say('Simulated from ' + c.formatMoment() + '.');
+        }
+        S.clock.mode = v;
+        save();
+      }),
+      'Changes the island you already have. Live re-anchors the clock to the real moment and '
+      + 'stamps the real datetime that happened at into the record.'));
+
+    const startInput = el('input', {
+      type: 'datetime-local', class: 'st-when', value: S.clock.startISO || DEFAULT_START_ISO,
+      onchange: (e) => {
+        const v = String(e.target.value || '').slice(0, 16);
+        if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)) return;
+        S.clock.startISO = v;
+        S.clock.mode = 'simulated';
+        save();
+        refresh();
+      }
+    });
+    g.append(row('The moment a new island opens at',
+      el('div', { class: 'btn-row st-when-row' }, startInput,
+        el('button', {
+          class: 'btn ghost', type: 'button',
+          onclick: () => { S.clock.startISO = liveStartISO(); S.clock.mode = 'simulated'; save(); refresh(); }
+        }, 'The real moment')),
+      'Island time, ' + ISLAND_TZ + '. This is the moment the next island starts from, not this one.'));
+
+    g.append(el('div', { class: 'btn-row' },
+      el('button', {
+        class: 'btn', type: 'button',
+        onclick: () => openWith({ clock: 'live', start: null })
+      }, 'Open a fresh island at the real moment'),
+      el('button', {
+        class: 'btn', type: 'button',
+        onclick: () => openWith({ clock: 'simulated', start: S.clock.startISO || DEFAULT_START_ISO })
+      }, 'Open a fresh island at that moment')));
+    g.append(el('p', { class: 'st-note' },
+      'Both of those reload the page and build the island again from the seed and the packs. '
+      + 'Nothing is fetched that was not already fetched at boot; the twin makes no network '
+      + 'request while it is running, in any mode.'));
+    main.append(g);
+
+    const g1 = group('Go to now',
+      'Two different nows, and they are not the same thing. One is the furthest this island has '
+      + 'actually run to. The other is the real Queensland moment, which a simulated island may '
+      + 'be nowhere near.');
+    g1.append(el('div', { class: 'btn-row' },
+      el('button', {
+        class: 'btn', type: 'button', disabled: (st && st.scrubbing) ? null : true,
+        onclick: () => { if (T) { T.toPresent(); say('Back at the island\'s present, ' + c.formatMoment() + '.'); } }
+      }, 'The island\'s present'),
+      el('button', {
+        class: 'btn', type: 'button',
+        onclick: () => { if (T) { T.goLive(); S.clock.mode = 'live'; save(); say('Live at ' + c.formatMoment() + '.'); } }
+      }, 'The real moment, and follow it')));
+    if (st && st.scrubbing) {
+      const ticks = Math.round(st.offsetMin / TICK_MINUTES);
+      g1.append(el('p', { class: 'st-note warn' },
+        'The clock is parked ' + (st.offsetMin > 0 ? ticks : -ticks).toLocaleString('en-AU')
+        + ' ticks ' + (st.offsetMin > 0 ? 'ahead of' : 'behind') + ' the island\'s present. The sun, '
+        + 'the moon, the tide at every station, the date and the day of the week are exact for the '
+        + 'moment on screen. The school calendar is '
+        + (c.schoolCalendarBasis === 'published'
+          ? 'exact too: the published Queensland dates for that year are on file. '
+          : 'derived from the published Queensland anchors for that year rather than read from a '
+            + 'published calendar, because only 2026 is on file. ')
+        + 'Everything tagged HELD on the bar is the island\'s present, because nothing can '
+        + 'recompute a moment the island has not lived through.'));
+    }
+    if (saveNote) g1.append(el('p', { class: 'st-note good' }, saveNote));
+    main.append(g1);
+
+    const gRec = group('The clock record',
+      'What a save carries about time. The mode and the real datetime a live session was anchored '
+      + 'at are written down as data, not read off the machine again later, so a live run is a '
+      + 'seeded run from a starting point that happens to have been the real moment. Measured '
+      + 'headless with the machine clock frozen: two live runs from one anchor produce the same '
+      + 'fingerprint, and so does a simulated run started at that anchor. Live gives up nothing.');
+    const t = el('table', { class: 'st-table' });
+    const line = (k, v) => t.append(el('tr', {}, el('th', {}, k), el('td', {}, v == null ? '–' : String(v))));
+    const d = c.describe();
+    line('Mode', d.declared + (d.declared === d.mode ? '' : ', over a ' + d.mode + ' run'));
+    line('On the clock', d.moment);
+    line('This island opened at', d.startISO + ' ' + ISLAND_TZ);
+    line('Current anchor', d.anchorISO + ' ' + ISLAND_TZ + ', at tick ' + c.anchorTick);
+    line('Real datetime of the anchor', d.anchorRealMs === null
+      ? 'none: this island has never been live'
+      : new Date(d.anchorRealMs).toISOString().replace('T', ' ').slice(0, 19) + ' UTC');
+    line('The island has lived to', d.livedISO + ' ' + ISLAND_TZ);
+    line('Recomputed from the clock alone', st ? st.derived.join(', ') : '–');
+    line('Jumps not lived through', d.jumps);
+    // Nought is the only healthy number. Anything else is a defect in whatever wrote to the clock,
+    // and it is here rather than in a console because a person reading the record should see it.
+    line('Moved outside the time control', d.offRecordMoves
+      + (d.offRecordMoves ? ', each declared as a scrub and on the record below' : ''));
+    line('School calendar', d.schoolCalendarBasis === 'published'
+      ? 'the published Queensland dates for this year'
+      : 'derived from the published Queensland anchors; only 2026 is on file');
+    gRec.append(t);
+    // Said here because the paragraph above is about reproducing a run, and it would be easy to
+    // read it as a promise the whole file makes and does not keep.
+    gRec.append(el('p', { class: 'st-note' },
+      'That is about starting a run from a written-down point, not about resuming one from a '
+      + 'snapshot. Loading a save back into a fresh island does not currently reproduce it exactly: '
+      + 'the fingerprint after a load differs from the fingerprint before it. That gap is nothing '
+      + 'to do with the clock, which round-trips its mode, its anchor and the real datetime of that '
+      + 'anchor without loss. It is why the cheapest honest way to hand somebody this island is the '
+      + 'seed, the pack versions and this record, which is a text file, rather than a three '
+      + 'megabyte snapshot.'));
+    const rec = c.record.slice(-6).reverse();
+    if (rec.length) {
+      gRec.append(el('p', { class: 'st-note' }, 'The last few entries, newest first:'));
+      const list = el('table', { class: 'st-table' });
+      for (const r of rec) list.append(el('tr', {}, el('th', {}, 'tick ' + r.tick), el('td', {}, r.at + '  ' + r.note)));
+      gRec.append(list);
+    }
+    main.append(gRec);
+
+    const gSpeed = group('Speed');
+    gSpeed.append(row('Speed the island opens at',
       segmented([[0, 'Paused'], [1, '1×'], [2, '3×'], [3, '12×'], [4, '60×']],
         S.startSpeed, (v) => { S.startSpeed = v; save(); }),
       'One tick is ten minutes of island time. A day is a hundred and forty four of them. The '
       + 'simulation is identical at every speed.'));
-    g.append(el('p', { class: 'st-note' },
-      'Running at ' + (world.clock.speed ? world.clock.speed.label : '–') + ' now. This setting only '
-      + 'decides where the clock starts next time.'));
-    main.append(g);
+    gSpeed.append(el('p', { class: 'st-note' },
+      (c.mode === 'live'
+        ? 'Live now, which has no speed of its own: it keeps pace with the real clock at one tick '
+          + 'every ten real minutes. Choosing a speed leaves live. '
+        : 'Running at ' + (c.speed ? c.speed.label : '–') + ' now. ')
+      + 'This setting only decides where the clock starts next time, and it is ignored when the '
+      + 'island opens live.'));
+    main.append(gSpeed);
 
     const g2 = group('Autosave',
-      'Runs on a change of day from the interface loop, never inside a tick. The simulation is at '
-      + 'about 3.9 milliseconds of a 4 millisecond tick budget and a snapshot does not belong in it.');
+      'Runs on a change of the island\'s own day, from the interface loop, never inside a tick. '
+      + 'The simulation is at about 3.9 milliseconds of a 4 millisecond tick budget and a snapshot '
+      + 'does not belong in it.');
     g2.append(row('Autosave every',
       segmented([[0, 'Off'], [1, 'day'], [7, 'week'], [30, 'month'], [91, 'season']],
         S.autosaveDays, (v) => { S.autosaveDays = v; save(); }),
@@ -906,6 +1108,11 @@ function mountSettings(root, world) {
     g2.append(el('p', { class: 'st-note' }, auto && auto.meta
       ? 'Last autosave: ' + auto.meta.date + ', ' + auto.meta.time + ', ' + bytes(auto.size) + '.'
       : 'Nothing autosaved yet.'));
+    g2.append(el('p', { class: 'st-note' },
+      'Scrubbing cannot trigger one and cannot stamp one. A save is a record of what the island '
+      + 'did, so it is dated and counted from the furthest the island has actually run, not from '
+      + 'wherever the clock is parked. Dragging the ribbon across a midnight used to fire an '
+      + 'autosave carrying a date the island had never reached.'));
     main.append(g2);
   };
 
@@ -943,8 +1150,12 @@ function mountSettings(root, world) {
     const g3 = group('This island');
     const t = el('table', { class: 'st-table' });
     const line = (k, v) => t.append(el('tr', {}, el('th', {}, k), el('td', {}, v == null ? '–' : String(v))));
+    const cd = world.clock.describe();
     line('Seed', world.seed);
-    line('Date', world.clock.formatDate() + ', ' + world.clock.format());
+    line('Clock', cd.declared);
+    line('Date', world.clock.formatMoment());
+    line('Opened at', cd.startISO + ' ' + ISLAND_TZ);
+    line('Anchor', cd.anchorISO + ' ' + ISLAND_TZ + (cd.anchorRealMs === null ? '' : ', taken at the real ' + new Date(cd.anchorRealMs).toISOString().slice(0, 19).replace('T', ' ') + ' UTC'));
     line('Ticks run', world.clock.tick);
     line('Days', world.clock.dayIndex);
     line('Systems', world.systems.length);
@@ -952,7 +1163,9 @@ function mountSettings(root, world) {
     g3.append(t);
     g3.append(el('p', { class: 'st-note' },
       'Same seed and same inputs is the same island. Change the seed in the address bar with '
-      + '?seed= and everything downstream of it changes with it.'));
+      + '?seed= and everything downstream of it changes with it. A save carries the clock record '
+      + 'as well, so an island that was opened live replays from the real datetime it was anchored '
+      + 'at rather than from whenever the save happens to be loaded.'));
     main.append(g3);
   };
 
@@ -969,7 +1182,11 @@ function mountSettings(root, world) {
   // at mount would build it early and bake a lattice nobody asked to see, so a non-default palette
   // waits for the first frame instead.
   if (S.colourVision !== 'off') setTimeout(installColourVision, 1200);
-  if (S.startSpeed !== 1 && world.clock.tick < 4) world.clock.setSpeed(S.startSpeed);
+  // Not in live. Live has no speed of its own and choosing one is how you leave it, so applying a
+  // remembered speed here would drop an island out of live before anybody had looked at it.
+  if (S.startSpeed !== 1 && world.clock.tick < 4 && world.clock.mode !== 'live') {
+    world.clock.setSpeed(S.startSpeed);
+  }
 
   let ticks = 0;
   return {
@@ -1025,6 +1242,12 @@ function injectStyle() {
 .st-ctl { display: flex; justify-content: flex-end; }
 .st-seg { justify-content: flex-end; }
 .st-seg .btn { padding: var(--sp-2); font-size: var(--fs-micro); letter-spacing: .06em; }
+
+.st-when-row { justify-content: flex-end; flex-wrap: wrap; }
+.st-when { appearance: none; background: var(--s-sunk); border: 1px solid var(--edge-strong);
+  border-radius: var(--r-2); color: var(--t-hi); font: 400 var(--fs-sm)/1 var(--f-num);
+  padding: var(--sp-2); color-scheme: dark; }
+.st-when:focus-visible { outline: none; box-shadow: var(--glow-sea); }
 
 .st-slider { display: flex; align-items: center; gap: var(--sp-3); width: 100%; }
 .st-slider input[type=range] { flex: 1; appearance: none; height: 4px; border-radius: var(--r-pill);

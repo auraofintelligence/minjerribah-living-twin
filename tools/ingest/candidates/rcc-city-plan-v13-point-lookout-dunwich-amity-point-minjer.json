@@ -1,0 +1,1249 @@
+{
+  "kind": "ingest-candidates",
+  "lane": "document",
+  "schema": "minjerribah-candidates/1",
+  "document": {
+    "id": "rcc-city-plan-v13",
+    "title": "Redland City Plan version 13",
+    "publisher": "Redland City Council",
+    "sha256": "899417864b4fbb0f5e8bd5157c37b5007cadb2e2f078fb1d5c2285962d86310b",
+    "pages": 484
+  },
+  "extractor": {
+    "id": "lane-document",
+    "version": "1.0"
+  },
+  "extracted_at": "2026-08-09",
+  "note": "Candidates, not records. Nothing here has been read by a person. Delete what is wrong, rate what is left, then promote with tools/ingest/promote.mjs, which runs the gate first.",
+  "candidates": [
+    {
+      "id": "rcc-city-plan-v13-p12-l25",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 12, line 25",
+      "quote": "Figure 6.2.1.2.3--Precinct LDR3: Point Lookout residential ................................................... 118",
+      "context": [
+        "Figure 6.2.1.2.2--Precinct LDR2: park residential .................................................................. 117",
+        "Figure 6.2.1.2.4--Precinct LDR4: Kinross Road ................................................................... 1200"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p15-l16",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 15, line 16",
+      "quote": "(C) precinct LDR3: Point Lookout residential;",
+      "context": [
+        "(B) precinct LDR2: park residential;",
+        "(D) precinct LDR4: Kinross Road;"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p25-l37",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 25, line 37",
+      "quote": "On North Stradbroke (Minjerribah) Island the communities of Dunwich, Amity and Point",
+      "context": [
+        "Lookout will experience further development of housing, local services and facilities within the"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p25-l39",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 25, line 39",
+      "quote": "zoned urban areas. Tourism visitation to North Stradbroke Island will be greatly enhanced",
+      "context": [
+        "Lookout will experience further development of housing, local services and facilities within the",
+        "with the completion of the Toondah Harbour development, and other economic opportunities"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p25-l43",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 25, line 43",
+      "quote": "Editor's note--Parts of North Stradbroke Island (Minjerribah) are subject to State lead planning investigations as part",
+      "context": [],
+      "matched_term": "Minjerribah",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p25-l46",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 25, line 46",
+      "quote": "Future planning and development policy for these parts of North Stradbroke Island will be influenced by the outcomes",
+      "context": [
+        "of an Indigenous land use agreement between the Queensland State Government and the Quandamooka people.",
+        "of these investigations and may require future amendments to City Plan."
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p26-l18",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 26, line 18",
+      "quote": "areas at Beveridge Road in Thornlands and on North Stradbroke Island, and low impact and",
+      "context": [
+        "parks, the Redlands Business Park and industry zoned land at Redland Bay, marine industry",
+        "service industry areas in Capalaba and along Shore Street, Cleveland and on Macleay Island."
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p26-l37",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 26, line 37",
+      "quote": "significant natural features like Moreton Bay and North Stradbroke Island, the high scenic",
+      "context": [
+        "economic role in the future of Redlands. Tourism will celebrate regionally and internationally",
+        "amenity of rural and bushland landscapes, and native fauna species including the koala."
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p29-l7",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 29, line 7",
+      "quote": "(7) Housing in the Point Lookout (LDR3) precinct is designed to maintain the distinctive",
+      "context": [
+        "wastewater networks, public transport and roads.",
+        "character of the locality."
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p29-l53",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 29, line 53",
+      "quote": "(11) Future development on North Stradbroke Island should recognise and reflect",
+      "context": [
+        "indigenous land use values and the economic and social needs of the indigenous"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p31-l60",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 31, line 60",
+      "quote": "(3) Local centres on North Stradbroke and the Southern Moreton Bay Islands include the",
+      "context": [
+        "Dunwich, Point Lookout, Russell Island, Macleay Island and Lamb Island centres."
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p31-l61",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 31, line 61",
+      "quote": "Dunwich, Point Lookout, Russell Island, Macleay Island and Lamb Island centres.",
+      "context": [
+        "(3) Local centres on North Stradbroke and the Southern Moreton Bay Islands include the",
+        "These centres provide services and convenience shopping needs for the island"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p33-l70",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 33, line 70",
+      "quote": "(e) the sand resources of North Stradbroke Island.",
+      "context": [
+        "(d) German Church Road, Redland Bay; and"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p34-l15",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 34, line 15",
+      "quote": "(1) The islands of Moreton Bay (North Stradbroke and Southern Moreton Bay Islands)",
+      "context": [
+        "have a strong and sustainable tourism economy, with a range of tourist accommodation"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p35-l27",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 35, line 27",
+      "quote": "and wetlands including Eighteen Mile Swamp on North Stradbroke Island,",
+      "context": [
+        "(a) the coastal landscapes of Moreton Bay: coastal foreshores, headlands, estuaries",
+        "Wellington Point, Cleveland Point, Victoria Point, Point O'Halloran (Victoria"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p35-l64",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 35, line 64",
+      "quote": "of natural and cultural resources on North Stradbroke/Minjerribah Island is undertaken as a shared responsibility in",
+      "context": [
+        "heritage is protected under the Aboriginal Cultural Heritage Act 2003. In addition, the management and conservation",
+        "accordance with the Indigenous Land Use Agreement (ILUA). The responsibilities of the Quandamooka people as"
+      ],
+      "matched_term": "Minjerribah",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p37-l55",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 37, line 55",
+      "quote": "(b) North Stradbroke Island aquifer;",
+      "context": [
+        "(c) Leslie Harrison Dam;"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p37-l57",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 37, line 57",
+      "quote": "(d) water reservoirs at Alexandra Hills, Mount Cotton, Redland Bay, Dunwich, Amity",
+      "context": [
+        "(c) Leslie Harrison Dam;"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p37-l59",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 37, line 59",
+      "quote": "and Point Lookout;",
+      "context": [
+        "(e) water treatment plants at Capalaba, and North Stradbroke Island;"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p37-l60",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 37, line 60",
+      "quote": "(e) water treatment plants at Capalaba, and North Stradbroke Island;",
+      "context": [
+        "and Point Lookout;",
+        "(f) trunk water supply and sewer network including the eastern pipeline"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p37-l66",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 37, line 66",
+      "quote": "Mount Cotton, Dunwich and Point Lookout;",
+      "context": [
+        "(h) electrical substations and transmission corridors; and"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p87-l6",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 87, line 6",
+      "quote": "If on North Stradbroke Island and",
+      "context": [
+        "development",
+        "not accepted Recreation and open space"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p89-l53",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 89, line 53",
+      "quote": "North Stradbroke Island",
+      "context": [
+        "Moreton Bay Islands or"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p89-l75",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 89, line 75",
+      "quote": "North Stradbroke Island;",
+      "context": [
+        "Moreton Bay Islands or",
+        "and"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p122-l1",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 122, line 1",
+      "quote": "(c) Precinct LDR3: Point Lookout residential:",
+      "context": [],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p122-l12",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 122, line 12",
+      "quote": "Figure 6.2.1.2.3--Precinct LDR3: Point Lookout residential Part 6 Zones--118",
+      "context": [],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p129-l10",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 129, line 10",
+      "quote": "Dual occupancies and dwelling houses in precinct LDR3 Point Lookout residential",
+      "context": [],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p192-l20",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 192, line 20",
+      "quote": "on North Stradbroke Island.",
+      "context": [
+        "accommodation supported by community uses and small-scale services and facilities"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p192-l26",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 192, line 26",
+      "quote": "Point Lookout's holiday population;",
+      "context": [
+        "short term accommodation and tourist resorts and related support facilities for"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p201-l6",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 201, line 6",
+      "quote": "(e) built form ensures that views to North Stradbroke Island are retained when",
+      "context": [
+        "viewed from Shore Street between Delancey and Grant Streets;"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p224-l34",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 224, line 34",
+      "quote": "the Point Lookout local centre;",
+      "context": [
+        "catchment or involve late night operation are not established, other than within"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p224-l56",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 224, line 56",
+      "quote": "(k) the Point Lookout centre:",
+      "context": [
+        "buildings and do not visually dominate the centre; and"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p230-l34",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 230, line 34",
+      "quote": "North Stradbroke Island or Southern Moreton Bay Islands;",
+      "context": [
+        "catchment or involving late night operation are not established other than on",
+        "(e) residential development occurs in the form of shop-top housing or in a manner"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p312-l34",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 312, line 34",
+      "quote": "coastal management district at Amity, North Stradbroke Island, development",
+      "context": [
+        "(a) within the low density residential zone in the erosion prone area and inside the",
+        "does not occur, unless it cannot feasibly be located elsewhere on the site and:"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p313-l11",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 313, line 11",
+      "quote": "district at Amity, North Stradbroke Island",
+      "context": [
+        "Development in the Low Density Residential Zone inside the coastal management"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p313-l64",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 313, line 64",
+      "quote": "All development (whether or not at Amity, North Stradbroke Island)",
+      "context": [],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p336-l22",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 336, line 22",
+      "quote": "(b) North Stradbroke Island groundwater; and",
+      "context": [
+        "(a) Leslie Harrison Dam;",
+        "(c) Herring Lagoon."
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p408-l28",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 408, line 28",
+      "quote": "ZM-005 North Stradbroke Island zoning map 9 February 2022",
+      "context": [
+        "9 February 2022",
+        "5 April 2023"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p411-l10",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 411, line 10",
+      "quote": "ZM-005 North Stradbroke Island zoning map",
+      "context": [
+        "ZM-004 Mainland south zoning map (sheet 3/3)",
+        "ZM-006 Southern Moreton Bay Islands zoning map"
+      ],
+      "matched_term": "North Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p420-l36",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 420, line 36",
+      "quote": "Point Lookout 0 15 45.0 45.0 97.5 45.0 0.5",
+      "context": [],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p431-l9",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 431, line 9",
+      "quote": "Amity Point 89,613 93,713 97,959 101,712 102,719",
+      "context": [
+        "Dunwich",
+        "Point Lookout 21,165 21,890 22,965 23,961 24,250"
+      ],
+      "matched_term": "Amity Point",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p431-l10",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 431, line 10",
+      "quote": "Point Lookout 21,165 21,890 22,965 23,961 24,250",
+      "context": [
+        "Amity Point 89,613 93,713 97,959 101,712 102,719",
+        "Southern Moreton 1,372 1,575 1,607 1,633 1,636"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p431-l33",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 431, line 33",
+      "quote": "Dunwich 1,003 1,564 1,572 1,578 1,614",
+      "context": [
+        "Mount Cotton 4,205 5,314 5,352 5,409 5,494",
+        "Point Lookout 1,834 7,116 7,600 7,600 7,600"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p431-l34",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 431, line 34",
+      "quote": "Point Lookout 1,834 7,116 7,600 7,600 7,600",
+      "context": [
+        "Dunwich 1,003 1,564 1,572 1,578 1,614"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p448-l17",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 448, line 17",
+      "quote": "5303 Point Lookout - Headland Park Upgrade 2019 $1,110,745",
+      "context": [
+        "5237 (Coochie) Upgrade 2019 $72,209",
+        "5421 Macleay Island - Macleay Island Community 2019 $118,225"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p448-l26",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 448, line 26",
+      "quote": "5350-16 Point Lookout - Point Lookout Oval Upgrade 2020 $60,174",
+      "context": [
+        "5089 2020 $74,333",
+        "5367 2020 $60,174"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p451-l48",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 451, line 48",
+      "quote": "Amity Point - Amity Point Recreation Reserve $161,408",
+      "context": [
+        "Upgrade 2027",
+        "Upgrade 2027"
+      ],
+      "matched_term": "Amity Point",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p469-l52",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 469, line 52",
+      "quote": "Dickson Way, North Minjerribah Cemetery (1)",
+      "context": [
+        "Stradbroke Island cemeteries and"
+      ],
+      "matched_term": "Minjerribah",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p469-l56",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 469, line 56",
+      "quote": "14-16 Ballow Road, Minjerribah",
+      "context": [
+        "Dunwich Quandamooka Arts,"
+      ],
+      "matched_term": "Minjerribah",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p469-l57",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 469, line 57",
+      "quote": "Dunwich Quandamooka Arts,",
+      "context": [
+        "14-16 Ballow Road, Minjerribah",
+        "Museum and"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p470-l21",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 470, line 21",
+      "quote": "2020 Dunwich Aged Care Hostel",
+      "context": [
+        "2 October Lot 7 RP160678 28 Dickson Way, Nareeba Moopi Moopi Pa",
+        "(Ministerial (14) Residential care"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p471-l16",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 471, line 16",
+      "quote": "1 October Lot 15 on SP304734 Dunwich galleries, libraries and",
+      "context": [
+        "14 Sturt Street, community centres,",
+        "2021 meeting halls."
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p476-l12",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 476, line 12",
+      "quote": "22 Road Reserve The Esplanade, Oxley Dunwich Polka Point",
+      "context": [
+        "Parade Draughts Board"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p476-l15",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 476, line 15",
+      "quote": "23 Lot 3 CP865498 Junner Street Dunwich Benevolent Asylum",
+      "context": [
+        "structures"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p476-l18",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 476, line 18",
+      "quote": "24 Lot 125 10 East Coast Road Dunwich Dunwich Learning",
+      "context": [
+        "SP160702 Centre"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p476-l25",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 476, line 25",
+      "quote": "26 Lots 704 & 705 15-17 Welsby Street Dunwich Historical Museum",
+      "context": [
+        "D9044"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p476-l28",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 476, line 28",
+      "quote": "27 Lot 130 Mooloomba Road Point Lookout Bill North's Cattle",
+      "context": [
+        "SL13002 Dip"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p476-l31",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 476, line 31",
+      "quote": "28 Lot 6 SL1335 40 Lucinda Crescent Point Lookout Point Lookout",
+      "context": [
+        "Lighthouse"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p476-l34",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 476, line 34",
+      "quote": "29 Road Reserve Moongalba Road Point Lookout Point Lookout",
+      "context": [
+        "Norfolk Pines (7)"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p476-l37",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 476, line 37",
+      "quote": "30 Lot 1 AP5382 East Coast Road Point Lookout Point Lookout Well",
+      "context": [],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p476-l39",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 476, line 39",
+      "quote": "31 Lot 1 A33911 16 Ballow Street Amity Amity Point Public",
+      "context": [
+        "Hall"
+      ],
+      "matched_term": "Amity Point",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p477-l47",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 477, line 47",
+      "quote": "51 Lot 93 SL5245 2 Ballow Street, Amity Amity Point Cabarita",
+      "context": [
+        "Point"
+      ],
+      "matched_term": "Amity Point",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p478-l29",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 478, line 29",
+      "quote": "68 Lot 719 D9044 14 Bingle Road, Dunwich Former Benevolent",
+      "context": [
+        "Dunwich Asylum Building"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p478-l30",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 478, line 30",
+      "quote": "Dunwich Asylum Building",
+      "context": [
+        "68 Lot 719 D9044 14 Bingle Road, Dunwich Former Benevolent"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p478-l32",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 478, line 32",
+      "quote": "69 Lot 720 D9044 16 Bingle Road, Dunwich Former Benevolent",
+      "context": [
+        "Dunwich Asylum Building"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p478-l33",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 478, line 33",
+      "quote": "Dunwich Asylum Building",
+      "context": [
+        "69 Lot 720 D9044 16 Bingle Road, Dunwich Former Benevolent"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p478-l35",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 478, line 35",
+      "quote": "70 Lot 721 D9044 18 Bingle Road, Dunwich Former Benevolent",
+      "context": [
+        "Dunwich Asylum Building"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p478-l36",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 478, line 36",
+      "quote": "Dunwich Asylum Building",
+      "context": [
+        "70 Lot 721 D9044 18 Bingle Road, Dunwich Former Benevolent"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p478-l38",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 478, line 38",
+      "quote": "71 Lot 1 D9046 14 Stradbroke Place, Dunwich Former Benevolent",
+      "context": [
+        "Dunwich Asylum Building"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p478-l39",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 478, line 39",
+      "quote": "Dunwich Asylum Building",
+      "context": [
+        "71 Lot 1 D9046 14 Stradbroke Place, Dunwich Former Benevolent"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p478-l41",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 478, line 41",
+      "quote": "72 Lot 1023 D9046 11 Parsons Street, Dunwich Former Benevolent",
+      "context": [
+        "Dunwich Asylum Building"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p478-l42",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 478, line 42",
+      "quote": "Dunwich Asylum Building",
+      "context": [
+        "72 Lot 1023 D9046 11 Parsons Street, Dunwich Former Benevolent"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p478-l44",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 478, line 44",
+      "quote": "73 Lot 2 D9046 12 Stradbroke Place, Dunwich Former Benevolent",
+      "context": [
+        "Dunwich Asylum Building"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p478-l45",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 478, line 45",
+      "quote": "Dunwich Asylum Building",
+      "context": [
+        "73 Lot 2 D9046 12 Stradbroke Place, Dunwich Former Benevolent"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p478-l47",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 478, line 47",
+      "quote": "74 Lot 5 2 Bayly Street, Dunwich Police Station Cell",
+      "context": [
+        "CP898073 Dunwich Block"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-city-plan-v13-p478-l48",
+      "source": "rcc-city-plan-v13",
+      "locator": "p. 478, line 48",
+      "quote": "CP898073 Dunwich Block",
+      "context": [
+        "74 Lot 5 2 Bayly Street, Dunwich Police Station Cell"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-09",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    }
+  ]
+}

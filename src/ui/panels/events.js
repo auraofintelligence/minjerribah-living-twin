@@ -1,14 +1,14 @@
 // The island calendar.
 //
-// Every civic game has a festival that adds tourists. This one has data/events.json: twenty-seven
-// real events, five load periods and nine operating rhythms, each carrying what it needs, what it
-// strains, who earns from it and an hourly crowd curve. Nothing here was invented. The pack says so
-// in its own honesty block, it marks the ones that could not be confirmed, it keeps the festival
+// Every civic game has a festival that adds tourists. This one has data/events.json: thirty-six
+// real events, seven load periods and eleven operating rhythms, each carrying what it needs, what
+// it strains, who earns from it and an hourly crowd curve. Nothing here was invented. The pack says
+// so in its own honesty block, it marks the ones that could not be confirmed, it keeps the festival
 // that ended because the reasons it ended are civic levers, and it records what was deliberately
 // left out. All of that is on this panel, because a calendar that hides its own gaps is a lie about
 // a small island where everyone knows what is on.
 //
-// The three things this panel does that a "tourism event" system does not:
+// The four things this panel does that a "tourism event" system does not:
 //
 //   1. It resolves dates from the pack's own `date_rule` rather than from a hard-coded list, so the
 //      calendar keeps working in 2029. Fixed dates, nth weekday, Easter-anchored, weekly, fortnightly,
@@ -21,14 +21,46 @@
 //   3. It gives equal weight to the rhythms nobody puts in a calendar and everybody plans around:
 //      Monday bins against a Monday public holiday, the hourly barge, the school terms, the Friday
 //      wave and the Sunday queue, and a fishing window that runs on the tide rather than the clock.
+//   4. Added 10 August 2026: it shows what the island is actually doing about the record, beside the
+//      record. The pack estimates a crowd; the simulation counts how many people crossed for it,
+//      where they are standing at this hour, and how many did not fit on a boat. When those two
+//      numbers disagree, both are on screen. That is the difference between a calendar and a table
+//      of intentions, and until this pass the table was all there was: nothing in this pack reached
+//      the island at all.
+//   5. Added in the second pass the same day: nothing on this board is a promise the island does not
+//      keep. Every `cancels_if` sentence used to be printed as "Called off if" and then ignored in
+//      the rain, because the simulation understood four of the fourteen sentences and only asked the
+//      question at midnight. Beside each sentence now are the exact conditions the island tests, the
+//      reading of each right now, and what happens when one is met, including the two that are not a
+//      cancellation: a session that moves to the sheltered beach and a night that runs short because
+//      the water taxis are off. Where a condition cannot be tested at all, that is printed too.
+//      The board also says what is physically standing on the ground because of the calendar, from
+//      the same read model the render layer draws, so a player can read a sentence here and then fly
+//      there and see it.
 //
-// CULTURAL RULE. Three records in the pack carry a cultural_handling field: they are held as civic
-// load only, and no programme, protocol or cultural content exists in the data. This panel renders
-// the dates, the crowd, the ferries and the bins, and says plainly that the rest is not this
-// project's to hold. It never generates any of it. See data/lore.json prohibitions and
+// THREE SMALLER THINGS THE SAME PASS FIXED, RECORDED SO NOBODY PUTS THEM BACK.
+//   "Busiest today" was a rolling twenty-four hour figure, so at five in the morning this board
+//   showed yesterday's crowd under the word today. Both numbers are here now and each is labelled.
+//   An annual event whose dates the organiser announces sat under "Real, but no date the pack will
+//   stand behind" beside things with no pattern at all, which is a different and worse claim; those
+//   have their own section with the window and the last dates that were published. And the board
+//   could only look forwards, so on the default start it had nothing at all to say about the biggest
+//   weekend of the year, which had been on the fortnight before.
+//
+// The date arithmetic is no longer this file's own. `occurrencesOf` comes from
+// src/systems/agents/calendar.js, which is the same pure helper the simulation resolves its event
+// days with, so what a player reads here and what the island runs cannot drift apart. That was a
+// real risk: this panel and the old infrastructure reader disagreed about every record in the pack
+// with no published date, which was eleven of them.
+//
+// CULTURAL RULE. Records in the pack carrying a cultural_handling field are held as civic load
+// only, and no programme, protocol or cultural content exists in the data. This panel renders the
+// dates, the crowd, the ferries and the bins, and says plainly that the rest is not this project's
+// to hold. It never generates any of it. See data/lore.json prohibitions and
 // docs/CULTURAL-REVIEW.md.
 
 import { registerPanel, el } from '../mount.js';
+import { occurrencesOf, annualWindowOf, parseISODay, dowOfDay, yearOfDay } from '../../systems/agents/calendar.js';
 
 /* ------------------------------------------------------------------ shared chrome */
 
@@ -152,13 +184,8 @@ const WD = { sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday
 const DAY3 = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MON3 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const edOf = (y, m0, d) => Math.floor(Date.UTC(y, m0, d) / DAY_MS);
-const dowOf = (e) => ((e + 4) % 7 + 7) % 7;
-const parseISO = (s) => {
-  if (!s) return null;
-  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
-  return m ? edOf(+m[1], +m[2] - 1, +m[3]) : null;
-};
+const dowOf = dowOfDay;
+const parseISO = parseISODay;
 function fmtDay(e) {
   const d = new Date(e * DAY_MS);
   return `${DAY3[d.getUTCDay()]} ${d.getUTCDate()} ${MON3[d.getUTCMonth()]}`;
@@ -178,132 +205,51 @@ function awayText(days) {
   return 'in ' + Math.round(days / 30.4375) + ' months';
 }
 
-/** The anonymous Gregorian computus. Arithmetic, deterministic, no wall clock. */
-function easterSunday(y) {
-  const a = y % 19, b = Math.floor(y / 100), c = y % 100;
-  const d = Math.floor(b / 4), e = b % 4;
-  const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
-  const h = (19 * a + b - d - g + 15) % 30;
-  const i = Math.floor(c / 4), k = c % 4;
-  const l = (32 + 2 * e + 2 * i - h - k) % 7;
-  const m = Math.floor((a + 11 * h + 22 * l) / 451);
-  const month = Math.floor((h + l - 7 * m + 114) / 31);
-  const day = ((h + l - 7 * m + 114) % 31) + 1;
-  return edOf(y, month - 1, day);
-}
-
-function nthWeekday(year, month1, weekday, nth) {
-  const m0 = month1 - 1;
-  const first = edOf(year, m0, 1);
-  const want = WD[weekday] ?? 0;
-  let e = first + (((want - dowOf(first)) % 7) + 7) % 7;
-  e += (nth - 1) * 7;
-  const d = new Date(e * DAY_MS);
-  return d.getUTCMonth() === m0 ? e : null;
-}
-
 /**
- * Resolve a record's occurrences into a window. A sourced `next_known` wins over the pattern and is
- * flagged, because the pack's own honesty note says island event dates move and next_known is a
- * snapshot rather than a rule.
+ * Resolve a record into occurrences inside a window. This used to be a hundred and ten lines of
+ * date arithmetic living in this file, a second copy of the same computus and the same nth-weekday
+ * walk that the simulation used. It is now one import from src/systems/agents/calendar.js, so the
+ * date a player reads and the date the island runs are the same arithmetic by construction rather
+ * than by two people being careful.
  */
-function occurrences(rec, from, to) {
-  const out = [];
-  const rule = rec.date_rule || {};
-  const dur = Math.max(1, rule.duration_days || 1);
-  const push = (start, sourced) => {
-    if (start == null) return;
-    const end = start + dur - 1;
-    if (end < from || start > to) return;
-    if (out.some((o) => Math.abs(o.start - start) <= 3)) return;
-    out.push({ start, end, sourced: !!sourced });
-  };
+const occurrences = occurrencesOf;
 
-  const nk = rec.next_known;
-  if (nk && nk.start) {
-    const s = parseISO(nk.start), e = parseISO(nk.end) ?? s;
-    if (e != null && e >= from && s <= to) out.push({ start: s, end: e, sourced: true, confidence: nk.confidence });
-  }
-
-  const y0 = new Date(from * DAY_MS).getUTCFullYear();
-  const y1 = new Date(to * DAY_MS).getUTCFullYear();
-
-  switch (rule.kind) {
-    case 'fixed':
-      for (let y = y0; y <= y1 + 1; y++) push(edOf(y, (rule.month || 1) - 1, rule.day || 1));
-      break;
-    case 'nth_weekday':
-      for (let y = y0; y <= y1 + 1; y++) push(nthWeekday(y, rule.month || 1, rule.weekday, rule.nth || 1));
-      break;
-    case 'moveable':
-      for (let y = y0; y <= y1 + 1; y++) {
-        const anchor = String(rule.anchor || '');
-        if (/easter/i.test(anchor)) {
-          const es = easterSunday(y);
-          if (/good friday/i.test(anchor)) push(es - 2);
-          else push(es + (rule.offset_days || 0));
-        } else if (/first sunday in july/i.test(anchor)) {
-          push(nthWeekday(y, 7, 'sunday', 1));
-        }
-      }
-      break;
-    case 'weekly': {
-      const want = WD[rule.weekday];
-      if (want == null) break;
-      let e = from + (((want - dowOf(from)) % 7) + 7) % 7;
-      for (; e <= to; e += 7) {
-        if (rule.season_months && !rule.season_months.includes(new Date(e * DAY_MS).getUTCMonth() + 1)) continue;
-        push(e);
-      }
-      break;
-    }
-    case 'fortnightly': {
-      const want = WD[rule.weekday];
-      if (want == null) break;
-      // No anchor date is published, so the phase is pinned to the first matching weekday of the
-      // year and the record says the published list goes stale faster than anything else here.
-      const y = new Date(from * DAY_MS).getUTCFullYear();
-      let anchor = edOf(y, 0, 1);
-      anchor += (((want - dowOf(anchor)) % 7) + 7) % 7;
-      let e = anchor + Math.ceil((from - anchor) / 14) * 14;
-      for (; e <= to; e += 14) push(e);
-      break;
-    }
-    case 'monthly': {
-      if (rule.weekday == null || rule.nth == null) break;
-      for (let y = y0; y <= y1 + 1; y++) {
-        for (let m = 1; m <= 12; m++) push(nthWeekday(y, m, rule.weekday, rule.nth));
-      }
-      break;
-    }
-    case 'season':
-      for (let y = y0 - 1; y <= y1 + 1; y++) {
-        const s = edOf(y, (rule.start_month || 1) - 1, rule.start_day || 1);
-        const endYear = (rule.end_month || 1) < (rule.start_month || 1) ? y + 1 : y;
-        const e = edOf(endYear, (rule.end_month || 1) - 1, rule.end_day || 1);
-        if (e >= from && s <= to && !out.some((o) => Math.abs(o.start - s) <= 3)) out.push({ start: s, end: e, sourced: false });
-      }
-      break;
-    default:
-      break; // irregular: only the sourced date, which is the honest answer
-  }
-  out.sort((a, b) => a.start - b.start);
-  return out;
-}
+const cap = (s) => String(s || '').replace(/^./, (c) => c.toUpperCase());
+const listOf = (a) => (a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
 
 function ruleText(rule) {
   if (!rule) return 'no pattern recorded';
-  const wd = rule.weekday ? rule.weekday.replace(/^./, (c) => c.toUpperCase()) : '';
+  const wd = cap(rule.weekday);
+  // A venue that runs the same night twice a week publishes it as one thing, so the rule carries a
+  // list and this has to read it. Without this the pub's line came out as "every ".
+  const days = Array.isArray(rule.weekdays) && rule.weekdays.length ? listOf(rule.weekdays.map(cap)) : wd;
+  const nth = ['first', 'second', 'third', 'fourth', 'fifth'][(rule.nth || 1) - 1];
+  const off = rule.offset_days
+    ? (Math.abs(rule.offset_days) === 1
+      ? (rule.offset_days < 0 ? ', starting the day before' : ', starting the day after')
+      : `, offset ${rule.offset_days} days`)
+    : '';
   switch (rule.kind) {
     case 'fixed': return `${rule.day} ${MON3[(rule.month || 1) - 1]} every year`;
-    case 'nth_weekday': return `the ${['first', 'second', 'third', 'fourth', 'fifth'][(rule.nth || 1) - 1]} ${wd} of ${MON3[(rule.month || 1) - 1]}`;
+    case 'nth_weekday': return `the ${nth} ${wd} of ${MON3[(rule.month || 1) - 1]}${off}`;
+    case 'last_weekday': return `the last ${wd} of ${MON3[(rule.month || 1) - 1]}${off}`;
     case 'moveable': return `moves with ${rule.anchor}`;
-    case 'weekly': return `every ${wd}${rule.season_months ? ', in season' : ''}`;
+    case 'weekly': return `every ${days}${rule.season_months ? ', in season' : ''}`;
     case 'fortnightly': return `every second ${wd}`;
     case 'monthly': return rule.weekday ? `the ${['first', 'second', 'third', 'fourth'][(rule.nth || 1) - 1]} ${wd} of the month` : 'roughly monthly';
     case 'season': return 'a window rather than a date';
+    case 'annual_window': return 'every year, on dates the organiser announces';
     default: return 'real, but no stable pattern was found';
   }
+}
+
+/** "late August to mid September", from an annual window's two ends. */
+function windowText(rule) {
+  const a = (rule && rule.window_start) || {};
+  const b = (rule && rule.window_end) || {};
+  if (!a.month || !b.month) return 'a window the pack does not give';
+  const part = (d) => (d <= 10 ? 'early ' : d <= 20 ? 'mid ' : 'late ');
+  return part(a.day || 1) + MON3[a.month - 1] + ' to ' + part(b.day || 28) + MON3[b.month - 1];
 }
 
 /* ------------------------------------------------------------------ small helpers */
@@ -381,8 +327,9 @@ registerPanel({
       el('div', {},
         el('h2', {}, 'The island calendar'),
         el('div', { class: 'ev-sub' },
-          'Twenty-seven real events, five load periods and nine operating rhythms, from data/events.json. ' +
-          'Nothing here was invented, the unconfirmed ones say so, and what was deliberately left out is listed at the bottom of the right-hand column.')),
+          'Thirty-six real events, seven load periods and eleven operating rhythms, from data/events.json. ' +
+          'Nothing here was invented, the unconfirmed ones say so, and what was deliberately left out is listed at the bottom of the right-hand column. ' +
+          'Where the island is running one of these today, what the simulation is actually doing about it sits beside what the pack expected.')),
       statBox,
       el('button', { class: 'btn ghost', type: 'button', title: 'Close (Esc)', onclick: () => toggle(false) }, 'Close'));
     const cols = el('div', { class: 'ev-cols', style: { gridTemplateColumns: 'minmax(230px, 22%) 1fr minmax(280px, 28%)' } });
@@ -454,22 +401,80 @@ registerPanel({
 
     /** Next occurrence of every record, cached by day. */
     let schedCache = { day: -1, list: [] };
+    /**
+     * Records below the confidence threshold are held, not caveated.
+     *
+     * `no-low-confidence-to-player` in data/lore.json is a blocking prohibition and this panel used
+     * to render every record in the pack regardless. `world.data.mayShow` is the runtime's own
+     * classifier, the same one the ingest gate runs, so this panel and the gate cannot disagree
+     * about what a player is allowed to see. The count of what is held is shown, because
+     * docs/INGEST.md is clear that unreviewed is invisible rather than caveated and this file is
+     * equally clear that a calendar hiding its own gaps is a lie on an island this size. A number
+     * is not a caveat.
+     *
+     * Scope, stated rather than left to be discovered: this filter runs over the `events`
+     * collection only. `periods` and `rhythms` each still carry one low-confidence record that this
+     * board renders with its confidence and its source printed beside it. That is the older
+     * treatment and it is not the one the rule asks for. It was left alone in this pass rather than
+     * quietly dropping the waste transfer station record, which is one of the most useful things on
+     * this board, and it is written into the handover as an open question.
+     */
+    let heldCount = 0;
+    function mayShow(rec) {
+      const d = world.data;
+      if (d && typeof d.mayShow === 'function') return d.mayShow(rec);
+      return rec.confidence !== 'low';
+    }
+
+    /**
+     * The next annual window that has no announced date inside it, plus the last dates that were.
+     * Returns null for anything that is not an `annual_window` record and for a year whose dates
+     * have been published, because then the record has a real date and belongs in the dated list.
+     */
+    function annualWindow(rec, t) {
+      if (!rec.date_rule || rec.date_rule.kind !== 'annual_window') return null;
+      const dated = occurrences(rec, t - 800, t + 800);
+      for (let y = yearOfDay(t); y <= yearOfDay(t) + 1; y++) {
+        const w = annualWindowOf(rec, y);
+        if (!w || w.end < t) continue;
+        if (dated.some((o) => o.sourced && o.start >= w.start - 10 && o.start <= w.end + 10)) continue;
+        const past = dated.filter((o) => o.sourced && o.end < t).sort((a, b) => b.start - a.start)[0] || null;
+        return { start: w.start, end: w.end, year: y, lastPublished: past };
+      }
+      return null;
+    }
+
     function schedule() {
       const t = today();
       if (schedCache.day === t) return schedCache.list;
       const pk = pack();
       const list = [];
+      heldCount = 0;
       if (pk && pk.events) {
         for (const rec of pk.events) {
+          if (!mayShow(rec)) { heldCount++; continue; }
           if (rec.status === 'ended') { list.push({ rec, occ: null, days: 99999, ended: true }); continue; }
           const occ = occurrences(rec, t, t + view.horizon);
-          if (!occ.length) { list.push({ rec, occ: null, days: 99998 }); continue; }
-          list.push({ rec, occ: occ[0], all: occ, days: occ[0].start - t });
+          if (occ.length) { list.push({ rec, occ: occ[0], all: occ, days: occ[0].start - t }); continue; }
+          // An annual event whose dates the organiser has not announced yet is not the same thing as
+          // an event with no pattern, and putting the island's largest event in the second bucket
+          // was the wrong answer even though every sentence in it was true. It gets its window and
+          // the last dates that were published, and it says which is which.
+          const win = annualWindow(rec, t);
+          if (win) { list.push({ rec, occ: null, window: win, days: 99997 }); continue; }
+          list.push({ rec, occ: null, days: 99998 });
         }
       }
       list.sort((a, b) => a.days - b.days || (a.rec.name < b.rec.name ? -1 : 1));
       schedCache = { day: t, list };
       return list;
+    }
+
+    /** What the simulation is doing with a record right now, or null when it is not running one. */
+    function liveRow(id) {
+      const s = world.read('events');
+      if (!s || !s.ready) return null;
+      return (s.running || []).find((r) => r.id === id) || null;
     }
     function nextEventLabel() {
       const s = schedule().find((x) => x.occ && x.days >= 0 && x.rec.attendance && x.rec.attendance.typical >= 200);
@@ -528,7 +533,28 @@ registerPanel({
       }
       if (!shown) pane.append(el('div', { class: 'ev-quiet' }, 'Nothing dated inside that window.'));
 
-      const unpatterned = list.filter((s) => !s.ended && !s.occ);
+      // What has just been on. An islander's calendar sense runs both ways, and the default
+      // playthrough opens six days after the biggest weekend of the year: a board that could only
+      // look forward had nothing at all to say about it.
+      const ev = world.read('events');
+      const gone = (ev && ev.justGone) || [];
+      if (gone.length) {
+        pane.append(el('div', { class: 'ev-h' }, 'Just gone'));
+        for (const g of gone) {
+          pane.append(el('div', { class: 'ev-card pick', onclick: () => { view.eventId = g.id; refresh(true); } },
+            el('div', { class: 'ev-when' }, fmtDay(parseISO(g.date) ?? t),
+              el('em', {}, g.endedDaysAgo === 1 ? 'finished yesterday' : 'finished ' + g.endedDaysAgo + ' days ago')),
+            el('h4', {}, g.name)));
+        }
+      }
+
+      const annual = list.filter((s) => !s.ended && !s.occ && s.window);
+      if (annual.length) {
+        pane.append(el('div', { class: 'ev-h' }, 'Every year, on dates the organiser announces'));
+        for (const s of annual) pane.append(annualRow(s, t));
+      }
+
+      const unpatterned = list.filter((s) => !s.ended && !s.occ && !s.window);
       if (unpatterned.length) {
         pane.append(el('div', { class: 'ev-h' }, 'Real, but no date the pack will stand behind'));
         for (const s of unpatterned) pane.append(eventRow(s, t));
@@ -557,6 +583,30 @@ registerPanel({
           att.typical ? chip('sea', num(att.typical) + ' at peak') : null));
     }
 
+    /**
+     * An annual event with no announced date. The window is real and the pack will stand behind it;
+     * a date inside it would be a projection nobody published, so there is not one. What is offered
+     * instead is the last weekend it actually ran on, which is the useful true sentence.
+     */
+    function annualRow(s, t) {
+      const r = s.rec;
+      const on = view.eventId === r.id;
+      const att = r.attendance || {};
+      const w = s.window;
+      return el('div', { class: 'ev-card pick' + (on ? ' on' : ''), onclick: () => { view.eventId = r.id; refresh(true); } },
+        el('div', { class: 'ev-when' }, windowText(r.date_rule) + ' ' + w.year,
+          el('em', {}, w.start > t ? awayText(w.start - t) : 'inside the window now')),
+        el('h4', {}, r.name),
+        el('div', { class: 'ev-quiet', style: { marginTop: '4px' } },
+          w.lastPublished
+            ? 'Dates not announced. It last ran ' + fmtSpan(w.lastPublished.start, w.lastPublished.end) + '.'
+            : 'Dates not announced, and no earlier published dates are held.'),
+        el('div', { class: 'ev-chips' },
+          chip(CATEGORY_CHIP[r.category] || 'iron', r.category.replace(/-/g, ' ')),
+          chip('iron', 'window, not a date'),
+          att.typical ? chip('sea', num(att.typical) + ' at peak') : null));
+    }
+
     function todayCard(pk) {
       const t = today();
       const active = activePeriods(pk, t, t);
@@ -576,7 +626,68 @@ registerPanel({
           el('div', { class: 'ev-num' }, el('b', {}, bind((w) => num(w.read('visitors').arrivalsToday))), el('i', {}, 'arrived today')),
           el('div', { class: 'ev-num' }, el('b', {}, bind((w) => (w.read('visitors').pressure || 0).toFixed(2))), el('i', {}, 'pressure'))));
       }
+      // The part that makes this a calendar rather than a table: how many of the people on the
+      // island right now crossed the water because something in this pack is on.
+      const ev = world.read('events');
+      if (ev && ev.ready && ev.running.length) {
+        card.append(el('div', { class: 'ev-nums' },
+          el('div', { class: 'ev-num' }, el('b', {}, bind((w) => num((w.read('events') || {}).crowdNow || 0))), el('i', {}, 'on site now')),
+          el('div', { class: 'ev-num' }, el('b', {}, bind((w) => num((w.read('visitors') || {}).eventArrivalsToday || 0))), el('i', {}, 'came for it')),
+          el('div', { class: 'ev-num' },
+            el('b', {}, bind((w) => num((w.read('events') || {}).crowdPeakToday || 0))),
+            el('i', { title: 'The busiest moment since midnight. The rolling twenty-four hour figure is beside it.' }, 'busiest today')),
+          el('div', { class: 'ev-num' },
+            el('b', {}, bind((w) => num((w.read('events') || {}).crowdPeak24h || 0))),
+            el('i', {}, 'busiest in 24 h'))));
+        if (ev.calledOff.length) {
+          card.append(el('div', { class: 'ev-quiet', style: { marginTop: '6px', color: 'var(--coral)' } },
+            'Called off by the weather: ' + ev.calledOff.map((c) => c.name + ' (' + c.why + ')').join('; ') + '.'));
+        }
+        if (ev.weatherChanges && ev.weatherChanges.length) {
+          card.append(el('div', { class: 'ev-quiet', style: { marginTop: '6px', color: 'var(--sun)' } },
+            'Changed by the weather: ' + ev.weatherChanges.map((c) => c.name + ' (' + c.why + ')').join('; ') + '.'));
+        }
+        // What is physically on the ground right now, which is the thing you can go and look at.
+        const kit = onGroundText(ev);
+        if (kit) card.append(el('div', { class: 'ev-quiet', style: { marginTop: '6px' } }, kit));
+      }
+      if (heldCount) {
+        card.append(el('div', { class: 'ev-quiet', style: { marginTop: '8px' } },
+          heldCount === 1
+            ? 'One record in the pack is held below the confidence threshold and is not shown or simulated.'
+            : heldCount + ' records in the pack are held below the confidence threshold and are not shown or simulated.'));
+      }
       return card;
+    }
+
+    /**
+     * One sentence about what is physically standing on the island because of the calendar. The
+     * numbers come from the same read model the render layer draws from, so if the board says
+     * thirty marquees are up at Dunwich, thirty are up at Dunwich and a player can fly there.
+     */
+    function onGroundText(ev) {
+      const sites = (ev && ev.sites) || [];
+      if (!sites.length) return '';
+      let marquees = 0, stages = 0, loos = 0, bins = 0, raising = 0;
+      const where = new Set();
+      for (const s of sites) {
+        const k = s.kit || {};
+        marquees += k.marquees || 0;
+        stages += k.stage ? 1 : 0;
+        loos += k.toilets || 0;
+        bins += k.bins || 0;
+        if (s.up < 0.99) raising++;
+        for (const p of s.placeIds || []) where.add(placeName(p));
+      }
+      const bits = [];
+      if (marquees) bits.push(marquees === 1 ? 'one marquee' : num(marquees) + ' marquees');
+      if (stages) bits.push(stages === 1 ? 'a stage' : num(stages) + ' stages');
+      if (loos) bits.push(num(loos) + ' portable toilet' + (loos === 1 ? '' : 's'));
+      if (bins) bits.push(num(bins) + ' extra bin' + (bins === 1 ? '' : 's'));
+      if (!bits.length) return '';
+      const place = [...where].slice(0, 3).join(', ');
+      return 'On the ground right now: ' + listOf(bits) + ' at ' + place +
+        (raising ? '. Some of it is still going up or coming down.' : '.');
     }
 
     /** Which load periods and seasons contain a span. */
@@ -640,6 +751,29 @@ registerPanel({
       if (s.occ) {
         pane.append(el('div', { class: 'ev-when', style: { fontSize: 'var(--fs-lg)' } },
           fmtSpan(s.occ.start, s.occ.end), el('em', {}, awayText(s.occ.start - t))));
+      } else if (s.window) {
+        pane.append(el('div', { class: 'ev-when', style: { fontSize: 'var(--fs-lg)' } },
+          windowText(r.date_rule) + ' ' + s.window.year,
+          el('em', {}, s.window.start > t ? awayText(s.window.start - t) : 'inside the window now')));
+        pane.append(el('div', { class: 'ev-banner' },
+          el('b', {}, 'A window, not a date. '),
+          'This runs every year and the organiser announces the dates. The published dates fit no weekday rule, so the pack holds the window they have fallen in and does not project a date inside it. ' +
+          (s.window.lastPublished
+            ? 'The last dates it published were ' + fmtSpan(s.window.lastPublished.start, s.window.lastPublished.end) + '.'
+            : 'No earlier published dates are held.')));
+      }
+      // Where two public listings give different dates for the same event, both are on screen and
+      // the one the simulation runs says so. Quietly picking one and printing it as the date is how
+      // a listing somebody has not updated becomes a fact.
+      if (r.alternate_listings && r.alternate_listings.length > 1) {
+        pane.append(el('div', { class: 'ev-h' }, 'Two public listings, two different dates'));
+        for (const alt of r.alternate_listings) {
+          const a = parseISO(alt.start), b = parseISO(alt.end) ?? a;
+          pane.append(el('div', { class: 'ev-item' },
+            el('div', { class: 'body' },
+              el('div', {}, (a != null ? fmtSpan(a, b) : alt.start) + (alt.used ? ' · the one the island runs' : ' · recorded, not run')),
+              el('em', {}, (alt.quote ? '"' + txt(alt.quote) + '" ' : '') + txt(alt.note || '') + ' Source: ' + alt.source))));
+        }
       }
       const kv = [];
       kv.push(['Pattern', ruleText(r.date_rule)]);
@@ -653,6 +787,10 @@ registerPanel({
       if (s.all && s.all.length > 1) {
         pane.append(el('div', { class: 'ev-quiet' }, 'Then again on ' + s.all.slice(1, 4).map((o) => fmtSpan(o.start, o.end)).join(', ') + '.'));
       }
+
+      /* what the island is doing about it, right now */
+      const live = liveRow(r.id);
+      if (live) pane.append(liveBlock(live));
 
       /* how many */
       if (r.attendance) {
@@ -757,6 +895,70 @@ registerPanel({
       const box = el('div', { class: 'ev-lvl', title: 'Strain level ' + level + ' of 5' });
       for (let i = 1; i <= 5; i++) box.append(el('i', { class: i <= level ? 'on' + level : '' }));
       return box;
+    }
+
+    /**
+     * On now. The pack's estimate is one thing; what the island did with it is another, and this is
+     * the only place in the build where the two are on screen together. If they ever disagree
+     * badly, that is a finding rather than a bug to hide: the pack is an estimate and the
+     * simulation is a model, and neither of them is a gate count.
+     */
+    function liveBlock(live) {
+      const wrap = el('div', {});
+      wrap.append(el('div', { class: 'ev-h' }, 'On now, in the running island'));
+      wrap.append(el('div', { class: 'ev-nums' },
+        el('div', { class: 'ev-num' },
+          el('b', {}, bind((w) => {
+            const row = ((w.read('events') || {}).running || []).find((x) => x.id === live.id);
+            return num(row ? row.onSiteNow : 0);
+          })), el('i', {}, 'on site')),
+        el('div', { class: 'ev-num' }, el('b', {}, num(live.expected)), el('i', {}, 'expected today')),
+        el('div', { class: 'ev-num' }, el('b', {}, num(live.packTypical)), el('i', {}, 'the pack\'s typical')),
+        live.days > 1 ? el('div', { class: 'ev-num' }, el('b', {}, 'Day ' + live.dayOfEvent + ' of ' + live.days), el('i', {}, 'of the event')) : null));
+      if (live.weatherMult < 0.98) {
+        wrap.append(el('div', { class: 'ev-p', style: { marginTop: '6px' } },
+          el('strong', {}, 'Today\'s weather has taken it to ' + Math.round(live.weatherMult * 100) + ' per cent'),
+          live.weatherDrivers.length ? ' of what it would otherwise draw, on ' + live.weatherDrivers.join(' and ') + '.' : ' of what it would otherwise draw.'));
+      }
+      if (live.weatherEffect && live.weatherWhy && live.weatherWhy.length) {
+        wrap.append(el('div', { class: 'ev-banner', style: { marginTop: '8px' } },
+          el('b', {}, live.weatherEffect === 'moved' ? 'Moved today. ' : 'Running short today. '),
+          txt(live.weatherWhy.join('; ')) + '.' +
+          (live.movedTo ? ' It is at ' + placeName(live.movedTo) + ' rather than ' + placeName(live.placeIds[0]) + '.' : '')));
+      }
+      // What is standing on the ground for this event at this minute. The same numbers the render
+      // layer is drawing from, so a player can read it here and then go and look at it.
+      if (live.kit) {
+        const k = live.kit;
+        const bits = [];
+        if (k.marquees) bits.push(k.marquees === 1 ? 'one marquee' : k.marquees + ' marquees');
+        if (k.stage) bits.push('a stage');
+        if (k.toilets) bits.push(k.toilets + ' portable toilet' + (k.toilets === 1 ? '' : 's'));
+        if (k.bins) bits.push(k.bins + ' extra bin' + (k.bins === 1 ? '' : 's'));
+        if (k.banners) bits.push(k.banners === 1 ? 'a banner' : k.banners + ' banners');
+        if (k.bunting) bits.push('a bunting run');
+        wrap.append(el('div', { class: 'ev-p', style: { marginTop: '8px' } },
+          el('strong', {}, 'On the ground: '),
+          bits.length
+            ? listOf(bits) + ' at ' + placeName(live.siteIds ? live.siteIds[0] : live.placeIds[0]) +
+              (live.kitUp < 0.99 ? ', ' + Math.round(live.kitUp * 100) + ' per cent up.' : '.')
+            : 'nothing. ' + (k.note ? txt(k.note) : 'This one puts nothing on a paddock.')));
+        if (bits.length && k.note) wrap.append(el('div', { class: 'ev-quiet' }, txt(k.note)));
+        wrap.append(el('div', { class: 'ev-quiet' },
+          'Counts from sim_defaults.site_kit in data/events.json and this record’s own needs block, all modelling estimates. No event’s site plan is published for this island.'));
+      }
+      const v = world.read('visitors');
+      if (v && v.ready) {
+        wrap.append(el('div', { class: 'ev-quiet', style: { marginTop: '6px' } },
+          num(v.eventArrivalsToday || 0) + ' people crossed today for something in this calendar' +
+          ((v.eventTurnedAwayToday || 0) > 0
+            ? ', and ' + num(v.eventTurnedAwayToday) + ' could not get on a boat.'
+            : '. Nobody was turned away.')));
+      }
+      wrap.append(el('div', { class: 'ev-quiet' },
+        'The expected figure is the pack\'s own estimate with a deterministic day-to-day jitter and the pack\'s own weather sensitivity applied. ' +
+        'Nobody publishes a gate count for any event on this island, so none of these three numbers is a measurement.'));
+      return wrap;
     }
 
     function attendanceBand(r, s, t) {
@@ -869,11 +1071,83 @@ registerPanel({
         body.append(el('tr', {}, el('td', {}, label), el('td', { class: 'n' }, ws[k].toFixed(2)), el('td', {}, now)));
       }
       wrap.append(tb);
-      if (ws.cancels_if) wrap.append(el('div', { class: 'ev-p', style: { marginTop: '8px' } }, el('strong', {}, 'Called off if: '), txt(ws.cancels_if)));
+
+      /* The sentence, and then the conditions the island actually tests against it.
+         This block exists because the sentence used to be printed on its own. Fourteen records
+         carry one, the simulation understood four of them and only looked at midnight, and so the
+         board promised a player that rain closes the green and then ran barefoot bowls through a
+         downpour twenty-two times. Anything printed here is now something the island does. */
+      if (ws.cancels_if) {
+        wrap.append(el('div', { class: 'ev-p', style: { marginTop: '8px' } }, el('strong', {}, 'Called off if: '), txt(ws.cancels_if)));
+        const conds = Array.isArray(ws.called_off_when) ? ws.called_off_when : [];
+        const testable = conds.filter((c) => c && !c.not_evaluated);
+        if (testable.length) {
+          const ct = el('table', { class: 'ev-table', style: { marginTop: '6px' } });
+          const cb = el('tbody', {});
+          ct.append(el('thead', {}, el('tr', {}, el('th', {}, 'What the island tests'), el('th', {}, 'Then'), el('th', { class: 'n' }, 'Right now'))), cb);
+          for (const c of testable) {
+            cb.append(el('tr', {},
+              el('td', {}, conditionText(c)),
+              el('td', {}, effectText(c)),
+              el('td', { class: 'n', style: { color: conditionLive(c, wx) ? 'var(--coral)' : null } }, readingText(c, wx))));
+          }
+          wrap.append(ct);
+          wrap.append(el('div', { class: 'ev-quiet' },
+            'Every threshold here is a modelling estimate. Nobody publishes the millimetre of rain at which a market packs up, and this pack says so rather than implying somebody does. The island checks these through the event’s own hours, not at midnight.'));
+        } else {
+          wrap.append(el('div', { class: 'ev-quiet', style: { color: 'var(--sun)' } },
+            'The pack carries that sentence and no condition this build can test, so nothing in the running island acts on it. That is a gap, and it is printed rather than hidden.'));
+        }
+        for (const c of conds) {
+          if (!c || !c.not_evaluated) continue;
+          wrap.append(el('div', { class: 'ev-quiet', style: { marginTop: '6px' } },
+            el('strong', {}, 'Not tested: '), txt(c.not_evaluated)));
+        }
+      }
       if (ws.note) wrap.append(el('div', { class: 'ev-quiet' }, txt(ws.note)));
       wrap.append(el('div', { class: 'ev-quiet' },
         'A sensitivity of 1 means the event does not happen in that condition. The forecast above only applies today’s weather when the event is within three days, because weather three months out is not a forecast, it is a guess.'));
       return wrap;
+    }
+
+    /* --- the weather conditions, in words a player reads rather than a schema ------------- */
+
+    const DRIVER_LABEL = {
+      rain: ['rain', 'mm/h', (wx) => (wx.rainMmHr || 0).toFixed(1)],
+      'rain-today': ['rain since midnight', 'mm', (wx) => Math.round(wx.rainToday || 0)],
+      wind: ['wind', 'kt', (wx) => Math.round(wx.windKt || 0)],
+      swell: ['swell', 'm', (wx) => (wx.swellM || 0).toFixed(1)],
+      heat: ['feels like', '°C', (wx) => Math.round(wx.apparentC ?? wx.tempC ?? 0)]
+    };
+    function conditionText(c) {
+      if (c.driver === 'crossing') return 'the crossing is ' + (c.state || 'cancelled');
+      const d = DRIVER_LABEL[c.driver];
+      if (!d) return c.driver;
+      if (c.over != null) return d[0] + ' over ' + c.over + ' ' + d[1];
+      if (c.under != null) return d[0] + ' under ' + c.under + ' ' + d[1];
+      return d[0];
+    }
+    function effectText(c) {
+      if (c.effect === 'moved') return 'it moves to ' + placeName(c.move_to || '');
+      if (c.effect === 'shortened') return 'it runs short, about ' + Math.round((c.reduce_to || 0.75) * 100) + ' per cent of the crowd';
+      if (c.effect === 'postponed') return 'it is held over';
+      return 'it is called off';
+    }
+    function readingText(c, wx) {
+      if (!wx) return 'not built';
+      if (c.driver === 'crossing') return wx.crossingCondition || 'unrated';
+      const d = DRIVER_LABEL[c.driver];
+      return d ? d[2](wx) + ' ' + d[1] : '';
+    }
+    function conditionLive(c, wx) {
+      if (!wx) return false;
+      if (c.driver === 'crossing') return wx.crossingCondition === (c.state || 'cancelled');
+      const d = DRIVER_LABEL[c.driver];
+      if (!d) return false;
+      const v = Number(d[2](wx));
+      if (c.over != null) return v > c.over;
+      if (c.under != null) return v < c.under;
+      return false;
     }
 
     /* --- column three: the rhythms ----------------------------------- */
@@ -896,6 +1170,34 @@ registerPanel({
 
       pane.append(el('div', { class: 'ev-h' }, 'The weekly wave'));
       pane.append(weeklyCard(pk, t));
+
+      // Anything in the pack's rhythms that does not have a card of its own above. Five records
+      // were invisible on this board before this was added, including the two that decide when a
+      // resident can be in the room where a decision about this island is taken, and what the same
+      // crossing costs on a public holiday. A card per rhythm does not scale; a list does.
+      const BESPOKE = ['bin-day', 'vehicle-barge', 'school-run', 'tide-fishing-window',
+        'friday-afternoon-arrivals', 'sunday-afternoon-departures'];
+      const others = (pk.rhythms || []).filter((r) => !BESPOKE.includes(r.id));
+      if (others.length) {
+        pane.append(el('div', { class: 'ev-h' }, 'The rest of the working week'));
+        for (const r of others) {
+          const card = el('div', { class: 'ev-card' },
+            el('h4', {}, txt(r.name)),
+            el('div', { class: 'ev-chips' }, chip('iron', String(r.kind || '').replace(/-/g, ' '))),
+            el('div', { class: 'ev-quiet', style: { marginTop: '6px' } },
+              txt(String(r.description || '').split('. ').slice(0, 3).join('. ') + '.')));
+          for (const st of (r.strains || []).slice(0, 2)) {
+            card.append(el('div', { class: 'ev-item' },
+              levelBar(st.level),
+              el('div', { class: 'body' },
+                el('div', {}, String(st.system).replace(/-/g, ' ') + ' · level ' + st.level),
+                st.note ? el('em', {}, txt(st.note)) : null)));
+          }
+          if (r.sim_hint) card.append(el('div', { class: 'ev-quiet', style: { marginTop: '6px' } }, txt(r.sim_hint)));
+          card.append(el('div', { class: 'ev-src' }, 'Confidence: ' + (r.confidence || 'not stated') + '. Source: ' + (r.source || 'not recorded')));
+          pane.append(card);
+        }
+      }
 
       pane.append(el('div', { class: 'ev-h' }, 'Seasons and load'));
       pane.append(el('div', { class: 'ev-quiet', style: { marginBottom: '8px' } },

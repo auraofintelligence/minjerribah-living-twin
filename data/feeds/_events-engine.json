@@ -1,0 +1,2337 @@
+{
+  "feed": "events-engine",
+  "schema": "minjerribah-connector-feed/1",
+  "version": "1.0.0",
+  "title": "The public event atlas: what is on, where, and who listed it",
+  "organisation": "Quandamooka Country Events Engine, and through it the listing sources it names",
+  "about": "Publicly listed island events, read from a local checkout of the events engine. The source publishes its own last search date and its own draft flag, and both are carried through rather than replaced with a judgement of ours. Cultural events are carried as date, place and listing source only, and are flagged for a human.",
+  "sync": {
+    "synced_at": "2026-08-10T05:28:27+10:00",
+    "connector": {
+      "id": "events-engine",
+      "version": "1.0"
+    },
+    "source": {
+      "kind": "repository",
+      "id": "quandamooka-country-events-engine",
+      "path": "C:/Users/sbt41/githublocal/quandamooka-country-events-engine",
+      "present": true,
+      "commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32",
+      "commit_date": "2026-07-03",
+      "working_tree": "clean",
+      "files": [
+        "assets/site-data.js"
+      ]
+    },
+    "source_statement": {
+      "quote": "Draft event atlas. Confirm dates, permissions and contacts with the responsible source before use.",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js project.dataStatus"
+    },
+    "source_boundary": {
+      "quote": "This site is not an official permission, cultural authority, council permit, safety approval or live emergency source. It helps organisers ask clearer questions before they approach the right authority.",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js project.boundary"
+    },
+    "source_last_public_search": "3 July 2026",
+    "source_search_anchor": "2026-07-03",
+    "source_search_age_days": 38,
+    "checkout_age_days": 38,
+    "checkout_is_behind_cadence": true,
+    "publication_boundary": "quandamooka-country-events-engine/docs/PUBLIC_BOUNDARY.md is treated as blocking by this connector. Its keep-private list includes sensitive cultural material, protected places, unapproved images or names, and incident details that identify people. None of that enters through here, whatever the data file happens to contain.",
+    "cadence": {
+      "every": "weekly, and always before a wave that touches the calendar",
+      "run_by": "a person, after pulling that repository",
+      "reason": "The git history of that repository carries repeated public source refreshes, roughly weekly through June and July 2026. A local checkout lags the remote, so a sync that did not record which commit it read would claim a currency it does not have."
+    },
+    "stale_after_days": 21,
+    "counts": {
+      "events_read": 39,
+      "places_read": 24,
+      "cultural_flagged": 6,
+      "kept": 63,
+      "held": 0,
+      "wanted": 2
+    }
+  },
+  "confidence_scale": {
+    "high": "Not reachable while the source calls itself a draft, and it does. Nothing in this feed is high.",
+    "medium": "A listing source states this event, this date and this place, and the record quotes the atlas line.",
+    "low": "Not used. An event that cannot be cited is not carried."
+  },
+  "freshness_rule": "An event listing is only as true as the last public search behind it. The source names that date and this feed carries it, so a panel showing an event can show when somebody last looked rather than implying it knows what is on tonight.",
+  "cultural_flags": [
+    {
+      "id": "qcee-redlands-coast-naidoc-cultural-celebration-2026",
+      "name": "Redlands Coast NAIDOC Cultural Celebration 2026",
+      "why": "Names a cultural event, a Quandamooka organisation, or Country. Carried as date, place and listing source only. A human reads this before it goes anywhere.",
+      "queue": "docs/CULTURAL-REVIEW.md"
+    },
+    {
+      "id": "qcee-queensland-young-people-quandamooka-country-2026",
+      "name": "Queensland Young people: Join us on Quandamooka Country!",
+      "why": "Names a cultural event, a Quandamooka organisation, or Country. Carried as date, place and listing source only. A human reads this before it goes anywhere.",
+      "queue": "docs/CULTURAL-REVIEW.md"
+    },
+    {
+      "id": "qcee-goompi-naidoc-community-film-celebration-2026",
+      "name": "Goompi NAIDOC 2026 - Community Film Celebration",
+      "why": "Names a cultural event, a Quandamooka organisation, or Country. Carried as date, place and listing source only. A human reads this before it goes anywhere.",
+      "queue": "docs/CULTURAL-REVIEW.md"
+    },
+    {
+      "id": "qcee-quandamooka-festival-2026",
+      "name": "Quandamooka Festival",
+      "why": "Names a cultural event, a Quandamooka organisation, or Country. Carried as date, place and listing source only. A human reads this before it goes anywhere.",
+      "queue": "docs/CULTURAL-REVIEW.md"
+    },
+    {
+      "id": "qcee-stitching-stories-pattern",
+      "name": "Stitching Stories",
+      "why": "Names a cultural event, a Quandamooka organisation, or Country. Carried as date, place and listing source only. A human reads this before it goes anywhere.",
+      "queue": "docs/CULTURAL-REVIEW.md"
+    },
+    {
+      "id": "qcee-goompi-heritage-walk-2026",
+      "name": "Goompi / Dunwich Heritage Walk",
+      "why": "Names a cultural event, a Quandamooka organisation, or Country. Carried as date, place and listing source only. A human reads this before it goes anywhere.",
+      "queue": "docs/CULTURAL-REVIEW.md"
+    }
+  ],
+  "records": [
+    {
+      "id": "qcee-paula-boo-coil-workshop-winter-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[0], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Coil Workshop, 30 June and 7 July 2026, Paula Boo Studios. Listed by Visit Redlands Coast.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Coil Workshop",
+      "date_label": "30 June and 7 July 2026",
+      "starts": "2026-06-30",
+      "ends": "2026-07-07",
+      "atlas_status": "confirmed",
+      "atlas_status_meaning": "The listing source states this date.",
+      "listing_period": "Winter school holidays",
+      "place": "Paula Boo Studios",
+      "village": "Point Lookout",
+      "sector": "Workshops and making",
+      "scale": "small guided creative workshop",
+      "listed_by": "Visit Redlands Coast",
+      "upstream_sources": [
+        "https://www.redlandscoast.com.au/ATDW/Events/Coil-Workshop-Adventurefest-67e6260e64c9461c4042cb1a",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Two school-holiday basketry sessions using natural fibres and coiling techniques in a small Point Lookout studio setting.",
+      "load_tags": [
+        "workshop",
+        "basketry",
+        "Point Lookout",
+        "small group",
+        "winter holidays"
+      ],
+      "movement_note": "Small booked arrivals with low transport pressure, afternoon dwell time and limited spillover beyond the studio site.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-paula-boo-twist-weave-workshop-winter-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[1], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Twist Weave Workshop, 1 and 8 July 2026, Paula Boo Studios. Listed by Visit Redlands Coast.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Twist Weave Workshop",
+      "date_label": "1 and 8 July 2026",
+      "starts": "2026-07-01",
+      "ends": "2026-07-08",
+      "atlas_status": "confirmed",
+      "atlas_status_meaning": "The listing source states this date.",
+      "listing_period": "Winter school holidays",
+      "place": "Paula Boo Studios",
+      "village": "Point Lookout",
+      "sector": "Workshops and making",
+      "scale": "small guided fibre workshop",
+      "listed_by": "Visit Redlands Coast",
+      "upstream_sources": [
+        "https://www.redlandscoast.com.au/ATDW/Events/Twist-Weave-Workshop-Adventurefest-67e62a9ee64d2e334074736d",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Two holiday weaving sessions focused on twined basket-making with locally gathered natural fibres and small-group teaching.",
+      "load_tags": [
+        "workshop",
+        "weaving",
+        "Point Lookout",
+        "small group",
+        "winter holidays"
+      ],
+      "movement_note": "Small daytime studio attendance with low parking pressure and mostly pre-booked participant arrivals.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-paula-boo-alternate-weave-workshop-winter-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[2], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Alternate Weave Workshop, 2 and 9 July 2026, Paula Boo Studios. Listed by Visit Redlands Coast.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Alternate Weave Workshop",
+      "date_label": "2 and 9 July 2026",
+      "starts": "2026-07-02",
+      "ends": "2026-07-09",
+      "atlas_status": "confirmed",
+      "atlas_status_meaning": "The listing source states this date.",
+      "listing_period": "Winter school holidays",
+      "place": "Paula Boo Studios",
+      "village": "Point Lookout",
+      "sector": "Workshops and making",
+      "scale": "small guided fibre workshop",
+      "listed_by": "Visit Redlands Coast",
+      "upstream_sources": [
+        "https://www.redlandscoast.com.au/ATDW/Events/Alternate-Weave-Workshop-Adventurefest-69325cb7605e275d5c8766b9",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Two school-holiday fibre workshops where participants make small woven sea creatures from coccus palm and raffia in a Point Lookout studio setting.",
+      "load_tags": [
+        "workshop",
+        "weaving",
+        "Point Lookout",
+        "small group",
+        "winter holidays"
+      ],
+      "movement_note": "Small booked afternoon arrivals with low transport pressure, short studio dwell time and limited spillover beyond the host site.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-tones-and-tides-point-lookout-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[3], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Tones and Tides: Point Lookout, 4 July 2026, Point Lookout Community Hall. Listed by Redlands Coast.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Tones and Tides: Point Lookout",
+      "date_label": "4 July 2026",
+      "starts": "2026-07-04",
+      "ends": null,
+      "atlas_status": "confirmed",
+      "atlas_status_meaning": "The listing source states this date.",
+      "listing_period": "Winter school holidays",
+      "place": "Point Lookout Community Hall",
+      "village": "Point Lookout",
+      "sector": "Music and community arts",
+      "scale": "small ticketed concert",
+      "listed_by": "Redlands Coast",
+      "upstream_sources": [
+        "https://www.redlandscoast.com.au/ATDW/Events/Tones-and-Tides-Point-Lookout-6a2053a2483de0291224b3e5",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Afternoon Point Lookout concert in the Tones and Tides series, pairing touring opera with free kids music workshops before the show.",
+      "load_tags": [
+        "opera",
+        "concert",
+        "Point Lookout",
+        "kids workshop",
+        "winter culture"
+      ],
+      "movement_note": "Small afternoon hall audience with pre-show family arrivals and manageable ferry, bus and parking overlap.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-redlands-coast-naidoc-cultural-celebration-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[4], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Redlands Coast NAIDOC Cultural Celebration 2026, 5 July 2026, Raby Bay Harbour Park. Listed by Visit Redlands Coast and Redland City Council.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Redlands Coast NAIDOC Cultural Celebration 2026",
+      "date_label": "5 July 2026",
+      "starts": "2026-07-05",
+      "ends": null,
+      "atlas_status": "confirmed",
+      "atlas_status_meaning": "The listing source states this date.",
+      "listing_period": "NAIDOC Week",
+      "place": "Raby Bay Harbour Park",
+      "village": "Cleveland",
+      "sector": "Culture and community",
+      "scale": "regional public celebration",
+      "listed_by": "Visit Redlands Coast and Redland City Council",
+      "upstream_sources": [
+        "https://www.visitredlandscoast.com.au/whats-on/event/7335-redlands-coast-naidoc-cultural-celebration-2026",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": true,
+      "summary": null,
+      "load_tags": null,
+      "movement_note": null,
+      "cultural_handling": "Carried as civic load only: the date, the place, and who listed it, exactly as advertised. No programme, no description, no protocol, no meaning. This record is flagged for a human to read before it is promoted into any pack, and nothing about it may be inferred.",
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-stradbroke-chamber-music-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[5], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Stradbroke Chamber Music Festival, 17-19 July 2026, Point Lookout Community Hall. Listed by SeaLink and festival program.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Stradbroke Chamber Music Festival",
+      "date_label": "17-19 July 2026",
+      "starts": "2026-07-17",
+      "ends": "2026-07-19",
+      "atlas_status": "confirmed",
+      "atlas_status_meaning": "The listing source states this date.",
+      "listing_period": "Winter",
+      "place": "Point Lookout Community Hall",
+      "village": "Point Lookout",
+      "sector": "Music and arts",
+      "scale": "destination cultural festival",
+      "listed_by": "SeaLink and festival program",
+      "upstream_sources": [
+        "https://www.sealink.com.au/north-stradbroke-island/events/stradbroke-chamber-music-festival/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Three-day chamber music festival with six concerts and destination travel patterns.",
+      "load_tags": [
+        "concerts",
+        "hall capacity",
+        "ferry discount",
+        "winter culture"
+      ],
+      "movement_note": "Small but high-intent audience, timed around ferry transfers, buses and Point Lookout accommodation.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-stradbroke-island-hostplus-cup-game-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[6], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Stradbroke Island Hostplus Cup Game, 18 July 2026, Ron Stark Oval. Listed by Visit Brisbane and tourism listings.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Stradbroke Island Hostplus Cup Game",
+      "date_label": "18 July 2026",
+      "starts": "2026-07-18",
+      "ends": null,
+      "atlas_status": "confirmed",
+      "atlas_status_meaning": "The listing source states this date.",
+      "listing_period": "Winter / Indigenous Round",
+      "place": "Ron Stark Oval",
+      "village": "Goompi / Dunwich",
+      "sector": "Sport and community",
+      "scale": "major one-day rugby league event",
+      "listed_by": "Visit Brisbane and tourism listings",
+      "upstream_sources": [
+        "https://visit.brisbane.qld.au/whats-on/north-stradbroke-island/sporting-events/stradbroke-island-hostplus-cup-game-4d7e",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Annual Indigenous Round island game day bringing BMD Premiership and Hostplus Cup teams to Ron Stark Oval.",
+      "load_tags": [
+        "rugby league",
+        "Ron Stark Oval",
+        "culture",
+        "family",
+        "free entry"
+      ],
+      "movement_note": "Day-trip arrivals cluster around ferry and bus connections, then compress into oval entry, food lines and match turnover windows.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-queensland-young-people-quandamooka-country-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[7], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Queensland Young people: Join us on Quandamooka Country!, 18-19 July 2026, Minjerribah Camping Ground. Listed by Humanitix.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Queensland Young people: Join us on Quandamooka Country!",
+      "date_label": "18-19 July 2026",
+      "starts": "2026-07-18",
+      "ends": "2026-07-19",
+      "atlas_status": "confirmed",
+      "atlas_status_meaning": "The listing source states this date.",
+      "listing_period": "Winter",
+      "place": "Minjerribah Camping Ground",
+      "village": "Pulan / Amity",
+      "sector": "Youth gathering and climate justice",
+      "scale": "small multi-day gathering",
+      "listed_by": "Humanitix",
+      "upstream_sources": [
+        "https://events.humanitix.com/queensland-young-climate-warriors-join-us-on-quandamooka-country",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": true,
+      "summary": null,
+      "load_tags": null,
+      "movement_note": null,
+      "cultural_handling": "Carried as civic load only: the date, the place, and who listed it, exactly as advertised. No programme, no description, no protocol, no meaning. This record is flagged for a human to read before it is promoted into any pack, and nothing about it may be inferred.",
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-travla-hoedown-party-cruise-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[8], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Party Cruise - Journey to the travla Hoedown at The Straddie Hotel, 25 July 2026, SeaLink Ferry to The Straddie Hotel. Listed by SeaLink North Stradbroke Island.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Party Cruise - Journey to the travla Hoedown at The Straddie Hotel",
+      "date_label": "25 July 2026",
+      "starts": "2026-07-25",
+      "ends": null,
+      "atlas_status": "confirmed",
+      "atlas_status_meaning": "The listing source states this date.",
+      "listing_period": "Winter",
+      "place": "SeaLink Ferry to The Straddie Hotel",
+      "village": "Cleveland to Goompi / Dunwich",
+      "sector": "Travel-linked live music and hospitality",
+      "scale": "ticketed ferry-and-hotel social event",
+      "listed_by": "SeaLink North Stradbroke Island",
+      "upstream_sources": [
+        "https://www.sealink.com.au/north-stradbroke-island/events/party-cruise-journey-to-the-travla-hoedown-at-the-straddie-hotel/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Ticketed pre-party ferry cruise with live music, line dancing and transfers into a larger hoedown afternoon at The Straddie Hotel.",
+      "load_tags": [
+        "SeaLink",
+        "live music",
+        "line dancing",
+        "ferry",
+        "Straddie Hotel"
+      ],
+      "movement_note": "Boarding compresses around the Cleveland departure window, then shifts into bus transfers and a broader afternoon hotel crowd in Dunwich.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-goompi-naidoc-community-film-celebration-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[9], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Goompi NAIDOC 2026 - Community Film Celebration, 31 July 2026, Dunwich State School Oval. Listed by Redlands Coast and MMEIC.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Goompi NAIDOC 2026 - Community Film Celebration",
+      "date_label": "31 July 2026",
+      "starts": "2026-07-31",
+      "ends": null,
+      "atlas_status": "confirmed",
+      "atlas_status_meaning": "The listing source states this date.",
+      "listing_period": "NAIDOC Week",
+      "place": "Dunwich State School Oval",
+      "village": "Goompi / Dunwich",
+      "sector": "Culture and community storytelling",
+      "scale": "free community evening",
+      "listed_by": "Redlands Coast and MMEIC",
+      "upstream_sources": [
+        "https://www.redlandscoast.com.au/ATDW/Events/Goompi-NAIDOC-2026-Community-Film-Celebration-6a3e137dfc002204294282df",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": true,
+      "summary": null,
+      "load_tags": null,
+      "movement_note": null,
+      "cultural_handling": "Carried as civic load only: the date, the place, and who listed it, exactly as advertised. No programme, no description, no protocol, no meaning. This record is flagged for a human to read before it is promoted into any pack, and nothing about it may be inferred.",
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-nature-art-retreat-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[10], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Nature Art Retreat, 13-15 August 2026, Soul Lodge, Amity. Listed by Humanitix.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Nature Art Retreat",
+      "date_label": "13-15 August 2026",
+      "starts": "2026-08-13",
+      "ends": "2026-08-15",
+      "atlas_status": "confirmed",
+      "atlas_status_meaning": "The listing source states this date.",
+      "listing_period": "Winter",
+      "place": "Soul Lodge, Amity",
+      "village": "Pulan / Amity",
+      "sector": "Retreat and creative practice",
+      "scale": "small retreat",
+      "listed_by": "Humanitix",
+      "upstream_sources": [
+        "https://events.humanitix.com/nature-art-retreat-2026",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Three-day art-making retreat connecting landscape, meals, studio practice and island visits.",
+      "load_tags": [
+        "retreat",
+        "small group",
+        "art making",
+        "accommodation"
+      ],
+      "movement_note": "Low-volume ferry and local car movement toward Amity.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-straddie-arts-trail-next",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[11], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Straddie Arts Trail, 13-16 August 2026, Across the whole island. Listed by Visit Redlands Coast and iam Straddie.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Straddie Arts Trail",
+      "date_label": "13-16 August 2026",
+      "starts": "2026-08-13",
+      "ends": "2026-08-16",
+      "atlas_status": "confirmed",
+      "atlas_status_meaning": "The listing source states this date.",
+      "listing_period": "Winter",
+      "place": "Across the whole island",
+      "village": "Island-wide",
+      "sector": "Artists and creative hubs",
+      "scale": "distributed arts trail",
+      "listed_by": "Visit Redlands Coast and iam Straddie",
+      "upstream_sources": [
+        "https://www.visitredlandscoast.com.au/whats-on/event/7316-straddie-arts-trail",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Self-guided island arts trail with open studios, pop-ups, workshops, talks, performances and market stalls.",
+      "load_tags": [
+        "open studios",
+        "island-wide",
+        "artists",
+        "workshops",
+        "markets"
+      ],
+      "movement_note": "Distributed low-to-medium visitor flow between studios, galleries and village stops.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-quandamooka-festival-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[12], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Quandamooka Festival, 29-30 August 2026, QUAMPI Arts and Culture Centre. Listed by SeaLink and official visitor listing.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Quandamooka Festival",
+      "date_label": "29-30 August 2026",
+      "starts": "2026-08-29",
+      "ends": "2026-08-30",
+      "atlas_status": "confirmed",
+      "atlas_status_meaning": "The listing source states this date.",
+      "listing_period": "Yalingbila / winter-spring transition",
+      "place": "QUAMPI Arts and Culture Centre",
+      "village": "Goompi / Dunwich",
+      "sector": "Quandamooka culture",
+      "scale": "major cultural anchor",
+      "listed_by": "SeaLink and official visitor listing",
+      "upstream_sources": [
+        "https://www.sealink.com.au/north-stradbroke-island/events/quandamooka-festival-2/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": true,
+      "summary": null,
+      "load_tags": null,
+      "movement_note": null,
+      "cultural_handling": "Carried as civic load only: the date, the place, and who listed it, exactly as advertised. No programme, no description, no protocol, no meaning. This record is flagged for a human to read before it is promoted into any pack, and nothing about it may be inferred.",
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-straddie-invitational-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[13], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Straddie Invitational, 16-18 October 2026, Main Beach, Point Lookout. Listed by SeaLink event listing.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Straddie Invitational",
+      "date_label": "16-18 October 2026",
+      "starts": "2026-10-16",
+      "ends": "2026-10-18",
+      "atlas_status": "confirmed",
+      "atlas_status_meaning": "The listing source states this date.",
+      "listing_period": "Spring",
+      "place": "Main Beach, Point Lookout",
+      "village": "Point Lookout",
+      "sector": "Surfing and sport",
+      "scale": "major spectator sport",
+      "listed_by": "SeaLink event listing",
+      "upstream_sources": [
+        "https://www.sealink.com.au/north-stradbroke-island/events/straddie-invitational/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Longest-running team surfing competition, formerly Straddie Assault, returning for its 43rd year.",
+      "load_tags": [
+        "surf",
+        "spectators",
+        "food vendors",
+        "music",
+        "Main Beach"
+      ],
+      "movement_note": "Ferry pressure, beach access, headland viewing, food vendors, weather and surf conditions.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-island-vibe-pattern",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[14], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "proposed",
+      "quote": "Island Vibe Festival, Annual last weekend of October; 2026 date to confirm, Point Lookout Oval / Home Beach precinct. Listed by Island Vibe official site.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Island Vibe Festival",
+      "date_label": "Annual last weekend of October; 2026 date to confirm",
+      "starts": "2026-10-30",
+      "ends": null,
+      "atlas_status": "tbc",
+      "atlas_status_meaning": "The atlas records the event and not the date. Proposed until a date is published.",
+      "listing_period": "Late spring / whale migration end",
+      "place": "Point Lookout Oval / Home Beach precinct",
+      "village": "Point Lookout",
+      "sector": "Music, arts and island culture",
+      "scale": "major music festival pattern",
+      "listed_by": "Island Vibe official site",
+      "upstream_sources": [
+        "https://www.islandvibe.com.au/about",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Reggae, roots, soul, electronic music, art exhibitions, workshops, stalls, circus, eco-food and craft markets.",
+      "load_tags": [
+        "music",
+        "multi-day",
+        "camping",
+        "markets",
+        "eco-event"
+      ],
+      "movement_note": "Large multi-day visitor load, camping, shuttles, ferry transfers and late-night movement.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-straddie-oyster-festival-next",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[15], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "proposed",
+      "quote": "Straddie Oyster Festival, 2026 date to confirm, Ron Stark Oval, Dunwich. Listed by SeaLink event page and Straddie Sharks link.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Straddie Oyster Festival",
+      "date_label": "2026 date to confirm",
+      "starts": "2026-11-01",
+      "ends": null,
+      "atlas_status": "tbc",
+      "atlas_status_meaning": "The atlas records the event and not the date. Proposed until a date is published.",
+      "listing_period": "Late spring / summer lead-in",
+      "place": "Ron Stark Oval, Dunwich",
+      "village": "Goompi / Dunwich",
+      "sector": "Food and community festival",
+      "scale": "community festival",
+      "listed_by": "SeaLink event page and Straddie Sharks link",
+      "upstream_sources": [
+        "https://www.sealink.com.au/north-stradbroke-island/events/straddie-oyster-festival/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Seafood, food vendors, mud crab races, oyster-shucking, live entertainment and market stalls.",
+      "load_tags": [
+        "food vendors",
+        "oval",
+        "markets",
+        "music",
+        "waste"
+      ],
+      "movement_note": "Dunwich oval attendance, food-truck access, ferry arrival pulses and family flow.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-point-lookout-markets-pattern",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[16], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Point Lookout Markets, Every second Sunday, about 8am-midday, Point Lookout Bowls Club. Listed by SeaLink and Point Lookout Bowls Club.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Point Lookout Markets",
+      "date_label": "Every second Sunday, about 8am-midday",
+      "starts": "2026-01-01",
+      "ends": null,
+      "atlas_status": "recurring",
+      "atlas_status_meaning": "A pattern the atlas records as recurring, not a dated instance.",
+      "listing_period": "Year-round / visitor peaks",
+      "place": "Point Lookout Bowls Club",
+      "village": "Point Lookout",
+      "sector": "Markets and stallholders",
+      "scale": "regular local market",
+      "listed_by": "SeaLink and Point Lookout Bowls Club",
+      "upstream_sources": [
+        "https://www.sealink.com.au/north-stradbroke-island/events/point-lookout-markets/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Regular island market with local makers, food, breakfast trade and a relaxed Sunday community rhythm at the Bowls Club.",
+      "load_tags": [
+        "stallholders",
+        "second Sunday",
+        "local artists",
+        "food",
+        "visitor rhythm"
+      ],
+      "movement_note": "Small recurring market flow with parking, breakfast overlap, bus stop use and weather-sensitive stall layout.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-bowlsie-wednesday-trivia-pattern",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[17], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Wednesday Nights @ The Bowlsie, Every Wednesday, with trivia from 7pm, Point Lookout Bowls Club. Listed by Point Lookout Bowls Club.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Wednesday Nights @ The Bowlsie",
+      "date_label": "Every Wednesday, with trivia from 7pm",
+      "starts": "2026-01-07",
+      "ends": null,
+      "atlas_status": "recurring",
+      "atlas_status_meaning": "A pattern the atlas records as recurring, not a dated instance.",
+      "listing_period": "Year-round midweek rhythm",
+      "place": "Point Lookout Bowls Club",
+      "village": "Point Lookout",
+      "sector": "Community nights and club hospitality",
+      "scale": "weekly local club gathering",
+      "listed_by": "Point Lookout Bowls Club",
+      "upstream_sources": [
+        "https://www.pointlookoutbowlsclub.com.au/whats-on/billys-world-famous-trivia-24sep25-cyl6d-efwcl-rl48c-ygx28-6h9nw-br7cp-jxf78-6cj5m-a4xhm-87sld-wba7f-jdcnx-zzcgs-9kmtm-f3zfw-jrsam-g92tw-mywj6",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Weekly Bowlsie midweek gathering with roast specials, Billy's trivia and a steady locals-and-visitors social mix.",
+      "load_tags": [
+        "weekly",
+        "trivia",
+        "club night",
+        "Point Lookout",
+        "midweek"
+      ],
+      "movement_note": "Low-to-moderate evening arrivals centred on dinner and trivia, with little ferry pressure compared with weekend events.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-stitching-stories-pattern",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[18], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Stitching Stories, Every second Saturday of the month, 10am-1pm, North Stradbroke Island Museum on Minjerribah verandah. Listed by North Stradbroke Island Museum on Minjerribah.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Stitching Stories",
+      "date_label": "Every second Saturday of the month, 10am-1pm",
+      "starts": "2026-01-10",
+      "ends": null,
+      "atlas_status": "recurring",
+      "atlas_status_meaning": "A pattern the atlas records as recurring, not a dated instance.",
+      "listing_period": "Year-round",
+      "place": "North Stradbroke Island Museum on Minjerribah verandah",
+      "village": "Goompi / Dunwich",
+      "sector": "Museum and community making",
+      "scale": "small recurring workshop",
+      "listed_by": "North Stradbroke Island Museum on Minjerribah",
+      "upstream_sources": [
+        "https://www.stradbrokemuseum.com.au/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": true,
+      "summary": null,
+      "load_tags": null,
+      "movement_note": null,
+      "cultural_handling": "Carried as civic load only: the date, the place, and who listed it, exactly as advertised. No programme, no description, no protocol, no meaning. This record is flagged for a human to read before it is promoted into any pack, and nothing about it may be inferred.",
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-open-studio-days-pattern",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[19], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Open Studio Days, Dates to confirm / by appointment pattern, Paula Boo Studios, Point Lookout. Listed by Official North Stradbroke Island visitor listing.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Open Studio Days",
+      "date_label": "Dates to confirm / by appointment pattern",
+      "starts": "2026-06-01",
+      "ends": null,
+      "atlas_status": "recurring",
+      "atlas_status_meaning": "A pattern the atlas records as recurring, not a dated instance.",
+      "listing_period": "Holiday and appointment rhythm",
+      "place": "Paula Boo Studios, Point Lookout",
+      "village": "Point Lookout",
+      "sector": "Artists and studios",
+      "scale": "open studio",
+      "listed_by": "Official North Stradbroke Island visitor listing",
+      "upstream_sources": [
+        "https://stradbrokeisland.com/open-studio-days/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Local fibre art, visual art, silversmithing, biochrome, gyotaku and printmaking open-studio pattern.",
+      "load_tags": [
+        "open studio",
+        "artists",
+        "sales",
+        "creative tourism"
+      ],
+      "movement_note": "Low visitor movement, strongest around holidays and arts trail moments.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-grass-roots-live-music-pattern",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[20], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Grass Roots Live Music, First Sunday of every month, 2pm-5pm, Straddie Brewing Co rooftop deck. Listed by Stradbroke Island visitor listing and Straddie Brewing Co.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Grass Roots Live Music",
+      "date_label": "First Sunday of every month, 2pm-5pm",
+      "starts": "2026-06-07",
+      "ends": null,
+      "atlas_status": "recurring",
+      "atlas_status_meaning": "A pattern the atlas records as recurring, not a dated instance.",
+      "listing_period": "Year-round Sunday music rhythm",
+      "place": "Straddie Brewing Co rooftop deck",
+      "village": "Goompi / Dunwich",
+      "sector": "Live music and hospitality",
+      "scale": "regular local live-music session",
+      "listed_by": "Stradbroke Island visitor listing and Straddie Brewing Co",
+      "upstream_sources": [
+        "https://stradbrokeisland.com/straddie-brewing-co-2/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Monthly rooftop live-music session at the brewery with local acts, Sunday food trade and an easy afternoon social crowd.",
+      "load_tags": [
+        "live music",
+        "monthly",
+        "brewery",
+        "Dunwich",
+        "Sunday session"
+      ],
+      "movement_note": "Low-to-moderate Sunday arrivals centred on lunch, drinks and a relaxed rooftop dwell pattern rather than a single peak.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-straddievarious-philip-farley-exhibition-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[21], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Straddievarious Gallery: Philip Farley Earth, Sea and Sky Exhibition, 16 May-28 June 2026, Straddievarious Gallery. Listed by Visit Redlands Coast.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Straddievarious Gallery: Philip Farley Earth, Sea and Sky Exhibition",
+      "date_label": "16 May-28 June 2026",
+      "starts": "2026-05-16",
+      "ends": "2026-06-28",
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Autumn to winter",
+      "place": "Straddievarious Gallery",
+      "village": "Cleveland",
+      "sector": "Gallery and coastal arts",
+      "scale": "regional exhibition",
+      "listed_by": "Visit Redlands Coast",
+      "upstream_sources": [
+        "https://www.visitredlandscoast.com.au/whats-on/markets/event/7345-straddievarious-gallery-philip-farley-earth-sea-and-sky-exhibition",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Extended gallery exhibition of coastal and bayside painting with a Straddie-linked creative identity in the Cleveland harbour precinct.",
+      "load_tags": [
+        "gallery",
+        "exhibition",
+        "coastal art",
+        "Cleveland",
+        "winter culture"
+      ],
+      "movement_note": "Steady small-scale gallery traffic that can combine with harbour dining, shopping and ferry-day itineraries.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-tones-and-tides-dunwich-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[22], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Tones and Tides: Dunwich, 28 June 2026, Dunwich Community Hall. Listed by Redlands Coast.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Tones and Tides: Dunwich",
+      "date_label": "28 June 2026",
+      "starts": "2026-06-28",
+      "ends": null,
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Winter",
+      "place": "Dunwich Community Hall",
+      "village": "Goompi / Dunwich",
+      "sector": "Music and community arts",
+      "scale": "small ticketed concert",
+      "listed_by": "Redlands Coast",
+      "upstream_sources": [
+        "https://www.redlandscoast.com.au/ATDW/Events/Tones-and-Tides-Dunwich-6a1682a0894ff201458e34f0",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Intimate afternoon opera concert in Dunwich with free pre-concert kids workshops and post-show chats with the musicians.",
+      "load_tags": [
+        "opera",
+        "concert",
+        "Dunwich",
+        "kids workshop",
+        "winter culture"
+      ],
+      "movement_note": "Small afternoon hall attendance with light ferry-linked visitor movement and low pressure on surrounding streets.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-pig-day-out-stradbroke-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[23], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Pig Day Out Stradbroke Island, 27 June 2026, Little Ship Club. Listed by Visit Redlands Coast and Little Ship Club.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Pig Day Out Stradbroke Island",
+      "date_label": "27 June 2026",
+      "starts": "2026-06-27",
+      "ends": null,
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Winter",
+      "place": "Little Ship Club",
+      "village": "Goompi / Dunwich",
+      "sector": "Family fun and waterfront hospitality",
+      "scale": "daytime club event",
+      "listed_by": "Visit Redlands Coast and Little Ship Club",
+      "upstream_sources": [
+        "https://www.redlandscoast.com.au/ATDW/Events/Pig-Day-Out-Stradbroke-Island-6a28cf22cba85783776e1725",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Full-day Little Ship Club event with live pig races, family activities, food stalls and a busy waterfront social crowd in Dunwich.",
+      "load_tags": [
+        "family",
+        "Little Ship Club",
+        "pig races",
+        "Dunwich",
+        "winter weekend"
+      ],
+      "movement_note": "Day-trip and local arrivals build from the late morning, with ferry-linked visitor pulses, family dwell time and a broad afternoon spread across the waterfront venue.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-north-stradbroke-emergencyredi-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[24], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "North Stradbroke Island Australian Red Cross EmergencyRedi Workshop, 17 June 2026, Dunwich Community Hall. Listed by Eventbrite and Australian Red Cross.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "North Stradbroke Island Australian Red Cross EmergencyRedi Workshop",
+      "date_label": "17 June 2026",
+      "starts": "2026-06-17",
+      "ends": null,
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Early winter",
+      "place": "Dunwich Community Hall",
+      "village": "Goompi / Dunwich",
+      "sector": "Preparedness and community resilience",
+      "scale": "free workshop",
+      "listed_by": "Eventbrite and Australian Red Cross",
+      "upstream_sources": [
+        "https://www.eventbrite.com.au/e/north-stradbroke-island-australian-red-cross-emergencyreditm-workshop-tickets-1989199949597",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Free preparedness workshop focused on local risks, practical planning and disaster-readiness for island residents and community groups.",
+      "load_tags": [
+        "free entry",
+        "workshop",
+        "preparedness",
+        "Dunwich",
+        "community resilience"
+      ],
+      "movement_note": "Small daytime hall attendance with mostly local arrivals and low transport pressure compared with festival or sport events.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-amity-community-day-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[25], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Amity Point Community Day, 13 June 2026, Amity Point Community Club. Listed by Amity Point Community Club.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Amity Point Community Day",
+      "date_label": "13 June 2026",
+      "starts": "2026-06-13",
+      "ends": null,
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Early winter",
+      "place": "Amity Point Community Club",
+      "village": "Pulan / Amity",
+      "sector": "Community and family gathering",
+      "scale": "free local club activation",
+      "listed_by": "Amity Point Community Club",
+      "upstream_sources": [
+        "https://amitypointcommunityclub.com.au/whats-on/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Free community afternoon with kids activities, a sausage sizzle and live music from Pippi Lips at the club.",
+      "load_tags": [
+        "free entry",
+        "community day",
+        "family",
+        "live music",
+        "Amity"
+      ],
+      "movement_note": "Short local and visitor arrivals build across late morning, with family dwell time spread between food, music and kids activities.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-many-hands-making-reflection-zone-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[26], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Many Hands, Making and Reflection Zone, 28 April-9 June 2026, Redland Art Gallery. Listed by Visit Redlands Coast.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Many Hands, Making and Reflection Zone",
+      "date_label": "28 April-9 June 2026",
+      "starts": "2026-04-28",
+      "ends": "2026-06-09",
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Autumn to early winter",
+      "place": "Redland Art Gallery",
+      "village": "Cleveland",
+      "sector": "Art and cultural participation",
+      "scale": "regional gallery activation",
+      "listed_by": "Visit Redlands Coast",
+      "upstream_sources": [
+        "https://www.visitredlandscoast.com.au/whats-on/markets/event/7347-drop-in-activity-many-hands-making-and-reflection-zone",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Free drop-in making zone linked to Dean Bingkin Tyson's exhibition, inviting slow creative participation shaped by land and sea patterns.",
+      "load_tags": [
+        "gallery",
+        "free entry",
+        "drop-in",
+        "Quandamooka connections",
+        "Cleveland"
+      ],
+      "movement_note": "Low-to-steady gallery visitation with flexible dwell time rather than a single arrival spike.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-reef-and-beef-open-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[27], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Reef & Beef 2026 Open Competition, 6-7 June 2026, Point Lookout Bowls Club. Listed by Point Lookout Bowls Club.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Reef & Beef 2026 Open Competition",
+      "date_label": "6-7 June 2026",
+      "starts": "2026-06-06",
+      "ends": "2026-06-07",
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Winter",
+      "place": "Point Lookout Bowls Club",
+      "village": "Point Lookout",
+      "sector": "Sport and club competition",
+      "scale": "weekend bowls tournament",
+      "listed_by": "Point Lookout Bowls Club",
+      "upstream_sources": [
+        "https://www.pointlookoutbowlsclub.com.au/whats-on",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Weekend open competition on the greens with teams of three and a public club-weekend atmosphere.",
+      "load_tags": [
+        "bowls",
+        "club competition",
+        "weekend",
+        "spectators",
+        "Point Lookout"
+      ],
+      "movement_note": "Steady daytime foot traffic into the club with player arrivals, meal service and spectator overlap.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-australian-eagles-live-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[28], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "The Australian Eagles Show, 6 June 2026, Little Ship Club. Listed by Little Ship Club social calendar.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "The Australian Eagles Show",
+      "date_label": "6 June 2026",
+      "starts": "2026-06-06",
+      "ends": null,
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Winter",
+      "place": "Little Ship Club",
+      "village": "Goompi / Dunwich",
+      "sector": "Live music",
+      "scale": "ticketed waterfront concert",
+      "listed_by": "Little Ship Club social calendar",
+      "upstream_sources": [
+        "https://littleshipclub.com.au/whats-on/social-calendar/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Waterfront live music afternoon with reserved seating, buffet packages and limited remaining tickets.",
+      "load_tags": [
+        "live music",
+        "ticketed",
+        "waterfront",
+        "buffet",
+        "Dunwich"
+      ],
+      "movement_note": "Pre-booked arrivals concentrate before noon, with afternoon dwell time and ferry-linked return waves.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-gallery-museum-hop-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[29], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Redlands Coast Gallery and Museum Hop, 23-24 May 2026, Island and mainland venues, including NSI Museum, Salt Water Murris and QUAMPI. Listed by Visit Redlands Coast.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Redlands Coast Gallery and Museum Hop",
+      "date_label": "23-24 May 2026",
+      "starts": "2026-05-23",
+      "ends": "2026-05-24",
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Autumn / AdventureFest",
+      "place": "Island and mainland venues, including NSI Museum, Salt Water Murris and QUAMPI",
+      "village": "Goompi / Dunwich plus wider Redlands Coast",
+      "sector": "Heritage and art",
+      "scale": "multi-venue",
+      "listed_by": "Visit Redlands Coast",
+      "upstream_sources": [
+        "https://www.visitredlandscoast.com.au/redlandscoastadventurefest/redlands-coast-gallery-and-museum-hop",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Two-day gallery and museum trail with several Minjerribah venues in the network.",
+      "load_tags": [
+        "heritage",
+        "gallery trail",
+        "cultural venues",
+        "visitor dispersal"
+      ],
+      "movement_note": "Self-drive and ferry-linked island visitation across multiple venues.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-straddie-stories-workshops-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[30], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Straddie Stories: Collage Workshop, Series through 22 May 2026, Paula Boo Studios, Point Lookout. Listed by Humanitix and Visit Redlands Coast.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Straddie Stories: Collage Workshop",
+      "date_label": "Series through 22 May 2026",
+      "starts": "2026-05-22",
+      "ends": "2026-05-22",
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Summer-autumn workshop series",
+      "place": "Paula Boo Studios, Point Lookout",
+      "village": "Point Lookout",
+      "sector": "Creative workshop",
+      "scale": "small workshop",
+      "listed_by": "Humanitix and Visit Redlands Coast",
+      "upstream_sources": [
+        "https://events.humanitix.com/straddie-stories-collage-workshop-may-22nd",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Collage and paper-weaving workshops using island flora, fauna, coastal life and local imagery.",
+      "load_tags": [
+        "workshop",
+        "collage",
+        "weaving",
+        "studio",
+        "local artists"
+      ],
+      "movement_note": "Very small studio-scale attendance with direct booking.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-straddie-salute-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[31], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Straddie Salute Triathlon Festival, 15-17 May 2026, Point Lookout and island course areas. Listed by Straddie Salute, AusTriathlon and Visit Redlands Coast.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Straddie Salute Triathlon Festival",
+      "date_label": "15-17 May 2026",
+      "starts": "2026-05-15",
+      "ends": "2026-05-17",
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Autumn / AdventureFest",
+      "place": "Point Lookout and island course areas",
+      "village": "Point Lookout / island course",
+      "sector": "Triathlon and endurance sport",
+      "scale": "major participant sport",
+      "listed_by": "Straddie Salute, AusTriathlon and Visit Redlands Coast",
+      "upstream_sources": [
+        "https://straddiesalute.com.au/home/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Destination triathlon festival with triathlon, trail run, ocean swim and kids events.",
+      "load_tags": [
+        "triathlon",
+        "trail run",
+        "ocean swim",
+        "kids",
+        "road and trail"
+      ],
+      "movement_note": "Athlete and supporter ferry load, road/trail closures, transition zones, bikes, beaches and emergency access.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-caxton-classic-golf-tournament-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[32], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Caxton Classic Golf Tournament, 16 May 2026, North Stradbroke Island Golf Course and Straddie Brewing Co. Listed by Stradbroke Island visitor listing and Straddie Brewing Co.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Caxton Classic Golf Tournament",
+      "date_label": "16 May 2026",
+      "starts": "2026-05-16",
+      "ends": null,
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Autumn",
+      "place": "North Stradbroke Island Golf Course and Straddie Brewing Co",
+      "village": "Goompi / Dunwich",
+      "sector": "Golf, hospitality and fundraising",
+      "scale": "small invitational tournament",
+      "listed_by": "Stradbroke Island visitor listing and Straddie Brewing Co",
+      "upstream_sources": [
+        "https://stradbrokeisland.com/caxton-classic-golf-tournament/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "All-inclusive island golf day with sporting guests, ferry transfers, brewery after-party and Wildlife Rescue Minjerribah support.",
+      "load_tags": [
+        "golf",
+        "fundraiser",
+        "brewery",
+        "ferry transfers",
+        "small tournament"
+      ],
+      "movement_note": "Team arrivals move through ferry transfer, golf-course start windows and a later return pulse toward the brewery rooftop after-party.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-goompi-heritage-walk-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[33], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Goompi / Dunwich Heritage Walk, 15 May 2026, North Stradbroke Island Museum on Minjerribah. Listed by Visit Redlands Coast and Stradbroke Island visitor listing.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Goompi / Dunwich Heritage Walk",
+      "date_label": "15 May 2026",
+      "starts": "2026-05-15",
+      "ends": null,
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Autumn / AdventureFest",
+      "place": "North Stradbroke Island Museum on Minjerribah",
+      "village": "Goompi / Dunwich",
+      "sector": "History and heritage",
+      "scale": "guided walk",
+      "listed_by": "Visit Redlands Coast and Stradbroke Island visitor listing",
+      "upstream_sources": [
+        "https://stradbrokeisland.com/goompi-dunwich-heritage-walk/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": true,
+      "summary": null,
+      "load_tags": null,
+      "movement_note": null,
+      "cultural_handling": "Carried as civic load only: the date, the place, and who listed it, exactly as advertised. No programme, no description, no protocol, no meaning. This record is flagged for a human to read before it is promoted into any pack, and nothing about it may be inferred.",
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-straddie-sharks-easter-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[34], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Straddie Sharks Easter Carnival, 4 April 2026, Ron Stark Oval, Dunwich. Listed by Straddie Sharks and Visit Redlands Coast.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Straddie Sharks Easter Carnival",
+      "date_label": "4 April 2026",
+      "starts": "2026-04-04",
+      "ends": null,
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Easter",
+      "place": "Ron Stark Oval, Dunwich",
+      "village": "Goompi / Dunwich",
+      "sector": "Family and community",
+      "scale": "local carnival",
+      "listed_by": "Straddie Sharks and Visit Redlands Coast",
+      "upstream_sources": [
+        "https://straddiesharks.com/upcoming-events/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Family carnival with rides, reptile show, food vendors, market stalls and fireworks.",
+      "load_tags": [
+        "rides",
+        "fireworks",
+        "food vendors",
+        "markets",
+        "family"
+      ],
+      "movement_note": "Afternoon family flow into Ron Stark Oval, parking, ride queues and evening exit after fireworks.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-little-ship-game-classic-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[35], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Little Ship Club Garmin Game Classic & Reef Rumble, 27-29 March 2026, Little Ship Club and Moreton Bay offshore grounds. Listed by Little Ship Club Game Fishing Club.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Little Ship Club Garmin Game Classic & Reef Rumble",
+      "date_label": "27-29 March 2026",
+      "starts": "2026-03-27",
+      "ends": "2026-03-29",
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Autumn shoulder",
+      "place": "Little Ship Club and Moreton Bay offshore grounds",
+      "village": "Goompi / Dunwich",
+      "sector": "Boating and sport fishing",
+      "scale": "multi-day tournament",
+      "listed_by": "Little Ship Club Game Fishing Club",
+      "upstream_sources": [
+        "https://littleshipclub.com.au/on-the-water/game-fishing/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Annual family-friendly game fishing and reef event linked to the Little Ship Club waterfront base.",
+      "load_tags": [
+        "boating",
+        "fishing",
+        "offshore",
+        "family",
+        "club event"
+      ],
+      "movement_note": "Boat launches, pontoon traffic, marina-style coordination and return-to-club social flow.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-art-teacher-camp-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[36], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Art Teacher Camp, 6-8 March 2026, Point Lookout Community Hall and QUAMPI visit. Listed by Humanitix.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Art Teacher Camp",
+      "date_label": "6-8 March 2026",
+      "starts": "2026-03-06",
+      "ends": "2026-03-08",
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Late summer",
+      "place": "Point Lookout Community Hall and QUAMPI visit",
+      "village": "Point Lookout / Goompi",
+      "sector": "Education and creative practice",
+      "scale": "professional development camp",
+      "listed_by": "Humanitix",
+      "upstream_sources": [
+        "https://events.humanitix.com/art-teacher-camp",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Place-based professional development camp for arts educators with workshops and QUAMPI visit.",
+      "load_tags": [
+        "education",
+        "teacher camp",
+        "community hall",
+        "QUAMPI",
+        "place-based learning"
+      ],
+      "movement_note": "Small group travelling between accommodation, hall, field sites and QUAMPI.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-clean-up-straddie-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[37], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Clean Up Straddie, 1 March 2026, Island-wide registration points in Point Lookout, Amity and Dunwich. Listed by Straddie Brewing Co.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Clean Up Straddie",
+      "date_label": "1 March 2026",
+      "starts": "2026-03-01",
+      "ends": null,
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Late summer",
+      "place": "Island-wide registration points in Point Lookout, Amity and Dunwich",
+      "village": "Island-wide",
+      "sector": "Environment and community care",
+      "scale": "distributed volunteer day",
+      "listed_by": "Straddie Brewing Co",
+      "upstream_sources": [
+        "https://straddiebrewing.com.au/news/beach-cleanup/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Community clean-up day with township registration points and volunteer support across Minjerribah.",
+      "load_tags": [
+        "cleanup",
+        "volunteers",
+        "beaches",
+        "waste",
+        "community"
+      ],
+      "movement_note": "Small volunteer groups disperse across beaches and townships, with staggered registration and return flow.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-arthur-mobsby-seafood-spectacular-2026",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js events[38], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "quote": "Arthur Mobsby Seafood Spectacular, 17 January 2026, Little Ship Club. Listed by Stradbroke Island visitor listing and Little Ship Club.",
+      "asserts": "real_world",
+      "kind": "public-event-listing",
+      "name": "Arthur Mobsby Seafood Spectacular",
+      "date_label": "17 January 2026",
+      "starts": "2026-01-17",
+      "ends": null,
+      "atlas_status": "past",
+      "atlas_status_meaning": "An event that has already happened.",
+      "listing_period": "Summer",
+      "place": "Little Ship Club",
+      "village": "Goompi / Dunwich",
+      "sector": "Seafood and community fundraising",
+      "scale": "waterfront club event",
+      "listed_by": "Stradbroke Island visitor listing and Little Ship Club",
+      "upstream_sources": [
+        "https://stradbrokeisland.com/arthur-mobsby-seafood-spectacular/",
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "cultural_event": false,
+      "summary": "Waterfront seafood day with mud crab races, live music and a strong local-family turnout.",
+      "load_tags": [
+        "seafood",
+        "live music",
+        "fundraiser",
+        "waterfront",
+        "family"
+      ],
+      "movement_note": "Midday visitor flow into Dunwich waterfront parking, ferry arrivals and club lawn seating.",
+      "cultural_handling": null,
+      "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-0",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[0], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "QUAMPI Arts and Culture Centre",
+      "village": null,
+      "role": "Cultural anchor, exhibitions, arts gatherings and public education",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-1",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[1], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "North Stradbroke Island Museum on Minjerribah",
+      "village": null,
+      "role": "Museum, heritage walks, archive-linked events and public history.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-2",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[2], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Dunwich Public Hall and community venues",
+      "village": null,
+      "role": "Indoor community events, workshops, meetings, training, arts and wet-weather fallback.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-3",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[3], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Ron Stark Oval",
+      "village": null,
+      "role": "Large community sport, carnivals, food vendors, fireworks, markets and club events.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-4",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[4], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Dunwich Swimming Pool and sports precinct",
+      "village": null,
+      "role": "Aquatic sport, training, club gatherings, youth programs and heat-safe activities.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-5",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[5], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Point Lookout Surf Life Saving Club",
+      "village": null,
+      "role": "Coastal safety hub, club functions, sport, beach event coordination",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-6",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[6], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Point Lookout Community Hall",
+      "village": null,
+      "role": "Concerts, workshops, talks, meetings, arts programs and indoor backup.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-7",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[7], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Stradbroke Island Beach Hotel",
+      "village": null,
+      "role": "Hospitality, accommodation, music, dining and visitor events",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-8",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[8], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "North Stradbroke Island Golf Club",
+      "village": null,
+      "role": "Club events, sport, functions and community gatherings",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-9",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[9], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Point Lookout Bowls Club",
+      "village": null,
+      "role": "Club meals, local gatherings, functions and sport",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-10",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[10], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Point Lookout Oval / Home Beach precinct",
+      "village": null,
+      "role": "Music festivals, markets, surf events, spectator movement and Home Beach activity.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-11",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[11], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "The Amity Pavilion",
+      "village": null,
+      "role": "Community, food, small events and local gatherings",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-12",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[12], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Amity Point Community Club",
+      "village": null,
+      "role": "Community club, meals, sport-linked gatherings, meetings and local social events.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-13",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[13], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Amity Point Public Hall",
+      "village": null,
+      "role": "Public hall, community meetings, indoor fallback, small performances and local notices.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-14",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[14], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Naree Budjong Djara National Park",
+      "village": null,
+      "role": "Nature, education, walking, caring-for-Country context",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-15",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[15], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Bummiera / Brown Lake",
+      "village": null,
+      "role": "Quiet nature education and visitor-flow consideration; not a default event venue.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-16",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[16], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Karboora / Blue Lake",
+      "village": null,
+      "role": "Sensitive walking and nature context; suitable for education framing only with care.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-17",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[17], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Flinders Beach and beach camping zones",
+      "village": null,
+      "role": "Beach activity, camping, visitor movement and environmental sensitivity",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-18",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[18], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Cylinder Beach and campground",
+      "village": null,
+      "role": "Beach recreation, camping, school holiday pressure and visitor safety notices.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-19",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[19], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Adder Rock campground",
+      "village": null,
+      "role": "Camping, visitor overflow, small group gatherings and event accommodation load.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-20",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[20], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Main Beach, Point Lookout",
+      "village": null,
+      "role": "Surfing, spectator sport, beach awareness, filming and weather-dependent activity.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-21",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[21], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Amity Point campground",
+      "village": null,
+      "role": "Camping, fishing, small gatherings and western-side sunset visitor movement.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-22",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[22], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Bradbury's Beach campground",
+      "village": null,
+      "role": "Arrival-side camping, family gatherings and ferry-linked accommodation load.",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    },
+    {
+      "id": "qcee-place-23",
+      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "locator": "quandamooka-country-events-engine/assets/site-data.js places[23], commit 3bb21b632",
+      "confidence": "medium",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-events-engine/1.0",
+      "status": "committed",
+      "kind": "event-place",
+      "name": "Dunwich ferry gateway",
+      "village": null,
+      "role": "Arrival, freight, buses, wayfinding and visitor pressure",
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 21,
+        "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
+      }
+    }
+  ],
+  "held": [],
+  "wanted": [
+    {
+      "id": "qcee-want-pull",
+      "what": "A pull of the source repository before every sync.",
+      "why_it_matters": "The checkout read here is 38 day(s) old. That repository refreshes its public event sources roughly weekly, so a stale checkout produces a stale calendar that looks current.",
+      "who_would_have_to_agree": "Nobody. It is one git pull, and this connector reports the age every run.",
+      "how_small_it_could_start": "It already does. This entry exists so the number is on the feed and not only in a terminal."
+    },
+    {
+      "id": "qcee-want-confirmations",
+      "what": "Confirmation of dates from the organisers themselves, rather than from listing sites.",
+      "why_it_matters": "Every record here rests on a public listing. The source says so about itself. The twin can carry that honestly, but a calendar the island relies on needs one more hop.",
+      "who_would_have_to_agree": "Each organiser.",
+      "how_small_it_could_start": "The two events the atlas marks as a date to confirm are the whole of the first ask."
+    }
+  ]
+}

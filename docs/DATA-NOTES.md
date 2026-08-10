@@ -24,10 +24,9 @@ Counts: 67 trading, 31 trading-unconfirmed, 1 proposed, 2 closed. Confidence: 46
 
 ### Could not verify
 
-1. **Trading hours.** Only seven entries have published hours: Amity Pavilion, Amity Point Community Club bistro,
-   Fishes at the Point, Stradbroke Island Medical Centre, Marie Rose Centre, the museum, and the recycling centre.
-   Every other `typical_hours` block is `basis: "estimate"`. They are a plausible island pattern for the simulation
-   to run on. Do not show them to a player as fact.
+1. **Trading hours.** Superseded on 10 August 2026 by the pass recorded below, which took the pack from seven
+   published weeks to forty published or listed ones. The rule this line was written to protect still stands and
+   is now enforced by `node tools/hours-envelope.mjs`: an estimate is not shown to a player as a week.
 2. **Every headcount.** No `employs` figure was verified. All are modelling estimates with `basis: "estimate"`.
    The ones most likely to be wrong are QYAC, Yulu-Burri-Ba, SeaLink and Redland City Council, where the
    organisation extends well beyond the island.
@@ -78,6 +77,86 @@ QYAC, QUAMPI, MMEIC, Salt Water Murris, Straddie Adventures, Yura Tours, Goompi 
 Cockatoo-Collins shopfront are in this pack as civic and commercial entities only. No cultural content, language,
 story or ceremony has been attached to any of them, and none should be generated. Anything cultural goes through
 `docs/CULTURAL-REVIEW.md` and a human conversation with the Traditional Owners.
+
+### Opening hours, reviewed 10 August 2026
+
+Before this review, ninety-two of the hundred and one records carried a researched weekly pattern flagged
+`estimate` and the simulation reported a number of businesses open with nothing behind it. Every trading
+business, club and service was then looked for, one at a time, on its own site first and then on a council,
+tourism or island listing. Hours now carry a `basis`, a `source`, a `source_kind`, the date somebody looked
+and their own confidence, and the interface shows all five.
+
+**Twenty-three carry hours the body published itself.** Stradbroke Island Beach Hotel, Point Lookout Bowls
+Club, The Point Bar and Bistro, Little Ship Club, Six Beaches, FoodWorks Point Lookout, FoodWorks Dunwich,
+Stradbroke Pharmacy, Point Lookout Pharmacy, Stradbroke Island Medical Centre, Marie Rose Centre,
+Yulu-Burri-Ba, NSI Museum on Minjerribah, Whale Tail Gelati, Straddie Brewing Co, Bo Beans Coffee,
+North Stradbroke Island Golf Club, Salt Water Murris, The Amity Pavilion, Amity Point Community Club and the
+NSI Recycling and Waste Centre. Two of those, Marie Rose and the waste centre, stand at their 6 August check
+because the health service directory and every Redland City Council page refused to serve on 10 August 2026.
+
+Two more were added in the second pass on 10 August 2026 and neither is a shop. **Minjerribah Moorgumpin
+Elders-in-Council** publishes office hours of Monday, Wednesday and Friday, 9am to 3pm on its own site, which
+replaced a Monday to Friday roster nobody had published; the other four days are left unverified because the
+site does not mention them. **Dunwich State School** publishes its office as open 8.30am to 3.30pm, school
+starting at 9.00am and concluding at 3.00pm, with breaks at 10.45 and 1.00. Neither record is asked whether it
+is open: see `hours_posture` below.
+
+**Seventeen carry hours somebody else published**, almost all of them Discover Stradbroke's island restaurant
+listing, marked `listed` rather than `published` for a reason worth keeping in view: that same listing still
+carries Rufus King Seafoods as trading daily when the owner confirmed on 6 May 2026 that it had closed, and
+still lists The Amity Pavilion under its previous name. It is a real, citable, public source and it goes stale
+without telling anybody. Where the business publishes its own hours, the business wins, and the difference is
+recorded in the note: Straddie Brewing's own page says shut Tuesday and Wednesday while the listing gives it
+a seven-day week.
+
+**Thirty-four remain estimates and twenty-five carry no week at all.** The split is the second pass's doing and
+it is the point of it. An estimate is a guess the simulation runs on, and it now appears on screen as one line
+of prose with the simulation as its subject, never as seven rows under a heading reading THE WEEK. A `basis` of
+`none` is a blank: seven unverified days and nothing invented, which is the honest state for a body that was
+never going to have trading hours. Thirteen of the estimates carry `checked: null`, meaning nobody has gone
+looking rather than somebody looked and found nothing.
+
+**Twenty-four records carry an `hours_posture` and are never asked whether they are open.** Eleven
+organisations (QYAC, MMEIC, the chamber of commerce, the council, the housing society, the aged care service,
+the three halls, Friends of Stradbroke Island, Point Lookout Bushcare, and Dunwich State School), seven on-call
+services (both ambulance stations, the police station, the rural fire brigade, marine rescue, wildlife rescue
+and the mobile vet) and five transport operators that run to a timetable rather than opening. Their `open` is
+null for the life of a run, not false, and every layer above carries the null. An ambulance station reading
+SHUT at two in the morning is a lie with consequences; a card reading SHUT over an Elders' council is this
+project describing how somebody else runs, which it is not allowed to do.
+
+The ones worth a phone call first, because they are the gaps that most change what the island does:
+
+- **QUAMPI.** Opened September 2025 and no opening hours are published anywhere found, including the
+  Queensland Government tourism listing. One call closes it.
+- **Australia Post at Dunwich, Point Lookout and Amity Point.** Australia Post's own locator is script-driven
+  and returned nothing readable. Third-party listings circulate a weekday nine to four and disagree with each
+  other about the close.
+- **Straddie Super Sports.** Two directories give it two different weeks. Neither is the business. An early
+  opening matters here because this is where the bait comes from.
+- **Minjerribah Camping.** Runs the campgrounds at Adder Rock, Cylinder, Home Beach, Amity Point, Flinders and
+  Main Beach, and publishes no office or gate hours. A Friday arrival that misses the office is a real problem
+  and the twin cannot model it truthfully yet.
+- **Straddie Sharks All Sports Club.** The club publishes its weekly events in detail, meat trays and the
+  members draw and trivia, and no club opening hours at all. The Jade Lime bistro's three published event
+  nights are recorded; the rest of its week is not.
+- **Stradbroke Island Butchery, Cellarbrations Dunwich, Bistro Seymour, Mal Starkey Seafood, Noreen's Seaside
+  Shop.** Each has a site or a listing that either carries no hours or would not serve its pages.
+- **Point Lookout Markets.** The island tourism page still lists dates from 2019 and 2020. The twin runs them
+  every second Sunday, which is what that stale list shows, and that is a modelling choice sitting on an old
+  page rather than a fact.
+
+**What is modelled rather than published, and is labelled modelled everywhere it shows:** what the weather,
+the swell and a beach shut to vehicles do to anybody trading outdoors; the early close a thin business makes
+to save wages; the quiet-season midweek shutdown; the stretch an estimate-hours cafe gets while the island is
+full; and the short menu when the barge did not run and the cold room is empty. No source on this island
+publishes any of that.
+
+**The show holiday.** Redland City, which is where Minjerribah is, does not take Brisbane's Ekka day. Council
+asked the state in 2013 to gazette the Monday before People's Day and has kept it since, so the island has a
+public holiday on the Monday and Brisbane has one on the Wednesday. The gazetted People's Day date is read per
+year (2026, 2027 and 2028 are in `src/systems/agents/schedule.js`); the island's Monday is derived from
+council's published rule. A year nobody has read is left empty and says so.
 
 ### Where to check next
 
@@ -279,8 +358,27 @@ the survival of the island's old cypress pines, are both in the file with publis
 
 ## events
 
-`data/events.json`, written 7 August 2026. 27 events, 5 periods, 9 rhythms, 10 visitor archetypes,
-plus an explicit `left_out` list of 8 things the brief asked for that are not in the file.
+`data/events.json`, written 7 August 2026, widened 10 August 2026. **36 events, 7 periods,
+11 rhythms**, 10 visitor archetypes, plus an explicit `left_out` list of **13** things that are not
+in the file and why.
+
+What the 10 August pass added, in one place. Events: live music at the Stradbroke Hotel on a Friday
+and a Sunday and at the Little Ship Club on a Saturday, Friday Reef and Beef at the bowls club, the
+Arthur Mobsby Seafood Spectacular, Pig Day Out, Tones and Tides, the museum's heritage walk, the
+gallery and museum hop, and a Red Cross preparedness workshop. Periods: the publicly notified
+planned burn season, and the builders' summer shutdown that the simulation has modelled since the
+residents slice but never showed. Rhythms: the council meeting cycle, because the decisions this
+island lives with are taken in a chamber on the mainland at 9.30 on a Wednesday morning, and the
+ferry's peak timetable and public-holiday surcharge. One correction: the Straddie Salute's date rule
+said the third Friday of May, which is the right day in 2026 and a week late in 2027; the organiser
+publishes Saturday 15 May 2027, which is the third Saturday, so the rule is now the third Saturday
+with the festival running the Friday to the Sunday around it.
+
+The same pass wired the pack into the simulation for the first time. `sim_defaults.event_visitor_increment`
+is new and is the one number in this file that changes the island's population; it is a modelling
+assumption, it is written as data so it can be argued with, and the annual carve-out it describes is
+why a year of this island still sums to the 375,000 in `data/residents.json` rather than to
+375,000 plus a pile of festival goers.
 
 Sources in priority order: Luke's own repos (`quandamooka-country-events-engine` for the event atlas
 and its 22 May 2026 source pass, `straddie-night-market-lab` for the ferry fleet and transport scan,

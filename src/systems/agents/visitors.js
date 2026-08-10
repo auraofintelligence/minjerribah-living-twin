@@ -65,6 +65,15 @@ const FALLBACK_PLACE = {
 
 export function registerVisitors(world) {
   const rng = world.rng.stream('visitors');
+  // The named-event draw has a stream of its own so that editing data/events.json changes only the
+  // people that edit brought. Sharing one stream would mean a single new line in the pack reshuffled
+  // every visitor draw for the following year, and then nobody could tell what the edit did.
+  const eventRng = world.rng.stream('visitors-events');
+  // The attendance jitter itself is forked off the events system's own stream, because the crowd a
+  // player reads on the calendar board and the crowd that gets on a boat have to be the same crowd.
+  // `fork` is a pure function of the name and the seed and never advances the stream it came from,
+  // so drawing it here costs the events system nothing.
+  const attendanceRng = world.rng.stream('events');
 
   const state = world.publish('visitors', {
     ready: false,
@@ -76,6 +85,14 @@ export function registerVisitors(world) {
     departuresToday: 0,
     turnedAwayToday: 0,
     turnedAwayRolling30: 0,
+    // The named-event share of the day, kept separate from the baseline so a panel can say which
+    // people came because something was on. data/events.json is where the estimate comes from and
+    // every one of those estimates is flagged low confidence in the pack itself.
+    eventArrivalsToday: 0,
+    eventTurnedAwayToday: 0,
+    eventDrawToday: 0,
+    eventsToday: [],
+    events: null,
     peakThisYear: 0,
     peakDay: null,
     spendTodayA$: 0,
@@ -104,8 +121,41 @@ export function registerVisitors(world) {
   let walkOnSeats = 0, vehicleSlots = 0;
   let seatsUsedToday = 0, slotsUsedToday = 0;
   let annualTarget = 375000;
+  let annualEventDraw = 0;      // how much of the year the named events account for
+  let annualBaseline = 375000;  // the rest, which is what the daily draw normalises against
   let calendarMean = 1;
   const turnedAwayLog = [];
+
+  /**
+   * The events pack and the residents pack name their visitors differently, because one is
+   * describing who is standing on a beach and the other is describing who got on a boat. This is
+   * the join, and it is a modelling choice rather than a published mapping.
+   *
+   * Two of the ten need saying out loud.
+   *
+   * `boatie` arrives in a private boat and takes no ferry seat and no vehicle slot. It is mapped to
+   * a day tripper and the arrival is marked so the capacity gate lets it through: turning away
+   * somebody who never asked for a seat would be a fabricated failure.
+   *
+   * `quandamooka-family` is people travelling to the island for an event. This build maps them onto
+   * the same unlabelled visitor archetypes as everybody else and attaches nothing whatever: no
+   * field, no label, no behaviour, no name pool of its own. Modelling the crossing load is a
+   * transport fact; modelling who those people are is not this project's to do, and
+   * data/lore.json no-aboriginal-characters-with-invented-culture is blocking. Logged in
+   * docs/CULTURAL-REVIEW.md.
+   */
+  const EVENT_ARCHETYPE_MAP = {
+    'day-tripper-walkon': { to: 'day-tripper', vehicle: false, overnight: false },
+    'day-tripper-vehicle': { to: 'day-tripper', vehicle: true, overnight: false },
+    'crew-and-official': { to: 'day-tripper', vehicle: true, overnight: false },
+    boatie: { to: 'day-tripper', vehicle: false, overnight: false, ownBoat: true },
+    'holiday-house': { to: 'family-in-a-holiday-house', vehicle: true, overnight: true },
+    camper: { to: 'weekend-camper', vehicle: true, overnight: true },
+    backpacker: { to: 'backpacker', vehicle: false, overnight: true },
+    competitor: { to: 'day-tripper', vehicle: true, overnight: true, surfing: 'surfer' },
+    'quandamooka-family': { to: 'day-tripper', vehicle: true, overnight: true },
+    resident: null   // already on the island. Never an arrival.
+  };
 
   /* -------------------------------------------------------------- reading the packs */
 
@@ -249,36 +299,64 @@ export function registerVisitors(world) {
     return Math.max(0, w);
   }
 
-  /** Normalise so a year of these weights sums to the archetype's share of the measured total. */
+  /**
+   * Normalise so a year of these weights sums to the archetype's share of the measured total.
+   *
+   * The same walk now also sums the year's named-event draw, because those people have to come out
+   * of the annual figure rather than be added to it. The 375,000 in data/residents.json is a
+   * measured count of everybody who visited, and everybody who visited includes everybody who came
+   * for a festival. Adding the events on top would make the island's year larger than the only
+   * measured number anybody has published about it, which is a worse error than the one this
+   * whole change is fixing. data/events.json sim_defaults.event_visitor_increment says the same
+   * thing in the pack's own words.
+   */
   function calibrate(w) {
     let sum = 0;
+    let eventDraw = 0;
     const start = new Date(w.clock.date.getTime());
     for (let d = 0; d < 365; d++) {
       const date = new Date(start.getTime() + d * 86400000);
       const info = cal.day(date);
       const dow = date.getUTCDay();
       for (const a of archetypes) sum += calendarWeight(a, info, dow) * (a.share / 100);
+      eventDraw += info.eventIncrement || 0;
     }
     calendarMean = sum / 365;
+    annualEventDraw = Math.round(eventDraw);
+    // Never let the carve-out take more than a fifth of the year: if a future pack ever claimed an
+    // event draw larger than that, the honest answer is that the pack is wrong, not that the
+    // island's baseline population should collapse to make room for it.
+    const cap = Math.round(annualTarget * 0.2);
+    if (annualEventDraw > cap) {
+      state.notes.push(`The pack's modelled event draw of ${annualEventDraw} a year is more than a fifth of the measured annual total. It has been held at ${cap} and the difference is not being carved out.`);
+      annualEventDraw = cap;
+    }
+    annualBaseline = Math.max(1, annualTarget - annualEventDraw);
+    state.events = {
+      annualDraw: annualEventDraw,
+      annualTotal: annualTarget,
+      baselineAfterCarveOut: annualBaseline,
+      basis: 'data/events.json sim_defaults.event_visitor_increment. A modelling assumption, not a measurement.'
+    };
   }
 
   /* -------------------------------------------------------------- accommodation */
 
-  function takeHolidayHouse() {
+  function takeHolidayHouse(r = rng) {
     const pool = R.holidayHomes;
     for (let i = 0; i < 12; i++) {
-      const d = pool[rng.int(0, pool.length)];
+      const d = pool[r.int(0, pool.length)];
       if (d && !d.occupiedByPartyId) return d;
     }
     for (const d of pool) if (!d.occupiedByPartyId) return d;
     return null;
   }
 
-  function takeCampsite(size) {
+  function takeCampsite(size, r = rng) {
     const need = Math.max(1, Math.ceil(size / 4));
     const open = campgrounds.filter((c) => c.used + need <= c.sites);
     if (!open.length) return null;
-    const c = open[rng.int(0, open.length)];
+    const c = open[r.int(0, open.length)];
     c.used += need;
     return { camp: c, sites: need };
   }
@@ -298,14 +376,22 @@ export function registerVisitors(world) {
     for (const s of pools.surnames || []) SURNAME.push(s);
   }
 
-  function makeParty(a, tick, info) {
-    const size = rng.int(a.size[0], a.size[1] + 1);
+  /**
+   * `r` is the stream to draw from. It defaults to the shared visitor stream, and the event draw
+   * passes its own. That separation is what makes a pack edit answerable: with the named events on
+   * their own stream, adding or removing a record in data/events.json changes only the people that
+   * record brought, and the rest of the visitor year is byte for byte the same. Without it, one new
+   * line in the pack reshuffles every draw for the next twelve months and no before-and-after
+   * comparison means anything. docs/DIRECTION.md calls replay peer review; this is what it costs.
+   */
+  function makeParty(a, tick, info, r = rng) {
+    const size = r.int(a.size[0], a.size[1] + 1);
     // Stay length, skewed to the short end. The pack gives a range of two to fourteen nights for a
     // holiday house; drawn flat, that fills every empty house on the island with a fortnight-long
     // booking, and most bookings are a weekend.
     let nights = 0;
     if (Array.isArray(a.nights) && a.nights[1] > 0) {
-      const t = rng.float() * rng.float();
+      const t = r.float() * r.float();
       nights = Math.round(a.nights[0] + t * (a.nights[1] - a.nights[0]));
     }
 
@@ -314,17 +400,17 @@ export function registerVisitors(world) {
     let stay = null, home = null;
     if (nights > 0) {
       if (a.id === 'family-in-a-holiday-house') {
-        const d = takeHolidayHouse();
+        const d = takeHolidayHouse(r);
         if (!d) return null;
         stay = { kind: 'holiday-house', dwellingId: d.id, label: 'a holiday house', x: d.x, z: d.z };
         home = d;
       } else if (a.id === 'weekend-camper' || a.id === 'grey-nomad' || a.id === 'school-group') {
-        const c = takeCampsite(size);
+        const c = takeCampsite(size, r);
         if (!c) return null;
         stay = { kind: 'campground', campId: c.camp.id, sites: c.sites, label: c.camp.label, x: c.camp.x, z: c.camp.z };
       } else if (a.id === 'backpacker' || a.id === 'surfer') {
         if (hostelUsed + size > hostelBeds) {
-          const c = takeCampsite(size);
+          const c = takeCampsite(size, r);
           if (!c) return null;
           stay = { kind: 'campground', campId: c.camp.id, sites: c.sites, label: c.camp.label, x: c.camp.x, z: c.camp.z };
         } else {
@@ -344,12 +430,12 @@ export function registerVisitors(world) {
     // Names. A party of six is usually two families sharing or three generations, which is two
     // surnames, not six people who all happen to be called the same thing.
     const members = [];
-    const surnames = [SURNAME.length ? SURNAME[rng.int(0, SURNAME.length)] : 'Visitor'];
-    if (size > 4 && SURNAME.length) surnames.push(SURNAME[rng.int(0, SURNAME.length)]);
+    const surnames = [SURNAME.length ? SURNAME[r.int(0, SURNAME.length)] : 'Visitor'];
+    if (size > 4 && SURNAME.length) surnames.push(SURNAME[r.int(0, SURNAME.length)]);
     const surname = surnames[0];
     for (let i = 0; i < Math.min(size, 8); i++) {
       const sn = surnames[i < Math.ceil(size / surnames.length) ? 0 : surnames.length - 1];
-      members.push({ name: (GIVEN.length ? GIVEN[rng.int(0, GIVEN.length)] : 'Visitor') + ' ' + sn });
+      members.push({ name: (GIVEN.length ? GIVEN[r.int(0, GIVEN.length)] : 'Visitor') + ' ' + sn });
     }
 
     const spend = a.spend && a.spend.per_person_per_day_a$ ? a.spend.per_person_per_day_a$
@@ -365,7 +451,7 @@ export function registerVisitors(world) {
       surname,
       nights,
       arrivedTick: tick,
-      leavesTick: tick + Math.max(6, nights * 144 + rng.int(30, 60)),
+      leavesTick: tick + Math.max(6, nights * 144 + r.int(30, 60)),
       stay,
       dwelling: home,
       vehicle: a.vehicle,
@@ -374,7 +460,7 @@ export function registerVisitors(world) {
       reason: 'off the boat',
       locationId: 'dunwich-ferry-terminal',
       locationLabel: 'the Dunwich terminal',
-      spendPerPersonPerDay: rng.range(spend[0], spend[1]),
+      spendPerPersonPerDay: r.range(spend[0], spend[1]),
       satisfaction: 0.7,
       friction: [],
       day: a.day
@@ -412,6 +498,18 @@ export function registerVisitors(world) {
   }
 
   function updateActivity(p, minute, ctx) {
+    // Somebody who crossed for an event is at the event while it is on. Their archetype's ordinary
+    // day resumes either side of it, which is right: the family who came for the surf contest still
+    // has breakfast and still goes to the beach afterwards.
+    if (p.forEvent && p.eventVenue && p.eventWindow && minute >= p.eventWindow[0] && minute < p.eventWindow[1]) {
+      p.activity = 'at ' + p.eventName;
+      p.reason = 'they came over for it';
+      p.locationId = p.eventVenue.id;
+      p.locationLabel = p.eventVenue.label;
+      p.tx = p.eventVenue.x;
+      p.tz = p.eventVenue.z;
+      return;
+    }
     let block = null;
     for (let i = 0; i < p.day.length; i++) {
       const b = p.day[i];
@@ -496,6 +594,10 @@ export function registerVisitors(world) {
         state.arrivalsToday = 0;
         state.departuresToday = 0;
         state.turnedAwayToday = 0;
+        state.eventArrivalsToday = 0;
+        state.eventTurnedAwayToday = 0;
+        state.eventDrawToday = 0;
+        state.eventsToday = [];
         turnedAwayLog.push(0);
         if (turnedAwayLog.length > 30) turnedAwayLog.shift();
         planArrivals(w);
@@ -597,6 +699,10 @@ export function registerVisitors(world) {
         departures: state.departuresToday,
         turnedAway: state.turnedAwayToday,
         turnedAway30: state.turnedAwayRolling30,
+        eventArrivals: state.eventArrivalsToday,
+        eventDraw: state.eventDrawToday,
+        eventsOn: state.eventsToday.length,
+        annualEventDraw,
         peak: state.peakThisYear,
         peakDay: state.peakDay,
         campsitesUsed: state.beds.occupied,
@@ -698,7 +804,7 @@ export function registerVisitors(world) {
       // number of whole people, so the raw draw lands about fourteen per cent under the measured
       // baseline. This puts it back, so the modelled year sums to the figure the pack publishes
       // rather than to an artefact of how the daily draw is built.
-      const perDay = annualTarget * WEATHER_MEAN_CORRECTION * (wgt / Math.max(1e-6, calendarMean)) / 365;
+      const perDay = annualBaseline * WEATHER_MEAN_CORRECTION * (wgt / Math.max(1e-6, calendarMean)) / 365;
       const people = Math.max(0, perDay * rng.range(0.8, 1.2));
       let partiesWanted = Math.round(people / Math.max(1, a.meanSize));
       const win = arrivalWindow(a);
@@ -706,8 +812,103 @@ export function registerVisitors(world) {
         pending.push({ a, at: Math.round(rng.range(win[0], win[1])) });
       }
     }
+    if (!cancelled) planEventArrivals(w, info);
     pending.sort((x, y) => y.at - x.at);   // popped from the back, so earliest first
     state.plannedArrivals = pending.length;
+  }
+
+  /**
+   * The people who came for something.
+   *
+   * The baseline draw above answers "how busy is this time of year". It cannot answer "the teams
+   * event is on", because nothing in the school calendar knows that. So each named event running
+   * today contributes its own arrivals, sized by the pack's own attendance estimate and its own
+   * archetype mix, and timed off its own crowd curve rather than off a generic tourist morning: a
+   * dawn surf contest and an evening concert put people on different boats.
+   *
+   * Overnight archetypes arrive on the first day of a multi-day event and stay, which is why the
+   * Friday of a three-day festival is the heavy crossing and the Sunday is the heavy return.
+   */
+  function planEventArrivals(w, info) {
+    const list = info.events || [];
+    if (!list.length) return;
+    const weather = w.read('weather') || {};
+    const table = cal.incrementTable;
+    const byArchetype = (table && table.by_archetype) || {};
+    const fallback = (table && table.default_when_no_mix != null) ? table.default_when_no_mix : 0.5;
+    const byCategory = (table && table.by_category) || {};
+    let drawn = 0;
+
+    for (const ev of list) {
+      if (byCategory[ev.category] === 0) continue;      // already carried by the load multiplier
+      const rec = ev.rec;
+      const mix = rec.archetype_mix;
+      if (!mix) continue;
+      const att = rec.attendance || {};
+      const base = ev.peak || 0;
+      if (base <= 0) continue;
+      // The same jitter the events system draws, from the same forked stream, so the crowd the
+      // panel shows and the crowd that gets on the boat are the same crowd.
+      const jitter = 0.8 + attendanceRng.fork(ev.id + ':' + info.dayNum).float() * 0.4;
+      const expect = clamp(base * jitter, att.low ?? base * 0.5, att.high ?? base * 1.6);
+      // Weather, from the pack's own sensitivities. An event nobody can stand outdoors at does not
+      // fill a boat.
+      const ws = rec.weather_sensitivity || {};
+      let wmult = 1;
+      wmult *= 1 - (ws.rain || 0) * clamp((weather.rainMmHr || 0) / 6, 0, 1);
+      wmult *= 1 - (ws.wind || 0) * clamp(((weather.windKt || 0) - 15) / 25, 0, 1);
+      wmult *= 1 - (ws.heat || 0) * clamp(((weather.apparentC ?? weather.tempC ?? 22) - 30) / 8, 0, 1);
+      const crowd = Math.max(0, expect * clamp(wmult, 0, 1));
+
+      const peakHour = ev.curve ? ev.curve.indexOf(Math.max(...ev.curve)) : 12;
+      // Where they will actually stand. Without this an event crowd is a number in a read model
+      // and a set of visitors doing their ordinary archetype day somewhere else entirely, which is
+      // the difference between a festival and a bigger Tuesday. The window comes from the record's
+      // own crowd curve rather than from a guess about when things start.
+      let venue = null;
+      for (const pid of ev.placeIds || []) {
+        const rec = R.places.get(pid) || R.places.get('biz:' + pid);
+        if (rec) { venue = rec; break; }
+      }
+      let from = 24, to = 0;
+      if (ev.curve) {
+        for (let h = 0; h < ev.curve.length; h++) {
+          if (ev.curve[h] >= 0.25) { if (h < from) from = h; if (h > to) to = h; }
+        }
+      }
+      const window = (from <= to) ? [from * 60, (to + 1) * 60] : null;
+
+      for (const [key, share] of Object.entries(mix)) {
+        const map = EVENT_ARCHETYPE_MAP[key];
+        if (!map) continue;
+        const addl = byArchetype[key] != null ? byArchetype[key] : fallback;
+        if (addl <= 0) continue;
+        if (map.overnight && ev.dayOfEvent > 1) continue;   // they arrived on the first day
+        // One arrival, however many days they stay. The archetype's own stay length in
+        // data/residents.json decides how long they are here, and multiplying by the event's
+        // length here as well would put a three-day festival's crowd on three separate boats.
+        const people = crowd * share * addl;
+        if (people < 1) continue;
+        const target = (map.surfing && ev.category === 'surfing') ? map.surfing : map.to;
+        const a = archetypes.find((x) => x.id === target) || archetypes.find((x) => x.id === 'day-tripper');
+        if (!a) continue;
+        // Arrive before it starts. Overnighters come in the afternoon before the first day and
+        // day visitors come in on the boat that lands them an hour or so ahead of the peak.
+        const win = map.overnight
+          ? [13 * 60, 18 * 60]
+          : [clamp((peakHour - 3) * 60, 5 * 60, 17 * 60), clamp((peakHour - 1) * 60, 6 * 60, 19 * 60)];
+        const wanted = Math.round(people / Math.max(1, a.meanSize));
+        for (let i = 0; i < wanted; i++) {
+          pending.push({
+            a, at: Math.round(eventRng.range(win[0], win[1])),
+            forEvent: ev.id, eventName: ev.name, ownBoat: !!map.ownBoat, venue, window
+          });
+        }
+        drawn += people;
+      }
+    }
+    state.eventDrawToday = Math.round(drawn);
+    state.eventsToday = list.map((e) => e.id);
   }
 
   function arrivalWindow(a) {
@@ -728,16 +929,30 @@ export function registerVisitors(world) {
   function admit(w, item, tick) {
     const a = item.a;
     const size = Math.round(a.meanSize);
-    const needSlot = a.vehicle;
-    if (seatsUsedToday + size > walkOnSeats || (needSlot && slotsUsedToday + 1 > vehicleSlots)) {
+    // Somebody crossing in their own boat takes no seat and no vehicle slot, so the ferry ceiling
+    // is not their ceiling. Turning them away for want of a seat they never asked for would be an
+    // invented failure, and the fishing competition in the pack is a third private boats.
+    const ownBoat = !!item.ownBoat;
+    const needSlot = a.vehicle && !ownBoat;
+    if (!ownBoat && (seatsUsedToday + size > walkOnSeats || (needSlot && slotsUsedToday + 1 > vehicleSlots))) {
       state.turnedAwayToday += size;
       turnedAwayLog[turnedAwayLog.length - 1] += size;
+      if (item.forEvent) {
+        state.eventTurnedAwayToday = (state.eventTurnedAwayToday || 0) + size;
+        if (state.eventTurnedAwayToday === size) {
+          w.bus.emit('visitors:event-capacity', {
+            day: today.iso, event: item.forEvent, people: size,
+            reason: needSlot ? 'no vehicle slot left on the barge' : 'no seat left on a boat',
+            text: 'Somebody heading over for ' + item.forEvent.replace(/-/g, ' ') + ' could not get on a boat.'
+          });
+        }
+      }
       if (state.turnedAwayToday === size) {
         w.bus.emit('visitors:turned-away', { day: today.iso, archetype: a.id, reason: needSlot ? 'no vehicle slot left on the barge' : 'no seat left on a boat' });
       }
       return;
     }
-    const p = makeParty(a, tick, today);
+    const p = makeParty(a, tick, today, item.forEvent ? eventRng : rng);
     if (!p) {
       // No bed. Camping and holiday houses both sell out, and a school group needs a campground to
       // itself. This is the other way a visitor does not arrive.
@@ -745,7 +960,14 @@ export function registerVisitors(world) {
       turnedAwayLog[turnedAwayLog.length - 1] += size;
       return;
     }
-    seatsUsedToday += p.size;
+    if (item.forEvent) {
+      p.forEvent = item.forEvent;
+      p.eventName = item.eventName;
+      p.eventVenue = item.venue;
+      p.eventWindow = item.window;
+      state.eventArrivalsToday += p.size;
+    }
+    if (!ownBoat) seatsUsedToday += p.size;
     if (needSlot) slotsUsedToday++;
     state.arrivalsToday += p.size;
     const term = R.places.get(a.id === 'surfer' || a.id === 'backpacker' ? 'one-mile-jetty' : 'dunwich-ferry-terminal');

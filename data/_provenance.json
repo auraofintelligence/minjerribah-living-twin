@@ -3,7 +3,7 @@
   "schema": "minjerribah-provenance/1",
   "version": 1,
   "generated": "2026-08-10",
-  "fingerprint": "b2c36fc9579b",
+  "fingerprint": "aef69c808fba",
   "about": "The pack registry. One entry per data pack, carrying its version, the lane it came through, the documents behind it, when it was ingested, by what extractor, a checksum over the file, and the spread of confidence inside it. src/world/data.js loads what this file lists, so adding a pack means adding it here. docs/INGEST.md is the contract; tools/gate-audit.mjs enforces it.",
   "offline_note": "This is a committed file, not a lookup. The running twin fetches these paths off its own origin and nothing else, ever. Ingestion is an offline step that produces committed, versioned, checksummed data.",
   "confidence_scale": {
@@ -50,6 +50,12 @@
       "tool": "tools/ingest/lane-scenario.mjs",
       "produces": "a scenario definition stamped with the seed and the pack fingerprint so it replays",
       "note": "The stamping half is built, because it is registry work. Running a scenario and writing its report belongs to the scenario system, not to ingest."
+    },
+    "connector": {
+      "built": true,
+      "tool": "tools/connectors/sync.mjs",
+      "produces": "a committed, checksummed feed in data/feeds, stamped with the source commit it read and how long a record from it can be believed",
+      "note": "A connector reads a real island source that belongs to a real organisation and changes over time. A sync is an offline step, never a runtime fetch: nothing under tools/connectors opens a socket, and the running twin never touches any of it. A feed is not a pack. It is what a source said, staged for a person, and it becomes pack content only through tools/ingest/promote.mjs. Every connector, its cadence, its freshness policy, what it can and cannot know, and what its source organisation is being asked for and promised, is in docs/CONNECTORS.md."
     }
   },
   "documents": {
@@ -84,7 +90,7 @@
     {
       "id": "businesses",
       "file": "data/businesses.json",
-      "version": "1.0.0",
+      "version": "1.2.0",
       "lane": "research",
       "envelope": "legacy",
       "pack_status": "committed",
@@ -100,20 +106,24 @@
       },
       "checksum": {
         "algorithm": "sha256-lf",
-        "value": "108e49ec115e673c2e2e6528de3cb140d70997e41316a3532ab0c01ed2d02a20"
+        "value": "00935adb076c4ebb3c2d385e4de25462a2df118ba6fbccc0ff2639ab158735fa"
       },
-      "bytes": 137699,
-      "records": 101,
+      "bytes": 202105,
+      "records": 104,
       "confidence": {
-        "high": 46,
-        "medium": 36,
-        "low": 19,
+        "high": 49,
+        "medium": 35,
+        "low": 20,
         "unrated": 0
       },
       "collections": [
         {
           "path": "businesses",
           "records": 101
+        },
+        {
+          "path": "businesses[].typical_hours.variants",
+          "records": 3
         }
       ],
       "player_facing_collections": [
@@ -269,7 +279,7 @@
     {
       "id": "events",
       "file": "data/events.json",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lane": "research",
       "envelope": "legacy",
       "pack_status": "committed",
@@ -284,28 +294,28 @@
       },
       "checksum": {
         "algorithm": "sha256-lf",
-        "value": "3c7127e4cc06affe3cf530142aacbd36bf06c00f5f6891e3c905eaaa0c54bf6b"
+        "value": "53cf9c29954b4c2679777b4be180d7a61445522089ad5a2e409da65e2d6ab5a6"
       },
-      "bytes": 133135,
-      "records": 51,
+      "bytes": 195050,
+      "records": 64,
       "confidence": {
-        "high": 18,
-        "medium": 20,
+        "high": 21,
+        "medium": 30,
         "low": 3,
         "unrated": 10
       },
       "collections": [
         {
           "path": "events",
-          "records": 27
+          "records": 36
         },
         {
           "path": "periods",
-          "records": 5
+          "records": 7
         },
         {
           "path": "rhythms",
-          "records": 9
+          "records": 11
         },
         {
           "path": "visitor_archetypes",

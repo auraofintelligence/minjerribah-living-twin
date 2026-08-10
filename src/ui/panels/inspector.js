@@ -25,6 +25,7 @@
 //   reaching the camera rig, so arrowing through a list of relatives does not fly you across the bay.
 
 import { registerPanel, el } from '../mount.js';
+import { freshnessAt, checkedPhrase, freshnessMoment, STALE_AFTER_DAYS } from '../../world/freshness.js';
 
 /* ------------------------------------------------------------------ formatting */
 
@@ -664,11 +665,66 @@ function mount(root, world) {
       const pack = bizPack(id);
       if (!card) return null;
       const chips = [];
-      chips.push(chip(card.openNow ? 'open now' : 'shut', card.openNow ? 'leaf' : 'iron'));
+      /**
+       * The open sign, and the two things that were wrong with it.
+       *
+       * It used to be stamped once, inside `header()`, which only runs when you select something.
+       * A card opened at three in the morning and left open still read SHUT at eleven the next
+       * morning while the Trade tab underneath it said "Open. It closes late". Now it is bound and
+       * re-reads the card at 10 Hz like everything else on the panel.
+       *
+       * And it used to be a two-way switch over `card.openNow`, so a null meant SHUT. A null does
+       * not mean shut. It means the twin is not entitled to an opinion: nobody published a week, or
+       * the thing is not a shopfront. A live SHUT chip over the Minjerribah Moorgumpin
+       * Elders-in-Council was this twin describing how an Elders' council runs, which is the one
+       * thing it is not allowed to do. Three states now, and the third one says what it is.
+       */
+      const POSTURE_CHIP = { organisation: 'not a shopfront', 'on-call': 'on call', 'by-timetable': 'runs to a timetable' };
+      const openChip = chip('', 'iron');
+      bind(() => {
+        const c = bizCard(id) || card;
+        const gone = c.status === 'closed' || c.status === 'proposed';
+        // A shopfront running on a week nobody published still gets its state, because the
+        // simulation is running on it and hiding that would be its own kind of dishonesty. It does
+        // not get to say it the way a published week says it.
+        const modelled = c.hoursBasis !== 'published' && c.hoursBasis !== 'listed';
+        const word = gone ? '' : POSTURE_CHIP[c.hoursPosture]
+          || (!c.answersOpenShut ? 'hours not published'
+            : modelled ? (c.openNow ? 'open, not published' : 'shut, not published')
+              : c.openNow ? 'open now' : 'shut');
+        openChip.textContent = word;
+        openChip.className = 'chip ' + (word === 'open now' ? 'leaf' : 'iron');
+        openChip.style.display = word ? '' : 'none';
+      });
+      chips.push(openChip);
       if (card.status && card.status !== 'trading') chips.push(chip(plain(card.status), 'sun'));
       if (card.viability && card.viability !== 'steady') chips.push(chip(card.viability, card.viability === 'thin' ? 'coral' : 'sun'));
       if (card.winterClosed) chips.push(chip('closed for winter', 'iron'));
       if (card.confidence && card.confidence !== 'high') chips.push(chip(card.confidence + ' confidence', 'iron'));
+      // A published or listed set of hours that nobody has looked at for a season says so on the
+      // card, in the word rather than in a colour. An estimate gets no freshness chip at all,
+      // because there is nothing published underneath it to have gone off.
+      //
+      // Bound rather than stamped once, unlike the chips above it, and the reason is the clock: a
+      // player who presses live moves the moment this age is counted from, and a chip reading
+      // "hours ageing" beside a sentence reading "checked today" would be the panel arguing with
+      // itself. The chip empties itself when the hours are fresh.
+      if (card.hoursBasis === 'published' || card.hoursBasis === 'listed') {
+        const ageChip = chip('', 'sun');
+        bind(() => {
+          // The chip wants the state word rather than the sentence, so it calls the shared
+          // function directly. Same module, same limit, same four words as the prose below it.
+          const f = freshnessAt(
+            { freshness: { synced_at: card.hoursChecked, stale_after_days: STALE_AFTER_DAYS.hours } },
+            freshnessMoment(world.clock).iso
+          );
+          const say = f.state === 'ageing' || f.state === 'stale' ? 'hours ' + f.state : '';
+          ageChip.textContent = say;
+          ageChip.className = 'chip ' + (f.state === 'stale' ? 'coral' : 'sun');
+          ageChip.style.display = say ? '' : 'none';
+        });
+        chips.push(ageChip);
+      }
       const aka = Array.isArray(card.alsoKnownAs) ? card.alsoKnownAs[0] : card.alsoKnownAs;
       return {
         name: card.name,
@@ -695,41 +751,243 @@ function mount(root, world) {
     return pack ? pack.find((b) => b.id === id) || null : null;
   }
 
-  const DOW = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
   const DOW_LABEL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  function bizHours(id) {
+    const bs = world.read('businesses');
+    return bs && bs.hours ? bs.hours(id) : null;
+  }
+
+  /**
+   * How old a check is, in words a person reads rather than a date they have to subtract.
+   *
+   * The age is counted against the clock's declared moment, never against the machine's wall
+   * clock, and that is not a detail. This panel used to read `Date.now()`, so an island sitting at
+   * 2 October could tell you an hour checked on 10 August was "checked today", because it was
+   * answering with the reviewer's calendar rather than the island's. `src/world/freshness.js` owns
+   * the arithmetic and the vocabulary, `tools/connectors/lib.mjs` imports the same module, and the
+   * moment comes off `world.clock`: the real Queensland moment in live, the declared calendar in
+   * simulated, the parked view in scrub. Which one it was goes on screen underneath.
+   */
+  function checkAge(checked, staleAfterDays) {
+    return checkedPhrase(checked, freshnessMoment(world.clock), staleAfterDays || STALE_AFTER_DAYS.hours);
+  }
+
+  /** The clause that says what the age was counted against. One sentence, always shown with it. */
+  function countedAgainst() {
+    return freshnessMoment(world.clock).countedAgainst;
+  }
+
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+  /**
+   * An ISO date in the words the rest of the card uses: '10 August 2026'.
+   *
+   * The pack writes its notes in prose and its stamps in ISO, so a card could carry "checked
+   * 2026-08-10" in one line and "checked 10 August 2026" in the next, which reads as two different
+   * facts. One format wins on screen and it is the readable one; the ISO stays in the data.
+   */
+  function longDate(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ''));
+    if (!m) return String(iso || '');
+    return `${Number(m[3])} ${MONTHS[Number(m[2]) - 1]} ${m[1]}`;
+  }
 
   function bizTrade(id) {
     const out = [];
-    const pack = bizPack(id);
+
+    /* ---- open, shut, and how sure anybody is ---- */
 
     const lede = el('div', { class: 'lede' });
-    bind(() => {
-      const c = bizCard(id);
-      if (!c) return;
-      lede.textContent = c.openNow ? 'Open now.' : 'Shut at the moment.';
-    });
     const hoursToday = el('div', {});
+    const kitchenLine = el('div', {});
     bind(() => {
-      const dow = world.clock.dayOfWeek;
-      const raw = pack && pack.typical_hours ? pack.typical_hours[DOW[dow]] : null;
+      const h = bizHours(id);
       const c = bizCard(id);
-      const cut = c && c.hoursCutPct ? ` They are cutting about ${Math.round(c.hoursCutPct)} per cent off the late end to save wages.` : '';
-      hoursToday.textContent = raw
-        ? `${DOW_LABEL[dow]}: ${raw === 'closed' ? 'closed' : raw}.${cut}`
-        : 'No trading hours in the pack for today.';
-    });
-    out.push(sec('Trading', lede, whyBox('', hoursToday)));
+      if (!h) {
+        lede.textContent = c && c.openNow ? 'Open now.' : 'Shut at the moment.';
+        return;
+      }
+      // Nothing to hang a sign on. An Elders' council, a Traditional Owner corporation, an
+      // ambulance station, a hall, a school, a ferry line, or a shop nobody has published a week
+      // for. The twin says what it does know and stops there, and the one thing it does not do is
+      // fall through to the shut branch below and make something up.
+      if (!h.answersOpenShut) {
+        lede.textContent = h.postureLine
+          || 'Nobody has published hours for this place and nothing has been made up in their place.';
+        const said = [];
+        if (h.noWeek) said.push('There is no week here to show you.');
+        else said.push('What it does publish is below, and it is published rather than worked out.');
+        if (h.checked) said.push(`Somebody looked on ${longDate(h.checked)}.`);
+        else said.push('Nobody has gone looking yet.');
+        hoursToday.textContent = said.join(' ');
+        kitchenLine.textContent = '';
+        return;
+      }
+      if (!h.weekIsPublished) {
+        // A shopfront the simulation is running on a pattern of its own. The state is real, in the
+        // sense that it is what the twin is doing this minute, and it is not a fact about the
+        // island. The sentence has to carry both, and the subject of it is the simulation.
+        lede.textContent = h.open
+          ? 'The simulation has it open. Nobody has published hours for this place.'
+          : 'The simulation has it shut. Nobody has published hours for this place.';
+      } else if (h.open) {
+        lede.textContent = h.closesAt
+          ? (h.closeUnpublished ? 'Open. It closes late and the closing time is not published.'
+            : `Open until ${h.closesAt}.`)
+          : 'Open now.';
+      } else {
+        lede.textContent = h.nextOpen ? `Shut. Opens again ${h.nextOpen}.` : 'Shut, and nothing published says when it opens again.';
+      }
+      const dowNow = world.clock.dayOfWeek;
+      const row = h.rows[dowNow];
+      const bits = h.weekIsPublished ? [`${DOW_LABEL[dowNow]}: ${row ? row.text : 'not recorded'}.`]
+        : [`The pattern it is running on today: ${row ? row.text : 'not recorded'}.`];
+      if (h.week && h.week !== 'ordinary week') bits.push(`These are its ${h.week} hours.`);
+      const m = h.modelled || {};
+      if (m.shutReason && !h.open) bits.push(cap(m.shutReason) + '.');
+      if (m.hoursCutPct) bits.push(`They are cutting about ${Math.round(m.hoursCutPct)} per cent off the late end to save wages, which is modelled here and is not a published change.`);
+      if (m.stretchMin) bits.push(`The simulation is running them ${m.stretchMin} minutes later than the estimate while the island is full. Modelled.`);
+      hoursToday.textContent = bits.join(' ');
 
-    if (pack && pack.typical_hours) {
-      const rows = DOW.map((k, i) => el('div', { class: 'need' },
-        el('div', { class: 'n' }, DOW_LABEL[i].slice(0, 3)),
-        el('div', { style: { color: pack.typical_hours[k] === 'closed' ? 'var(--t-faint)' : 'var(--t)', fontSize: 'var(--fs-sm)' } },
-          pack.typical_hours[k] || 'not recorded'),
-        el('div', { class: 's' }, i === world.clock.dayOfWeek ? 'today' : '')));
-      out.push(sec('The week', rows,
-        basis(pack.typical_hours.basis === 'published'
-          ? 'Hours as published by the business.'
-          : 'These hours are an estimate in data/businesses.json, not the business’s published times.')));
+      if (h.kitchenOpen === null || h.kitchenOpen === undefined) { kitchenLine.textContent = ''; return; }
+      const krow = h.rows[dowNow];
+      const kwhen = krow && krow.kitchen ? ` The kitchen today: ${krow.kitchen}.` : '';
+      kitchenLine.textContent = (h.kitchenOpen
+        ? 'Somebody is still in the kitchen.'
+        : h.open ? 'The kitchen has shut. The bar is open and you cannot get a meal.' : 'The kitchen is shut with the rest of it.')
+        + kwhen + (m.kitchenShort ? ' ' + cap(m.kitchenShort) + '.' : '');
+    });
+    // "Trading" is the wrong heading over a body that does not trade, in the same small way that
+    // "shut" was the wrong chip. The tab keeps its name because it is one name for a hundred
+    // records; the heading on the card does not have to.
+    out.push(sec((bizHours(id) || {}).posture && bizHours(id).posture !== 'shopfront' ? 'Open or shut' : 'Trading',
+      lede, whyBox('', hoursToday), kitchenLine));
+
+    /* ---- where the hours came from, and when anybody last looked ---- */
+
+    const provenance = el('div', {});
+    const sourceLine = el('div', {});
+    bind(() => {
+      const h = bizHours(id);
+      if (!h) { provenance.textContent = ''; return; }
+      // The week actually in force decides this line, not the base week. A club that publishes its
+      // winter hours and then says only that the holidays are "extended" is publishing one and
+      // guessing the other, and on a day in the holidays a player is looking at the guess.
+      const applied = h.weekBasis || h.basis;
+      const age = checkAge(h.checked);
+      // "and ageing", "and stale", or nothing at all when it is fresh. The rule in
+      // docs/CONNECTORS.md is that a stale record says the word where it is drawn, not that every
+      // record announces its own health.
+      const standing = age.standing ? ` and ${age.standing}` : '';
+      // The clause naming the clock is dropped when the phrase has already named it. "Checked on
+      // 2026-08-10, which is later than the moment on screen, counted against the island's own
+      // clock" says the same thing twice and reads like a machine.
+      const against = age.state === 'unknown' ? '' : `, counted against ${countedAgainst()}`;
+      if (applied === 'estimate' && h.basis !== 'estimate') {
+        provenance.textContent = `This week is not the published one. The business publishes its ordinary week `
+          + `and says only that its hours extend in the holidays, without saying how far, so the ${h.week} hours `
+          + `you are looking at are the simulation’s estimate on top of that. `
+          + `The published week underneath it was ${age.phrase}${standing}${against}.`;
+      } else if (h.basis === 'none') {
+        provenance.textContent = 'Nobody has published hours for this place and this pack carries no guess at '
+          + 'them either. There is a difference between a guess and a blank, and this is the blank. '
+          + (h.checked ? 'Somebody went looking on ' + longDate(h.checked) + ' and found nothing.' : 'Nobody has gone looking yet.');
+      } else if (applied === 'estimate') {
+        provenance.textContent = 'Nobody has published hours for this place. What you are looking at is the '
+          + 'simulation’s own pattern for an island business of this kind, and it is not a claim about when the '
+          + 'doors are open. '
+          + (h.checked ? 'Somebody went looking on ' + longDate(h.checked) + ' and found nothing.' : 'Nobody has gone looking yet.');
+      } else {
+        const words = h.basis === 'published'
+          ? (h.posture === 'shopfront'
+            ? 'These hours are the business’s own, as published on its own page.'
+            : 'These hours are the organisation’s own, as published on its own page.')
+          : 'These hours were published by somebody else: a council, a tourism body or an island directory. Real and citable, and one step further from the kitchen, so they go stale without anybody being told.';
+        provenance.textContent = `${words} ${cap(age.phrase)}${standing}${against}.`;
+      }
+      sourceLine.textContent = h.source ? h.source : '';
+      sourceLine.className = h.source ? 'basis' : '';
+    });
+    out.push(sec('Who says so', whyBox(null, provenance), sourceLine));
+
+    /* ---- the week, and only when somebody published one ----
+
+    This section used to draw seven rows under a heading reading THE WEEK for every record in the
+    pack, including the ninety-odd that nobody has published an hour for. A critic found the
+    Pandanus Palms card saying, in as many words, that the hours below were not a claim about when
+    the doors were open, and then drawing Sunday to Saturday, 08:30 to 17:00, directly underneath
+    it. The label was doing the work the layout was undoing.
+
+    Seven rows in a grid is the shape of a published roster and a reader takes it as one. So a week
+    is drawn as a week only when somebody published it. What the simulation is running on is real
+    and is not hidden: it is stated in one line, in a sentence with a subject, and the subject is
+    the simulation. */
+
+    const weekRows = el('div', {});
+    const weekBasis = el('div', { class: 'basis' });
+    const hCard = bizHours(id);
+    const drawGrid = !!(hCard && hCard.weekIsPublished);
+    const weekTitle = !hCard ? 'The week'
+      : hCard.noWeek ? 'The week'
+        : !drawGrid ? 'What the simulation runs it on'
+          : hCard.posture !== 'shopfront' ? 'Office hours, as published'
+            : 'The week';
+    bind(() => {
+      const h = bizHours(id);
+      if (!h) return;
+      weekRows.textContent = '';
+      if (h.noWeek) {
+        weekRows.append(el('div', { class: 'basis' },
+          'Not published, and not invented. There is no week on this record.'));
+      } else if (!drawGrid) {
+        weekRows.append(el('div', { class: 'basis' }, h.patternLine
+          ? `The simulation runs this one on ${h.patternLine}. That is the twin’s own working `
+            + 'pattern for an island business of this kind. It is not a roster, nobody published '
+            + 'it, and it is written out here in one line rather than drawn as a week so that it '
+            + 'cannot be mistaken for one.'
+          : 'Nothing published, and nothing modelled.'));
+      } else {
+        for (let i = 0; i < 7; i++) {
+          const r = h.rows[i];
+          const shut = r.text === 'closed' || r.text === 'not published';
+          weekRows.append(el('div', { class: 'need' },
+            el('div', { class: 'n' }, r.label.slice(0, 3)),
+            el('div', { style: { color: shut ? 'var(--t-faint)' : 'var(--t)', fontSize: 'var(--fs-sm)' } },
+              r.text + (r.kitchen && r.kitchen !== r.text ? `  (kitchen ${r.kitchen})` : '')),
+            el('div', { class: 's' }, r.today ? 'today' : '')));
+        }
+      }
+      const lines = [];
+      if (h.note) lines.push(h.note);
+      if (h.kitchenHours && h.kitchenHours.note) lines.push('Kitchen: ' + h.kitchenHours.note);
+      if (h.variants.length) {
+        lines.push('A different week applies when: ' + h.variants.map((v) => `${v.applies.join(' or ')} (${v.basis})`).join(', ') + '.');
+      }
+      if (h.publicHolidayRule === 'closed') lines.push('Closed public holidays, in the business’s own words.');
+      // Only worth saying where there is a published week for a public holiday to depart from.
+      // On a record that publishes nothing it is a second sentence saying the same nothing.
+      // Only worth saying where there is a published week and something computed off it for a
+      // public holiday to change. On a record that publishes nothing, or one the twin never asks
+      // about, "the ordinary week is used" describes a calculation that does not happen.
+      else if (h.publicHolidayRule === 'unverified' && h.weekIsPublished && h.answersOpenShut) lines.push('Nothing is published about what this place does on a public holiday, so the ordinary week is used and that may be wrong.');
+      else if (h.publicHolidayNote) lines.push(h.publicHolidayNote);
+      const m = h.modelled || {};
+      if (m.exposure) lines.push('Weather, swell and the state of the beach can shut this one, which is modelled here and is published by nobody.');
+      weekBasis.textContent = '';
+      for (const t of lines) weekBasis.append(el('div', {}, t));
+    });
+    out.push(sec(weekTitle, weekRows, weekBasis));
+
+    // Money, but only where there is money. This panel used to draw A$0 takings, a 0.0 per cent
+    // margin and a meter labelled "can this place keep trading" under the Minjerribah Moorgumpin
+    // Elders-in-Council, which is a question about them that does not apply and reads worse than
+    // the wrong number would.
+    if ((bizCard(id) || {}).trades === false) {
+      out.push(sec('Takings', el('div', { class: 'basis' },
+        'Nothing. This one has no till in this model: it is here because it is part of how the '
+        + 'island works, not because it sells anything.')));
+      return out.concat(bizClosingBasis(id));
     }
 
     out.push(sec('Takings', el('div', { class: 'stat-row' },
@@ -752,12 +1010,33 @@ function mount(root, world) {
     });
     out.push(sec('How it is holding up', strain, service, shortOf(id)));
 
-    out.push(sec(null, basis(
-      el('b', {}, 'Every dollar on this card is modelled. '),
-      'No trading figure is published for any business on this island. What is real here is the '
-      + 'business, its type, its township, its price band and the staffing band in '
-      + 'data/businesses.json, which flags the staffing and most hours as estimates.')));
-    return out;
+    return out.concat(bizClosingBasis(id));
+  }
+
+  /** The line at the foot of the Trade tab that says what on it is real. */
+  function bizClosingBasis(id) {
+    const closing = el('div', {});
+    bind(() => {
+      const h = bizHours(id);
+      const c = bizCard(id) || {};
+      const hoursWord = !h ? ''
+        : h.basis === 'none'
+          ? ' There are no hours on this card because nobody has published any and none have been made up.'
+          : h.basis === 'estimate'
+            ? ' The trading hours on this card are not real either: nobody has published any for this place, '
+              + 'and what you are reading is the simulation’s own pattern for an island business of this kind.'
+            : h.posture !== 'shopfront'
+              ? ' The hours are real and the page they came from is named above. They are office hours, not '
+                + 'trading hours, and the twin does not work anything out from them.'
+              : ' The trading hours are real, and the page they came from is named above.';
+      closing.textContent = (c.trades === false
+        ? 'Nothing on this card is a trading figure, because there is no trade here to figure. What is real '
+          + 'is the organisation, its type and its township, out of data/businesses.json.'
+        : 'Every dollar on this card is modelled. No trading figure is published for any business on this '
+          + 'island. What is real here is the business, its type, its township and its price band, out of '
+          + 'data/businesses.json, which flags the staffing band as an estimate.') + hoursWord;
+    });
+    return [sec(null, el('div', { class: 'basis' }, closing))];
   }
 
   function strainWord(c) {
@@ -859,12 +1138,17 @@ function mount(root, world) {
     const c = bizCard(id) || {};
     const pack = bizPack(id);
     const out = [];
+    // The pack's status vocabulary is written for shops, so `trading` is its word for "confirmed
+    // to exist and running". Printed unchanged it puts the word Trading over an Elders' council
+    // and a rural fire brigade, which is the same category error as the open sign, one size down.
+    const status = c.hoursPosture && c.hoursPosture !== 'shopfront' && c.status === 'trading'
+      ? 'Operating' : cap(plain(c.status));
     out.push(sec('What it is', kv([
       ['Type', cap(plain(c.type))],
       ['Sector', cap(plain(c.sector))],
       ['Township', c.township],
-      ['Price band', c.priceBand],
-      ['Status', cap(plain(c.status))],
+      ['Price band', c.trades === false ? 'nothing sold in this model' : c.priceBand],
+      ['Status', status],
       ['Address', pack ? pack.address : null]
     ])));
     if (c.role) out.push(sec('Role in this island', whyBox('', c.role)));

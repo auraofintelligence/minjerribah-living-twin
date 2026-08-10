@@ -1,4 +1,5 @@
 shots/
 node_modules/
 .DS_Store
-tools/ingest/candidates/
+ingest-inbox/
+out/

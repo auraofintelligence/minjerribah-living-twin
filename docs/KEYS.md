@@ -11,21 +11,39 @@ anything held with Control or Command, so the browser's own shortcuts still work
 
 | Key | What it does | Owner |
 | --- | --- | --- |
-| `Space` | Pause, and unpause | `src/ui/panels/hud.js` |
+| `Space` | Pause, and unpause. From a parked clock, come back to the island's present and play | `src/ui/panels/hud.js` |
 | `1` `2` `3` `4` | Speed: 1x, 3x, 12x, 60x | `src/ui/panels/hud.js` |
 | `0` | Pause | `src/ui/panels/hud.js` |
+| `,` `.` | Step an hour back and forward through time. The world follows | `src/ui/panels/hud.js` |
+| `Shift` + `,` `.` | The same, a day at a time | `src/ui/panels/hud.js` |
 
 The camera rig would otherwise use `1` to `5` for its own modes. It stands down: the HUD raises the
 `camera-no-number-keys` flag at mount and the rig checks it. `Tab` is how you change camera mode.
 `Space` in the drone camera flies up instead, and the HUD checks for that before taking it.
 
+Choosing a speed is how you leave live, so `0` to `4` and `Space` all do that, and the mode chip on
+the bar changes the moment they do. Nothing is bound to going live or to coming back to the
+island's present, on purpose: both are permanent buttons on the bar rather than keys, because a
+person who does not know they are looking at a projection will not press a key to find out.
+
+The time ribbon along the bottom of the bar takes focus with `Tab` and then answers `Left` and
+`Right`, with `Shift` for a day, which is the same thing `,` and `.` do without focusing it first.
+It stops those two keys from reaching anything else while it holds focus.
+
+Photo mode (`P`) has a Time slider of its own and it is not a fourth way of moving the clock: it is
+the same scrub, through the same `world.time`, and it declares itself. Photo mode hides the whole
+interface including the bar, so that panel carries the bar's own mode word and the date beside the
+clock, and grows a **Back to now** button while it is parked. Nothing in photo mode advances the
+island. It used to: the slider wrote the clock's minute in directly and then stepped the world, so
+a photograph moved the island and the bar carried on saying LIVE over a moment nobody chose.
+
 ## Moving
 
 | Key | What it does | Owner |
 | --- | --- | --- |
-| Drag | Hold the ground and move it | `src/render/camera.js` |
+| Drag | Hold the ground and move it. On the time ribbon, hold time and move it | `src/render/camera.js`, `src/ui/panels/hud.js` |
 | Right drag | Orbit and tilt | `src/render/camera.js` |
-| Wheel | Zoom, or on foot and in the air, the lens | `src/render/camera.js` |
+| Wheel | Zoom, or on foot and in the air, the lens. On the time ribbon, how much time you can see | `src/render/camera.js`, `src/ui/panels/hud.js` |
 | `W` `A` `S` `D` | Pan, walk or fly, depending on the mode | `src/render/camera.js` |
 | `Tab`, `Shift` + `Tab` | Next and previous camera mode: planner, street, follow, drone, cinematic | `src/render/camera.js` |
 | `Home` | Frame the whole island | `src/render/camera.js` |
@@ -44,6 +62,7 @@ Each of these opens its board and closes it again. `Escape` closes whatever is o
 
 | Key | Board | Owner |
 | --- | --- | --- |
+| `Y` | How it works: the explainer sheet | `src/ui/panels/howitworks.js` |
 | `G` | The civic board | `src/ui/panels/civic.js` |
 | `E` | The island calendar | `src/ui/panels/events.js` |
 | `K` | The siting bench | `src/ui/panels/build.js` |
@@ -54,6 +73,14 @@ Each of these opens its board and closes it again. `Escape` closes whatever is o
 | `M` | The map: docked, then off; `Shift` + `M` for full screen | `src/ui/panels/map.js` |
 | `N` | Mute and unmute; `Shift` + `N` for the mixer | `src/audio/audio.js` |
 | `?` | The arrival screens again, from the acknowledgement | `src/ui/panels/onboarding.js` |
+
+`Y` is the odd one in that table, because it is the only board that is not a board: it is a sheet
+down the right hand side with the island still on screen beside it, since six of its seven sections
+are about something you can see out the window. It took `Y` because every letter that means anything
+was already gone, and because `Y` `U` `I` `O` then read left to right as the four surfaces that
+explain rather than operate: how it works, the works below the sand, the island log, and settings.
+The minimap stands down while it is open, since that is the one rectangle the sheet takes, and comes
+straight back when it closes.
 
 ## Info views
 
@@ -114,3 +141,7 @@ Recorded so nobody re-introduces them.
   owns never also reaches the camera rig.
 - The island log had no key at all until this pass, which made it the only surface on screen you
   could not reach from the keyboard.
+- `,` and `.` were the only two unclaimed keys with an obvious meaning left, and they are the
+  standard step-back and step-forward pair, so the clock took them. `Home` would have been the
+  natural key for going back to the present and the camera already owns it for framing the island;
+  the clock did not take it and does not need it, because the ribbon carries a button.

@@ -1535,12 +1535,17 @@ export function buildViews(world) {
         stats: [
           { k: 'Trading', v: fmt.n(c.trading_now) },
           { k: 'Not yet confirmed', v: fmt.n(c.unconfirmed) },
-          { k: 'Open right now', v: fmt.n(b.openNow) },
+          // Split, because the single number was the thing this whole slice exists to fix. "Open
+          // right now: 28" is a claim about a real street and only part of it is traceable. The
+          // first line is the part somebody can go and check. The second is the twin's own pattern
+          // and says so in its own label rather than in a footnote nobody renders.
+          { k: 'Open now, on published hours', v: fmt.n(b.openOnPublishedHours) },
+          { k: 'Open on the twin’s own pattern', v: fmt.n(b.openOnEstimatedHours) },
           { k: 'Margin, last year', v: `${(b.marginPctRolling365 || 0).toFixed(1)}%` },
           { k: 'Spend leaving', v: `${(b.leakageToMainlandPct || 0).toFixed(1)}%` },
           { k: 'Demand lost today', v: fmt.money(b.demandLostTodayA$) }
         ],
-        note: (b.notes && b.notes[0]) || ''
+        note: (b.notes || []).join(' ')
       };
     },
     markers(w) {

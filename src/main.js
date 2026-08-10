@@ -7,6 +7,38 @@ import { Stage } from './render/stage.js';
 import { loadDataPacks } from './world/data.js';
 import { MANIFEST, PLANNED } from './systems/manifest.js';
 import { mountUI } from './ui/mount.js';
+import { makeTimeControl, liveStartISO, DEFAULT_START_ISO } from './kernel/clock.js';
+
+/**
+ * What kind of time this island opens in. Three inputs, in this order, because an address bar is
+ * an explicit instruction and a remembered preference is not:
+ *
+ *   ?clock=live        open at the real Queensland moment and keep pace with it
+ *   ?clock=simulated   open at ?start=, or at the moment in DEFAULT_START_ISO
+ *   ?start=<ISO>       a specific island moment, in island time, e.g. 2026-12-27T16:00
+ *   the setting        src/ui/panels/settings.js writes { clock: { mode, startISO } } into the
+ *                      localStorage key it owns, and this reads it. The two ends of that contract
+ *                      are named in each other's comments and nowhere else keeps a copy.
+ *   nothing            DEFAULT_START_ISO, simulated. This is the default on purpose: the headless
+ *                      harness constructs a world with no start at all, so the deterministic
+ *                      baseline and a browser opened with no query string are the same island.
+ */
+const CLOCK_SETTINGS_KEY = 'twin.settings';
+function resolveClockBoot(params) {
+  let stored = null;
+  try {
+    const raw = localStorage.getItem(CLOCK_SETTINGS_KEY);
+    if (raw) stored = (JSON.parse(raw) || {}).clock || null;
+  } catch (e) { /* private browsing, or a setting written by an older build */ }
+
+  const asked = (params.get('clock') || '').toLowerCase();
+  const wantLive = asked === 'live' || (!asked && !params.get('start') && stored && stored.mode === 'live');
+  if (wantLive) {
+    return { mode: 'live', startISO: liveStartISO(), why: asked ? 'the address bar asked for live' : 'the last choice made in Settings was live' };
+  }
+  const startISO = params.get('start') || (asked ? null : (stored && stored.startISO)) || DEFAULT_START_ISO;
+  return { mode: 'simulated', startISO, why: params.get('start') ? 'the address bar named a moment' : 'the default moment' };
+}
 
 const bootStatus = document.getElementById('boot-status');
 const bootFill = document.getElementById('boot-bar-fill');
@@ -29,7 +61,17 @@ async function main() {
   const data = await loadDataPacks();
 
   await step('setting the clock');
-  const world = new World({ seed, startISO: params.get('start') || '2026-09-19T05:20' });
+  const clockBoot = resolveClockBoot(params);
+  const world = new World({ seed, startISO: clockBoot.startISO });
+  if (clockBoot.mode === 'live') {
+    // Stamp the anchor now, before a single system has run, so the real datetime this island
+    // started from is in the record rather than in somebody's memory of when they opened the tab.
+    world.clock.goLive();
+  }
+  world.clock.note('opened ' + clockBoot.mode + ' at ' + world.clock.formatISO() + ': ' + clockBoot.why);
+  // The time control belongs to the clock, not to a panel: a panel must not decide what a system
+  // is allowed to recompute. Attached like world.settings and world.camera, read by the HUD.
+  world.time = makeTimeControl(world);
   world.data = data;
   if (params.get('flags')) for (const f of params.get('flags').split(',')) world.flags.add(f.trim());
 
@@ -87,7 +129,15 @@ async function main() {
   // interrogate the running world rather than read a builder's report.
   window.TWIN = {
     world, stage,
-    probe: () => world.probe(),
+    // The clock's own record travels with every probe, so a critic never has to wonder whether a
+    // number they are reading belongs to the real island or to a simulation of a moment that has
+    // not happened. `world.probe()` itself is untouched, so the headless fingerprint is untouched.
+    // `reconcile()` first, on purpose. If something has moved the moment without going through
+    // world.time, the honest answer to "what state is this world in" is the declared one, and a
+    // probe that reported the undeclared state would be the one place in the build where a
+    // direct write still looked like nothing had happened. `world.probe()` itself is untouched,
+    // so the headless fingerprint is untouched.
+    probe: () => { world.time.reconcile(); const p = world.probe(); p.clock = world.clock.describe(); return p; },
     run: (n) => { world.run(n); return world.probe(); },
     speed: (i) => world.clock.setSpeed(i),
     save: () => world.save(),
@@ -95,12 +145,51 @@ async function main() {
     events: (t, n) => world.bus.recent(t, n),
     errors: () => world.errors,
     missing,
-    /** Jump to a time of day and render one frame. For screenshot comparisons. */
-    // Three frames, not one. The sky layer eases the sun light rather than snapping it, so one
-    // frame after a jump the lighting still belongs to the hour you left.
+
+    /**
+     * Time, from the console. `TWIN.clock.status()` says which of the three modes the island is
+     * in and where it is looking; the rest do what their names say. `scrubResidue()` is the one
+     * worth running once: it parks the clock somewhere else, comes back, and proves the derived
+     * systems are exactly as they were, which is the whole claim scrubbing rests on.
+     */
+    get clock() {
+      return {
+        describe: () => { world.time.reconcile(); return world.clock.describe(); },
+        record: () => world.clock.record.slice(),
+        status: () => world.time.status(),
+        live: () => world.time.goLive(),
+        simulated: () => world.time.goSimulated('asked for from the console'),
+        scrub: (minutes) => world.time.scrubBy(minutes),
+        scrubTo: (minutes) => world.time.scrubTo(minutes),
+        present: () => world.time.toPresent(),
+        catchUp: () => world.time.catchUp(),
+        scrubResidue: (m) => world.time.scrubResidue(m),
+        /**
+         * Did anything move the moment without coming through `world.time`? Nought is the only
+         * healthy answer. Any other number names a defect in whatever wrote to the clock: the
+         * moment was already declared and put on the record when it happened, so this is the
+         * count, not the alarm.
+         */
+        offRecord: () => world.clock.offRecordMoves
+      };
+    },
+
+    /**
+     * Jump to a time of day and render. For screenshot comparisons.
+     *
+     * Setting the time of day is moving the moment, so it goes through `world.time` like every
+     * other mover in this build. It lands as a declared scrub: the bar says PROJECTION or LOOKING
+     * BACK, and `TWIN.clock.present()` is the way back. It used to write `clock.minuteOfDay`
+     * straight in and then call `world.step()`, which meant taking a screenshot at midday quietly
+     * advanced the island through a tick, and left the mode chip saying whatever it had said
+     * before. Only the sun, the moon and the tide follow, which is all a time-of-day shot needs
+     * and all this build can honestly recompute.
+     *
+     * Three frames, not one. The sky layer eases the sun light rather than snapping it, so one
+     * frame after a jump the lighting still belongs to the hour you left.
+     */
     setTime: (h, m = 0) => {
-      world.clock.minuteOfDay = h * 60 + m;
-      world.step();
+      world.time.scrubToMinuteOfDay(h * 60 + m);
       if (stage) for (let i = 0; i < 3; i++) { world.frame(0.016); stage.render(0.016); }
       return world.clock.format();
     },
@@ -136,8 +225,9 @@ async function main() {
       // render loop keeps pumping ticks while the PNG is being encoded and posted, so the frame
       // that lands on disk is not the time of day you asked for. A critic hit exactly that and
       // spent four screenshots looking at night frames labelled midday.
-      const heldSpeed = world.clock.speedIndex;
-      world.clock.setSpeed(0);
+      // `freeze` rather than `setSpeed(0)`: choosing a speed is how you leave live, and taking a
+      // photograph of a live island must not be the thing that stops it being one.
+      world.clock.freeze();
       // Size the drawing buffer explicitly. Babylon's CreateScreenshotAsync waits for a composited
       // frame, which never arrives when the pane is hidden, so render manually and read the buffer.
       c.style.width = width + 'px';
@@ -165,9 +255,16 @@ async function main() {
       c.style.width = prev.sw; c.style.height = prev.sh;
       stage.engine.setSize(prev.w, prev.h);
       stage.render(0.016);
-      world.clock.setSpeed(heldSpeed);
-      const res = await fetch('/__shot/' + encodeURIComponent(name), { method: 'POST', body: data });
-      return res.json();
+      world.clock.thaw();
+      // The sink is tools/serve.js, which only exists when someone is developing locally. On a static
+      // host such as GitHub Pages there is nothing listening, so hand the caller the image rather than
+      // throwing: a critic on a local server still gets a file on disk, and anyone opening the
+      // published build still gets a screenshot they can save. Nothing about the island depends on it.
+      try {
+        const res = await fetch('__shot/' + encodeURIComponent(name), { method: 'POST', body: data });
+        if (res.ok) return res.json();
+      } catch (e) { /* no sink here: fall through to the data URL */ }
+      return { ok: false, sink: 'none', hint: 'no local shot sink, so the PNG is returned instead of written', dataUrl: data };
     },
 
     /** Render a contact sheet of the same view across a day. One call, six files. */

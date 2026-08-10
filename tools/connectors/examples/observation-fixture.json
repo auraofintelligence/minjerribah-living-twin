@@ -1,0 +1,20 @@
+{
+  "_readme": "A test fixture, not a sighting. It exists so the wildlife emission can be run end to end without anybody fabricating a report of a real animal. Every field is filled with something that says what it is. origin is fixture, which makes the emitter stamp DO NOT SEND through the message and the filename.",
+  "kind": "twin-observation",
+  "origin": "fixture",
+  "id": "r_fixture_0001",
+  "case_id": "r_fixture_0001",
+  "observed_by": "",
+  "observed_at": "2026-08-10T07:20",
+  "group": "koala",
+  "species": "",
+  "count": 1,
+  "status": "help",
+  "cause": "vehicle",
+  "mobility": "stationary",
+  "urgency": "now",
+  "place": "test fixture, no place",
+  "lat": null,
+  "lng": null,
+  "notes": "Test fixture. No animal, no person, no place. Do not send."
+}

@@ -148,6 +148,45 @@ export const EVENT_COPY = [
     at: () => ({ place: 'point-lookout' }),
     act: () => ({ label: 'Manage the parking', lever: 'point-lookout-parking-management' }) },
 
+  /* ---- what is on. src/systems/agents/events.js, out of data/events.json ---- */
+
+  { type: 'events:opens', tier: 'notice', icon: 'bell', system: 'The calendar',
+    headline: (p) => `${p.name} starts today`,
+    detail: (p) => [
+      `About ${p.expected} people at the busiest moment, which is an estimate`,
+      p.days > 1 ? `over ${p.days} days` : null,
+      p.sourced ? null : 'date worked out from the pattern, not published'
+    ].filter(Boolean).join(', '),
+    at: (p) => (p.place ? { place: p.place } : null) },
+
+  { type: 'events:peak', tier: 'notice', icon: 'people', system: 'The calendar',
+    headline: (p) => `${p.name} is at its busiest`,
+    detail: (p) => `About ${p.people} people on site`,
+    at: (p) => (p.place ? { place: p.place } : null) },
+
+  { type: 'events:called-off', tier: 'warning', icon: 'wind', system: 'The calendar',
+    headline: (p) => (p.effect === 'postponed' ? `${p.name} is held over` : `${p.name} is off`),
+    detail: (p) => p.why,
+    at: (p) => (p.place ? { place: p.place } : null) },
+
+  // The weather does more than cancel. A surf club moves the session to the sheltered beach before
+  // it calls it off, and a cancelled crossing takes half the crowd out of a club night rather than
+  // ending it. Both come out of the record's own `cancels_if` sentence.
+  { type: 'events:moved', tier: 'notice', icon: 'wind', system: 'The calendar',
+    headline: (p) => `${p.name} has moved`,
+    detail: (p) => p.why,
+    at: (p) => (p.to ? { place: p.to } : null) },
+
+  { type: 'events:shortened', tier: 'notice', icon: 'wind', system: 'The calendar',
+    headline: (p) => `${p.name} is running short`,
+    detail: (p) => `${p.why}. About ${p.expected} people now expected at the busiest moment.` },
+
+  { type: 'events:capacity-bit', tier: 'warning', icon: 'ferry', system: 'The calendar',
+    headline: (p) => `${p.people} people did not get across for ${p.name}`,
+    detail: () => 'The boats are the ceiling on every event on this island, and today it bound.',
+    at: () => ({ place: 'dunwich' }),
+    act: () => ({ label: 'Ask for more sailings', lever: 'vehicle-barge-peak-sailings' }) },
+
   { type: 'visitors:peak', tier: 'notice', icon: 'people', system: 'Visitors',
     headline: (p) => `${p.onIsland || 0} visitors on the island, a new peak`,
     detail: (p) => `Pressure index ${Number(p.pressure || 0).toFixed(2)} against the island's practical limit`,

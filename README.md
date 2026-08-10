@@ -172,6 +172,7 @@ known traps, and what to do next.
 
 | File | What it is |
 | --- | --- |
+| `docs/HOW-IT-WORKS.md` | The introduction, for a reader rather than an agent: what this is, how time works, where the numbers come from, real against modelled against proposed, what a player can actually change, how to put something in, and what the project will not do. The twin gives the same explanation on screen with `Y`. |
 | `docs/CONTRACT.md` | The build contract. Architecture, non-negotiables, performance budget, definition of done. |
 | `docs/CRITIC.md` | How the project is judged. Read this before reviewing anything. |
 | `docs/KEYS.md` | The keyboard, in one place. Add a key here in the same commit you bind it. |

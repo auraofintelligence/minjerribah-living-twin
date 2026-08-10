@@ -1,7 +1,7 @@
 {
   "pack": "events",
-  "version": "1.0.0",
-  "generated": "2026-08-07",
+  "version": "1.1.0",
+  "generated": "2026-08-10",
   "island": "Minjerribah / North Stradbroke Island, Quandamooka Country",
   "timezone": "Australia/Brisbane",
   "currency": "AUD",
@@ -13,16 +13,21 @@
     "Every `crowd_curve` is a modelling estimate. They are shaped from the published start and finish times where those exist, and from the ferry timetable where they do not.",
     "Every `revenue_to` entry is a plausible trade link, not measured turnover. Business ids resolve against `data/businesses.json`.",
     "Dates for 2026 are as published at the time of writing. Island event dates move. Treat `next_known` as a snapshot, not a rule; `date_rule` is the thing the simulation should use.",
-    "Cultural events are recorded here as civic load only: dates, places, crowds, ferries, bins. No ceremony, story, language or protocol has been written into this pack. See `docs/CULTURAL-REVIEW.md`."
+    "Cultural events are recorded here as civic load only: dates, places, crowds, ferries, bins. No ceremony, story, language or protocol has been written into this pack. See `docs/CULTURAL-REVIEW.md`.",
+    "Added 10 August 2026: until this pass nothing in this pack reached the island. The only door into the simulation was a scan of `next_known`, every one of which is a 2026 date, so eleven records with no published date had never once fired and every dated one would have gone dark on 1 January 2027. Measured on the shipped build, the Friday of the island's biggest surfing weekend showed the lowest visitor count in a seventy-five day run. `src/systems/agents/calendar.js` now resolves every record's own `date_rule` in any year and `src/systems/agents/events.js` publishes what is on, so a record in this file is a crowd on a beach rather than a row in a table.",
+    "`sim_defaults.event_visitor_increment` is the one number in this pack that changes the island's population, and it is a modelling assumption rather than a measurement. It is written down as data so that anybody who thinks it is wrong can say so by editing a number rather than by reading code.",
+    "Added 10 August 2026, second pass. Three things this pack said and did not do. Every `cancels_if` sentence was printed to a player as a promise and then ignored by the island, because the simulation only understood four of the fourteen sentences and only looked at midnight, when it is rarely raining; `called_off_when` now carries each sentence as testable conditions and the island tests them through the event's own hours. Nothing in this pack was visible out of the window, so `sim_defaults.site_kit` now says what an event puts on the ground and a render layer puts it there. And the island's largest cultural event had an `irregular` date rule, so it resolved once in one year and never again; it is now an annual window with the published dates it has actually fallen on, and no date is projected inside that window.",
+    "Corrections made in that pass, recorded rather than quietly fixed: the weekly deal at the bowls club was named after a different real event at the same venue and its hours claimed a basis of published trading hours for an estimate, and the arts trail description asserted two things that are not on the page it cites. Each correction is written into the record's own `notes`."
   ],
   "conventions": {
     "status": "current = confirmed as running now. unconfirmed = a real event we could not confirm still runs on the current pattern. ended = it ran and it has stopped, kept because the reason it stopped is a civic lever. proposed = Luke's own proposal, never render as real.",
-    "date_rule": "kind is one of: fixed (same calendar date each year), nth_weekday (for example third Saturday of October), moveable (tied to Easter or another moving anchor), weekly, fortnightly, monthly, season (a window, not a date), irregular (real but no stable pattern found).",
+    "date_rule": "kind is one of: fixed (same calendar date each year), nth_weekday (for example third Saturday of October), moveable (tied to Easter or another moving anchor), weekly, fortnightly, monthly, season (a window, not a date), annual_window (it happens every year and the organiser announces the dates, so the pack holds the window the published dates have fallen in and projects no date inside it), irregular (real but no stable pattern found).",
     "attendance": "low, typical and high are people on site at the busiest moment, not tickets sold and not cumulative visitors across a multi-day event. `cumulative` is given separately where a multi-day total makes more sense.",
     "archetype_mix": "fractions of the on-site crowd, summing to about 1.0. Archetype ids resolve against `visitor_archetypes` in this file.",
     "crowd_curve": "24 values, index 0 is midnight to 1am. Each value is the fraction of that event's own peak crowd on site during that hour. All zeroes outside operating hours. Multi-day events give the curve for a typical single day.",
     "strains": "level 1 to 5. 1 = noticed by the people running it. 3 = noticed by residents who are not attending. 5 = the island's capacity is the binding constraint and something fails.",
     "weather_sensitivity": "0 to 1 per driver. 1 means the event does not happen in that condition. `cancels_if` is written where a public source or plain physics gives a threshold; otherwise null.",
+    "called_off_when": "Added 10 August 2026, and it exists because the panel printed every `cancels_if` sentence to a player as a promise the island then ignored. `cancels_if` is prose for a human; `called_off_when` is the same sentence as a list of conditions a machine can test, and a record may not have one without the other. Each entry names a `driver` (rain in mm/h, rain-today in mm since midnight, wind in knots, swell in metres, heat in degrees, crossing as a state word, fire-ban), a threshold (`over`, `under`, or `state`), and an `effect`: called-off, postponed, shortened (with `reduce_to`), or moved (with `move_to`, a place id). `says` is the short phrase shown to the player. An entry that carries `not_evaluated` instead of a threshold is a condition this build cannot test, and it names why. Every threshold is modelled: nobody publishes the millimetre at which a market packs up.",
     "place_ids": "resolve against `data/places.json`. Where a venue has no place record yet, `place_ids` holds the township and `place_note` says where it actually is.",
     "confidence": "high = a current public source states it directly. medium = a public source states it but for a different year, or two sources disagree on detail. low = inferred, or from a single weak listing."
   },
@@ -197,7 +202,15 @@
         { "business_id": "minjerribah-camping", "effect": "medium" }
       ],
       "crowd_curve": { "basis": "estimate", "note": "Two peaks: the morning heats and the afternoon finals, with a lunchtime dip when the tide is wrong.", "hours": [0, 0, 0, 0, 0, 0.05, 0.35, 0.7, 0.9, 1.0, 0.95, 0.8, 0.6, 0.65, 0.85, 0.95, 0.7, 0.3, 0.1, 0.05, 0, 0, 0, 0] },
-      "weather_sensitivity": { "rain": 0.2, "wind": 0.5, "swell": 0.7, "heat": 0.1, "cancels_if": "No rideable surf. The contest runs in rain and postpones for flat or blown-out conditions rather than cancelling.", "note": "Swell sensitivity is inverted: too little swell is the failure mode, not too much." },
+      "weather_sensitivity": {
+        "rain": 0.2, "wind": 0.5, "swell": 0.7, "heat": 0.1,
+        "cancels_if": "No rideable surf. The contest runs in rain and postpones for flat or blown-out conditions rather than cancelling.",
+        "called_off_when": [
+          { "driver": "swell", "under": 1.0, "effect": "postponed", "says": "the bank is flat, so heats are held over" },
+          { "driver": "wind", "over": 26, "effect": "postponed", "says": "blown out, so heats are held over" }
+        ],
+        "note": "Swell sensitivity is inverted: too little swell is the failure mode, not too much."
+      },
       "confidence": "high",
       "source": "https://visit.brisbane.qld.au/whats-on/north-stradbroke-island/sporting-events/gage-roads-straddie-invitational-surfing-competition-f3a1",
       "notes": "The brief called this the Straddie Assault. That is the historic name and locals still use it; the current public name carries a sponsor. Sources disagree on the edition number and on whether the 41st running was 2024 or 2026, so no edition number is recorded here. The 1983 first year is from the visit.brisbane listing."
@@ -210,9 +223,20 @@
       "organiser": "Quandamooka Yoolooburrabee Aboriginal Corporation (QYAC), in association with Brisbane Festival",
       "organiser_business_id": "qyac",
       "description": "The island's cultural anchor, run by the Traditional Owners. The 2026 public listing is a two-day gathering at Dunwich with dance, music, food, weaving, arts, markets, workshops and panel discussions. Free, all ages. It is the one event in the calendar where the island's own people are the hosts rather than the hosts' neighbours.",
-      "date_rule": { "kind": "irregular", "window_months": [6, 7, 8, 9], "duration_days": 2, "note": "The 2026 public gathering is a two-day event in late August. Published material from earlier years describes a longer season running from about 1 June to 31 August with separate named days. The simulation should treat the two-day gathering as the load event and the wider window as a season of smaller activity." },
-      "next_known": { "start": "2026-08-29", "end": "2026-08-30", "confidence": "high", "source": "https://www.queensland.com/au/en/things-to-do/events/p-68bfac3e4a35d00b1f6817eb-quandamooka-festival-2026" },
-      "typical_hours": { "start": "10:00", "end": "17:30", "basis": "published", "note": "Saturday 10:00 to 17:30, Sunday 10:00 to 17:00 per the 2026 listing." },
+      "date_rule": {
+        "kind": "annual_window",
+        "window_start": { "month": 8, "day": 25 },
+        "window_end": { "month": 9, "day": 20 },
+        "duration_days": 2,
+        "window_months": [6, 7, 8, 9],
+        "note": "Annual, and the organiser announces the dates. QYAC's own site describes it as an annual festival. The published gathering dates do not fit any weekday or week-of-month rule: 30 and 31 August 2024, 13 and 14 September 2025, and for 2026 two public listings that disagree. So this pack holds the window the published dates have fallen in rather than projecting a date it does not have. Beyond the year a listing exists for, the calendar shows the window and says the dates have not been announced. Published material from earlier years also describes a longer season running from about 1 June to 31 August with separate named days; that season is carried separately as the `quandamooka-festival-season` period, and the two-day gathering is the load event."
+      },
+      "next_known": { "start": "2026-09-12", "end": "2026-09-13", "confidence": "medium", "source": "https://tickets.oztix.com.au/outlet/event/987058a1-7c80-4099-888c-9b8458882021" },
+      "alternate_listings": [
+        { "start": "2026-09-12", "end": "2026-09-13", "used": true, "source": "https://tickets.oztix.com.au/outlet/event/987058a1-7c80-4099-888c-9b8458882021", "quote": "Saturday, 12 September 2026 10:00 am", "note": "The presenter's own ticketing outlet, listing free general admission for 12 and 13 September and naming Quandamooka Yoolooburrabee Aboriginal Corporation as the presenter. Closest to the organiser of the sources this project can read, so it is the one the simulation runs." },
+        { "start": "2026-08-29", "end": "2026-08-30", "used": false, "source": "https://www.visitredlandscoast.com.au/whats-on/event/6748-quandamooka-festival-2026", "note": "The council tourism listing, and the same dates appear on queensland.com. This pack carried these dates until 10 August 2026. Neither listing can be checked from here and neither is contradicted by the organiser directly, so both are recorded and only one is run. Logged in docs/CULTURAL-REVIEW.md for a human to resolve with QYAC." }
+      ],
+      "typical_hours": { "start": "10:00", "end": "17:30", "basis": "published", "note": "Saturday 10:00 to 17:30, Sunday 10:00 to 17:00 per the council tourism listing. The ticketing listing gives a 10:00 am start and no finish." },
       "place_ids": ["dunwich"],
       "place_note": "The 2026 listing gives 100 East Coast Road, Dunwich. Luke's own events engine records the venue as the QUAMPI Arts and Culture Centre. These may be the same site. `data/places.json` has no QUAMPI record yet.",
       "attendance": { "low": 800, "typical": 2500, "high": 5000, "cumulative_over_event": 6000, "basis": "estimate", "confidence": "low" },
@@ -254,17 +278,17 @@
       "confidence": "high",
       "source": "https://www.visitredlandscoast.com.au/whats-on/event/6748-quandamooka-festival-2026",
       "cultural_handling": "This record holds civic load only: dates, place, crowd, ferries, bins, money. Published sources name specific ceremony days within the festival season. Those are not written into this pack and must not be generated. They belong in `data/lore.json` with QYAC's own sourcing, or nowhere. See `docs/CULTURAL-REVIEW.md`.",
-      "notes": "Queensland's Minjerribah Futures program lists growing and promoting the festival as a funded tourism action, which is a real civic lever the simulation can expose. The DETSI page returned HTTP 403 to an automated fetch and its figures were not read."
+      "notes": "Queensland's Minjerribah Futures program lists growing and promoting the festival as a funded tourism action, which is a real civic lever the simulation can expose. The DETSI page returned HTTP 403 to an automated fetch and its figures were not read. Revised 10 August 2026. Two things changed and both were the pack overstating. The date was carried at high confidence from one council tourism listing; a second public listing, on the presenter's own ticketing outlet, gives a different weekend for the same festival, so the record now carries both, runs the ticketing one, and holds the date at medium confidence. And the date rule was `irregular`, which meant the island's largest event resolved for one weekend in one year and then never again: on the default 19 September 2026 start it had already happened and the calendar filed it under having no date at all. It is now an annual window, taken from three years of published gathering dates (30 and 31 August 2024, 13 and 14 September 2025, and the 2026 listings). The window is shown; no date inside it is projected, because the organiser announces the dates and this pack does not."
     },
     {
       "id": "straddie-salute",
       "name": "Straddie Salute Triathlon Festival",
       "status": "current",
       "category": "endurance-sport",
-      "organiser": "Straddie Salute",
+      "organiser": "NXsports, under the Straddie Salute name",
       "organiser_business_id": null,
       "description": "A participant event rather than a spectator event, and the one that spreads furthest across the island. The off-road triathlon is a 750 m swim, a 15 km mountain bike and an 8 km run, with an on-road triathlon, a kids event, an adventure run and an ocean swim alongside it. The swim starts at Home Beach and the hub is Point Lookout Oval.",
-      "date_rule": { "kind": "nth_weekday", "month": 5, "weekday": "friday", "nth": 3, "duration_days": 3, "note": "A mid-May Friday to Sunday. In 2026 it ran 15 to 17 May." },
+      "date_rule": { "kind": "nth_weekday", "month": 5, "weekday": "saturday", "nth": 3, "offset_days": -1, "duration_days": 3, "note": "The main day is the third Saturday of May and the festival runs the Friday to the Sunday around it. Corrected 10 August 2026: this record used to say the third Friday, which is the same day in 2026 and a week late in 2027. The organiser publishes Friday 15 to Sunday 17 May 2026 and Saturday 15 May 2027, and 15 May 2027 is the third Saturday." },
       "next_known": { "start": "2026-05-15", "end": "2026-05-17", "confidence": "high", "source": "https://straddiesalute.com.au/straddie-salute/" },
       "typical_hours": { "start": "05:30", "end": "14:00", "basis": "estimate" },
       "place_ids": ["home-beach", "point-lookout-oval", "point-lookout", "main-beach"],
@@ -301,10 +325,17 @@
         { "business_id": "foodworks-point-lookout", "effect": "high" }
       ],
       "crowd_curve": { "basis": "estimate", "note": "A dawn event. Almost everyone is on site by 07:00 and almost everyone is gone by early afternoon.", "hours": [0, 0, 0, 0, 0, 0.4, 0.85, 1.0, 0.95, 0.9, 0.85, 0.7, 0.5, 0.3, 0.15, 0.05, 0, 0, 0, 0, 0, 0, 0, 0] },
-      "weather_sensitivity": { "rain": 0.3, "wind": 0.4, "swell": 0.8, "heat": 0.2, "cancels_if": "The ocean swim leg is the fragile part. A big swell or a strong cross-current at Home Beach shortens or cancels the swim before it cancels the event." },
+      "weather_sensitivity": {
+        "rain": 0.3, "wind": 0.4, "swell": 0.8, "heat": 0.2,
+        "cancels_if": "The ocean swim leg is the fragile part. A big swell or a strong cross-current at Home Beach shortens or cancels the swim before it cancels the event.",
+        "called_off_when": [
+          { "driver": "swell", "over": 2.0, "effect": "shortened", "reduce_to": 0.8, "says": "the swim leg is shortened at Home Beach" }
+        ],
+        "note": "Nothing here calls the event off, because the record says the swim goes before the event does."
+      },
       "confidence": "high",
       "source": "https://straddiesalute.com.au/straddie-salute/",
-      "notes": "Described on its own site as the original off-road event. No founding year and no participant count are published, so neither is claimed."
+      "notes": "Described on its own site as the original off-road event. No founding year and no participant count are published, so neither is claimed. The organiser's contact address and its own copy identify NXsports; a Queensland tourism listing separately describes the event as run not for profit with QYAC and Redland City Council alongside NXsports, and that second claim is not repeated as fact here because it was not found on the organiser's own pages."
     },
     {
       "id": "stradbroke-chamber-music-festival",
@@ -358,7 +389,7 @@
       "category": "arts",
       "organiser": "iam Straddie",
       "organiser_business_id": null,
-      "description": "A self-guided trail across the townships: open studios, gallery pop-ups, workshops, demonstrations, live music and market stalls. The 2026 edition is the fifth, and its published stop list runs to 33 stops with an opening celebration at QUAMPI. It is the one event that deliberately spreads its crowd across the whole island instead of concentrating it, which makes it the cheapest large event the island runs.",
+      "description": "A self-guided trail across the townships: open studios, gallery pop-ups, workshops, demonstrations, live music and market stalls. The published 2026 stop list runs to 33 stops. It is the one event that deliberately spreads its crowd across the whole island instead of concentrating it, which makes it the cheapest large event the island runs.",
       "date_rule": { "kind": "nth_weekday", "month": 8, "weekday": "thursday", "nth": 2, "duration_days": 4, "note": "A mid-August block. Sources give both 13 to 16 August 2026 (four days) and 14 to 16 August 2026 (three days) for the same event, so both the start day and the duration are unresolved." },
       "next_known": { "start": "2026-08-13", "end": "2026-08-16", "confidence": "medium", "source": "repo:quandamooka-country-events-engine/assets/site-data.js and https://iamstraddie.com.au/artists-community-2026" },
       "typical_hours": { "start": "09:00", "end": "16:00", "basis": "estimate" },
@@ -398,7 +429,7 @@
       "weather_sensitivity": { "rain": 0.3, "wind": 0.1, "swell": 0.0, "heat": 0.1, "cancels_if": null, "note": "Most stops are indoors, so rain moves the crowd rather than removing it." },
       "confidence": "medium",
       "source": "https://iamstraddie.com.au/artists-community-2026",
-      "notes": "The 33 stops and the fifth year are consistent across sources. The dates are not: Luke's events engine and one guide give 13 to 16 August 2026 and describe four days, another summary gives 14 to 16 August. The wider range is used so the simulation does not under-book the load. The 'more than 70 artists' figure appears in a guide summary and was not confirmed on the organiser's own page, so it is not asserted in this record."
+      "notes": "The 33 stops are on the organiser's own page. The dates are not settled: Luke's events engine and one guide give 13 to 16 August 2026 and describe four days, another summary gives 14 to 16 August. The wider range is used so the simulation does not under-book the load. Corrected 10 August 2026: the description previously said the 2026 edition was the fifth and that there was an opening celebration at QUAMPI. Neither claim is on the cited organiser page and neither could be confirmed elsewhere, so both are removed rather than kept with a caveat. The 'more than 70 artists' figure appears in a guide summary and was not confirmed on the organiser's own page, so it is not asserted in this record either."
     },
     {
       "id": "straddie-oyster-and-seafood-festival",
@@ -445,7 +476,14 @@
         { "business_id": "straddie-kingfisher-tours", "effect": "medium", "note": "Runs a beach transfer to the festival in some years." }
       ],
       "crowd_curve": { "basis": "estimate", "note": "Builds on the late-morning sailings, peaks over lunch, empties hard into the afternoon returns.", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.25, 0.6, 0.9, 1.0, 0.95, 0.8, 0.6, 0.35, 0.15, 0.05, 0, 0, 0, 0, 0] },
-      "weather_sensitivity": { "rain": 0.6, "wind": 0.2, "swell": 0.0, "heat": 0.4, "cancels_if": "A November storm cell over Moreton Bay empties an outdoor food festival in twenty minutes and can stop the water taxis." },
+      "weather_sensitivity": {
+        "rain": 0.6, "wind": 0.2, "swell": 0.0, "heat": 0.4,
+        "cancels_if": "A November storm cell over Moreton Bay empties an outdoor food festival in twenty minutes and can stop the water taxis.",
+        "called_off_when": [
+          { "driver": "rain", "over": 8, "effect": "called-off", "says": "a storm cell over the bay emptied it" },
+          { "driver": "crossing", "state": "cancelled", "effect": "shortened", "reduce_to": 0.45, "says": "the water taxis are off, so the mainland half of the crowd never arrived" }
+        ]
+      },
       "confidence": "high",
       "source": "https://visit.brisbane.qld.au/whats-on/north-stradbroke-island/eat-and-drink-events/straddie-oyster-and-seafood-festival-e648"
     },
@@ -490,7 +528,14 @@
         { "business_id": "straddie-super-sports", "effect": "medium" }
       ],
       "crowd_curve": { "basis": "estimate", "note": "Two spikes at the ramp, dawn and dusk, and an empty middle because everyone is offshore.", "hours": [0, 0, 0, 0, 0.5, 0.9, 0.7, 0.3, 0.15, 0.1, 0.1, 0.1, 0.1, 0.15, 0.25, 0.55, 0.9, 1.0, 0.85, 0.6, 0.3, 0.1, 0, 0] },
-      "weather_sensitivity": { "rain": 0.2, "wind": 0.8, "swell": 0.9, "heat": 0.1, "cancels_if": "The South Passage bar. A strong easterly or a big swell against an outgoing tide closes the bar and the offshore day does not happen, whatever the forecast says on land." },
+      "weather_sensitivity": {
+        "rain": 0.2, "wind": 0.8, "swell": 0.9, "heat": 0.1,
+        "cancels_if": "The South Passage bar. A strong easterly or a big swell against an outgoing tide closes the bar and the offshore day does not happen, whatever the forecast says on land.",
+        "called_off_when": [
+          { "driver": "swell", "over": 2.4, "effect": "called-off", "says": "the bar is closed and the boats stayed in" },
+          { "driver": "wind", "over": 22, "effect": "called-off", "says": "too much wind over the bar for the offshore day" }
+        ]
+      },
       "confidence": "high",
       "source": "https://littleshipclub.com.au/on-the-water/game-fishing/"
     },
@@ -580,9 +625,9 @@
       "name": "Goompi NAIDOC Community Film Celebration",
       "status": "unconfirmed",
       "category": "cultural",
-      "organiser": "Listed with MMEIC and Redlands Coast",
+      "organiser": "Minjerribah Moorgumpin Elders-in-Council Aboriginal Corporation (MMEIC)",
       "organiser_business_id": "mmeic",
-      "description": "A free community evening on the Dunwich State School oval built around film. Recorded once for 2026; whether it is an annual fixture is not established.",
+      "description": "A free community evening on the Dunwich State School oval built around film. Recorded once for 2026; whether it is an annual fixture is not established. Council reporting in July 2026 states that Redland City Council awarded Community Celebration Grants funding to MMEIC to hold Goompi NAIDOC community celebrations on Minjerribah, and that MMEIC will hold three events including a community film celebration and dinner. This record is one of those three. The other two are not named here because no public listing for them was found, and nothing about the programme of any of the three is held in this project.",
       "date_rule": { "kind": "irregular", "window_months": [7], "duration_days": 1, "note": "One recorded date. Do not assume it recurs." },
       "next_known": { "start": "2026-07-31", "end": "2026-07-31", "confidence": "medium", "source": "repo:quandamooka-country-events-engine/assets/site-data.js" },
       "typical_hours": { "start": "17:00", "end": "21:00", "basis": "estimate" },
@@ -608,10 +653,19 @@
         { "business_id": "foodworks-dunwich", "effect": "low" }
       ],
       "crowd_curve": { "basis": "estimate", "note": "An evening event that starts when it gets dark, which in late July on this island is about 17:30.", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.5, 0.95, 1.0, 0.8, 0.3, 0.05, 0] },
-      "weather_sensitivity": { "rain": 0.9, "wind": 0.5, "swell": 0.0, "heat": 0.0, "cancels_if": "An outdoor screen in rain or wind. This one genuinely cancels." },
+      "weather_sensitivity": {
+        "rain": 0.9, "wind": 0.5, "swell": 0.0, "heat": 0.0,
+        "cancels_if": "An outdoor screen in rain or wind. This one genuinely cancels.",
+        "called_off_when": [
+          { "driver": "rain", "over": 1.2, "effect": "called-off", "says": "rain on an outdoor screen" },
+          { "driver": "wind", "over": 24, "effect": "called-off", "says": "too much wind for an outdoor screen" }
+        ]
+      },
       "confidence": "medium",
       "source": "repo:quandamooka-country-events-engine/assets/site-data.js",
-      "cultural_handling": "Civic load only. No content, programming or cultural material recorded."
+      "grant_source": "https://www.redlandscoasttoday.com.au/2026/07/cultural-celebration-launches-naidoc-week-on-redlands-coast/",
+      "cultural_handling": "Civic load only: the date, the place, the crowd, the power for a screen and the car park. MMEIC is named because it is publicly named as the recipient of a council grant to run these celebrations. Nothing about what MMEIC does, decides, thinks or holds is recorded here, and no programme is written or generated. Two of the three funded events are not in this pack because no public listing for them was found, and an unnamed event is better than an invented one.",
+      "notes": "The mainland Redlands Coast NAIDOC celebration at Raby Bay Harbour Park, Cleveland, on Sunday 5 July 2026 from 9am to 2pm is run by Redland City Council in partnership with Yulu-Burri-Ba Aboriginal Corporation. It is off the island and is not in this pack as an island event. It is recorded in this note because it pulls in the other direction: it is a reason for islanders to be on the early boat out on a Sunday in the winter holidays, which is a load this simulation currently has no way to represent."
     },
     {
       "id": "point-lookout-markets",
@@ -650,7 +704,14 @@
         { "business_id": "starfish-studio", "effect": "low" }
       ],
       "crowd_curve": { "basis": "estimate", "note": "A morning market. Peaks at 09:00 and is packing up by midday, then the same site fills again at 16:00 for barefoot bowls.", "hours": [0, 0, 0, 0, 0, 0, 0.1, 0.45, 0.85, 1.0, 0.9, 0.6, 0.25, 0.05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-      "weather_sensitivity": { "rain": 0.7, "wind": 0.5, "swell": 0.0, "heat": 0.2, "cancels_if": "Wet weather cancels or thins an outdoor market with soft goods on trestle tables." },
+      "weather_sensitivity": {
+        "rain": 0.7, "wind": 0.5, "swell": 0.0, "heat": 0.2,
+        "cancels_if": "Wet weather cancels or thins an outdoor market with soft goods on trestle tables.",
+        "called_off_when": [
+          { "driver": "rain", "over": 6, "effect": "called-off", "says": "wet weather on trestle tables" }
+        ],
+        "note": "The thinning half of that sentence is the rain sensitivity above. The cancelling half needs a heavier rate, because a stallholder who has driven a van onto a barge does not pack up for a shower."
+      },
       "confidence": "medium",
       "source": "https://stradbrokeisland.com/point-lookout-markets/",
       "notes": "The brief asked for Dunwich markets as well. No current regular Dunwich market could be confirmed. Market stalls appear at Dunwich inside the Quandamooka Festival and the Oyster Festival, but as part of those events, not as a standing market. Left out rather than invented."
@@ -707,7 +768,14 @@
         { "business_id": "the-point-bar-and-bistro", "effect": "medium" }
       ],
       "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.8, 1.0, 0.9, 0.5, 0.15, 0, 0, 0] },
-      "weather_sensitivity": { "rain": 0.85, "wind": 0.2, "swell": 0.0, "heat": 0.3, "cancels_if": "Rain closes the green." },
+      "weather_sensitivity": {
+        "rain": 0.85, "wind": 0.2, "swell": 0.0, "heat": 0.3,
+        "cancels_if": "Rain closes the green.",
+        "called_off_when": [
+          { "driver": "rain", "over": 2.0, "effect": "called-off", "says": "rain on the green" }
+        ],
+        "note": "The lowest cancelling threshold in the pack, and it should be: a bowling green is the one surface here that goes out of play in ordinary rain."
+      },
       "confidence": "high",
       "source": "https://www.barefootbowls.com.au/club/point-lookout-bowls-club/"
     },
@@ -801,7 +869,15 @@
         { "business_id": "cellarbrations-dunwich", "effect": "low" }
       ],
       "crowd_curve": { "basis": "estimate", "note": "Grades stack through the day: juniors first, seniors last, and the club fills after the final whistle.", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.6, 0.75, 0.7, 0.8, 1.0, 0.9, 0.7, 0.6, 0.4, 0.2, 0.05, 0, 0, 0] },
-      "weather_sensitivity": { "rain": 0.3, "wind": 0.1, "swell": 0.0, "heat": 0.2, "cancels_if": "Ground closure after heavy rain, or a ferry cancellation that strands the visiting team." },
+      "weather_sensitivity": {
+        "rain": 0.3, "wind": 0.1, "swell": 0.0, "heat": 0.2,
+        "cancels_if": "Ground closure after heavy rain, or a ferry cancellation that strands the visiting team.",
+        "called_off_when": [
+          { "driver": "rain-today", "over": 45, "effect": "called-off", "says": "the ground is closed after heavy rain" },
+          { "driver": "crossing", "state": "cancelled", "effect": "called-off", "says": "the visiting team could not get across" }
+        ],
+        "note": "A ground closes on what has fallen into it, not on what is falling at kick-off, so this one reads the day's rainfall rather than the rate."
+      },
       "confidence": "medium",
       "source": "https://www.facebook.com/Straddiesharks/",
       "notes": "The brief asked for Point Lookout Football Club fixtures. There is no Point Lookout Football Club. PLFC on this island is the Point Lookout Fishing Club, an incorporated association based out of the Bowls Club. Rugby league on Minjerribah is the Straddie Sharks at Ron Stark Oval, Dunwich, which is what this record covers."
@@ -842,7 +918,14 @@
         { "business_id": "dunwich-bakery", "effect": "medium" }
       ],
       "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0.3, 0.7, 0.9, 1.0, 0.95, 0.9, 0.85, 0.7, 0.45, 0.2, 0.05, 0, 0, 0, 0, 0] },
-      "weather_sensitivity": { "rain": 0.5, "wind": 0.1, "swell": 0.0, "heat": 0.3, "cancels_if": "Ground closure after heavy autumn rain." },
+      "weather_sensitivity": {
+        "rain": 0.5, "wind": 0.1, "swell": 0.0, "heat": 0.3,
+        "cancels_if": "Ground closure after heavy autumn rain.",
+        "called_off_when": [
+          { "driver": "rain-today", "over": 55, "effect": "called-off", "says": "the ground is closed after heavy autumn rain" }
+        ],
+        "note": "A higher bar than a Sunday fixture, because a carnival with visiting clubs already on a barge is not called off lightly."
+      },
       "confidence": "medium",
       "source": "https://straddiesharks.com/upcoming-events/"
     },
@@ -883,7 +966,15 @@
         { "business_id": "whale-tail-gelati", "effect": "medium" }
       ],
       "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0.2, 0.85, 1.0, 0.9, 0.4, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-      "weather_sensitivity": { "rain": 0.3, "wind": 0.4, "swell": 0.7, "heat": 0.2, "cancels_if": "Dangerous surf. The club moves the session to the more sheltered beach before it cancels." },
+      "weather_sensitivity": {
+        "rain": 0.3, "wind": 0.4, "swell": 0.7, "heat": 0.2,
+        "cancels_if": "Dangerous surf. The club moves the session to the more sheltered beach before it cancels.",
+        "called_off_when": [
+          { "driver": "swell", "over": 1.8, "effect": "moved", "move_to": "cylinder-beach", "says": "moved to Cylinder Beach, out of the swell" },
+          { "driver": "swell", "over": 3.0, "effect": "called-off", "says": "dangerous surf on both beaches" }
+        ],
+        "note": "The record's own place_note says the beach is chosen on the morning based on conditions, so the move is the first answer and the cancel is the second. Cylinder Beach faces north-east into the lee of the headland and takes less of a south-easterly swell than Main Beach does."
+      },
       "confidence": "high",
       "source": "https://pointlookoutslsc.com.au/nippers/"
     },
@@ -920,7 +1011,13 @@
         { "business_id": "nsi-recycling-and-waste-centre", "effect": "low", "note": "Cost rather than revenue." }
       ],
       "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0.3, 0.9, 1.0, 0.85, 0.5, 0.4, 0.3, 0.15, 0.05, 0, 0, 0, 0, 0, 0, 0, 0] },
-      "weather_sensitivity": { "rain": 0.6, "wind": 0.1, "swell": 0.0, "heat": 0.4, "cancels_if": "Heavy rain. March on this island is wet-season tail and a storm cell will end it." },
+      "weather_sensitivity": {
+        "rain": 0.6, "wind": 0.1, "swell": 0.0, "heat": 0.4,
+        "cancels_if": "Heavy rain. March on this island is wet-season tail and a storm cell will end it.",
+        "called_off_when": [
+          { "driver": "rain", "over": 7, "effect": "called-off", "says": "a storm cell ended it" }
+        ]
+      },
       "confidence": "high",
       "source": "https://straddiebrewing.com.au/news/beach-cleanup/",
       "notes": "The national date is confirmed for 1 March 2026. Whether the island runs registered sites every year, and how many, was not confirmed. Luke's events engine records island-wide registration points for 1 March 2026."
@@ -945,7 +1042,14 @@
       ],
       "revenue_to": [],
       "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0.6, 1.0, 0.9, 0.6, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-      "weather_sensitivity": { "rain": 0.7, "wind": 0.1, "swell": 0.0, "heat": 0.5, "cancels_if": "Rain, or a total fire ban if the work involves machinery." },
+      "weather_sensitivity": {
+        "rain": 0.7, "wind": 0.1, "swell": 0.0, "heat": 0.5,
+        "cancels_if": "Rain, or a total fire ban if the work involves machinery.",
+        "called_off_when": [
+          { "driver": "rain", "over": 3, "effect": "called-off", "says": "rain, and nobody plants in it" },
+          { "driver": "fire-ban", "not_evaluated": "Two reasons, and both are honest gaps rather than modelling choices. src/systems/environment/fire.js is not written, so nothing in this build declares a fire ban. And the weather system's own fire danger index never leaves Moderate across a sim-year, so even a threshold on that would not fire. Recorded here so the gap is visible instead of looking like a rule that holds." }
+        ]
+      },
       "confidence": "low",
       "source": "general knowledge, plus the presence of Point Lookout Bushcare and Friends of Stradbroke Island in `data/businesses.json`",
       "notes": "Included because the brief asked for it and because the simulation needs a volunteer-labour rhythm. The frequency is invented as a modelling default and must be replaced with the real calendar before anything is shown to a player as fact."
@@ -1044,7 +1148,14 @@
         { "business_id": "stradbroke-cab-service", "effect": "medium" }
       ],
       "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.5, 0.8, 1.0, 0.95, 0.8, 0.6, 0.35, 0.15, 0.05, 0, 0, 0] },
-      "weather_sensitivity": { "rain": 0.3, "wind": 0.3, "swell": 0.2, "heat": 0.1, "cancels_if": "A water taxi cancellation removes the mainland half of the crowd." },
+      "weather_sensitivity": {
+        "rain": 0.3, "wind": 0.3, "swell": 0.2, "heat": 0.1,
+        "cancels_if": "A water taxi cancellation removes the mainland half of the crowd.",
+        "called_off_when": [
+          { "driver": "crossing", "state": "cancelled", "effect": "shortened", "reduce_to": 0.5, "says": "the water taxis are off, so the mainland half of the crowd is not here" }
+        ],
+        "note": "The sentence says removes half the crowd, not cancels, so this thins the night rather than ending it."
+      },
       "confidence": "medium",
       "source": "https://littleshipclub.com.au/whats-on/social-calendar/",
       "notes": "Named events confirmed from Luke's events engine and the club's own listings: Arthur Mobsby Seafood Spectacular (17 January 2026), Pig Day Out (27 June 2026), The Australian Eagles Show (6 June 2026). Whether each recurs annually is not established, so they are folded into one recurring social record rather than claimed as fixtures."
@@ -1070,6 +1181,9 @@
           "A disputed A$4,948 ground maintenance bill for fertilising and watering the field after the event."
         ],
         "council_position": "Redland City Council stated its approvals required external providers for traffic and security management.",
+        "where_it_went": "The festival did not stop; it left. Later editions have been staged off the island, and the festival's own site lists a 2026 edition on the Sunshine Coast. That is the honest shape of this record: an island lost an event to its own cost of hosting, and the event is fine.",
+        "where_it_went_confidence": "medium",
+        "where_it_went_source": "https://www.islandvibe.com.au/",
         "source": "https://redlandbaysidenews.com.au/island-vibe-festival-ends/"
       },
       "typical_hours": { "start": "11:00", "end": "23:00", "basis": "estimate" },
@@ -1258,6 +1372,493 @@
       "weather_sensitivity": { "rain": 0.2, "wind": 0.1, "swell": 0.2, "heat": 0.1, "cancels_if": null, "note": "The one weather event that genuinely changes this season is a cyclone or an east coast low closing the crossing." },
       "confidence": "high",
       "source": "https://education.qld.gov.au/about-us/calendar/term-dates"
+    },
+    {
+      "id": "stradbroke-hotel-live-music",
+      "name": "Live music at the Stradbroke Hotel",
+      "also_known_as": ["the Straddie Hotel", "the pub"],
+      "status": "current",
+      "category": "live-music",
+      "organiser": "Stradbroke Island Beach Hotel",
+      "organiser_business_id": "stradbroke-island-beach-hotel",
+      "description": "The island has one hotel and it publishes live music on a Friday and a Sunday, above Cylinder Beach. It is the default answer to what is on tonight for anybody staying at Point Lookout, and it is the reason the last water taxi and the pub's closing time are two different conversations. Nothing here is ticketed and no line-up is recorded in this pack: the venue publishes the pattern, not a year of names.",
+      "date_rule": {
+        "kind": "weekly",
+        "weekdays": ["friday", "sunday"],
+        "duration_days": 1,
+        "note": "The venue publishes live music on Fridays and Sundays with a rotating line-up. Which act plays on which night is not recorded here."
+      },
+      "next_known": null,
+      "typical_hours": {
+        "start": "16:00",
+        "end": "20:30",
+        "basis": "estimate",
+        "note": "Bounded by the hotel's published trading hours, which end at 9pm."
+      },
+      "place_ids": ["point-lookout"],
+      "place_note": "The hotel sits above Cylinder Beach on East Coast Road.",
+      "attendance": {
+        "low": 60,
+        "typical": 180,
+        "high": 450,
+        "basis": "estimate",
+        "confidence": "low",
+        "note": "The high figure is a school-holiday Sunday. No venue capacity is published."
+      },
+      "archetype_mix": { "holiday-house": 0.35, "resident": 0.25, "camper": 0.15, "day-tripper-vehicle": 0.15, "backpacker": 0.1 },
+      "needs": {
+        "parking_spaces": 70,
+        "toilets_extra": 0,
+        "traffic_management": "none published. East Coast Road carries the arrivals and the departures on its own.",
+        "ferry_capacity": "none of its own: this crowd is already on the island",
+        "basis": "estimate"
+      },
+      "strains": [
+        {
+          "system": "parking",
+          "level": 2,
+          "note": "A Sunday afternoon at the pub and a Sunday afternoon at Cylinder Beach want the same kerb."
+        },
+        {
+          "system": "roads",
+          "level": 2,
+          "note": "People drive home from this in the dark on a road with koalas on it. data/ecology.json carries the strike record."
+        },
+        {
+          "system": "noise",
+          "level": 2,
+          "note": "The nearest houses are within earshot, and this is a residential street as well as a tourist one."
+        },
+        { "system": "emergency-services", "level": 1 }
+      ],
+      "revenue_to": [
+        { "business_id": "stradbroke-island-beach-hotel", "effect": "high" },
+        { "business_id": "point-lookout-roadhouse", "effect": "low", "note": "The late feed on the way home." }
+      ],
+      "crowd_curve": {
+        "basis": "estimate",
+        "note": "Builds through the afternoon and empties at the hotel's published close.",
+        "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.25, 0.3, 0.4, 0.6, 0.85, 1, 0.9, 0.6, 0.15, 0, 0, 0]
+      },
+      "weather_sensitivity": {
+        "rain": 0.15,
+        "wind": 0.05,
+        "swell": 0,
+        "heat": 0.05,
+        "cancels_if": null,
+        "note": "A wet afternoon moves this crowd indoors rather than away, which is the opposite of every beach event in this pack."
+      },
+      "confidence": "high",
+      "source": "https://moretonhospitality.com.au/venue/the-straddie-hotel/",
+      "notes": "A second listing gives the same pattern: https://stradbrokeisland.com/the-beach-hotel-stradbroke-island/. Trading hours are published as 11am to 9pm, seven days."
+    },
+    {
+      "id": "little-ship-club-saturday-live-music",
+      "name": "Saturday live music at the Little Ship Club",
+      "status": "current",
+      "category": "live-music",
+      "organiser": "Little Ship Club",
+      "organiser_business_id": "little-ship-club",
+      "description": "The club states that live music is on most Saturdays, on the Dunwich waterfront. It is a members and guests room rather than a public venue, which is why its crowd behaves differently from the pub's: people arrive by boat as well as by car, and a share of them sleep on the water.",
+      "date_rule": {
+        "kind": "weekly",
+        "weekday": "saturday",
+        "duration_days": 1,
+        "note": "The club's own words are \"most Saturdays\", not every Saturday. The simulation runs it weekly and this note is the caveat."
+      },
+      "next_known": null,
+      "typical_hours": { "start": "17:00", "end": "21:00", "basis": "estimate" },
+      "place_ids": ["dunwich"],
+      "place_note": "The club is on the Dunwich foreshore beside the One Mile.",
+      "attendance": { "low": 40, "typical": 110, "high": 260, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "resident": 0.4, "holiday-house": 0.2, "boatie": 0.2, "day-tripper-walkon": 0.12, "day-tripper-vehicle": 0.08 },
+      "needs": {
+        "parking_spaces": 45,
+        "toilets_extra": 0,
+        "ferry_capacity": "the walk-on crowd needs a seat on the last water taxi, which leaves before the music does",
+        "basis": "estimate"
+      },
+      "strains": [
+        {
+          "system": "ferry-passenger",
+          "level": 2,
+          "note": "A Saturday night act finishes after the last sailing. Anybody who came over for it is staying over, or was never going home."
+        },
+        { "system": "parking", "level": 1 },
+        { "system": "emergency-services", "level": 1 }
+      ],
+      "revenue_to": [
+        { "business_id": "little-ship-club", "effect": "high" },
+        { "business_id": "straddie-brewing-co", "effect": "low" }
+      ],
+      "crowd_curve": {
+        "basis": "estimate",
+        "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.15, 0.2, 0.35, 0.6, 0.9, 1, 0.85, 0.5, 0.2, 0.05, 0]
+      },
+      "weather_sensitivity": {
+        "rain": 0.1,
+        "wind": 0.25,
+        "swell": 0.1,
+        "heat": 0.05,
+        "cancels_if": null,
+        "note": "Wind matters here in a way it does not at the pub, because a fifth of this crowd crosses the bay in its own boat."
+      },
+      "confidence": "high",
+      "source": "https://littleshipclub.com.au/whats-on/",
+      "notes": "The club also publishes a social calendar and a cruising calendar, neither of which could be read as a dated list. The monthly record `little-ship-club-social-events` carries those and this record carries the weekly music."
+    },
+    {
+      "id": "bowls-club-friday-steak-date",
+      "name": "Spike's Friday's Steak Date",
+      "status": "current",
+      "category": "club-night",
+      "organiser": "Point Lookout Bowls Club",
+      "organiser_business_id": "point-lookout-bowls-club",
+      "description": "The club's standing Friday deal, in its own words: a 250g rump steak, Carlsberg stubby and good Friday vibes for $30, every Friday lunchtime. Published as a standing deal rather than as an event. It is in this pack because on this island a fixed weekly price at the only bowls club is a calendar entry: it is what a lot of people do on a Friday, and it is one of the few real A$ figures anywhere in this pack.",
+      "date_rule": { "kind": "weekly", "weekday": "friday", "duration_days": 1 },
+      "next_known": null,
+      "typical_hours": {
+        "start": "11:30",
+        "end": "14:00",
+        "basis": "estimate",
+        "note": "The club publishes the deal as \"every Friday lunchtime\" and publishes no start or finish time for it. Its published Friday trading is 10am to 10pm. These two hours are a modelled lunch sitting inside that, not a published sitting."
+      },
+      "place_ids": ["point-lookout-bowls-club", "point-lookout"],
+      "place_note": "The bowls club greens sit behind the Point Lookout shops.",
+      "attendance": {
+        "low": 20,
+        "typical": 55,
+        "high": 130,
+        "basis": "estimate",
+        "confidence": "low",
+        "note": "The high figure is a school-holiday Friday."
+      },
+      "archetype_mix": { "resident": 0.55, "holiday-house": 0.25, "camper": 0.1, "day-tripper-vehicle": 0.1 },
+      "needs": { "parking_spaces": 25, "toilets_extra": 0, "basis": "estimate" },
+      "strains": [
+        { "system": "parking", "level": 1 },
+        {
+          "system": "staffing",
+          "level": 2,
+          "note": "One kitchen, one lunchtime, and a hospitality labour market that src/systems/economy/jobs.js models as the tightest on the island."
+        }
+      ],
+      "revenue_to": [
+        { "business_id": "point-lookout-bowls-club", "effect": "high", "note": "A$30 a head, published." }
+      ],
+      "crowd_curve": {
+        "basis": "estimate",
+        "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.6, 1, 0.8, 0.35, 0.15, 0.1, 0.05, 0, 0, 0, 0, 0, 0]
+      },
+      "weather_sensitivity": { "rain": 0.1, "wind": 0, "swell": 0, "heat": 0.05, "cancels_if": null },
+      "confidence": "high",
+      "source": "https://www.pointlookoutbowlsclub.com.au/",
+      "notes": "Corrected 10 August 2026. This record was previously called \"Friday Reef and Beef at the Point Lookout Bowls Club\" and gave its hours a basis of \"published trading hours\". Both were wrong. The club calls the weekly deal Spike's Friday's Steak Date; Reef and Beef at this club is a bowls tournament, which is a different thing and is in `left_out` under that name. The club publishes no time for the meal, so the sitting is an estimate and now says so. The club publishes its trading hours as closed Monday, 4pm to 9.30pm Tuesday, 11am to 10pm Wednesday, 11am to 10.30pm Thursday, 10am to 10pm Friday, 10am to 11pm Saturday and 8am to 9pm Sunday. Those belong in data/businesses.json rather than here and are recorded in this note so the hours slice can pick them up. The club's other published standing deals are a Sunday social bowls session from 4pm, a happy hour and $15 sunset cocktails from 5pm to 7pm; the Sunday one is in this pack as its own record and the two drink deals are trading terms rather than calendar entries."
+    },
+    {
+      "id": "arthur-mobsby-seafood-spectacular",
+      "name": "Arthur Mobsby Seafood Spectacular",
+      "status": "unconfirmed",
+      "category": "food-community",
+      "organiser": "Little Ship Club",
+      "organiser_business_id": "little-ship-club",
+      "description": "A named seafood fundraiser on the Dunwich waterfront in the middle of the summer holidays, when the island is at its fullest and the club is the only room big enough. It is named for a person, which usually means an annual memorial event, but no source states that it recurs and this pack does not assume it.",
+      "date_rule": {
+        "kind": "irregular",
+        "window_months": [1],
+        "duration_days": 1,
+        "note": "One recorded date, 17 January 2026. Whether it runs every January is not established."
+      },
+      "next_known": {
+        "start": "2026-01-17",
+        "end": "2026-01-17",
+        "confidence": "medium",
+        "source": "repo:quandamooka-country-events-engine/assets/site-data.js (public event atlas, last public search 3 July 2026, dataStatus \"Draft event atlas. Confirm dates, permissions and contacts with the responsible source before use.\")"
+      },
+      "typical_hours": { "start": "12:00", "end": "17:00", "basis": "estimate" },
+      "place_ids": ["dunwich"],
+      "attendance": { "low": 80, "typical": 220, "high": 450, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "resident": 0.35, "holiday-house": 0.3, "boatie": 0.15, "day-tripper-walkon": 0.1, "day-tripper-vehicle": 0.1 },
+      "needs": {
+        "parking_spaces": 90,
+        "toilets_extra": 2,
+        "waste_extra_bins": 6,
+        "ferry_capacity": "inside the summer peak, so it competes for seats that are already scarce",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "parking", "level": 2 },
+        {
+          "system": "waste",
+          "level": 2,
+          "note": "Seafood waste in January heat is a different waste problem from paper cups."
+        },
+        { "system": "ferry-passenger", "level": 2 }
+      ],
+      "revenue_to": [
+        { "business_id": "little-ship-club", "effect": "high" },
+        { "business_id": "sealink-south-east-queensland", "effect": "low" }
+      ],
+      "crowd_curve": {
+        "basis": "estimate",
+        "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.3, 0.8, 1, 0.95, 0.7, 0.45, 0.2, 0.05, 0, 0, 0, 0, 0]
+      },
+      "weather_sensitivity": { "rain": 0.4, "wind": 0.2, "swell": 0.1, "heat": 0.2, "cancels_if": null },
+      "confidence": "medium",
+      "source": "repo:quandamooka-country-events-engine/assets/site-data.js (public event atlas, last public search 3 July 2026, dataStatus \"Draft event atlas. Confirm dates, permissions and contacts with the responsible source before use.\")",
+      "notes": "Listed in the owner's public event atlas against a Stradbroke Island visitor listing and the club. The atlas publishes its own status as a draft, so this record carries that through rather than computing a confidence of its own."
+    },
+    {
+      "id": "pig-day-out",
+      "name": "Pig Day Out",
+      "status": "unconfirmed",
+      "category": "community",
+      "organiser": "Little Ship Club",
+      "organiser_business_id": "little-ship-club",
+      "description": "A daytime family event on the club lawn at Dunwich in the winter school holidays. Recorded here for its shape rather than its name: a free or cheap daytime thing at a waterfront club, in the one week of winter when the island has children in it who are not at school.",
+      "date_rule": {
+        "kind": "irregular",
+        "window_months": [6],
+        "duration_days": 1,
+        "note": "One recorded date, 27 June 2026. No recurrence is claimed."
+      },
+      "next_known": {
+        "start": "2026-06-27",
+        "end": "2026-06-27",
+        "confidence": "medium",
+        "source": "repo:quandamooka-country-events-engine/assets/site-data.js (public event atlas, last public search 3 July 2026, dataStatus \"Draft event atlas. Confirm dates, permissions and contacts with the responsible source before use.\")"
+      },
+      "typical_hours": { "start": "11:00", "end": "16:00", "basis": "estimate" },
+      "place_ids": ["dunwich"],
+      "attendance": { "low": 60, "typical": 180, "high": 400, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "resident": 0.45, "holiday-house": 0.25, "day-tripper-vehicle": 0.15, "day-tripper-walkon": 0.1, "boatie": 0.05 },
+      "needs": { "parking_spaces": 70, "toilets_extra": 2, "waste_extra_bins": 4, "basis": "estimate" },
+      "strains": [
+        { "system": "parking", "level": 2 },
+        { "system": "waste", "level": 1 }
+      ],
+      "revenue_to": [
+        { "business_id": "little-ship-club", "effect": "high" }
+      ],
+      "crowd_curve": {
+        "basis": "estimate",
+        "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.5, 0.9, 1, 0.9, 0.6, 0.25, 0.05, 0, 0, 0, 0, 0, 0]
+      },
+      "weather_sensitivity": { "rain": 0.5, "wind": 0.2, "swell": 0, "heat": 0.05, "cancels_if": null },
+      "confidence": "medium",
+      "source": "repo:quandamooka-country-events-engine/assets/site-data.js (public event atlas, last public search 3 July 2026, dataStatus \"Draft event atlas. Confirm dates, permissions and contacts with the responsible source before use.\")"
+    },
+    {
+      "id": "tones-and-tides",
+      "name": "Tones and Tides",
+      "status": "unconfirmed",
+      "category": "music-arts",
+      "organiser": "listed under Redlands Coast",
+      "organiser_business_id": null,
+      "description": "A small ticketed concert series that plays both of the island's community halls in the same fortnight, Dunwich and then Point Lookout. It is the clearest example in this pack of an event sized to a hall rather than to a beach: a hundred seats, no car park problem, and an audience that is mostly already here.",
+      "date_rule": {
+        "kind": "irregular",
+        "window_months": [6, 7],
+        "duration_days": 1,
+        "note": "Two recorded 2026 dates, Dunwich on 28 June and Point Lookout on 4 July. Whether the series returns is not established."
+      },
+      "next_known": {
+        "start": "2026-07-04",
+        "end": "2026-07-04",
+        "confidence": "medium",
+        "source": "repo:quandamooka-country-events-engine/assets/site-data.js (public event atlas, last public search 3 July 2026, dataStatus \"Draft event atlas. Confirm dates, permissions and contacts with the responsible source before use.\")"
+      },
+      "typical_hours": { "start": "18:00", "end": "21:00", "basis": "estimate" },
+      "place_ids": ["point-lookout", "dunwich"],
+      "place_note": "Point Lookout Community Hall for the second date, Dunwich Community Hall for the first.",
+      "attendance": {
+        "low": 40,
+        "typical": 100,
+        "high": 180,
+        "basis": "estimate",
+        "confidence": "low",
+        "note": "Bounded by the hall, not by demand. No hall capacity figure is published for either."
+      },
+      "archetype_mix": {
+        "resident": 0.4,
+        "holiday-house": 0.3,
+        "day-tripper-vehicle": 0.15,
+        "crew-and-official": 0.1,
+        "day-tripper-walkon": 0.05
+      },
+      "needs": {
+        "parking_spaces": 40,
+        "toilets_extra": 0,
+        "power": "hall supply, no generator",
+        "ferry_capacity": "an evening event on an island whose last public sailing is before the encore",
+        "basis": "estimate"
+      },
+      "strains": [
+        {
+          "system": "ferry-passenger",
+          "level": 2,
+          "note": "Anybody who comes for this from the mainland is staying the night. That is the whole economics of an evening event here."
+        },
+        { "system": "parking", "level": 1 }
+      ],
+      "revenue_to": [
+        { "business_id": "point-lookout-community-hall", "effect": "medium" },
+        { "business_id": "stradbroke-island-beach-hotel", "effect": "low", "note": "After the Point Lookout night." }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.4, 1, 1, 0.8, 0.2, 0, 0] },
+      "weather_sensitivity": {
+        "rain": 0.1,
+        "wind": 0.05,
+        "swell": 0,
+        "heat": 0,
+        "cancels_if": null,
+        "note": "Indoors. The weather reaches this only through the crossing."
+      },
+      "confidence": "medium",
+      "source": "repo:quandamooka-country-events-engine/assets/site-data.js (public event atlas, last public search 3 July 2026, dataStatus \"Draft event atlas. Confirm dates, permissions and contacts with the responsible source before use.\")"
+    },
+    {
+      "id": "goompi-heritage-walk",
+      "name": "Goompi / Dunwich Heritage Walk",
+      "status": "unconfirmed",
+      "category": "heritage",
+      "organiser": "North Stradbroke Island Museum on Minjerribah",
+      "organiser_business_id": "nsi-museum-on-minjerribah",
+      "description": "A guided walk advertised by the island museum, starting from the museum at Dunwich. This project holds the date, the size of the group and where they walk, and holds nothing at all about what is said on it.",
+      "date_rule": {
+        "kind": "irregular",
+        "window_months": [5],
+        "duration_days": 1,
+        "note": "One recorded date, 15 May 2026. No recurrence is claimed."
+      },
+      "next_known": {
+        "start": "2026-05-15",
+        "end": "2026-05-15",
+        "confidence": "medium",
+        "source": "repo:quandamooka-country-events-engine/assets/site-data.js (public event atlas, last public search 3 July 2026, dataStatus \"Draft event atlas. Confirm dates, permissions and contacts with the responsible source before use.\")"
+      },
+      "typical_hours": { "start": "10:00", "end": "12:00", "basis": "estimate" },
+      "place_ids": ["dunwich"],
+      "attendance": {
+        "low": 8,
+        "typical": 25,
+        "high": 50,
+        "basis": "estimate",
+        "confidence": "low",
+        "note": "A guided walk is bounded by how many people one guide can be heard by."
+      },
+      "archetype_mix": { "day-tripper-walkon": 0.4, "resident": 0.25, "holiday-house": 0.2, "day-tripper-vehicle": 0.15 },
+      "needs": { "parking_spaces": 8, "toilets_extra": 0, "basis": "estimate" },
+      "strains": [
+        { "system": "parking", "level": 1 }
+      ],
+      "revenue_to": [
+        { "business_id": "nsi-museum-on-minjerribah", "effect": "medium" }
+      ],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 1, 1, 0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+      "weather_sensitivity": {
+        "rain": 0.6, "wind": 0.1, "swell": 0, "heat": 0.2,
+        "cancels_if": "Heavy rain. It is a walk.",
+        "called_off_when": [
+          { "driver": "rain", "over": 5, "effect": "called-off", "says": "heavy rain, and it is a walk" }
+        ]
+      },
+      "cultural_handling": "Held as civic load only: the date, the group size and the starting point. The history of this township includes the protection era and the Benevolent Asylum, which docs/CULTURAL-REVIEW.md B5 holds open. No route, no stops, no interpretation and no content is recorded here or generated anywhere.",
+      "confidence": "medium",
+      "source": "repo:quandamooka-country-events-engine/assets/site-data.js (public event atlas, last public search 3 July 2026, dataStatus \"Draft event atlas. Confirm dates, permissions and contacts with the responsible source before use.\")"
+    },
+    {
+      "id": "redlands-coast-gallery-and-museum-hop",
+      "name": "Redlands Coast Gallery and Museum Hop",
+      "status": "unconfirmed",
+      "category": "arts",
+      "organiser": "listed under Visit Redlands Coast",
+      "organiser_business_id": null,
+      "description": "A weekend where the mainland galleries and the island museums are programmed as one trail. It matters to this island for one reason and it is a transport reason: it is a mainland-organised event that puts mainland visitors on the first boat, and the island end of it has two rooms and a car park.",
+      "date_rule": {
+        "kind": "irregular",
+        "window_months": [5],
+        "duration_days": 2,
+        "note": "One recorded weekend, 23 and 24 May 2026. No recurrence is claimed."
+      },
+      "next_known": {
+        "start": "2026-05-23",
+        "end": "2026-05-24",
+        "confidence": "medium",
+        "source": "repo:quandamooka-country-events-engine/assets/site-data.js (public event atlas, last public search 3 July 2026, dataStatus \"Draft event atlas. Confirm dates, permissions and contacts with the responsible source before use.\")"
+      },
+      "typical_hours": { "start": "10:00", "end": "16:00", "basis": "estimate" },
+      "place_ids": ["dunwich"],
+      "place_note": "The island stops are at Dunwich. The rest of the trail is on the mainland and is not modelled.",
+      "attendance": {
+        "low": 30,
+        "typical": 90,
+        "high": 200,
+        "basis": "estimate",
+        "confidence": "low",
+        "note": "The island's share only, not the whole trail."
+      },
+      "archetype_mix": { "day-tripper-walkon": 0.45, "day-tripper-vehicle": 0.25, "resident": 0.15, "holiday-house": 0.15 },
+      "needs": {
+        "parking_spaces": 25,
+        "toilets_extra": 0,
+        "ferry_capacity": "about 60 extra one-way walk-on seats across the two mornings",
+        "basis": "estimate"
+      },
+      "strains": [
+        { "system": "ferry-passenger", "level": 1 },
+        { "system": "parking", "level": 1 }
+      ],
+      "revenue_to": [
+        { "business_id": "nsi-museum-on-minjerribah", "effect": "high" },
+        { "business_id": "sealink-south-east-queensland", "effect": "low" }
+      ],
+      "crowd_curve": {
+        "basis": "estimate",
+        "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.4, 0.8, 1, 0.9, 0.85, 0.6, 0.3, 0.1, 0, 0, 0, 0, 0, 0, 0]
+      },
+      "weather_sensitivity": { "rain": 0.25, "wind": 0.2, "swell": 0.1, "heat": 0.05, "cancels_if": null },
+      "confidence": "medium",
+      "source": "repo:quandamooka-country-events-engine/assets/site-data.js (public event atlas, last public search 3 July 2026, dataStatus \"Draft event atlas. Confirm dates, permissions and contacts with the responsible source before use.\")"
+    },
+    {
+      "id": "emergency-preparedness-workshop",
+      "name": "Australian Red Cross EmergencyRedi workshop",
+      "status": "unconfirmed",
+      "category": "preparedness",
+      "organiser": "Australian Red Cross",
+      "organiser_business_id": null,
+      "description": "A free preparedness workshop at the Dunwich Community Hall. Thirty people in a hall is nothing on a crowd curve and it is the single most consequential entry in this pack, because this is an island whose disaster plan turns on the crossing being closed and on residents having planned for it. The simulation carries it as civic load; whether it changes how a household behaves in a cyclone scenario is a question for the disaster layer, not for this record.",
+      "date_rule": {
+        "kind": "irregular",
+        "window_months": [6],
+        "duration_days": 1,
+        "note": "One recorded date, 17 June 2026. Red Cross runs these across Queensland on request rather than on a calendar."
+      },
+      "next_known": {
+        "start": "2026-06-17",
+        "end": "2026-06-17",
+        "confidence": "medium",
+        "source": "repo:quandamooka-country-events-engine/assets/site-data.js (public event atlas, last public search 3 July 2026, dataStatus \"Draft event atlas. Confirm dates, permissions and contacts with the responsible source before use.\")"
+      },
+      "typical_hours": { "start": "10:00", "end": "12:30", "basis": "estimate" },
+      "place_ids": ["dunwich"],
+      "attendance": { "low": 8, "typical": 30, "high": 70, "basis": "estimate", "confidence": "low" },
+      "archetype_mix": { "resident": 0.85, "holiday-house": 0.1, "crew-and-official": 0.05 },
+      "needs": { "parking_spaces": 12, "toilets_extra": 0, "basis": "estimate" },
+      "strains": [
+        {
+          "system": "volunteers",
+          "level": 1,
+          "note": "The people who turn up to this are mostly the people already on the SES and the surf club roster."
+        }
+      ],
+      "revenue_to": [],
+      "crowd_curve": { "basis": "estimate", "hours": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0.3, 1, 1, 0.6, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+      "weather_sensitivity": { "rain": 0.05, "wind": 0, "swell": 0, "heat": 0, "cancels_if": null },
+      "confidence": "medium",
+      "source": "repo:quandamooka-country-events-engine/assets/site-data.js (public event atlas, last public search 3 July 2026, dataStatus \"Draft event atlas. Confirm dates, permissions and contacts with the responsible source before use.\")",
+      "notes": "The island's hazard picture, activation levels and evacuation arrangements are in the Redland City local disaster management plan, which docs/SOURCES.md names as the best single source for a disaster scenario and which no wave has read yet."
     }
   ],
   "periods": [
@@ -1362,6 +1963,76 @@
       "source": "https://www.redlandcitybulletin.com.au/story/6135798/jessica-mauboy-headlines-straddies-quandamooka-festival-line-up/",
       "cultural_handling": "The published season includes named ceremony days at specific places. Those names, their meanings and their protocols are not written into this pack and must not be generated into the world. They are a QYAC matter. Logged in `docs/CULTURAL-REVIEW.md`.",
       "notes": "The June to August season description comes from a report on an earlier festival year, not from a current QYAC source. Treat as low confidence until QYAC's own program is read."
+    },
+    {
+      "id": "planned-burn-season",
+      "name": "The planned burn season",
+      "kind": "operational-season",
+      "description": "Hazard reduction burning on Minjerribah runs across the cooler and drier months and is publicly notified. Reporting on the island programme describes it as led by the Quandamooka Yoolooburrabee Aboriginal Corporation, with Redland City Council, the Queensland Fire Department, Seqwater and Queensland Parks and Wildlife Service running coordinated burning and fire lines across the wider region. Residents in an affected area are notified before a burn, and properties adjoining a burn area get a letterbox drop. What this pack holds is the season, the notification, the smoke and the closures.",
+      "occurrences_2026": [
+        {
+          "start": "2026-03-01",
+          "end": "2026-09-30",
+          "label": "2026 season",
+          "confidence": "medium",
+          "note": "The months are the regional pattern reported for the programme, not a published island burn calendar. Individual burn dates are notified close to the day and are deliberately not modelled as dates."
+        }
+      ],
+      "place_ids": ["naree-budjong-djara-national-park", "dunwich", "point-lookout", "amity-point"],
+      "strains": [
+        {
+          "system": "air-quality",
+          "level": 3,
+          "note": "Smoke over a township is the part of this that residents who are not near the fire still experience. src/systems/ecology/vegetation.js emits it and src/systems/civic/sentiment.js already listens."
+        },
+        {
+          "system": "roads",
+          "level": 2,
+          "note": "Track and road closures while a burn is active, on an island with one road spine."
+        },
+        { "system": "emergency-services", "level": 2 },
+        {
+          "system": "tourism-operators",
+          "level": 2,
+          "note": "A smoke day and a beach day are the same day for anybody who has already paid for the ferry."
+        }
+      ],
+      "cultural_handling": "Land management that is publicly reported, and nothing else. The knowledge behind fire practice on this Country is not held in this project, is not modelled, and is not this project's to hold. docs/CULTURAL-REVIEW.md B12 is the open question and it stays open.",
+      "confidence": "medium",
+      "source": "https://www.redland.qld.gov.au/PlannedBurns",
+      "reporting_source": "https://www.redlandcitybulletin.com.au/story/6772495/planned-burns-to-kick-off-on-straddie/",
+      "notes": "data/ecology.json proc-fire-regime and data/civic.json planned-burn-extent already carry the ecological and civic sides of this. This record exists so the calendar carries the season a resident actually plans around: the months when a still, clear autumn morning is also a smoke morning."
+    },
+    {
+      "id": "island-builder-shutdown",
+      "name": "The builders' summer shutdown",
+      "kind": "operational-season",
+      "description": "From about the third week of December to about the third week of January the island's trades stop, because the owners are in the houses. It is the one period of the year when the busiest island is also the quietest work site, and it is why a repair that could have been done in November is done in February. The simulation has modelled this since the residents slice was built; this record puts it on the calendar where a player can see it.",
+      "occurrences_2026": [
+        {
+          "start": "2026-12-18",
+          "end": "2027-01-20",
+          "label": "2026 to 2027 shutdown",
+          "load_multiplier": 1,
+          "confidence": "medium",
+          "note": "The dates are the rule the simulation already uses. No trade association publishes an island shutdown calendar."
+        }
+      ],
+      "strains": [
+        {
+          "system": "staffing",
+          "level": 3,
+          "note": "Maintenance backlogs land in February, on the same crews, at the same time as the post-summer repairs."
+        },
+        {
+          "system": "ferry-vehicle",
+          "level": 2,
+          "note": "The trades vehicles come off the barge for a month, which is the only thing that makes the summer deck survivable."
+        }
+      ],
+      "confidence": "medium",
+      "source": "data/residents.json occupations.island-builder-carpenter",
+      "notes": "Carried in src/systems/agents/calendar.js as `isBuilderShutdown` and read by the jobs and businesses systems."
     }
   ],
   "rhythms": [
@@ -1565,6 +2236,63 @@
       "confidence": "low",
       "source": "https://stradbrokeisland.com/waste-transfer-station/",
       "notes": "No public data on the waste removal schedule, tonnage, barge slot allocation or the facility's capacity was found. This is the largest unfilled gap in the pack for anyone modelling event load honestly."
+    },
+    {
+      "id": "council-meeting-cycle",
+      "name": "The council meeting",
+      "kind": "council-service",
+      "description": "The decisions this island lives with are taken in a chamber on the mainland. Redland City Council holds its general meeting monthly, on a Wednesday, from 9.30am, in the council chambers on Bloomfield Street at Cleveland. For an islander who wants to be in the room rather than watching the webcast, that is a 6.30am water taxi, a bus, a morning in a public gallery and an afternoon boat home: a whole working day for one agenda item. That asymmetry is the single most island-specific fact about how this place is governed, and it is why the civic board in this build cares so much about who decides.",
+      "cycle": {
+        "kind": "monthly",
+        "weekday": "wednesday",
+        "start_time": "09:30",
+        "venue": "Council chambers, Administration Building, Bloomfield Street, Cleveland",
+        "islander_day": { "ferry_out_approx": "06:30", "ferry_back_approx": "15:30", "hours_gone": 10 },
+        "basis": "The weekday, the time and the venue are published. Two 2026 general meetings were observed on Wednesday 15 April and Wednesday 20 May, which is a third Wednesday and then a third Wednesday, but the council publishes a schedule rather than a rule and the rule was not read."
+      },
+      "affects": ["dunwich-ferry-terminal", "dunwich"],
+      "strains": [
+        {
+          "system": "household-time",
+          "level": 3,
+          "note": "A day of leave to speak for three minutes. This is the reason island deputations are rarer than mainland ones and it is not apathy."
+        },
+        { "system": "ferry-passenger", "level": 1 }
+      ],
+      "sim_hint": "A consultation that closes the day after a general meeting, and a general meeting that lands on a day the crossing is cancelled, are two civic failures this island can actually have. src/systems/civic/consultation.js owns the first and src/systems/movement/ferry.js already produces the second.",
+      "confidence": "medium",
+      "source": "https://www.redland.qld.gov.au/About-Council/Council-meetings/Council-meeting-schedule",
+      "notes": "The council publishes agendas, minutes and a webcast. Nothing about the content of any meeting is held in this pack."
+    },
+    {
+      "id": "ferry-peak-and-surcharge",
+      "name": "The peak timetable and the holiday fare",
+      "kind": "transport",
+      "description": "The crossing is not one service all year. On public holidays and through the summer peak the operator publishes a surcharge and runs a peak timetable, so the same trip costs more and the same day has more sailings on it. Published for the 2025 to 2026 summer: a A$20 surcharge on public holidays and across the peak from 22 December to 4 January, and again on 26 January. Every event in this pack that lands on a public holiday inherits this.",
+      "cycle": {
+        "kind": "holiday-linked",
+        "surcharge_a$": 20,
+        "applies_on": ["public holidays", "the published Christmas peak", "26 January"],
+        "published_peak_2025_26": { "start": "2025-12-22", "end": "2026-01-04" },
+        "basis": "The surcharge and the 2025 to 2026 peak dates are published. That the same pattern repeats each year is inferred and is not published."
+      },
+      "affects": ["dunwich-ferry-terminal", "one-mile-jetty", "toondah-harbour"],
+      "strains": [
+        {
+          "system": "ferry-vehicle",
+          "level": 4,
+          "note": "A peak timetable is more sailings on a deck that is already the island's hard ceiling. data/transport.json holds the vessel capacities."
+        },
+        {
+          "system": "household-budget",
+          "level": 2,
+          "note": "A resident crossing on a public holiday pays the visitor's surcharge for the same water."
+        }
+      ],
+      "sim_hint": "The vehicle deck and the walk-on seats in src/systems/movement/ferry.js are built from the timetable variants in data/transport.json. A peak day should select the peak variant and a public holiday should carry the fare, and the calendar already knows which days those are.",
+      "confidence": "medium",
+      "source": "https://www.sealink.com.au/north-stradbroke-island/ferry-information/north-stradbroke-island-ferry-fares/",
+      "notes": "No 2026 to 2027 peak window is published yet. The dates above are last summer's and are labelled as such rather than rolled forward."
     }
   ],
   "left_out": [
@@ -1598,7 +2326,27 @@
     },
     {
       "name": "One-off 2026 listings",
-      "reason": "Luke's events engine carries a number of confirmed one-off 2026 listings: weaving and collage workshops at a Point Lookout studio, Tones and Tides concerts, a Red Cross EmergencyRedi workshop, a youth climate gathering, a ferry party cruise, an art teacher camp, a nature art retreat and a gallery and museum hop. These are real but they are single dates, not calendar rhythms, so they are not modelled here. They live in `quandamooka-country-events-engine/assets/site-data.js` with their sources if a future agent wants a specific 2026 day."
+      "reason": "Revised 10 August 2026. Luke's events engine carries a number of confirmed one-off 2026 listings and the first pass left all of them out on the grounds that a single date is not a calendar rhythm. Four of them are now in this pack, marked `unconfirmed` with an `irregular` date rule, because that combination says exactly what is true: a real event, on one published date, with no recurrence claimed. They are Tones and Tides, the Red Cross EmergencyRedi workshop, the gallery and museum hop and the heritage walk. The ones still left out are listed separately below with their dates, and they all live in `quandamooka-country-events-engine/assets/site-data.js` with their sources."
+    },
+    {
+      "name": "Dunwich State School fete, sports day and under 8s day",
+      "reason": "The brief asked for them. The school's public pages, the Queensland schools directory and the Redlands event listings were searched on 10 August 2026 and none of them publishes a fete, a sports day, a swimming carnival or an under 8s day for this school. Those days exist at almost every state school and they shape a whole morning in a township this size, but a date invented for one would be a date parents would recognise as wrong. The school year itself is in `reference_2026` and the daily shape is in the `school-run` rhythm."
+    },
+    {
+      "name": "The golf club's own competition calendar",
+      "reason": "North Stradbroke Island Golf Club publishes that it runs regular tournaments and events and does not publish which day of the week club competition is played on, or a fixture list. The Caxton Classic is in this pack because it is separately listed with a date. Nothing else about the golf year was written."
+    },
+    {
+      "name": "A Reef and Beef bowls competition",
+      "reason": "The owner's public event atlas lists a \"Reef & Beef 2026 Open Competition\" as a weekend bowls tournament at the Point Lookout Bowls Club on 6 and 7 June 2026. Reef and Beef at this club is a bowls tournament: Bowls Queensland lists a 2022 Point Lookout Reef & Beef triples tournament and the club's own pages carry \"Reef n Beef 2024\". No 2026 tournament date could be confirmed from the club itself, so the tournament is not in this pack. Corrected 10 August 2026: the first pass took Reef and Beef to be the name of the club's weekly Friday steak deal and named the weekly record after it. The club calls that deal Spike's Friday's Steak Date, and the record now carries the club's own name for it."
+    },
+    {
+      "name": "A youth gathering advertised on Quandamooka Country",
+      "reason": "A two-day ticketed youth gathering at the Minjerribah Camping ground on 18 and 19 July 2026 appears in the owner's public event atlas from a ticketing platform. The listing names Quandamooka Country in its title and does not name an organiser this project could verify. The events engine's own publication contract says not to treat catalogue data as consent and not to imply an authority that has not been granted, so it is not written into this pack. Logged in docs/CULTURAL-REVIEW.md."
+    },
+    {
+      "name": "Named 2026 one-off listings that are neither annual nor recurring",
+      "reason": "Recorded here with their dates so a later agent does not have to find them again: a weaving and collage workshop series at a Point Lookout studio through May to July 2026, an art teacher camp at the Point Lookout Community Hall on 6 to 8 March 2026, a nature art retreat at Amity Point on 13 to 15 August 2026, and a ticketed ferry party cruise to the Stradbroke Hotel on 25 July 2026. All four are real and sourced in `quandamooka-country-events-engine/assets/site-data.js`. They are single dates rather than calendar rhythms, and the studio and the retreat lodge are not in `data/businesses.json`, so nothing was written that would render a business this project has not checked."
     }
   ],
   "sim_defaults": {
@@ -1607,6 +2355,70 @@
     "attendance_noise": "Apply a deterministic jitter from `world.rng.stream('events')`, plus or minus 20 per cent on `typical`, clamped to the low and high bounds. Never `Math.random`.",
     "weather_coupling": "Multiply attendance by (1 - sensitivity * severity) for each active driver, then apply `cancels_if` as a hard gate.",
     "load_multiplier_application": "Period multipliers multiply the visitor baseline only. They never multiply the resident population.",
-    "strain_to_consequence": "A strain at level 5 should produce a visible failure in the world: a queue that does not clear before the last sailing, a bin that overflows, a car park that turns cars away, a patrol that cannot be filled. If nothing fails at level 5, the number is decoration."
+    "event_visitor_increment": {
+      "about": "How much of an event's on-site crowd would not otherwise have been on the island that day. It is the only number in this pack that the visitor model may add, because everything else about an event is people who were already here standing somewhere different. A day tripper at the markets on a school-holiday Sunday was probably coming anyway; a boardrider from Lennox Head at the October teams event was not.",
+      "applied_to": "attendance.typical, after the weather coupling and the deterministic jitter above",
+      "how": "Sum archetype_mix[a] * by_archetype[a] across the record's mix, unless by_category names the record's category, in which case that value wins outright.",
+      "by_category": { "seasonal-peak": 0 },
+      "by_category_note": "Christmas, Easter and New Year are already the school holiday and long weekend load multipliers that the visitor model has applied since it was written. Counting them again as events would put several thousand people on the island who are already counted.",
+      "by_archetype": {
+        "resident": 0,
+        "competitor": 1,
+        "crew-and-official": 1,
+        "boatie": 0.9,
+        "quandamooka-family": 0.8,
+        "camper": 0.7,
+        "day-tripper-walkon": 0.6,
+        "day-tripper-vehicle": 0.6,
+        "backpacker": 0.4,
+        "holiday-house": 0.4
+      },
+      "default_when_no_mix": 0.5,
+      "stays_overnight": ["holiday-house", "camper", "backpacker", "competitor", "quandamooka-family"],
+      "stays_overnight_note": "These sleep on the island, so on the second and third day of a multi-day event they are already here and are not counted again. Everybody else is a fresh crossing every day. Getting this wrong triples the boat load of every festival in the pack, which is what the first attempt at this did.",
+      "keeping_the_year_honest": "The annual visitor total in data/residents.json is a measured figure that already includes everybody who came for a festival. So the modelled event draw is carved out of that total rather than added on top of it: src/systems/agents/visitors.js sums a year of this increment at boot and takes it off the baseline before calibrating. Adding it on top would make the island's year bigger than the only measured number anybody has published about it.",
+      "basis": "A modelling assumption. Nobody publishes where an event crowd came from. It is written here rather than in code so it can be argued with, and every figure in it is a judgement rather than a measurement."
+    },
+    "strain_to_consequence": "A strain at level 5 should produce a visible failure in the world: a queue that does not clear before the last sailing, a bin that overflows, a car park that turns cars away, a patrol that cannot be filled. If nothing fails at level 5, the number is decoration.",
+    "site_kit": {
+      "about": "What an event puts on the ground. Added 10 August 2026, because until then nothing in this pack was visible out of the window: an island holding fourteen hundred people at a festival looked exactly like the same island on a Tuesday. `src/render/layers/eventsite.js` reads this table and nothing else decides what appears. It lives here rather than in the layer so that anybody who thinks a market does not look like this can say so by editing a number.",
+      "what_is_drawn": "Ordinary hire gear: white pop-up marquees, a stage deck, portable toilets, wheelie bins, plain feather banners and a bunting line. Nothing is branded, nothing carries a design, no signage carries readable text, and nothing cultural is drawn anywhere. A record carrying `cultural_handling` gets the same plain marquees and bins as a footy carnival, because the dates, the crowd, the bins and the ferries are the whole of what this project holds about it. See `data/lore.json` prohibitions.",
+      "scaling": "marquees = round(sqrt(people expected on site at the peak) * marquee_per_sqrt), clamped to min and max. The expected figure is the day's, after the deterministic jitter and after the weather, so a wet market has fewer stalls up than a fine one and a called-off event has none. Toilets and bins are the record's own `needs.toilets_extra` and `needs.waste_extra_bins`, not a number from this table.",
+      "timing": "The kit goes up over `raise_minutes` before the record's own crowd curve first rises above `curve_open`, and comes down over `pack_down_minutes` after it drops back. So a market on a Sunday morning is marquees going up in the half-light and a paddock again by two.",
+      "raise_minutes": 90,
+      "pack_down_minutes": 75,
+      "curve_open": 0.04,
+      "spacing_m": 6.0,
+      "site_radius_m": 46,
+      "distributed_site_radius_m": 90,
+      "max_instances": 420,
+      "basis": "Every number here is a modelling estimate. No event's site plan, marquee count or bump-in time is published for any event on this island.",
+      "by_category": {
+        "market": { "marquee_per_sqrt": 1.0, "min": 6, "max": 28, "stage": false, "banners": 2, "bunting": true, "note": "A row of pop-ups on the grass beside the greens, which is what the fortnightly market is." },
+        "food-community": { "marquee_per_sqrt": 0.8, "min": 6, "max": 30, "stage": true, "banners": 3, "bunting": true },
+        "cultural": { "marquee_per_sqrt": 0.7, "min": 6, "max": 30, "stage": true, "banners": 3, "bunting": true, "note": "Plain hire gear only. Nothing about the programme is held in this project and nothing about it is drawn." },
+        "music-festival": { "marquee_per_sqrt": 0.6, "min": 5, "max": 24, "stage": true, "banners": 3, "bunting": true },
+        "music-arts": { "marquee_per_sqrt": 0.3, "min": 1, "max": 5, "stage": false, "banners": 2, "bunting": false, "note": "Chamber music is indoors in a hall that is already built and already drawn." },
+        "arts": { "marquee_per_sqrt": 0.2, "min": 1, "max": 4, "stage": false, "banners": 3, "bunting": false, "note": "The trail is signage, not a showground. Its crowd is spread over thirty-three stops, so what you see from the air is banners at the townships rather than a marquee field." },
+        "surfing": { "marquee_per_sqrt": 0.6, "min": 3, "max": 14, "stage": false, "banners": 4, "bunting": false, "note": "Contest tents above the high water mark and banners on the sand. No judging tower is drawn, because none is modelled." },
+        "endurance-sport": { "marquee_per_sqrt": 0.5, "min": 3, "max": 12, "stage": false, "banners": 4, "bunting": true },
+        "fishing-competition": { "marquee_per_sqrt": 0.4, "min": 2, "max": 8, "stage": false, "banners": 2, "bunting": false, "note": "The boats are the event and they are out. What is on the ground is the weigh-in." },
+        "sport-fixture": { "marquee_per_sqrt": 0.3, "min": 1, "max": 4, "stage": false, "banners": 1, "bunting": false },
+        "sport-carnival": { "marquee_per_sqrt": 0.6, "min": 4, "max": 16, "stage": false, "banners": 3, "bunting": true },
+        "junior-sport": { "marquee_per_sqrt": 0.5, "min": 2, "max": 8, "stage": false, "banners": 4, "bunting": false, "note": "Nippers is a club tent and beach flags, and the flags move to whichever beach the club picked that morning." },
+        "sport-fundraiser": { "marquee_per_sqrt": 0.3, "min": 1, "max": 4, "stage": false, "banners": 2, "bunting": false },
+        "volunteer-environment": { "marquee_per_sqrt": 0.4, "min": 1, "max": 4, "stage": false, "banners": 2, "bunting": false, "note": "A sign-on table under one marquee and a stack of bags, which is what a clean-up looks like from anywhere." },
+        "community": { "marquee_per_sqrt": 0.6, "min": 3, "max": 12, "stage": false, "banners": 2, "bunting": true },
+        "commemoration": { "marquee_per_sqrt": 0, "min": 0, "max": 0, "stage": false, "banners": 2, "bunting": false, "note": "Anzac Day puts nothing on the ground but people. No marquee is drawn for it and that is the correct picture." },
+        "club-night": { "marquee_per_sqrt": 0, "min": 0, "max": 0, "stage": false, "banners": 1, "bunting": false, "note": "It happens inside a club that is already built and already drawn. A board out the front is the whole of it." },
+        "club-social": { "marquee_per_sqrt": 0, "min": 0, "max": 0, "stage": false, "banners": 1, "bunting": false },
+        "live-music": { "marquee_per_sqrt": 0, "min": 0, "max": 0, "stage": false, "banners": 1, "bunting": false },
+        "community-workshop": { "marquee_per_sqrt": 0, "min": 0, "max": 0, "stage": false, "banners": 1, "bunting": false },
+        "heritage": { "marquee_per_sqrt": 0, "min": 0, "max": 0, "stage": false, "banners": 1, "bunting": false },
+        "preparedness": { "marquee_per_sqrt": 0, "min": 0, "max": 0, "stage": false, "banners": 1, "bunting": false },
+        "seasonal-peak": { "marquee_per_sqrt": 0, "min": 0, "max": 0, "stage": false, "banners": 0, "bunting": false, "toilets": false, "bins": false, "note": "Christmas, Easter and New Year are load periods rather than staged events. Nothing goes on the ground for them, because nobody puts anything on the ground for them." }
+      },
+      "default": { "marquee_per_sqrt": 0.4, "min": 1, "max": 8, "stage": false, "banners": 1, "bunting": false }
+    }
   }
 }

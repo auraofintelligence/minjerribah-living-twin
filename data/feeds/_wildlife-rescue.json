@@ -1,0 +1,892 @@
+{
+  "feed": "wildlife-rescue",
+  "schema": "minjerribah-connector-feed/1",
+  "version": "1.0.0",
+  "title": "Wildlife rescue reports, contacts and lookouts",
+  "organisation": "Wildlife Rescue Minjerribah",
+  "about": "What the island's own wildlife rescue app publishes, read from a local checkout of it. The numbers to ring, the vocabulary the island already uses for animals and what happened to them, the current lookout board, and any case records a coordinator has handed over. Reporter names and phone numbers never enter this repository and coordinates are coarsened before commit.",
+  "sync": {
+    "synced_at": "2026-08-10T05:28:27+10:00",
+    "connector": {
+      "id": "wildlife-rescue",
+      "version": "1.0"
+    },
+    "source": {
+      "kind": "repository",
+      "id": "minjerribah-wildlife-rescue",
+      "path": "C:/Users/sbt41/githublocal/minjerribah-wildlife-rescue",
+      "present": true,
+      "commit": "f23639197bd9eb573365cfb134fa14e326befae9",
+      "commit_date": "2026-07-20",
+      "working_tree": "clean",
+      "files": [
+        "assets/contacts.js",
+        "assets/db.js",
+        "lookouts.json"
+      ]
+    },
+    "source_statement": {
+      "quote": "No server. No accounts. No cost. Records live on each phone; the group chat carries them between phones as plain text.",
+      "locator": "minjerribah-wildlife-rescue/README.md"
+    },
+    "cadence": {
+      "every": "daily while a case is open, otherwise weekly",
+      "run_by": "the rescue coordinator, or whoever holds the group chat",
+      "reason": "A case moves in hours. A koala on the ground at breakfast is in care or dead by lunch, so a weekly sync would put a pin on the map that is wrong more often than right. The reference and contact half of this feed moves once a year and rides along."
+    },
+    "stale_after_days": 7,
+    "inbox": null,
+    "counts": {
+      "contacts": 3,
+      "vocabulary": 37,
+      "lookouts": 0,
+      "cases": 0,
+      "kept": 40,
+      "held": 0,
+      "wanted": 3,
+      "wanted_flagged_cultural": 0,
+      "fields_dropped_for_privacy": 0,
+      "places_resolved": 0
+    }
+  },
+  "confidence_scale": {
+    "high": "The app publishes this directly: a number it tells the public to ring, or a vocabulary term it uses on screen.",
+    "medium": "A record of something a person reported at a moment. True when it was made, and not a statement about now.",
+    "low": "Not used by this connector. A wildlife record that cannot be believed is held, not carried."
+  },
+  "freshness_rule": "A rescue record describes a moment, never a state. A twin that draws a pin from this feed must show how long ago it was synced beside it, and after 7 days it must say the record is old rather than let a player read it as current.",
+  "cultural_flags": [],
+  "records": [
+    {
+      "id": "wr-contact-wrm",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/contacts.js MWRC.list.wrm, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "quote": "The island's own rescue team. First call for everything.",
+      "asserts": "real_world",
+      "kind": "rescue-contact",
+      "contact_key": "wrm",
+      "name": "Wildlife Rescue Minjerribah",
+      "phone": "0448 466 556",
+      "dial": "+61448466556",
+      "is_primary": true,
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/minjerribah-wildlife-rescue/"
+      ],
+      "handling": "A published emergency contact. Show it whole or not at all, and never behind a paywall, a login or a low-confidence marker.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-contact-emergency",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/contacts.js MWRC.list.emergency, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "quote": "Any person in danger, snake bite, or bat scratch or bite.",
+      "asserts": "real_world",
+      "kind": "rescue-contact",
+      "contact_key": "emergency",
+      "name": "Triple Zero",
+      "phone": "000",
+      "dial": "000",
+      "is_primary": false,
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/minjerribah-wildlife-rescue/"
+      ],
+      "handling": "A published emergency contact. Show it whole or not at all, and never behind a paywall, a login or a low-confidence marker.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-contact-marine",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/contacts.js MWRC.list.marine, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "quote": "Sea turtles, dolphins, whales, dugongs. Press option 1.",
+      "asserts": "real_world",
+      "kind": "rescue-contact",
+      "contact_key": "marine",
+      "name": "Qld marine stranding hotline",
+      "phone": "1300 130 372",
+      "dial": "1300130372",
+      "is_primary": false,
+      "upstream_sources": [
+        "https://auraofintelligence.github.io/minjerribah-wildlife-rescue/"
+      ],
+      "handling": "A published emergency contact. Show it whole or not at all, and never behind a paywall, a login or a low-confidence marker.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-koala",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "koala",
+      "label": "Koala",
+      "code": "KO",
+      "twin_species": [
+        "sp-koala"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-kangaroo",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "kangaroo",
+      "label": "Kangaroo",
+      "code": "KA",
+      "twin_species": [
+        "sp-eastern-grey-kangaroo"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-wallaby",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "wallaby",
+      "label": "Wallaby",
+      "code": "WA",
+      "twin_species": [
+        "sp-swamp-wallaby",
+        "sp-agile-wallaby"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-snake",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "snake",
+      "label": "Snake",
+      "code": "SN",
+      "twin_species": [
+        "sp-eastern-brown-snake",
+        "sp-carpet-python"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-goanna",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "goanna",
+      "label": "Goanna",
+      "code": "GO",
+      "twin_species": [
+        "sp-lace-monitor"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-bluetongue",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "bluetongue",
+      "label": "Blue-tongue lizard",
+      "code": "BT",
+      "twin_species": [
+        "sp-eastern-blue-tongue"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-echidna",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "echidna",
+      "label": "Echidna",
+      "code": "EC",
+      "twin_species": [
+        "sp-short-beaked-echidna"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-possum",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "possum",
+      "label": "Possum or glider",
+      "code": "PO",
+      "twin_species": [
+        "sp-brushtail-possum",
+        "sp-ringtail-possum",
+        "sp-squirrel-glider"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-seaturtle",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "seaturtle",
+      "label": "Sea turtle",
+      "code": "ST",
+      "twin_species": [
+        "sp-green-turtle",
+        "sp-loggerhead-turtle"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-marine",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "marine",
+      "label": "Dolphin, whale or dugong",
+      "code": "DW",
+      "twin_species": [
+        "sp-humpback-whale",
+        "sp-indo-pacific-bottlenose-dolphin",
+        "sp-australian-humpback-dolphin",
+        "sp-dugong"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-shark",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "shark",
+      "label": "Shark or ray",
+      "code": "SH",
+      "twin_species": [
+        "sp-grey-nurse-shark",
+        "sp-bull-shark",
+        "sp-reef-manta-ray"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-pelican",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "pelican",
+      "label": "Pelican",
+      "code": "PE",
+      "twin_species": [],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-shorebird",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "shorebird",
+      "label": "Seabird or shorebird",
+      "code": "SB",
+      "twin_species": [
+        "sp-eastern-curlew",
+        "sp-bar-tailed-godwit",
+        "sp-curlew-sandpiper",
+        "sp-great-knot",
+        "sp-beach-stone-curlew",
+        "sp-pied-oystercatcher",
+        "sp-little-tern"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-landbird",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "landbird",
+      "label": "Land bird",
+      "code": "LB",
+      "twin_species": [
+        "sp-glossy-black-cockatoo",
+        "sp-rainbow-bee-eater"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-raptor",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "raptor",
+      "label": "Bird of prey",
+      "code": "BP",
+      "twin_species": [
+        "sp-white-bellied-sea-eagle",
+        "sp-eastern-osprey",
+        "sp-brahminy-kite"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-bat",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "bat",
+      "label": "Flying-fox or bat",
+      "code": "FF",
+      "twin_species": [
+        "sp-grey-headed-flying-fox"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-animal-group-other",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-animal-group",
+      "key": "other",
+      "label": "Other animal",
+      "code": "OT",
+      "twin_species": [],
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-condition-help",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-condition",
+      "key": "help",
+      "label": "Needs help",
+      "short": "Needs help",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-condition-care",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-condition",
+      "key": "care",
+      "label": "Rescued, in care",
+      "short": "In care",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-condition-released",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-condition",
+      "key": "released",
+      "label": "Released",
+      "short": "Released",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-condition-ok",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-condition",
+      "key": "ok",
+      "label": "Sighted, healthy",
+      "short": "Healthy",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-condition-dead",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-condition",
+      "key": "dead",
+      "label": "Deceased",
+      "short": "Deceased",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-cause-unknown",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-cause",
+      "key": "unknown",
+      "label": "Unknown",
+      "twin_event": null,
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-cause-vehicle",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-cause",
+      "key": "vehicle",
+      "label": "Vehicle strike",
+      "twin_event": "wildlife:call, cause vehicle. The twin models road strikes in its koala system.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-cause-dog",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-cause",
+      "key": "dog",
+      "label": "Dog attack",
+      "twin_event": "wildlife:call, cause dog. The twin models dog attacks in its koala system.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-cause-cat",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-cause",
+      "key": "cat",
+      "label": "Cat attack",
+      "twin_event": null,
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-cause-entangled",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-cause",
+      "key": "entangled",
+      "label": "Fishing line, hook or net",
+      "twin_event": "wildlife:call, cause entangled. The twin models fishing line and net interaction in its marine system.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-cause-collision",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-cause",
+      "key": "collision",
+      "label": "Fence or window strike",
+      "twin_event": null,
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-cause-habitat",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-cause",
+      "key": "habitat",
+      "label": "Tree fall or land clearing",
+      "twin_event": null,
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-cause-weather",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-cause",
+      "key": "weather",
+      "label": "Heat, fire or storm",
+      "twin_event": "wildlife:call, cause weather. The twin models heat and storm stress in its ecology systems.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-cause-illness",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-cause",
+      "key": "illness",
+      "label": "Illness or disease",
+      "twin_event": null,
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-cause-orphaned",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-cause",
+      "key": "orphaned",
+      "label": "Orphaned young",
+      "twin_event": "wildlife:call, cause orphaned.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-cause-healthy",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-cause",
+      "key": "healthy",
+      "label": "No injury, healthy sighting",
+      "twin_event": "not an incident. A healthy sighting, useful as presence and nothing else.",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-cause-other",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-cause",
+      "key": "other",
+      "label": "Other",
+      "twin_event": null,
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-mobility-stationary",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-mobility",
+      "key": "stationary",
+      "label": "Staying put",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-mobility-mobile",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-mobility",
+      "key": "mobile",
+      "label": "On the move",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    },
+    {
+      "id": "wr-vocab-mobility-unknown",
+      "source": "feed:wildlife-rescue@2026-08-10T05:28:27+10:00",
+      "locator": "minjerribah-wildlife-rescue/assets/db.js, commit f23639197",
+      "confidence": "high",
+      "extracted_at": "2026-08-10",
+      "extractor": "connector-wildlife-rescue/1.0",
+      "status": "committed",
+      "kind": "rescue-vocabulary-mobility",
+      "key": "unknown",
+      "label": "Not sure",
+      "freshness": {
+        "synced_at": "2026-08-10T05:28:27+10:00",
+        "stale_after_days": 7,
+        "source_commit": "f23639197bd9eb573365cfb134fa14e326befae9"
+      }
+    }
+  ],
+  "held": [],
+  "wanted": [
+    {
+      "id": "wr-want-case-stream",
+      "what": "The case stream itself. This connector reads app exports, CSV exports and pasted group-chat sync codes, and none has been handed over, so the twin currently models wildlife entirely from its own ecology pack and knows nothing about a single real rescue.",
+      "why_it_matters": "The twin already models koala road strikes and dog attacks. It has never once been checked against a real one. Two dozen real reports would tell us whether the modelled hotspots are the real hotspots, which is the difference between a simulation and evidence.",
+      "who_would_have_to_agree": "Wildlife Rescue Minjerribah, whose data it is.",
+      "how_small_it_could_start": "One export, once, covering a single season, with names already stripped by this connector before anything is written."
+    },
+    {
+      "id": "wr-want-lookouts",
+      "what": "Nothing is currently on the lookout board in the source repository, which is a real answer rather than a gap: no case is presently being watched for.",
+      "why_it_matters": "When the board is not empty it is the freshest thing on this island: an animal somebody is actively looking for, with a trail behind it.",
+      "who_would_have_to_agree": "Nobody. The coordinator already publishes it by editing one committed file.",
+      "how_small_it_could_start": "It is already running. This connector will pick it up the next time it is not empty."
+    },
+    {
+      "id": "wr-want-coarsening-review",
+      "what": "A ruling on the coarsening. Coordinates are rounded to about 110 m and times to the hour.",
+      "why_it_matters": "Somebody who knows this island needs to say whether 110 m is coarse enough for a shorebird roost or a turtle nest, and whether some species should not carry a pin at all.",
+      "who_would_have_to_agree": "Wildlife Rescue Minjerribah, and for anything on Country, the answer to question A1 in docs/CULTURAL-REVIEW.md first.",
+      "how_small_it_could_start": "A list of which animal groups get a pin and which get a township."
+    }
+  ]
+}

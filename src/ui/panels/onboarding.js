@@ -23,6 +23,15 @@
 //
 //   4. THE HANDOVER. The keys, once, and then it gets out of the way.
 //
+// WHAT THIS FILE DELIBERATELY DOES NOT DO. It does not explain the machine. Four screens is the
+// right length for arriving somewhere and the wrong length for how the clock has two modes, what a
+// synced record's freshness date means, or why nineteen of the sixty-two civic levers are yours and
+// forty-three are not. That is `src/ui/panels/howitworks.js`, seven sections on a sheet with the
+// island still visible behind it and the camera pointed at whatever is being described, reachable
+// with `Y`, from the third door below, from the handover, and from Settings. The one idea that
+// appears in both, because it is the one a person must be able to use on sight, is the difference
+// between real, modelled and proposed.
+//
 // AFTER THAT: CONTEXTUAL HINTS. Not a tutorial and not a checklist. Each hint has a condition
 // that has to be true on this island right now, appears once ever, is remembered in
 // localStorage, and never appears while a board is open or while another hint is up. There is a
@@ -34,6 +43,7 @@
 // button in the settings panel.
 
 import { registerPanel, el } from '../mount.js';
+import { lightGate } from './howitworks.js';
 
 /* ------------------------------------------------------------------ storage */
 
@@ -216,6 +226,7 @@ function mountOnboarding(root, world) {
 
   let step = 0;
   let open = false;
+  let heldTheIsland = false;
 
   const STEPS = [drawAcknowledgement, drawArrival, drawDoors, drawHandover];
 
@@ -238,6 +249,13 @@ function mountOnboarding(root, world) {
   function finish() {
     writeSeen();
     setOpen(false);
+    // Give the island back. See the note where it is held, below: this used to leave it stopped,
+    // so the first thing a person saw after reading four screens about a place that runs on its
+    // own was a place that was not running.
+    if (heldTheIsland) {
+      heldTheIsland = false;
+      try { world.clock.thaw(); } catch (e) { /* an unfrozen clock is the state we wanted anyway */ }
+    }
     // The camera rig puts up its own movement card on a first run. Step four has just taught the
     // same keys with room to read them, so it is retired rather than left to appear over the top.
     const cam = document.getElementById('cam-hint');
@@ -286,6 +304,23 @@ function mountOnboarding(root, world) {
         'data/lore.json did not load, so the acknowledgement it holds cannot be shown. That is a '
         + 'fault in this build and not a choice. Nothing else here should be read until it is fixed.'));
     }
+
+    // The boundary, on the surface rather than inside the fold below it. A person should not have
+    // to open a disclosure triangle to find out that the Traditional Owner corporation has not seen
+    // this. Each line is a statement of what this project refuses to do, and every one of them is
+    // enforced somewhere: the first by data/lore.json's own status field, the second by the
+    // prohibitions in the same pack and the scan that runs over the whole repository, the third by
+    // docs/CULTURAL-REVIEW.md being a queue that nobody has answered.
+    const wont = el('div', { class: 'ob-wont' },
+      el('h5', {}, 'What this project will not do'),
+      el('ul', {},
+        el('li', {}, 'QYAC has not seen this project. Nobody has asked whether it should exist.'),
+        el('li', {}, 'No language words, no story, no art, no cultural practice, no sacred or '
+          + 'restricted places go into it, from any source and from any contributor, however '
+          + 'offered.'),
+        el('li', {}, 'The cultural review file is an open queue and not a set of approvals. Nothing '
+          + 'on it is approved.')));
+    sheet.append(wont);
 
     const details = el('details', { class: 'ob-src' },
       el('summary', {}, 'Where this wording comes from, and what it is not'));
@@ -375,9 +410,13 @@ function mountOnboarding(root, world) {
     }
     sheet.append(list);
 
+    sheet.append(el('h3', {}, 'And what it is not'));
     sheet.append(el('p', { class: 'ob-note' },
-      'It is a simulation built from public records and it gets things wrong. Where a number is '
-      + 'modelled rather than measured, the panel that shows it says so.'));
+      'Not a game about a made-up place: every business, road, beach, headland, club and boat in '
+      + 'here is a real one out of a public record, and nothing was invented to fill a gap. And not '
+      + 'the island either: it is a model of the island, built by people who do not live there, and '
+      + 'it gets things wrong. What it can always tell you is where a number came from and how much '
+      + 'weight it will hold.'));
 
     sheet.append(el('div', { class: 'ob-act' },
       el('button', { class: 'btn ghost', type: 'button', onclick: () => go(0) }, 'Back'),
@@ -410,11 +449,46 @@ function mountOnboarding(root, world) {
     return 'Nothing off this coast at the moment. ' + (wh.season ? 'The migration is ' + wh.season + '.' : '');
   }
 
+  /**
+   * The state of the light, said before the three doors rather than after them.
+   *
+   * This build opens at 5:20am against a 5:39am sunrise, so two of the three doors below open on a
+   * dark island. Sending somebody through one of them without a word about that is how a person
+   * decides the twin is broken. The rule lives in `lightGate`, which the explainer sheet uses for
+   * the same thing, so there is one answer to what counts as dark rather than two that drift.
+   */
+  function lightNotice() {
+    let gate = null;
+    try { gate = lightGate(world); } catch (e) { gate = null; }
+    // Only the true dark case gets a notice here. A low sun is a line on the explainer sheet and
+    // not a reason to stop somebody on their way through the door.
+    if (!gate || !gate.jump) return null;
+    const row = el('div', { class: 'ob-light' },
+      el('b', {}, 'It is dark out there, and it is meant to be'),
+      el('span', {}, gate.text));
+    if (gate.jump && world.time) {
+      row.append(el('button', {
+        class: 'btn ob-light-go', type: 'button',
+        onclick: () => {
+          try { world.time.scrubBy(Math.round(gate.jump.minutes)); } catch (e) { /* the bar still tells the truth */ }
+          go(2);
+        }
+      }, gate.jump.label));
+      row.append(el('em', {}, 'That parks the clock, which the bar at the top will say. The ribbon '
+        + 'up there puts it back.'));
+    }
+    return row;
+  }
+
   function drawDoors() {
     sheet.classList.remove('ack');
     sheet.append(
       el('h2', {}, 'Where would you like to start'),
-      el('p', { class: 'ob-lede' }, 'None of these is a tutorial. They are three places to stand.'));
+      el('p', { class: 'ob-lede' }, 'None of these is a tutorial. Three of them are places to stand. '
+        + 'The fourth is the explanation, and you can take it whenever you like.'));
+
+    const notice = lightNotice();
+    if (notice) sheet.append(notice);
 
     const doors = el('div', { class: 'ob-doors' });
 
@@ -460,6 +534,20 @@ function mountOnboarding(root, world) {
         } catch (e) { console.warn('[onboarding] camera not ready', e); }
       }));
 
+    // The fourth door, and the different kind of thing. It hands over to the explainer sheet, which
+    // keeps the island on screen and walks the camera around it, so this is a door out of the dark
+    // overlay rather than a deeper room inside it.
+    const explain = el('button', {
+      class: 'ob-door wide', type: 'button',
+      onclick: () => { finish(); world.bus.emit('ui:open', { id: 'howitworks', section: 'what' }); }
+    },
+    el('b', {}, 'Have it explained first'),
+    el('i', {}, 'Seven short screens, with the island in front of you'),
+    el('span', {}, 'How time works and what a projection is, where every number came from, how to '
+      + 'tell what is real from what is modelled and what is only proposed, which levers are '
+      + 'actually yours, and how to put something of your own in. Press Y at any time.'));
+    doors.append(explain);
+
     sheet.append(doors);
     sheet.append(el('div', { class: 'ob-act' },
       el('button', { class: 'btn ghost', type: 'button', onclick: () => go(1) }, 'Back'),
@@ -501,6 +589,7 @@ function mountOnboarding(root, world) {
     ['O', 'settings'],
     ['P', 'photo mode. L for labels, B for bars, H hides all of this'],
     ['Esc', 'close whatever is open, or let go of what you picked'],
+    ['Y', 'how it works: the time, the data, and your part in it'],
     ['?', 'this screen again']
   ];
 
@@ -520,10 +609,15 @@ function mountOnboarding(root, world) {
 
     sheet.append(el('p', { class: 'ob-note' },
       'Small hints will appear when something on the island is worth explaining, once each, and '
-      + 'never again. Turn them off in settings.'));
+      + 'never again. Turn them off in settings. If you would rather have the whole thing explained '
+      + 'than discover it, that is Y, and you can leave it at any screen.'));
 
     sheet.append(el('div', { class: 'ob-act' },
       el('button', { class: 'btn ghost', type: 'button', onclick: () => go(2) }, 'Back'),
+      el('button', {
+        class: 'btn ghost', type: 'button',
+        onclick: () => { finish(); world.bus.emit('ui:open', { id: 'howitworks', section: 'what' }); }
+      }, 'How it works'),
       el('button', { class: 'btn ob-go', type: 'button', onclick: finish }, 'Take me to the island')));
   }
 
@@ -620,7 +714,14 @@ function mountOnboarding(root, world) {
   if (!readSeen()) {
     // Hold the clock while the acknowledgement is up. Nothing about this island needs to keep
     // running behind a screen that asks you to read six lines.
-    world.clock.setSpeed(0);
+    //
+    // `freeze()` and not `setSpeed(0)`, and the difference is not cosmetic. Choosing a speed is how
+    // a person leaves live, so `setSpeed(0)` on a build configured to open at the real Queensland
+    // moment would drop it out of live before anybody had touched anything, and write "a speed was
+    // chosen" on the clock's record over a choice nobody made. `freeze()` is the clock's own word
+    // for holding the world still without touching what kind of time it is, and `finish()` thaws.
+    heldTheIsland = true;
+    try { world.clock.freeze(); } catch (e) { heldTheIsland = false; }
     setOpen(true);
   } else {
     // A returning player has already seen the four minute floor reset, so let the first hint of a
@@ -672,6 +773,14 @@ function injectStyle() {
   margin-bottom: var(--sp-4); }
 .ob-ack p:last-child { margin-bottom: 0; color: var(--t-dim); font-size: var(--fs-base); line-height: 1.7; }
 
+/* The boundary, on the surface of the acknowledgement screen rather than under the fold. Coral
+   left edge, because in this palette coral is refusal, and every line here is a refusal. */
+.ob-wont { margin-top: var(--sp-6); border-left: 2px solid var(--coral); padding: var(--sp-1) 0 var(--sp-1) var(--sp-4); }
+.ob-wont h5 { font-size: var(--fs-micro); letter-spacing: .16em; text-transform: uppercase;
+  color: var(--coral); margin-bottom: var(--sp-2); }
+.ob-wont ul { margin: 0 0 0 1.05em; }
+.ob-wont li { font-size: var(--fs-sm); line-height: 1.6; color: var(--t-dim); margin-bottom: 5px; }
+
 .ob-src { margin-top: var(--sp-6); border-top: 1px solid var(--edge); padding-top: var(--sp-3); }
 .ob-src summary { cursor: pointer; font-size: var(--fs-sm); color: var(--t-faint); letter-spacing: .04em; }
 .ob-src summary:hover { color: var(--t); }
@@ -694,6 +803,17 @@ function injectStyle() {
 .ob-purpose b { color: var(--t-hi); font-weight: 500; }
 .ob-purpose span { color: var(--t-dim); font-size: var(--fs-sm); line-height: 1.55; }
 
+/* The light notice, above the doors, only when the sun is under the horizon. Amber rather than red:
+   it is not a fault, it is the time of day. */
+.ob-light { display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  margin-bottom: var(--sp-4); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-2);
+  border: 1px solid rgba(228,164,74,.3); background: rgba(228,164,74,.07); }
+.ob-light b { color: var(--sun); font-weight: 500; font-size: var(--fs-base); }
+.ob-light span { font-size: var(--fs-sm); line-height: 1.55; color: var(--t-dim); }
+.ob-light em { font-style: normal; font-size: var(--fs-micro); color: var(--t-faint); }
+.ob-light-go { margin-top: 2px; background: var(--sun); border-color: var(--sun); color: var(--t-on-accent); }
+.ob-light-go:hover { background: #f0b95f; border-color: #f0b95f; color: var(--t-on-accent); }
+
 .ob-doors { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: var(--sp-3); margin-top: var(--sp-5); }
 .ob-door { text-align: left; appearance: none; cursor: pointer; display: flex; flex-direction: column;
@@ -708,6 +828,11 @@ function injectStyle() {
 .ob-door span { font-size: var(--fs-sm); color: var(--t-dim); margin-top: 4px; }
 .ob-door em { font-style: normal; font-size: var(--fs-sm); color: var(--sun); margin-top: 6px;
   padding-top: 6px; border-top: 1px solid var(--edge); }
+/* The explainer door is a different kind of thing from the three places, so it spans the row and
+   wears the sand accent rather than the sea one. */
+.ob-door.wide { grid-column: 1 / -1; background: rgba(232,220,196,.045); }
+.ob-door.wide:hover { border-color: var(--sand); background: rgba(232,220,196,.09); }
+.ob-door.wide i { color: var(--sand); }
 
 .ob-keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 6px var(--sp-4); margin-top: var(--sp-4); }

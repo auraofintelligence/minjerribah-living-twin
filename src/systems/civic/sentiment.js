@@ -86,6 +86,15 @@ const LIVED_CHANNELS = [
   { prefix: 'housing:lost-to-holiday-let', groups: ['renters-and-key-workers'], delta: -0.05, cause: 'a house went to the holiday rate' },
   // economy/jobs.js
   { prefix: 'jobs:left-for-want-of-a-room', groups: ['renters-and-key-workers', 'tradies-and-builders'], delta: -0.03, cause: 'somebody left for want of a room' },
+  // agents/events.js: what is on. Both directions, because an event is not a nuisance and it is
+  // not a gift either. The operators earn from it and the people who live beside the car park pay
+  // for it, and on this island those are often the same street.
+  { prefix: 'events:peak', when: (p) => (p && p.people || 0) >= 500,
+    groups: ['tourism-operators'], delta: 0.012, cause: 'a big day on the calendar' },
+  { prefix: 'events:peak', when: (p) => (p && p.people || 0) >= 500,
+    groups: ['long-term-residents', 'retirees-and-seniors'], delta: -0.008, cause: 'the island full for an event' },
+  { prefix: 'events:capacity-bit', groups: ['tourism-operators', 'ferry-commuters'], delta: -0.02, cause: 'people who could not get over for it' },
+  { prefix: 'events:called-off', groups: ['tourism-operators', 'volunteers-and-emergency'], delta: -0.015, cause: 'an event called off' },
   // agents/visitors.js, movement/crowd.js, economy/tourism.js
   { prefix: 'visitors:peak', groups: ['long-term-residents', 'retirees-and-seniors'], delta: -0.006, cause: 'a long weekend' },
   { prefix: 'crowd:crush', groups: ['long-term-residents', 'retirees-and-seniors'], delta: -0.004, cause: 'the gorge walk was shoulder to shoulder' },

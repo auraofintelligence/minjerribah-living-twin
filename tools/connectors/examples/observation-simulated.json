@@ -1,0 +1,17 @@
+{
+  "_readme": "A refusal fixture. This is the shape a modelled road strike takes when it comes out of the twin's own ecology systems, and it is here so that the refusal can be run and seen rather than only described. The emitter must always refuse this file. If it ever writes one, something has gone badly wrong.",
+  "kind": "twin-observation",
+  "origin": "simulation",
+  "id": "r_sim_0001",
+  "observed_at": "2026-11-23T05:40",
+  "group": "koala",
+  "count": 1,
+  "status": "help",
+  "cause": "vehicle",
+  "mobility": "stationary",
+  "place": "East Coast Road",
+  "lat": -27.436,
+  "lng": 153.512,
+  "modelled_by": "src/systems/ecology/koala.js",
+  "seed": 19770614
+}

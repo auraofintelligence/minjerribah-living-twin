@@ -260,3 +260,28 @@ project already holds under different names:
 The second and fourth are exactly our no-fabrication and proposed-stays-proposed rules, arrived at
 independently. Where that document and ours differ on this material, that one wins: it is closer to the
 source and closer to the people the material is about.
+
+## Correction from the owner, 10 August 2026: the mine leases are former mine sites
+
+His Google MyMaps carries a folder named "Private Mine Leases" with four placemarks. His correction,
+in his own words: the leases were closed in 2019 but they are still the old mine sites.
+
+That distinction matters and the folder name alone would have got it wrong. Sand mining on Minjerribah
+ended in 2019 under the North Stradbroke Island Protection and Sustainability Act, and the Economic
+Transition Strategy is the state's response to that ending. So those four placemarks are the FORMER
+mine sites: the ground the mining happened on, which is still there, still recognisable, and in various
+states of rehabilitation. They are not current leases and nothing in this twin may present them as
+operating, or imply that anyone holds a right to mine there now.
+
+For any agent importing that folder:
+
+- status is `former`, never `active`, and the label a player sees says former mine site
+- they join the rehabilitation the twin already models rather than becoming a second parallel truth.
+  `src/systems/ecology/vegetation.js` already tracks the even-aged replanted areas and
+  `data/geography.json` carries the rehabilitation zones. Reconcile against those.
+- the end date is 2019 and it is sourced: the Act and the Economic Transition Strategy are both in
+  `data/civic.json`. Cite one of them rather than the map, because the map is a pin and the Act is the
+  reason.
+- the rehabilitated ground is one of the more interesting things about this island and reads as a real
+  landscape story rather than a footnote: an even-aged forest with a straight edge is visible from the
+  air, and the twin can already show it.

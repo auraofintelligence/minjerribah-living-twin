@@ -46,6 +46,7 @@ export const MANIFEST = [
   () => import('./economy/chour.js'),               // the community contribution ledger
 
   // --- agents: residents and visitors
+  () => import('./agents/events.js'),                // what is on today, from data/events.json
   () => import('./agents/population.js'),
   () => import('./agents/needs.js'),
   () => import('./agents/schedule.js'),
@@ -79,6 +80,7 @@ export const MANIFEST = [
   () => import('../render/layers/buildings.js'),
   () => import('../render/layers/roads.js'),
   () => import('../render/layers/people.js'),
+  () => import('../render/layers/eventsite.js'),   // what is on, on the ground
   () => import('../render/layers/vehicles.js'),
   () => import('../render/layers/fauna.js'),
   () => import('../render/layers/weatherfx.js'),
@@ -102,6 +104,7 @@ export const MANIFEST = [
   () => import('../ui/panels/chronicle.js'),
   () => import('../ui/panels/map.js'),
   () => import('../ui/panels/onboarding.js'),
+  () => import('../ui/panels/howitworks.js'),
   () => import('../ui/panels/settings.js')
 ];
 

@@ -1,0 +1,121 @@
+{
+  "pack": "_feeds",
+  "schema": "minjerribah-connector-feed-index/1",
+  "generated": "2026-08-10",
+  "about": "One entry per feed a connector has written. The checksum is over the feed file as it stands, so a hand edit shows up as a mismatch when tools/connectors/verify.mjs runs. Feeds are not data packs: data/_provenance.json is the registry for those.",
+  "feeds": [
+    {
+      "id": "events-engine",
+      "file": "data/feeds/_events-engine.json",
+      "title": "The public event atlas: what is on, where, and who listed it",
+      "organisation": "Quandamooka Country Events Engine, and through it the listing sources it names",
+      "synced_at": "2026-08-10T05:28:27+10:00",
+      "source": {
+        "kind": "repository",
+        "id": "quandamooka-country-events-engine",
+        "commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32",
+        "commit_date": "2026-07-03"
+      },
+      "cadence": {
+        "every": "weekly, and always before a wave that touches the calendar",
+        "run_by": "a person, after pulling that repository",
+        "reason": "The git history of that repository carries repeated public source refreshes, roughly weekly through June and July 2026. A local checkout lags the remote, so a sync that did not record which commit it read would claim a currency it does not have."
+      },
+      "stale_after_days": 21,
+      "counts": {
+        "events_read": 39,
+        "places_read": 24,
+        "cultural_flagged": 6,
+        "kept": 63,
+        "held": 0,
+        "wanted": 2
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "58822c55c2bc00030d19aa465494e73ea4274f9e3b5cb0dcddaed1acc7e4b9e7"
+      },
+      "bytes": 110599
+    },
+    {
+      "id": "noticeboard",
+      "file": "data/feeds/_noticeboard.json",
+      "title": "Island organisations, addresses, contacts and what each might publish",
+      "organisation": "Straddie Noticeboard Network, and through it the organisations it names",
+      "synced_at": "2026-08-10T05:28:27+10:00",
+      "source": {
+        "kind": "repository",
+        "id": "straddie-noticeboard-network",
+        "commit": "8a47bd31de48454a15c3073c76c0ad1375ca5fc2",
+        "commit_date": "2026-06-30"
+      },
+      "cadence": {
+        "every": "monthly",
+        "run_by": "whoever is maintaining the noticeboard network",
+        "reason": "Addresses and phone numbers move a few times a year. The reason to run it monthly is not that the data changes that fast, it is that the wanted list needs a person looking at it often enough to actually go and ask somebody."
+      },
+      "stale_after_days": 60,
+      "counts": {
+        "entities_read": 164,
+        "excluded_people_category": 22,
+        "excluded_individuals": 43,
+        "excluded_individuals_note": "The test that decides this errs toward leaving an entity out. Four trading names in the source read as personal names to it and are not on the wanted list because of that. No record is built from this test: records come only from entities carrying a researched business profile.",
+        "profiled": 9,
+        "proposed_screens": 5,
+        "kept": 14,
+        "held": 0,
+        "wanted": 91,
+        "wanted_flagged_cultural": 2,
+        "already_in_twin_by_name": 40,
+        "not_in_twin_by_name": 59,
+        "matched_hours_basis": {
+          "published": 12,
+          "listed": 3,
+          "estimate": 24,
+          "none": 0,
+          "not trading": 1
+        }
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "283bed87d30e78c1e48b8145553ff1c1ca4129211cdee89311045fd867d20656"
+      },
+      "bytes": 78299
+    },
+    {
+      "id": "wildlife-rescue",
+      "file": "data/feeds/_wildlife-rescue.json",
+      "title": "Wildlife rescue reports, contacts and lookouts",
+      "organisation": "Wildlife Rescue Minjerribah",
+      "synced_at": "2026-08-10T05:28:27+10:00",
+      "source": {
+        "kind": "repository",
+        "id": "minjerribah-wildlife-rescue",
+        "commit": "f23639197bd9eb573365cfb134fa14e326befae9",
+        "commit_date": "2026-07-20"
+      },
+      "cadence": {
+        "every": "daily while a case is open, otherwise weekly",
+        "run_by": "the rescue coordinator, or whoever holds the group chat",
+        "reason": "A case moves in hours. A koala on the ground at breakfast is in care or dead by lunch, so a weekly sync would put a pin on the map that is wrong more often than right. The reference and contact half of this feed moves once a year and rides along."
+      },
+      "stale_after_days": 7,
+      "counts": {
+        "contacts": 3,
+        "vocabulary": 37,
+        "lookouts": 0,
+        "cases": 0,
+        "kept": 40,
+        "held": 0,
+        "wanted": 3,
+        "wanted_flagged_cultural": 0,
+        "fields_dropped_for_privacy": 0,
+        "places_resolved": 0
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "3007ff10c072514493cee4cddc01016160af7c380d1a5867c104d186646005b6"
+      },
+      "bytes": 33999
+    }
+  ]
+}

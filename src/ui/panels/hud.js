@@ -14,9 +14,20 @@
 //    is the beach driving rule because that is the number in navigation.js. A HUD that shows a
 //    number without saying what it drives is decoration.
 //
-// 3. NOTHING HERE MUTATES THE SIMULATION. The one exception is the clock speed, which is a
-//    presentation control rather than world state: it changes how many ticks a real second buys,
-//    not what a tick does. Everything else that wants to change the island emits `ui:intent`.
+// 3. NOTHING HERE MUTATES THE SIMULATION. The exceptions are the clock speed and the time ribbon,
+//    which are presentation controls rather than world state: they change which moment you are
+//    looking at and how many ticks a real second buys, never what a tick does. The deciding is
+//    not done here either: the bar calls `world.time`, which lives beside the clock in
+//    src/kernel/clock.js, because a panel must not decide what a system may recompute.
+//    Everything else that wants to change the island emits `ui:intent`.
+//
+// THE TIME STATEMENT. A person must never have to wonder whether a number on this bar is the real
+// island or a simulation of a moment that has not happened, so the bar answers that before it is
+// asked, in three places at three levels of detail: a mode chip you can read at a glance, a plain
+// sentence on the ribbon row, and a HELD tag on every cell whose number belongs to a different
+// moment from the one on the clock. The rule the whole thing rests on: the sun, the moon, the tide
+// and the calendar are pure functions of the moment and follow a scrub exactly; everything the
+// island has to live through cannot be conjured, so it is held and says so.
 //
 // The tide sparkline is the piece worth understanding before editing. `tide.next` is a list of
 // upcoming turns computed once a day, so its `inHours` is measured from the last day boundary and
@@ -27,7 +38,10 @@
 // system only publishes about twenty six hours ahead and a full day has to come from somewhere.
 
 import { registerPanel, el } from '../mount.js';
-import { SPEEDS, ISLAND_SEASONS } from '../../kernel/clock.js';
+import { SPEEDS, ISLAND_SEASONS, TICK_MINUTES, MINUTES_PER_DAY, ISLAND_TZ, ISLAND_TZ_NOTE, spanText } from '../../kernel/clock.js';
+
+const DAY3 = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MON3 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /* ------------------------------------------------------------------ safe reads */
 
@@ -299,12 +313,27 @@ function mountHud(root, world) {
     tipEl.style.top = Math.round(top) + 'px';
   }
 
+  /**
+   * The spec a node's tooltip should show right now. A cell tagged HELD gets the reason first,
+   * before its own numbers, because the most important thing about a held number is that it is
+   * not the number for the moment on the clock.
+   */
+  function specFor(src) {
+    const spec = src.fn(world) || {};
+    if (world.clock.scrubbing && src.node.classList && src.node.classList.contains('hud-held')) {
+      spec.lines = ['HELD. This is the island\'s present, not the moment on the clock. Nothing '
+        + 'recomputes it for a moment the island has not lived through, and inventing one would '
+        + 'put a made-up number under a real date.'].concat(spec.lines || []);
+    }
+    return spec;
+  }
+
   /** Bind a live tooltip. `fn(world)` is called on show and again on every UI update while open. */
   function tip(node, fn) {
     node.classList.add('has-tip');
     node.addEventListener('pointerenter', () => {
       tipSource = { node, fn };
-      renderTip(fn(world));
+      renderTip(specFor(tipSource));
       tipEl.classList.add('show');
       placeTip(node);
     });
@@ -349,8 +378,14 @@ function mountHud(root, world) {
 
   /* ---- time block ------------------------------------------------------- */
 
+  const time = world.time || null;
+
+  // The one-word answer. First thing on the bar, before the date, because the first question a
+  // person has about a number on a screen like this is whether it is real.
+  const modeWord = el('b', {});
+  const modeEl = el('span', { class: 'hud-mode' }, el('i', { class: 'hud-mode-dot' }), modeWord);
   const dateEl = el('div', { class: 'hud-date' });
-  const pausedChip = el('span', { class: 'hud-paused' }, 'PAUSED');
+  const pausedChip = el('span', { class: 'hud-paused', hidden: true }, 'PAUSED');
   const seasonEl = el('span', { class: 'hud-season' });
   const clockEl = el('div', { class: 'hud-clock' });
 
@@ -363,11 +398,35 @@ function mountHud(root, world) {
     }, i === 0 ? pauseGlyph() : sp.label);
     return b;
   });
-  const speedRow = el('div', { class: 'hud-speeds' }, speedBtns);
+  const liveBtn = el('button', {
+    class: 'hud-sp hud-live', type: 'button', 'aria-label': 'Live',
+    onclick: () => toggleLive()
+  }, 'LIVE');
+  const speedRow = el('div', { class: 'hud-speeds' }, liveBtn, speedBtns);
 
   const timeBlock = el('div', { class: 'hud-time' },
-    el('div', { class: 'hud-row1' }, dateEl, pausedChip, seasonEl),
+    el('div', { class: 'hud-row1' }, modeEl, dateEl, pausedChip, seasonEl),
     el('div', { class: 'hud-row2' }, clockEl, speedRow));
+
+  tip(modeEl, () => modeTip());
+  tip(liveBtn, () => ({
+    title: world.clock.mode === 'live' ? 'Live, and this switches it off' : 'Go live',
+    lines: [
+      ['Live means', 'the island is at the real Queensland moment'],
+      ['Pace', 'one tick every ten real minutes'],
+      ['Timezone', ISLAND_TZ + ', UTC+10, and it never shifts'],
+      // Said carefully. "No daylight saving, ever" is the version everyone reaches for and it is
+      // wrong: Queensland ran summer time in 1971-72 and across the three summers to 1991-92, and
+      // voted it down at a referendum in February 1992. The operational fact is the true one, and
+      // it is the only one this twin needs, because no moment it can reach is inside a trial.
+      ISLAND_TZ_NOTE,
+      'The real datetime a live session started from is stamped into the save, so the session '
+      + 'still replays exactly. Determinism is not given up in live; it is anchored.',
+      'Choosing a speed leaves live, because an island running at sixty times real time is not '
+      + 'the real island and the bar will not say that it is.'
+    ],
+    why: 'Nothing about live touches the network. The clock is read once, on the machine, and written down.'
+  }));
 
   tip(dateEl, () => {
     const d = world.clock;
@@ -379,20 +438,40 @@ function mountHud(root, world) {
         ['Sunset', isNum(dl.sunsetMin) ? hhmm(dl.sunsetMin) : '–'],
         ['Daylight', isNum(dl.dayLengthMin) ? gap(dl.dayLengthMin / 60) : '–'],
         ['Moon', isNum(dl.moonIllum) ? Math.round(dl.moonIllum * 100) + '% lit' : '–'],
-        d.isQldSchoolHoliday ? 'Queensland school holidays. The visitor curve on this island follows the school calendar harder than it follows the weather.' : null,
+        // The school calendar is worked out from the published Queensland anchors, and only 2026's
+        // dates are on file to check against. Where they are, the tooltip says the break by name
+        // as published fact; where they are not, it says it is derived. Calling an approximation
+        // exact is the fault, not the approximation.
+        d.isQldSchoolHoliday
+          ? 'Queensland school holidays, the ' + d.schoolHolidayLabel + ' break'
+            + (d.schoolCalendarBasis === 'published'
+              ? ', on the published dates for this year. '
+              : ', derived from the published Queensland anchors: no published calendar for this year is on file. ')
+            + 'The visitor curve on this island follows the school calendar harder than it follows the weather.'
+          : 'School term. ' + (d.schoolCalendarBasis === 'published'
+            ? 'The published Queensland dates for this year are on file.'
+            : 'Derived from the published Queensland anchors: no published calendar for this year is on file.'),
         d.isWeekend ? 'Weekend.' : null
       ],
-      why: 'Island time is AEST by definition. One tick is ten minutes of island time.'
+      why: 'Island time is AEST by definition. School dates: data/events.json reference_2026, from '
+        + 'education.qld.gov.au term dates. One tick is ten minutes of island time.'
     };
   });
 
   tip(seasonEl, () => {
     const s = world.clock.season || ISLAND_SEASONS[0];
+    // Two kinds of claim, kept apart on screen as well as in the data. The weather line is
+    // ordinary climate description and says so; the markers are ecological claims a local could
+    // check against a sourced record. Running them together let four unsourced phrases borrow the
+    // pack's authority, which a critic caught.
     return {
       title: s.name,
-      lines: [s.marker],
-      why: 'Plain descriptive names. No published Quandamooka seasonal calendar was found for this '
-        + 'project, so none is used. See data/lore.json and docs/CULTURAL-REVIEW.md.'
+      lines: [['Weather', s.weather + ', typically']].concat(s.markers),
+      why: 'The markers are from data/ecology.json seasonal_calendar. The weather line is plain '
+        + 'south-east Queensland climate description, and is what this build\'s own weather model '
+        + 'is weighted toward in this season. Plain descriptive season names: no published '
+        + 'Quandamooka seasonal calendar was found for this project, so none is used. See '
+        + 'data/lore.json and docs/CULTURAL-REVIEW.md.'
     };
   });
 
@@ -443,6 +522,14 @@ function mountHud(root, world) {
 
   const conditions = el('div', { class: 'hud-conditions' },
     cTemp, cWind, cSwell, cTide, cUv, cFire, cCross);
+
+  // Which of these can answer for a moment the island has not lived through, and which cannot.
+  // The tide is a harmonic sum evaluated at an hour, so it is exact at whatever moment you scrub
+  // to, at every station. The rest are the island's own weather, its own boats and its own books:
+  // there is no arithmetic that produces next Tuesday's southerly or next Tuesday's ferry queue,
+  // so they stay at the island's present and the bar tags them HELD rather than letting a number
+  // sit under a date it does not belong to.
+  for (const c of [cTemp, cWind, cSwell, cUv, cFire, cCross]) c.classList.add('hud-held');
 
   tip(cTemp, () => {
     const wx = world.read('weather') || {};
@@ -611,8 +698,8 @@ function mountHud(root, world) {
   sparkTicks, sparkArea, sparkLine, sparkProj, sparkTurns, nowLine, nowDot);
 
   const sparkCap = el('div', { class: 'tide-cap' });
-  const sparkBlock = el('div', { class: 'hud-spark' },
-    el('div', { class: 'k' }, 'Tide, next 24 hours'), spark, sparkCap);
+  const sparkKey = el('div', { class: 'k' }, 'Tide, next 24 hours');
+  const sparkBlock = el('div', { class: 'hud-spark' }, sparkKey, spark, sparkCap);
 
   tip(sparkBlock, () => {
     const t = world.read('tide') || {};
@@ -655,7 +742,7 @@ function mountHud(root, world) {
     const trendSvg = sv('svg', {
       class: 'fig-spark', viewBox: '0 0 100 15', preserveAspectRatio: 'none', 'aria-hidden': 'true'
     }, base, line);
-    const node = el('div', { class: 'hud-cell hud-fig' },
+    const node = el('div', { class: 'hud-cell hud-fig hud-held' },
       el('div', { class: 'k' }, f.key), v, trendSvg);
     figNodes[f.id] = { node, val, arrow, line, s, track: makeTrack() };
   }
@@ -710,10 +797,363 @@ function mountHud(root, world) {
     return { title: 'Island health', lines, why: 'Averaged over dunes, bushland, fresh water, koalas and seagrass.' };
   });
 
+  /* ---- the time ribbon --------------------------------------------------
+
+     A permanent strip across the bottom of the bar saying what moment you are looking at and what
+     kind of moment it is. The centre line is always the moment on screen and the strip slides
+     under it, which is the same gesture the camera uses on the island: hold the ground and move
+     it. Three bands say what kind of time each part of the window is.
+
+       lived        the island has actually run through this. Sea.
+       not lived    later than the island's present. Hatched, because a projection is not a record.
+       before       earlier than the moment this island opened at. Nothing happened here at all.
+
+     Two pips: where the island's present is, and where the real Queensland moment is. In a live
+     session those two sit on top of each other, which is live mode explained in one glance.
+
+     Scrubbing is cheap because it re-simulates nothing. It moves the clock, runs the two systems
+     that are pure functions of the clock, and leaves everything else where it is with a tag on it.
+     Turning a projection into history is the expensive option and it is a separate, named button
+     that says how many ticks it is about to run. */
+
+  const RIBBON_H = 18;
+  const WINDOWS = [6, 12, 24, 48, 96, 168, 336, 720, 2160];
+  const GRID_STEPS = [1, 2, 3, 6, 12, 24, 48, 168, 336, 720];
+  const MAX_CATCHUP_TICKS = 4320; // thirty island days. Past that the honest answer is a number.
+  let windowIdx = 3;              // 48 hours across
+  let ribbonW = 0;
+  let ribbonKey = '';
+  let flashText = '';
+  let flashUntil = 0;
+
+  const rbBands = sv('g', { class: 'rb-bands' });
+  const rbGrid = sv('g', { class: 'rb-grid' });
+  const rbMarks = sv('g', { class: 'rb-marks' });
+  const rbCaretLine = sv('line', { class: 'rb-caret-line', y1: 0, y2: RIBBON_H });
+  const rbCaretHead = sv('path', { class: 'rb-caret-head' });
+  const ribbonSvg = sv('svg', {
+    class: 'rb-svg', height: RIBBON_H, preserveAspectRatio: 'none',
+    role: 'slider', tabindex: '0',
+    'aria-label': 'Island time. Drag to move through it, left and right to step an hour, with shift a day.'
+  },
+  sv('defs', {}, sv('pattern', {
+    id: 'twin-rb-hatch', width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(50)'
+  }, sv('line', { class: 'rb-hatch', x1: 0, y1: 0, x2: 0, y2: 6 }))),
+  rbBands, rbGrid, rbMarks, rbCaretLine, rbCaretHead);
+
+  const rbStmt = el('div', { class: 'rb-stmt' });
+  const btnPresent = el('button', { class: 'rb-btn', type: 'button', onclick: () => goPresent() }, 'Back to now');
+  const btnCatch = el('button', { class: 'rb-btn', type: 'button', onclick: () => startCatchUp() }, 'Live through it');
+  const btnStop = el('button', { class: 'rb-btn', type: 'button', onclick: () => { if (time) time.cancelCatchup(); } }, 'Stop');
+  const rbActions = el('div', { class: 'rb-actions' }, btnPresent, btnCatch, btnStop);
+  const showBtn = (b, on) => {
+    if (b.__show === on) return;
+    b.__show = on;
+    b.classList.toggle('show', on);
+    b.hidden = !on;
+  };
+  for (const b of [btnPresent, btnCatch, btnStop]) { b.hidden = true; b.__show = false; }
+  const ribbonRow = el('div', { class: 'hud-ribbon' }, rbStmt, ribbonSvg, rbActions);
+
+  tip(rbStmt, () => modeTip());
+  tip(ribbonSvg, () => {
+    const st = time ? time.status() : null;
+    const win = WINDOWS[windowIdx];
+    return {
+      title: 'Time, in both directions',
+      lines: [
+        ['Showing', win < 48 ? win + ' hours across' : Math.round(win / 24) + ' days across'],
+        ['Centre line', 'the moment on the clock above'],
+        ['Filled', 'a stretch the island has actually run through'],
+        ['Bare', 'calendar this island has never been at'],
+        ['Hatched', 'later than anything the island has run'],
+        st ? ['Sea pip', 'the island\'s present'] : null,
+        st ? ['Sand pip', 'the real Queensland moment'] : null,
+        'Drag to move through time. The wheel changes how much of it you can see. Left and right '
+        + 'step an hour, with shift a day, and the comma and full stop keys do the same without '
+        + 'clicking here first.',
+        'Moving the clock is free and changes nothing: the tide, the sun and the moon are '
+        + 'recomputed for whatever moment you land on, and everything else keeps saying what it '
+        + 'says at the island\'s present, tagged HELD so you can see which is which.'
+      ],
+      why: 'A scrubbed future is a projection, and a scrubbed past that was never simulated is not history.'
+    };
+  });
+
+  /** What the mode chip and the statement both explain, at length, in one place. */
+  function modeTip() {
+    const c = world.clock;
+    const st = time ? time.status() : null;
+    const lines = [
+      ['Mode', c.declaredMode],
+      ['On the clock', c.formatMoment()],
+      ['Opened at', prettyISO(c.startISO) + ' ' + ISLAND_TZ],
+      c.anchorRealMs !== null ? ['Live anchor taken', new Date(c.anchorRealMs).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'] : null
+    ];
+    if (st) {
+      lines.push(['The island has lived to', prettyMinute(st.livedMinute)]);
+      lines.push(['The real island is at', prettyMinute(st.realMinute)]);
+    }
+    if (c.mode === 'live') {
+      lines.push('Live: the island is at the real Queensland moment and keeps pace with it, one '
+        + 'tick every ten real minutes. The real datetime it started from is in the save, so the '
+        + 'session still replays exactly.');
+    } else {
+      lines.push('Simulated: seeded and deterministic. Same seed, same packs, same island.');
+    }
+    if (c.scrubbing) {
+      lines.push(c.viewOffsetMin > 0
+        ? 'You are looking at a projection. The island has not run this far, so nothing here is a record of anything.'
+        : 'You are looking back at a moment this island was never at. It is not history; the island opened later than this or has simply not been here since.');
+      // The exactness claim is now only made about the things that are exact. The school calendar
+      // used to be in this list and is not exact: it is derived from the published Queensland
+      // anchors, and only 2026's dates are on file to check it against. Calling an approximation
+      // exact was the fabrication, not the approximation.
+      lines.push('Exact for this moment: the date, the day of the week, the season, the sun, the '
+        + 'moon and the tide at every station. Everything tagged HELD is the island\'s present, '
+        + 'because there is no arithmetic that produces this moment\'s weather, its ferry queue '
+        + 'or its mood.');
+      lines.push(c.schoolCalendarBasis === 'published'
+        ? 'The school calendar is exact here too: the published Queensland dates for this year are on file.'
+        : 'The school calendar for this year is derived from the published Queensland anchors '
+          + 'rather than read from a published calendar, because only 2026 is on file. Treat its '
+          + 'edges as close rather than exact.');
+    }
+    if (c.jumps) lines.push(c.jumps + ' time' + (c.jumps === 1 ? '' : 's') + ' this session the island was ticked from a moment it had not lived through. That is on the clock record.');
+    // Nought unless something wrote to the clock without going through world.time. When it is not
+    // nought, saying so here is the whole point: the bar noticed, declared it, and wrote it down.
+    if (c.offRecordMoves) {
+      lines.push(c.offRecordMoves + ' time' + (c.offRecordMoves === 1 ? '' : 's')
+        + ' this session the moment was moved without going through the time control. Each one was '
+        + 'declared as a scrub the moment it was noticed and is on the clock record.');
+    }
+    return {
+      title: modeWordFor(c, st).long,
+      lines,
+      why: 'Island time is ' + ISLAND_TZ_NOTE + ' One tick is ten minutes of island time.'
+    };
+  }
+
+  function prettyISO(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(String(iso || ''));
+    if (!m) return String(iso || '–');
+    const h = +m[4], h12 = h % 12 === 0 ? 12 : h % 12;
+    return `${+m[3]} ${MON3[+m[2] - 1]} ${m[1]}, ${h12}:${m[5]}${h < 12 ? 'am' : 'pm'}`;
+  }
+  function prettyMinute(absMin) {
+    const d = new Date(absMin * 60000);
+    const h = d.getUTCHours(), h12 = h % 12 === 0 ? 12 : h % 12;
+    return `${DAY3[d.getUTCDay()]} ${d.getUTCDate()} ${MON3[d.getUTCMonth()]}, ${h12}:${String(d.getUTCMinutes()).padStart(2, '0')}${h < 12 ? 'am' : 'pm'}`;
+  }
+
+  /** The chip word, the sentence under it, and the tone. One function so they cannot disagree. */
+  function modeWordFor(c, st) {
+    if (c.scrubbing) {
+      const away = spanText(c.viewOffsetMin);
+      return c.viewOffsetMin > 0
+        ? { word: 'PROJECTION', tone: 'sun', long: 'A projection, ' + away + ' ahead',
+          stmt: 'Projection: ' + away + ' past what the island has lived.' }
+        : { word: 'LOOKING BACK', tone: 'sun', long: 'Looking back ' + away,
+          stmt: 'Looking back ' + away + ': this moment was never simulated.' };
+    }
+    if (c.mode === 'live') {
+      const off = st ? st.aheadOfRealMin : 0;
+      if (off < -TICK_MINUTES) {
+        return { word: 'LIVE', tone: 'sea', long: 'Live, catching up',
+          stmt: 'Live: ' + spanText(off) + ' behind the real clock, catching up.' };
+      }
+      return { word: 'LIVE', tone: 'sea', long: 'Live: the real island, right now',
+        stmt: 'Live: this is the real island, at the real Queensland time.' };
+    }
+    return { word: 'SIMULATED', tone: 'iron', long: 'A simulation, not the real island',
+      stmt: 'Simulated: running on from ' + prettyISO(world.clock.anchorISO) + '.' };
+  }
+
+  function flash(text) {
+    flashText = text;
+    flashUntil = performance.now() + 9000;
+  }
+
+  /* ---- ribbon drawing ---------------------------------------------------- */
+
+  function gridStepH(windowH) {
+    for (const s of GRID_STEPS) if (windowH / s <= 9) return s;
+    return GRID_STEPS[GRID_STEPS.length - 1];
+  }
+  function gridLabel(absMin, stepH) {
+    const d = new Date(absMin * 60000);
+    if (stepH < 24) {
+      const h = d.getUTCHours();
+      return (h % 12 === 0 ? 12 : h % 12) + (h < 12 ? 'a' : 'p');
+    }
+    if (stepH < 168) return DAY3[d.getUTCDay()] + ' ' + d.getUTCDate();
+    return d.getUTCDate() + ' ' + MON3[d.getUTCMonth()];
+  }
+
+  function drawRibbon(st) {
+    // Width is measured once a second in reserveGutter, not here: this runs ten times a second and
+    // a getBoundingClientRect ten times a second is a forced reflow ten times a second.
+    const w = ribbonW;
+    if (!st || w < 40) return;
+    const winMin = WINDOWS[windowIdx] * 60;
+    const key = [w, winMin, st.viewedMinute, st.livedMinute, st.segments.length, Math.floor(st.realMinute)].join('|');
+    if (key === ribbonKey) return;
+    ribbonKey = key;
+    ribbonSvg.setAttribute('viewBox', '0 0 ' + w + ' ' + RIBBON_H);
+
+    const half = winMin / 2;
+    const from = st.viewedMinute - half, to = st.viewedMinute + half;
+    const xAt = (absMin) => ((absMin - from) / winMin) * w;
+    const clampX = (v) => (v < 0 ? 0 : v > w ? w : v);
+    const band = (a, b, cls) => {
+      const x0 = clampX(xAt(a)), x1 = clampX(xAt(b));
+      if (x1 - x0 < 0.5) return null;
+      return sv('rect', { class: 'rb-band ' + cls, x: x0.toFixed(1), y: 4, width: (x1 - x0).toFixed(1), height: RIBBON_H - 9 });
+    };
+
+    // Bare track is calendar the island has never been at. Sea is a stretch it actually ran
+    // through, one band per stretch, so a re-anchor or a jump shows as a gap rather than being
+    // papered over. Hatch is everything past the island's present, which is nobody's record.
+    rbBands.textContent = '';
+    rbBands.appendChild(sv('rect', { class: 'rb-track', x: 0, y: 4, width: w, height: RIBBON_H - 9 }));
+    for (const seg of st.segments) {
+      if (seg.to < from || seg.from > to) continue;
+      const lived = band(Math.max(from, seg.from), Math.min(seg.to, to), 'rb-lived');
+      if (lived) rbBands.appendChild(lived);
+      // A stretch one tick long is a real stretch and has to be visible, so it gets a minimum.
+      else if (seg.to >= from && seg.from <= to) {
+        rbBands.appendChild(sv('rect', {
+          class: 'rb-band rb-lived', x: clampX(xAt(seg.from)).toFixed(1), y: 4, width: 1.5, height: RIBBON_H - 9
+        }));
+      }
+    }
+    const ahead = band(Math.max(from, st.livedMinute), to, 'rb-ahead');
+    if (ahead) rbBands.appendChild(ahead);
+
+    rbGrid.textContent = '';
+    const stepH = gridStepH(WINDOWS[windowIdx]);
+    const stepMin = stepH * 60;
+    const first = Math.ceil(from / stepMin) * stepMin;
+    for (let m = first; m <= to; m += stepMin) {
+      const x = xAt(m);
+      if (x < 14 || x > w - 14) continue;
+      const midnight = ((m % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY === 0;
+      rbGrid.appendChild(sv('line', {
+        class: 'rb-tick' + (midnight ? ' day' : ''), x1: x.toFixed(1), x2: x.toFixed(1), y1: 3, y2: RIBBON_H - 4
+      }));
+      rbGrid.appendChild(sv('text', { class: 'rb-lab', x: (x + 3).toFixed(1), y: RIBBON_H - 6 }, gridLabel(m, stepH)));
+    }
+
+    rbMarks.textContent = '';
+    const pip = (absMin, cls, label) => {
+      const x = xAt(absMin);
+      if (x < 1 || x > w - 1) return;
+      rbMarks.appendChild(sv('line', { class: 'rb-pip ' + cls, x1: x.toFixed(1), x2: x.toFixed(1), y1: 2, y2: RIBBON_H - 3 }));
+      rbMarks.appendChild(sv('circle', { class: 'rb-pip-dot ' + cls, cx: x.toFixed(1), cy: 3.4, r: 2.2 }));
+      if (label && Math.abs(x - w / 2) > 46) {
+        rbMarks.appendChild(sv('text', { class: 'rb-pip-lab ' + cls, x: (x + 4).toFixed(1), y: 7.5 }, label));
+      }
+    };
+    // Live puts these two on top of each other, and that is the mode explained without a word.
+    pip(st.realMinute, 'real', 'real now');
+    pip(st.livedMinute, 'lived', st.scrubbing ? 'the island' : null);
+
+    const cx = (w / 2).toFixed(1);
+    rbCaretLine.setAttribute('x1', cx);
+    rbCaretLine.setAttribute('x2', cx);
+    rbCaretHead.setAttribute('d', `M${w / 2 - 4} 0L${w / 2 + 4} 0L${w / 2} 5Z`);
+  }
+
+  /* ---- ribbon interaction ------------------------------------------------ */
+
+  let drag = null;
+  ribbonSvg.addEventListener('pointerdown', (e) => {
+    if (!time) return;
+    ribbonSvg.setPointerCapture(e.pointerId);
+    drag = { x: e.clientX, offset: world.clock.viewOffsetMin };
+    ribbonSvg.classList.add('dragging');
+    e.preventDefault();
+  });
+  ribbonSvg.addEventListener('pointermove', (e) => {
+    if (!drag || !time) return;
+    const w = ribbonW || ribbonSvg.getBoundingClientRect().width || 1;
+    // Drag right, go back: the strip moves with the hand the way the ground does under the camera.
+    const deltaMin = -((e.clientX - drag.x) / w) * WINDOWS[windowIdx] * 60;
+    time.scrubTo(drag.offset + deltaMin);
+    paintSpeed();
+  });
+  const endDrag = (e) => {
+    if (!drag) return;
+    drag = null;
+    ribbonSvg.classList.remove('dragging');
+    if (e && e.pointerId !== undefined && ribbonSvg.hasPointerCapture(e.pointerId)) ribbonSvg.releasePointerCapture(e.pointerId);
+  };
+  ribbonSvg.addEventListener('pointerup', endDrag);
+  ribbonSvg.addEventListener('pointercancel', endDrag);
+
+  ribbonSvg.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    windowIdx = clamp(windowIdx + (e.deltaY > 0 ? 1 : -1), 0, WINDOWS.length - 1);
+    ribbonKey = '';
+  }, { passive: false });
+
+  ribbonSvg.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey) return;
+    let step = 0;
+    if (e.code === 'ArrowLeft') step = -1;
+    else if (e.code === 'ArrowRight') step = 1;
+    else return;
+    e.preventDefault();
+    e.stopPropagation();
+    stepTime(step * (e.shiftKey ? MINUTES_PER_DAY : 60));
+  });
+
+  function stepTime(minutes) {
+    if (!time) return;
+    time.scrubBy(minutes);
+    paintSpeed();
+  }
+  function goPresent() {
+    if (!time) return;
+    time.toPresent();
+    paintSpeed();
+  }
+  function toggleLive() {
+    if (!time) return;
+    const c = world.clock;
+    if (c.mode === 'live' && !c.scrubbing) {
+      time.goSimulated('live was switched off');
+      flash('Simulated from ' + c.formatMoment() + '. The island runs forward from here.');
+    } else {
+      const moved = time.goLive();
+      const m = moved.movedMinutes;
+      flash(m === 0
+        ? 'Live. The island is at the real ' + c.formatMoment() + '.'
+        : 'Live. The clock moved ' + spanText(m) + (m > 0 ? ' forward' : ' back') + ' to the real '
+          + c.formatMoment() + '. Nothing the island had already done was undone.');
+    }
+    ribbonKey = '';
+    paintSpeed();
+  }
+  function startCatchUp() {
+    if (!time) return;
+    const ticks = Math.round(world.clock.viewOffsetMin / TICK_MINUTES);
+    if (ticks <= 0) return;
+    if (ticks > MAX_CATCHUP_TICKS) {
+      flash('That is ' + ticks.toLocaleString('en-AU') + ' ticks. The island will live through '
+        + (MAX_CATCHUP_TICKS / 144) + ' days at a time; come back closer and run it in stages.');
+      return;
+    }
+    time.catchUp({
+      onDone: (s) => flash('Lived through ' + s.total.toLocaleString('en-AU') + ' ticks at '
+        + (s.msPerTick === null ? '–' : s.msPerTick) + ' ms each. That stretch is the island\'s own history now, not a projection.')
+    });
+  }
+
   /* ---- assemble --------------------------------------------------------- */
 
   const sparkDiv = el('div', { class: 'hud-div spark-div' });
-  const bar = el('div', { class: 'hud-bar', id: 'twin-hud' },
+  const mainRow = el('div', { class: 'hud-main' },
     timeBlock,
     el('div', { class: 'hud-div' }),
     conditions,
@@ -721,6 +1161,7 @@ function mountHud(root, world) {
     sparkBlock,
     el('div', { class: 'hud-div' }),
     el('div', { class: 'hud-figs' }, figs.map((f) => figNodes[f.id].node)));
+  const bar = el('div', { class: 'hud-bar', id: 'twin-hud' }, mainRow, ribbonRow);
   root.appendChild(bar);
 
   /* ---- keeping out from under whatever else docks at the top -------------
@@ -731,10 +1172,12 @@ function mountHud(root, world) {
      and drops the tide sparkline if what is left is too tight for it. The conditions strip is the
      flexible item, so everything that survives stays aligned and legible rather than clipped. */
 
-  let lastGutter = -1;
+  let lastGutter = '';
   let gutterTick = 0;
   function reserveGutter() {
-    const barRect = bar.getBoundingClientRect();
+    // The main row rather than the whole bar: the time ribbon runs under it and a panel that only
+    // reaches the ribbon is not sitting on any of the readouts.
+    const barRect = mainRow.getBoundingClientRect();
     const half = barRect.width * 0.5;
     let leftMost = barRect.right;
     for (const n of root.children) {
@@ -751,11 +1194,18 @@ function mountHud(root, world) {
       if (r.left < half) continue;   // a full width overlay is not a dock, leave the bar alone
       if (r.left < leftMost) leftMost = r.left;
     }
+    // The ribbon's width comes from here too, because this is already the once-a-second reflow.
+    const rw = Math.round(ribbonSvg.getBoundingClientRect().width);
+    if (rw !== ribbonW) { ribbonW = rw; ribbonKey = ''; }
     const gutter = Math.max(0, Math.round(barRect.right - leftMost));
-    if (gutter === lastGutter) return;
-    lastGutter = gutter;
+    const free = Math.round(barRect.width - gutter);
+    // Both numbers, not just the gutter. Widening the window changes how much room the bar has
+    // without changing what is docked on it, and keying only on the gutter left the tide
+    // sparkline hidden and the cells squeezed for the rest of the session after any resize.
+    const key = gutter + ':' + free;
+    if (key === lastGutter) return;
+    lastGutter = key;
     bar.style.setProperty('--hud-gutter', gutter + 'px');
-    const free = barRect.width - gutter;
     bar.classList.toggle('no-spark', free < 1340);
     bar.classList.toggle('tight', free < 1290);
   }
@@ -764,13 +1214,22 @@ function mountHud(root, world) {
   /* ---- speed control ---------------------------------------------------- */
 
   function setSpeed(i) {
+    // Playing from a parked clock returns to the island's present first. The alternative is to
+    // start ticking from a moment the island never reached, which is a jump dressed up as a
+    // resume: the clock counts those and this is the one place that would cause them.
+    if (time && world.clock.scrubbing) time.toPresent();
     world.clock.setSpeed(i);
+    ribbonKey = '';
     paintSpeed();
     world.bus.emit('ui:speed', { index: world.clock.speedIndex, label: world.clock.speed.label });
   }
 
   function paintSpeed() {
-    const idx = world.clock.speedIndex;
+    const c = world.clock;
+    const live = c.mode === 'live';
+    // Nothing is selected in live (the pace is the real clock's, not one of these) and nothing is
+    // selected while parked (nothing is running at all).
+    const idx = live || c.scrubbing ? -1 : c.speedIndex;
     for (let i = 0; i < speedBtns.length; i++) {
       const on = i === idx;
       if (speedBtns[i].__on !== on) {
@@ -779,10 +1238,32 @@ function mountHud(root, world) {
         speedBtns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
       }
     }
-    const paused = world.clock.paused;
+    if (liveBtn.__on !== live) {
+      liveBtn.__on = live;
+      liveBtn.classList.toggle('on', live);
+      liveBtn.setAttribute('aria-pressed', live ? 'true' : 'false');
+    }
+    const paused = !live && !c.scrubbing && c.paused;
     if (bar.__paused !== paused) {
       bar.__paused = paused;
       bar.classList.toggle('is-paused', paused);
+      // The attribute as well as the class. A reader that walks the accessibility tree sees every
+      // node whether or not CSS is drawing it, and a PAUSED chip sitting next to a LIVE chip in
+      // that tree says the opposite of what is on screen.
+      pausedChip.hidden = !paused;
+    }
+    const scrubbed = c.scrubbing;
+    if (bar.__scrubbed !== scrubbed) {
+      bar.__scrubbed = scrubbed;
+      bar.classList.toggle('is-scrubbed', scrubbed);
+    }
+    // The moment, spoken. A slider that says "minus one hundred and eighty" is no use to anybody,
+    // so the number is there because the pattern requires one and the text is the real answer.
+    const said = c.formatMoment() + (scrubbed ? ', ' + (c.viewOffsetMin > 0 ? 'a projection' : 'never simulated') : '');
+    if (ribbonSvg.__said !== said) {
+      ribbonSvg.__said = said;
+      ribbonSvg.setAttribute('aria-valuetext', said);
+      ribbonSvg.setAttribute('aria-valuenow', String(c.viewOffsetMin));
     }
   }
 
@@ -799,7 +1280,16 @@ function mountHud(root, world) {
       const cam = world.read('camera');
       if (cam && cam.mode === 'drone') return;
       e.preventDefault();
+      // Parked, and the clock reads zero because parking stops it: Space is the way back.
+      if (world.clock.scrubbing) { setSpeed(world.clock.speedBeforeScrub || 1); return; }
       setSpeed(world.clock.speedIndex === 0 ? 1 : 0);
+      return;
+    }
+    // Step through time. Free keys, checked against docs/KEYS.md, and recorded there.
+    if (e.code === 'Comma' || e.code === 'Period') {
+      e.preventDefault();
+      const dir = e.code === 'Comma' ? -1 : 1;
+      stepTime(dir * (e.shiftKey ? MINUTES_PER_DAY : 60));
       return;
     }
     const m = /^(?:Digit|Numpad)([0-4])$/.exec(e.code);
@@ -809,18 +1299,49 @@ function mountHud(root, world) {
 
   /* ---- update ----------------------------------------------------------- */
 
+  let curve = null;
+  let lastCurveMinute = null;
+  let lastMinute = -1;
+  let lastSparkScrub = null;
+  let lastTickSeen = world.clock.tick;
+
   // `tide.next` is recomputed on a day boundary, so its `inHours` is measured from that moment.
   // At mount the anchor is either boot (day 0, at the start minute) or the last midnight.
+  //
+  // Parking the clock is where this gets subtle, and it is worth the ten lines. A scrub across a
+  // midnight makes tide.js work its turns out again at the scrubbed moment, so the anchor follows
+  // and the sub-line and the sparkline are exact for the moment you are looking at. But coming
+  // back to the island's present puts the pre-scrub turn list back verbatim, because a scrub is a
+  // way of looking and must leave no residue. The anchor has to come back with it, or the bar
+  // reads a restored list against a scrubbed anchor: measured, that was the next high water
+  // reported forty minutes out at the island's own present, in the one condition cell that
+  // deliberately carries no HELD tag because the tide really is exact.
   let tideAnchor = world.clock.dayIndex === 0
     ? { dayIndex: 0, minuteOfDay: world.clock.startMinuteOfDay }
     : { dayIndex: world.clock.dayIndex, minuteOfDay: 0 };
+  let anchorBeforePark = null;
   world.bus.on('tide:day', () => {
+    if (world.clock.scrubbing && anchorBeforePark === null) anchorBeforePark = tideAnchor;
     tideAnchor = { dayIndex: world.clock.dayIndex, minuteOfDay: world.clock.minuteOfDay };
   });
-
-  let curve = null;
-  let lastCurveTick = -1;
-  let lastMinute = -1;
+  // Emitted by the time control the instant it has put the derived state back.
+  world.bus.on('clock:restored', () => {
+    if (anchorBeforePark !== null) { tideAnchor = anchorBeforePark; anchorBeforePark = null; }
+    lastCurveMinute = null;
+  });
+  // A load replaces every read model at once, including the tide's turn list, and tide.js restores
+  // its own `lastRecompute` with it. The list it comes back with was worked out on the last day
+  // boundary the saved island crossed, which is this day's midnight, or the moment the island
+  // opened if it never crossed one.
+  world.bus.on('world:loaded', () => {
+    const c = world.clock;
+    tideAnchor = c.dayIndex === 0
+      ? { dayIndex: 0, minuteOfDay: c.startMinuteOfDay }
+      : { dayIndex: c.dayIndex, minuteOfDay: 0 };
+    anchorBeforePark = null;
+    lastCurveMinute = null;
+    lastTickSeen = c.tick;
+  });
 
   function hhmm(minuteOfDay) {
     if (!isNum(minuteOfDay)) return '–';
@@ -837,6 +1358,10 @@ function mountHud(root, world) {
     const c = w.clock;
     // Layout reads force a reflow, so once a second rather than ten times a second.
     if ((gutterTick = (gutterTick + 1) % 10) === 0) reserveGutter();
+    // The island lived a moment, so whatever anchor tide.js is on now is the true one and any
+    // copy kept for a parking is void. This is the path a parked clock that gets ticked takes,
+    // which never reaches `clock:restored`.
+    if (c.tick !== lastTickSeen) { lastTickSeen = c.tick; anchorBeforePark = null; }
 
     /* time */
     setText(dateEl, c.formatDate().toUpperCase());
@@ -844,6 +1369,33 @@ function mountHud(root, world) {
     const season = c.season || ISLAND_SEASONS[0];
     setText(seasonEl, season.name);
     paintSpeed();
+
+    /* which kind of time this is, said three ways: the chip, the sentence, the ribbon */
+    const st = time ? time.status() : null;
+    const mode = modeWordFor(c, st);
+    setText(modeWord, mode.word);
+    setCls(modeEl, 'hud-mode has-tip tone-' + mode.tone);
+    if (flashText && performance.now() > flashUntil) flashText = '';
+    setText(rbStmt, flashText || mode.stmt);
+    rbStmt.classList.toggle('flashing', !!flashText);
+    if (st) {
+      const cu = st.catchup;
+      // `hidden` beside the class for the same reason the PAUSED chip carries it: an action that
+      // does not apply must be absent from the accessibility tree, not merely undrawn.
+      showBtn(btnPresent, !!st.scrubbing && !cu);
+      showBtn(btnCatch, !!st.scrubbing && st.offsetMin > 0 && !cu);
+      showBtn(btnStop, !!cu);
+      if (btnCatch.classList.contains('show')) {
+        setText(btnCatch, 'Live through it: ' + Math.round(st.offsetMin / TICK_MINUTES).toLocaleString('en-AU') + ' ticks');
+      }
+      if (cu) {
+        const left = cu.total - cu.done;
+        setText(btnStop, 'Stop: ' + left.toLocaleString('en-AU') + ' ticks to go'
+          + (cu.msPerTick ? ', about ' + Math.max(1, Math.round((left * cu.msPerTick) / 1000)) + ' s' : ''));
+        ribbonKey = '';
+      }
+      drawRibbon(st);
+    }
 
     /* conditions */
     // Sub lines are kept short enough that they never need an ellipsis. Whatever will not fit in
@@ -878,15 +1430,30 @@ function mountHud(root, world) {
     setCls(tideCaret, 'hud-caret' + (rising ? ' up' : slack ? ' flat' : ''));
     setTone(cTide, slack ? 'tone-dim' : '');
 
-    /* the tide curve. Rebuilt when the sim tick moves, which is at most ten times a second. */
-    if (c.tick !== lastCurveTick) {
-      lastCurveTick = c.tick;
+    /* The tide curve, rebuilt on a change of the moment being VIEWED, not of the tick.
+       It used to key on `c.tick`, and a scrub does not move the tick, so the sparkline and the
+       Tide cell's sub-line stayed on the island's present while the height above them followed the
+       scrub. Scrubbed six weeks, the bar read "high 1.81 m, 4h 50m" under an October date while
+       the tide system was publishing a low in forty five minutes, and the sparkline path was
+       byte-identical across a three month scrub. The Tide cell is deliberately the one condition
+       cell without a HELD tag, because the tide is exact at any moment you scrub to, so two thirds
+       of it being stale was the worst possible place for that bug to be.
+       The rebuild is 73 samples of a cosine and runs at most ten times a second, exactly as before. */
+    const viewedMinute = c.absoluteMinute;
+    if (viewedMinute !== lastCurveMinute) {
+      lastCurveMinute = viewedMinute;
       curve = buildTideCurve(w, tideAnchor, SPARK_FROM, SPARK_TO, 72);
       drawSpark();
     }
     if (c.minuteOfDay !== lastMinute) {
       lastMinute = c.minuteOfDay;
       drawSparkTicks();
+    }
+    // "Next 24 hours" from where? From the moment on the clock, which while parked is not now.
+    const sparkScrub = c.scrubbing ? (c.viewOffsetMin > 0 ? 'ahead' : 'back') : '';
+    if (sparkScrub !== lastSparkScrub) {
+      lastSparkScrub = sparkScrub;
+      setText(sparkKey, sparkScrub ? 'Tide, 24 hours from that moment' : 'Tide, next 24 hours');
     }
 
     const turn = curve && curve.nextTurn;
@@ -932,7 +1499,7 @@ function mountHud(root, world) {
 
     /* live tooltip refresh */
     if (tipSource) {
-      renderTip(tipSource.fn(w));
+      renderTip(specFor(tipSource));
       placeTip(tipSource.node);
     }
   }
@@ -942,7 +1509,10 @@ function mountHud(root, world) {
     // Six hours of warm up. Several systems publish a placeholder at init and compute the real
     // number on their first pass, and a track that recorded that would report an improvement
     // that nothing on the island did.
-    if (world.clock.tick >= WARMUP_TICKS) sampleTrack(f.track, absHour, value);
+    // Nothing is sampled while the clock is parked: these three figures are held at the island's
+    // present, so recording them against a scrubbed hour would draw a week of flat line for a week
+    // that has not happened.
+    if (world.clock.tick >= WARMUP_TICKS && !world.clock.scrubbing) sampleTrack(f.track, absHour, value);
     setText(f.val, isNum(value) ? fmt(value) : '–');
     const tr = trend(f.track);
     let dir = 'flat';
@@ -1077,6 +1647,14 @@ function mountHud(root, world) {
     health: () => islandHealth(world),
     tracks: () => Object.fromEntries(Object.entries(figNodes).map(([k, f]) => [k, f.track.vals.slice()])),
     speed: setSpeed,
+    /** What the bar is currently claiming about time, in the same words it puts on screen. */
+    timeStatement: () => {
+      const s = modeWordFor(world.clock, time ? time.status() : null);
+      return { chip: s.word, sentence: s.stmt, held: world.clock.scrubbing };
+    },
+    scrub: stepTime,
+    present: goPresent,
+    live: toggleLive,
     /** Repaint now. Panels normally update at 10 Hz, which a backgrounded tab throttles to a
      *  crawl, so a critic fast forwarding with TWIN.run needs a way to make the bar catch up. */
     tick: () => update(world),
@@ -1130,19 +1708,24 @@ function injectStyle() {
 /* The bar is the one piece of chrome that is always there, so it owns the top of the screen and
    publishes how much of it. Anything using the shared layout anchors docks below it. A panel that
    positions itself by hand should read var(--hud-height) rather than guess. */
-:root{ --hud-height:74px }
+:root{ --hud-height:94px }
 .anchor-tl,.anchor-tr,.anchor-tc{ top:calc(var(--hud-height) + var(--sp-3)) }
-@media (max-width:860px){ :root{ --hud-height:132px } }
+@media (max-width:860px){ :root{ --hud-height:154px } }
 
 .hud-bar{
-  position:fixed; top:0; left:0; right:0; height:74px; z-index:14;
+  position:fixed; top:0; left:0; right:0; height:94px; z-index:14;
   --hud-gutter:0px;
-  display:flex; align-items:stretch; padding:0 calc(14px + var(--hud-gutter)) 0 14px;
+  display:flex; flex-direction:column;
   color:var(--t); font:var(--fs-base)/1.35 var(--f-ui);
   background:linear-gradient(180deg, rgba(9,13,16,.93), rgba(12,17,20,.86));
   backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
   border-bottom:1px solid var(--edge);
   box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+/* The readouts. The time ribbon runs full width underneath them and is a row of its own. */
+.hud-main{
+  flex:1 1 auto; min-height:0; display:flex; align-items:stretch;
+  padding:0 calc(14px + var(--hud-gutter)) 0 14px;
 }
 /* No entry animation on the permanent chrome. A browser that starts the page in a background tab
    freezes CSS animations at their first keyframe, and an animation with fill-mode both then holds
@@ -1155,7 +1738,23 @@ function injectStyle() {
 
 /* ---- time block ---- */
 .hud-time{display:flex;flex-direction:column;justify-content:center;gap:3px;flex:0 0 auto;padding-right:2px}
-.hud-row1{display:flex;align-items:center;gap:8px;height:13px}
+.hud-row1{display:flex;align-items:center;gap:8px;height:14px}
+
+/* ---- the mode chip: the one-word answer to "is this real" ---- */
+.hud-mode{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;cursor:help;
+  font:700 9px/1 var(--f-ui);letter-spacing:.15em;padding:2.5px 6px;
+  border:1px solid transparent;border-radius:var(--r-pill)}
+.hud-mode-dot{display:block;flex:none;width:5px;height:5px;border-radius:50%;background:currentColor}
+.hud-mode.tone-sea{color:var(--sea);border-color:rgba(63,182,196,.5);background:rgba(63,182,196,.13)}
+.hud-mode.tone-iron{color:var(--iron);border-color:rgba(140,153,163,.32)}
+.hud-mode.tone-sun{color:var(--sun);border-color:rgba(240,180,41,.5);background:rgba(240,180,41,.13)}
+/* Live gets a halo round its dot; simulated gets a hollow one. Deliberately not an animation.
+   A repeating keyframe here would be the obvious choice and it is the wrong one: this project's
+   own handover tells every critic to call document.getAnimations().forEach(a => a.finish())
+   before measuring the interface, and finish() throws on an animation with no end. One breathing
+   dot would break the documented way of reading every panel in the build. */
+.hud-mode.tone-sea .hud-mode-dot{box-shadow:0 0 0 2.5px rgba(63,182,196,.22),0 0 8px rgba(63,182,196,.55)}
+.hud-mode.tone-iron .hud-mode-dot{background:transparent;box-shadow:inset 0 0 0 1.5px currentColor}
 .hud-row2{display:flex;align-items:center;gap:10px}
 .hud-date{font:600 10px/1 var(--f-ui);letter-spacing:.15em;color:var(--t-dim);white-space:nowrap;cursor:help}
 .hud-season{font:600 9.5px/1 var(--f-ui);letter-spacing:.13em;text-transform:uppercase;color:var(--sea);
@@ -1163,6 +1762,7 @@ function injectStyle() {
 .hud-paused{display:none;font:700 9.5px/1 var(--f-ui);letter-spacing:.16em;color:var(--t-on-accent);
   background:var(--sun);border-radius:var(--r-1);padding:3px 5px}
 .hud-bar.is-paused .hud-paused{display:inline-block;animation:fade-in .2s var(--ease) both}
+.hud-paused[hidden]{display:none}
 .hud-clock{font:300 25px/1 var(--f-num);color:var(--t-hi);font-variant-numeric:tabular-nums;
   letter-spacing:-.01em;min-width:88px;cursor:help}
 .hud-bar.is-paused .hud-clock{color:var(--sun)}
@@ -1178,6 +1778,60 @@ function injectStyle() {
 .hud-sp:focus-visible{outline:none;box-shadow:var(--glow-sea)}
 .hud-bar.is-paused .hud-sp.on{background:var(--sun);border-color:var(--sun);
   box-shadow:0 0 0 1px rgba(240,180,41,.3),0 0 14px rgba(240,180,41,.3)}
+.hud-sp.hud-live{font-size:9px;letter-spacing:.11em;min-width:36px;margin-right:3px}
+
+/* ---- the time ribbon ---- */
+.hud-ribbon{flex:0 0 20px;display:flex;align-items:center;gap:10px;
+  padding:0 calc(14px + var(--hud-gutter)) 0 14px;
+  border-top:1px solid var(--edge);background:rgba(4,7,9,.3)}
+.rb-stmt{flex:0 0 auto;max-width:38ch;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font:500 10px/1 var(--f-ui);letter-spacing:.02em;color:var(--t-dim);cursor:help}
+.rb-stmt.flashing{color:var(--sea)}
+.rb-svg{flex:1 1 auto;min-width:60px;height:18px;display:block;cursor:ew-resize;touch-action:none}
+.rb-svg.dragging{cursor:grabbing}
+.rb-svg:focus-visible{outline:none;box-shadow:var(--glow-sea)}
+.rb-track{fill:var(--s-sunk)}
+/* The two fills that carry meaning go through the palette tokens rather than a literal colour, so
+   the colour-vision setting in src/ui/panels/settings.js moves them with everything else it moves. */
+.rb-lived{fill:var(--sea);opacity:.2}
+.rb-ahead{fill:url(#twin-rb-hatch)}
+.rb-hatch{stroke:var(--sun);opacity:.34;stroke-width:1}
+.rb-tick{stroke:var(--edge);stroke-width:1}
+.rb-tick.day{stroke:var(--edge-strong)}
+.rb-lab{fill:var(--t-faint);font:8.5px var(--f-num)}
+.rb-pip{stroke-width:1}
+.rb-pip.lived{stroke:var(--sea)}
+.rb-pip-dot.lived{fill:var(--sea)}
+.rb-pip.real{stroke:var(--sand);stroke-dasharray:1.5 2;opacity:.8}
+.rb-pip-dot.real{fill:var(--sand)}
+.rb-pip-lab{font:8.5px var(--f-ui);letter-spacing:.05em}
+.rb-pip-lab.lived{fill:var(--sea)}
+.rb-pip-lab.real{fill:var(--sand);opacity:.85}
+.rb-caret-line{stroke:var(--t-hi);stroke-width:1.2;opacity:.9}
+.rb-caret-head{fill:var(--t-hi)}
+.hud-bar.is-scrubbed .hud-ribbon{background:rgba(240,180,41,.07);border-top-color:rgba(240,180,41,.4)}
+.hud-bar.is-scrubbed .rb-caret-line{stroke:var(--sun)}
+.hud-bar.is-scrubbed .rb-caret-head{fill:var(--sun)}
+.hud-bar.is-scrubbed .rb-stmt{color:var(--sun)}
+.rb-actions{display:flex;gap:5px;flex:0 0 auto}
+.rb-btn{display:none;appearance:none;border:1px solid var(--edge-strong);background:var(--s-sunk);
+  color:var(--t-dim);font:600 9.5px/1 var(--f-ui);letter-spacing:.05em;height:16px;padding:0 7px;
+  border-radius:var(--r-1);cursor:pointer;white-space:nowrap;
+  transition:background var(--fast) var(--ease),color var(--fast),border-color var(--fast)}
+.rb-btn.show{display:inline-flex;align-items:center}
+.rb-btn[hidden]{display:none}
+.rb-btn:hover{color:var(--t-hi);border-color:rgba(63,182,196,.55);background:rgba(63,182,196,.12)}
+.rb-btn:focus-visible{outline:none;box-shadow:var(--glow-sea)}
+
+/* ---- held: a number that belongs to a different moment says so ---- */
+.hud-bar.is-scrubbed .hud-held .v,
+.hud-bar.is-scrubbed .hud-held .fig-val,
+.hud-bar.is-scrubbed .hud-held .fig-delta{color:var(--t-faint)}
+.hud-bar.is-scrubbed .hud-held .s{color:rgba(109,118,124,.62)}
+.hud-bar.is-scrubbed .hud-held .fig-line,
+.hud-bar.is-scrubbed .hud-held .fig-arrow,
+.hud-bar.is-scrubbed .hud-held .hud-arrow{opacity:.22}
+.hud-bar.is-scrubbed .hud-held .k::after{content:' HELD';color:var(--sun);font-weight:700;letter-spacing:.1em}
 
 /* ---- dividers ---- */
 .hud-div{flex:0 0 1px;width:1px;align-self:center;height:40px;background:var(--edge);margin:0 12px}
@@ -1262,12 +1916,16 @@ function injectStyle() {
 @media (max-width:1480px){ .hud-figs{gap:12px} .hud-fig{min-width:92px} .hud-div{margin:0 10px} }
 @media (max-width:1300px){ .hud-spark,.spark-div{display:none} }
 @media (max-width:1040px){ .hud-conditions{gap:12px} .hud-cell .s{max-width:96px} }
+@media (max-width:1120px){ .rb-stmt{max-width:26ch} }
 @media (max-width:860px){
-  .hud-bar{height:auto;flex-wrap:wrap;padding:8px 10px;gap:8px}
+  .hud-bar{height:auto}
+  .hud-main{flex-wrap:wrap;padding:8px 10px;gap:8px}
   .hud-div{display:none}
   .hud-conditions{order:3;flex-basis:100%;gap:14px}
   .hud-figs{order:2;margin-left:auto}
   .hud-clock{font-size:21px;min-width:74px}
+  .hud-ribbon{padding:0 10px}
+  .rb-stmt{max-width:18ch}
 }
 `;
   document.head.appendChild(s);

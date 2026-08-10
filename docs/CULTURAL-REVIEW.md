@@ -66,8 +66,9 @@ The project has recorded the variation rather than picking winners.
 all or just use one.
 
 ### A4. Should there be a Quandamooka seasonal calendar in the clock?
-**Affects:** `src/kernel/clock.js` lines 20 to 44 (the cultural note starts at line 23, the season array
-at line 37); `data/lore.json` line 362
+**Affects:** `src/kernel/clock.js`, the block introduced by the comment `Island seasons` (the cultural
+note starts at the line reading `CULTURAL NOTE, read before touching this block`, at line 68 as at
+10 August 2026, and the season array `ISLAND_SEASONS` at line 82); `data/lore.json` line 362
 (`language.seasonal_calendar`); `data/lore.json` line 350 (`language.banned_tokens`).
 
 **This has already been fixed once and the fix needs checking.** An earlier version of
@@ -76,8 +77,18 @@ memory. None could be sourced. One was demonstrably misused: *yalingbila* is pub
 whale, in the QYAC and University of Queensland project *Yalingbila Bibula* at Mooloomba, and it was
 being used as the name of a hot wet season. All six names have been deleted, the export has been renamed
 from `QUANDAMOOKA_SEASONS` to `ISLAND_SEASONS`, and the seasons are now plain descriptive English
-(High summer, Late summer, Cooling, Cold and clear, Warming, Building storms) with markers drawn from
-the sourced seasonal calendar in `data/ecology.json`.
+(High summer, Late summer, Cooling, Cold and clear, Warming, Building storms).
+
+**Corrected 10 August 2026, second pass.** The sentence above used to end "with markers drawn from
+the sourced seasonal calendar in `data/ecology.json`", and the code comment said the same. Most were;
+four short weather phrases were not, and had been written by the same hand that wrote the season
+names. A critic checked the list against the pack line by line and found them. Each band now carries
+its two kinds of claim on separate fields rather than run together in one string: `markers` are the
+ecological claims and every one of them traces to `data/ecology.json seasonal_calendar`, and
+`weather` is one phrase of ordinary south-east Queensland climate description, labelled as such
+where a player reads it, matched to what this build's own weather model is weighted toward in that
+season. One phrase, "Lakes full", was neither and has been deleted rather than relabelled. This is a
+factual accuracy correction and it changes nothing about what is asked below.
 
 No published Quandamooka seasonal calendar was found anywhere: not in QYAC's publications, not in
 Queensland Government material, not in the Bureau of Meteorology's Indigenous Weather Knowledge
@@ -230,8 +241,8 @@ agencies, not about QYAC's competence, and the twin must not present it as a cri
 
 ### B12. Cultural burning
 **Affects:** `data/ecology.json` line 1249 (`proc-fire-regime.cultural_burning`); `data/civic.json`
-line 1381 (`planned-burn-extent`); `src/kernel/clock.js` line 39, where the Cooling season marker says
-"Planned burn season opens".
+line 1381 (`planned-burn-extent`); `src/kernel/clock.js`, the `cooling` entry in `ISLAND_SEASONS`
+(line 85 as at 10 August 2026), where the marker says "Planned burn season opens".
 
 Research indicates the island's large old cypress pines reflect a long history of cultural burning with
 mild fires, and that their survival depends on the practice continuing. QYAC leads the island's bushfire
@@ -402,6 +413,172 @@ shown in its place.
 **Ask:** confirm that carrying these events as civic load at all is wanted, and that the attendance
 and strain estimates being visibly labelled as estimates is enough.
 
+### G4. What changed on 10 August 2026, and four new questions with it
+**Affects:** `data/events.json`, `src/systems/agents/calendar.js`, `src/systems/agents/events.js`,
+`src/systems/agents/visitors.js`, `src/ui/panels/events.js`.
+
+The calendar slice was widened from twenty-seven events to thirty-six, and for the first time the
+pack drives the simulation rather than only the board: a record in `data/events.json` now puts
+people on a boat, on a beach and in a shop. G2 and G3 above still describe the handling correctly
+and nothing in them was relaxed. Four things are new and each is a question rather than a decision.
+
+**G4a. MMEIC is now named as an organiser, with a council grant recorded beside it.**
+`goompi-naidoc-film-celebration` previously read "Listed with MMEIC and Redlands Coast". It now
+names the Minjerribah Moorgumpin Elders-in-Council Aboriginal Corporation as the organiser and
+records, from a July 2026 Redlands Coast Today report, that Redland City Council awarded Community
+Celebration Grants funding to MMEIC to hold Goompi NAIDOC community celebrations, and that MMEIC
+will hold three events including a community film celebration and dinner. The record holds the
+date, the place, the crowd, the power for a screen and the car park, and nothing else. The report
+goes on to describe the programme of those events; that sentence was deliberately not carried, and
+the two events with no public listing of their own are not in the pack at all.
+
+**Ask:** is naming MMEIC as the organiser of a publicly advertised, publicly funded event wanted,
+and is stopping at "a community film celebration and dinner" the right place to stop? The rule this
+was written to is that an organisation's publicly advertised events may be listed exactly as
+advertised, and that nothing about its views, decisions, internal workings or knowledge may be
+represented. A reviewer should check that the line held.
+
+**G4b. The mainland NAIDOC celebration is recorded in a note and not as an event.**
+The Redlands Coast NAIDOC Cultural Celebration at Raby Bay Harbour Park, Cleveland, on Sunday 5 July
+2026, run by Redland City Council in partnership with Yulu-Burri-Ba Aboriginal Corporation, is off
+the island. It is in a `notes` field on the island record because it pulls islanders the other way,
+onto an early Sunday boat out, which is a transport load this simulation has no way to represent.
+No performer, no programme and no content is carried.
+
+**Ask:** should an off-island event appear in an island pack at all, even as a note about transport?
+
+**G4c. A youth gathering advertised on Quandamooka Country was left out.**
+A two-day ticketed youth gathering at the Minjerribah Camping ground on 18 and 19 July 2026 appears
+in the owner's public event atlas from a ticketing platform. Its title names Quandamooka Country and
+the listing does not name an organiser this project could verify. `PUBLIC_BOUNDARY.md` in
+`quandamooka-country-events-engine` says not to treat guessed catalogue data as consent and not to
+imply an authority that has not been granted, and that document governs this material. It is in the
+pack's `left_out` list with that reason.
+
+**Ask:** was that the right call, or is a publicly ticketed event fair to list on its dates alone?
+
+**G4d. `quandamooka-family` is now a share of a modelled crossing.**
+`data/events.json` has always carried `quandamooka-family` as one of ten visitor archetypes in the
+`archetype_mix` of several events, describing who the crowd is. Until this pass that mix was
+displayed and nothing more. It now feeds the visitor model: a share of an event's crowd becomes
+arrivals who take a seat on a boat.
+
+What the build does with that share is deliberately nothing beyond the seat. Those arrivals are
+mapped onto the same unlabelled generic visitor archetypes as everybody else, carry no field, no
+label, no name pool, no behaviour and no cultural attribute of any kind, and the archetype id never
+reaches a player-facing string. This is the same handling as `R2` above, for the same reason:
+`no-aboriginal-characters-with-invented-culture` is blocking, and modelling the crossing load is a
+transport fact while modelling who those people are is not this project's to do. The reasoning is
+written into the header of the mapping table in `src/systems/agents/visitors.js`.
+
+**Ask:** should that archetype drive arrivals at all, or should its share be folded into the
+undifferentiated visitor draw so the question does not arise? The safest alternative is to zero its
+increment share in `sim_defaults.event_visitor_increment.by_archetype`, which is one number in a
+data file and would understate the crossing load on those days rather than overstate anything.
+
+**G4e. A heritage walk and a burn season entered the pack.**
+`goompi-heritage-walk`, a guided walk advertised by the North Stradbroke Island Museum on
+Minjerribah, is carried with a `cultural_handling` note holding it to the date, the group size and
+the starting point, because the history of that township includes the protection era, which **B5**
+holds open. `planned-burn-season` records the publicly notified hazard reduction season, reported as
+led by QYAC on the island, and holds the months, the notification and the smoke. Neither carries a
+route, a stop, an interpretation or any account of practice, and **B12** is unchanged: the knowledge
+behind fire on this Country is not in this project and is not modelled.
+
+**Ask:** confirm both, and in particular confirm that recording a burn season as a civic period,
+with QYAC named as the body reported to lead it, sits on the right side of the line drawn at B12.
+
+---
+
+## N. From the connector layer (10 August 2026)
+**Affects:** `tools/connectors/`, `data/feeds/`, `docs/CONNECTORS.md`.
+
+The connector layer reads real island sources into committed feeds and writes drafts back out.
+Five items from building it belong on this queue. None of them is approved and none is rendered to
+a player.
+
+### N1. Six publicly advertised events with a Quandamooka or First Nations subject are in a feed
+**Affects:** `data/feeds/_events-engine.json`, the records flagged in its `cultural_flags` block.
+
+The Quandamooka Country Events Engine's public event atlas lists them. Six are flagged by
+`tools/connectors/events-engine.mjs`: they name a cultural event, a Quandamooka organisation, or
+Country. Each is carried as **the date, the place, the event name and who listed it, exactly as
+advertised, and nothing else**. For those six the atlas's own descriptive summary, its load tags and
+its movement note are all dropped, because a description of what happens at a cultural event is not
+this project's to hold. Two of the six were listed through MMEIC or QUAMPI; naming a listing source
+is naming who advertised it, and is not a claim about anything either body holds.
+
+**Ask:** confirm that carrying a publicly advertised cultural event as a date, a place and a listing
+source is wanted at all, and confirm the wording of the note the emission puts under any screen
+digest containing one, which currently reads: do not add a description, a programme or anything
+about what happens at it.
+
+### N2. Straddie News is refused, and the refusal is worth a human reading
+**Affects:** `tools/connectors/refusals.mjs`, `checkStraddieNews`.
+
+`githublocal\straddie-news` is a strategy dashboard whose own footer calls it an internal research
+document. Its main table is a stakeholder map, and two of its entries are QYAC and MMEIC, each with a
+characterisation of the relationship and a strategy field for handling it. No connector reads it, and
+`refusals.mjs` re-reads it every run to check the disqualifying material is still there rather than
+holding the refusal as a memory.
+
+**Ask:** nothing of QYAC or MMEIC. This is recorded so that a future agent who finds that repository
+finds the refusal first, and so that a human who wants island news in the twin knows the route is a
+public story feed and not that document.
+
+### N3. Minjerribah Camping and the QYAC rangers are defined and deliberately not built
+**Affects:** `tools/connectors/registry.mjs`, entries `minjerribah-camping` and `qyac-rangers`.
+
+Both would be genuinely useful. Camping occupancy is the missing half of the visitor model, and a
+track closure changes what the twin should say about a walk. Both are QYAC. A connector that read
+either without asking would be this project taking data from a Traditional Owner organisation, which
+`docs/DIRECTION.md` rules out under no surveillance-shaped anything. Neither has a reader and neither
+has a guessed feed.
+
+**Ask:** these sit behind A1. If and when there is a conversation, the question for camping is
+whether nightly site counts and closures are welcome and in what form, and the question for rangers
+is whether ranger activity should appear at all. The line this project already holds stands either
+way: a closure is a closure and a date, and nothing about fire practice on this Country enters
+through any route, including a connector. B12 holds that one.
+
+### N4. A coarsening ruling is wanted, and the people who can give it are not us
+**Affects:** `tools/connectors/wildlife-rescue.mjs`, `coarsen()` in `tools/connectors/lib.mjs`.
+
+Wildlife records are rounded to about 110 m and to the hour before anything is written, and reporter
+names, phone numbers and free-text notes are dropped entirely. That floor was set by this project
+from `docs/PARTICIPATION.md` and nobody with local knowledge has looked at it.
+
+**Ask:** Wildlife Rescue Minjerribah, on which animal groups should carry a pin at all and which
+should carry only a township. And for anything on Country, A1 comes first.
+
+### N5. QYAC and MMEIC are on the noticeboard connector's wanted list, as names and nothing else
+**Affects:** `data/feeds/_noticeboard.json`, the two entries in its `cultural_flags` block, and
+`screenWanted()` in `tools/connectors/lib.mjs`.
+
+The Straddie Noticeboard Network's research pass names 164 island organisations, and QYAC and MMEIC
+are two of them. Neither carries a researched profile, so neither becomes a record. Both become
+wanted-list entries, which is this layer's word for an organisation that is real, is named, and has
+been asked nothing by anybody.
+
+Each entry now carries **the organisation's name, its category and township as the source recorded
+them, the sentence that nobody has asked it anything, and a handling note**. What the source
+repository guessed each might one day share has been dropped, because a guess about what a body
+would supply reads as that body's intention. Both are flagged so this queue sees them.
+
+Two things are worth a human knowing about how this arrived. It was a hole: for one round the wanted
+list was written into a committed feed without passing the screen at all, so these two entries sat
+in a public file carrying the source's guess and no flag. And when the screen was first extended
+over it, the entries were held rather than flagged, because the connector names a gap
+`nb-want-<organisation>` and "want" reads as a position verb, so two Traditional Owner organisations
+were quietly dropped off the list of organisations nobody has asked. Both are fixed and both are
+checked on every run.
+
+**Ask:** whether either organisation should be named on a public list of organisations this project
+has not spoken to at all. Naming an organisation nobody has asked is honest about a gap and it is
+still naming somebody in a file they have not seen. A1 stands over this one, and if the answer is
+that neither should be listed, the entries come out and the count says two were removed rather than
+the list quietly shortening.
+
 ---
 
 ## D. Machine checks that back this file up
@@ -485,3 +662,55 @@ Two things it raised that belong to a reviewer rather than to a tool:
    project should have.
 
 `docs/INGEST.md` is how the harness works and how to extend it.
+
+---
+
+## E. Opening hours, and who is not a shopfront (10 August 2026)
+
+### E1. The open sign came off QYAC and MMEIC, and the reason it should stay off
+**Affects:** `data/businesses.json`, records `qyac` and `mmeic`; `src/systems/economy/hours.js`
+(`HOURS_POSTURE`); `src/systems/economy/businesses.js` (the gate at the top of the open loop).
+
+Until this pass both records carried a Monday to Friday office roster that nobody had published, and
+the inspector drew a live open-or-shut chip from it. A critic named it exactly: a card reading SHUT
+over the Minjerribah Moorgumpin Elders-in-Council is the twin describing how an Elders' council runs,
+which is the one thing this project is not allowed to do.
+
+Both records now carry `hours_posture: "organisation"`, and a record that is not a shopfront is never
+entered into the open-or-shut model at all. Its `open` is null for the life of the run, not false.
+
+QYAC publishes no office hours on its own site, checked 10 August 2026, so its record carries
+`basis: "none"`: seven unverified days and no guess. **MMEIC does publish office hours**, on its own
+site, as Monday, Wednesday and Friday, 9am to 3pm. Those are carried exactly as published, with the
+URL and the date, and the other four days are left unverified because the site says nothing about
+them. Nothing is computed from them.
+
+The judgement worth a human's eye is that second one. The instruction this pass was given said to set
+every weekday on both records to unverified. It was not followed for MMEIC, and the reason is that
+blanking a fact the corporation itself published would have replaced an invented roster with a
+different kind of inaccuracy. Carrying their own three days from their own page is the smaller true
+claim. **If MMEIC would rather the twin held nothing at all, that is their call and not this
+project's**, and the change is one line in the pack.
+
+**Ask:** whether QYAC and MMEIC want to be in this pack at all, and if so, whether the office hours
+MMEIC publishes should appear in the twin or whether the record should hold nothing.
+
+### E2. QUAMPI has no published hours and none have been invented
+**Affects:** `data/businesses.json`, record `quampi`.
+
+The Quandamooka Arts and Culture Centre is a real gallery with a cafe and a shop and it does have
+opening hours; no source found on 10 August 2026 publishes them, including the Queensland Government
+tourism listing the record cites. The record previously carried a guessed Tuesday-to-Sunday week.
+
+It is Quandamooka owned and operated, so guessing its week is guessing at an operating detail of a
+QYAC business. The week is now empty, `basis: "none"`. This is the one gap in the pack that a single
+phone call would close, and it should be closed by a person asking rather than by an agent searching.
+
+**Ask:** QUAMPI's opening hours, from QUAMPI.
+
+### E3. What is still not asked of anybody
+`data/businesses.json` holds a `hours_posture` on twenty-four records: eleven organisations, seven
+on-call services and five transport operators, plus the school. None of them is asked whether it is
+open. That list is a judgement about what kind of thing each body is, made by an agent, and it is
+worth a reader's eye. It is checked mechanically by `node tools/hours-envelope.mjs`, which fails the
+build if a record that is not a shopfront ever carries a guessed week again.

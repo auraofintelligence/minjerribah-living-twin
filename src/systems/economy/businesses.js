@@ -44,9 +44,13 @@
 
 import {
   clamp, lerp, Rolling, sectorOf, TRADING_SECTORS, CATEGORY_SECTORS, CATEGORIES,
-  BAND_TICKET, COST_OF_SALES, OVERHEAD_MULTIPLIER, parseHours, openAt, hourWeight, townshipIdFor,
+  BAND_TICKET, COST_OF_SALES, OVERHEAD_MULTIPLIER, hourWeight, townshipIdFor,
   TOWNSHIP_IDS, STOCK_LINES, stockLinesFor
 } from './common.js';
+import {
+  compileHours, weekFor, dayFor, openAt, kitchenOpenAt, weeklyHours, hoursCard,
+  EXPOSURE, weatherClosure, kitchenShortened
+} from './hours.js';
 import { makeCalendar } from '../agents/calendar.js';
 
 /* ------------------------------------------------------------------ resident demand
@@ -158,6 +162,25 @@ export function registerBusinesses(world) {
       + 'the multipliers and most hours as estimates. Every dollar figure here is modelled.',
     counts: { total: 0, trading: 0, unconfirmed: 0, closed: 0, proposed: 0, trading_now: 0 },
     openNow: 0,
+    /** Every premises with its door open, trading or not: the museum, the clinic, the waste centre
+     *  and the surf school all keep hours and none of them takes money in this model. */
+    doorsOpenNow: 0,
+    /** Of the ones open right now, how many are open on hours somebody actually published. This is
+     *  the number that makes "34 open now" mean something: the rest is the simulation's own guess
+     *  about a real street and the interface has to say so. */
+    openOnPublishedHours: 0,
+    openOnEstimatedHours: 0,
+    kitchensOpenNow: 0,
+    shutByWeatherNow: 0,
+    /** How the whole pack's hours are sourced. Counted off disk at build, never asserted. */
+    hoursProvenance: { published: 0, listed: 0, estimate: 0, none: 0, neverChecked: 0, notAskedOpenShut: 0 },
+    hoursReviewed: null,
+    /** Which businesses are trading this minute, for anything deciding where to send somebody.
+     *  A Set, rebuilt in place each tick, so a caller never allocates to ask. */
+    openIds: new Set(),
+    kitchenOpenIds: new Set(),
+    isOpen: () => false,
+    isKitchenOpen: () => null,
     bySector: {},
     byTownship: {},
     revenueTodayA$: 0,
@@ -197,6 +220,8 @@ export function registerBusinesses(world) {
   const stockout30 = new Rolling(30);
   let dayRevenue = 0, dayWages = 0, dayCost = 0, dayLost = 0, dayStockouts = 0, dayDrawings = 0;
   let residentsByTownship = {};
+  /** Reused every tick so the weather check allocates nothing in the hot loop. */
+  const env = { windKt: 0, swellM: 0, rainMmHr: 0, beachDrivingOpen: null };
   /** Sim-days left before the stock model trusts its own read of a business's daily trade. */
   let warmupDays = 14;
 
@@ -220,9 +245,8 @@ export function registerBusinesses(world) {
       // Lookout's, and put it in permanent strain for no reason a local would recognise.
       const servesIslandWide = /camping-operator|tour-operator|surf-school|walking-tour|vehicle-hire|veterinary|^market$/.test(b.type)
         || b.township === 'Island-wide';
-      const hours = parseHours(b.typical_hours);
-      let weeklyOpenHours = 0;
-      for (const d of hours.days) if (d.open != null) weeklyOpenHours += (d.close - d.open) / 60;
+      const hours = compileHours(b.typical_hours, b.hours_posture);
+      const weeklyOpenHours = hours.weeklyOpenHours;
       const lines = trades ? stockLinesFor(sector, b.type) : null;
 
       const rec = {
@@ -243,6 +267,18 @@ export function registerBusinesses(world) {
         note: b.note || null,
         hours,
         hoursBasis: hours.basis,
+        hoursPosture: hours.posture,
+        // Whether this record is even asked the question. False for the Elders' council, the
+        // Traditional Owner corporation, the ambulance stations, the halls, the ferry lines and
+        // anything with no week from anybody. See HOURS_POSTURE in hours.js.
+        answersOpenShut: hours.answersOpenShut,
+        hoursSource: hours.source,
+        hoursSourceKind: hours.sourceKind,
+        hoursChecked: hours.checked,
+        hoursConfidence: hours.confidence,
+        // What the weather can even take off this business. Null for anything with a roof and a
+        // door. See EXPOSURE in hours.js: this is modelled and is labelled modelled everywhere.
+        exposure: EXPOSURE[b.type] || null,
         weeklyOpenHours: Math.max(6, weeklyOpenHours),
         employs,
         scale,
@@ -252,7 +288,13 @@ export function registerBusinesses(world) {
         trades,
 
         // runtime
-        open: false,
+        // null, not false, and it stays null for the whole run on anything the twin does not get
+        // to have an opinion about. Nothing downstream may turn that null into a shut sign.
+        open: hours.answersOpenShut ? false : null,
+        kitchenOpen: null,         // null when no separate kitchen is published: not a claim either way
+        week: null,                // which published week applies today, and why
+        shutReason: null,          // set only when something other than the clock has shut the doors
+        stretchMin: 0,             // the modelled summer stretch, see newDay()
         stockArr: null,
         sfHosp: 1, sfGroc: 1, sfFuel: 1, sfOther: 1,
         hoursCutPct: 0,
@@ -330,8 +372,52 @@ export function registerBusinesses(world) {
     }
     state.counts.trading_now = B.filter((r) => r.trades).length;
     state.notes.push(`${state.counts.unconfirmed} of the ${state.counts.total} records carry status trading-unconfirmed in the pack. They trade in this simulation and they are marked unconfirmed everywhere they surface.`);
-    const est = B.filter((r) => r.hoursBasis === 'estimate').length;
-    state.notes.push(`${est} businesses have modelled trading hours. data/businesses.json says these must not be shown to a player as published hours.`);
+
+    // The traceability line, and the reason this system exists in the shape it does. Counted from
+    // the pack rather than asserted, so it cannot drift away from what is actually on disk.
+    for (const r of B) {
+      if (r.status === 'closed') continue;
+      state.hoursProvenance[r.hoursBasis] = (state.hoursProvenance[r.hoursBasis] || 0) + 1;
+      if (r.hoursBasis === 'estimate' && !r.hoursChecked) state.hoursProvenance.neverChecked++;
+      if (!r.answersOpenShut) state.hoursProvenance.notAskedOpenShut++;
+    }
+    const p = state.hoursProvenance;
+    // Two sentences, and the second one is a promise the interface has to keep. It used to read
+    // "an estimate is never shown to a player as a trading hour" while the inspector drew seven
+    // estimated days under a heading reading THE WEEK, which made the pack's claim bigger than the
+    // build's behaviour. It now says what actually happens, and tools/hours-envelope.mjs fails the
+    // gate if the pack and the code stop agreeing about it.
+    state.notes.push(`${p.published || 0} businesses carry opening hours the business published itself and `
+      + `${p.listed || 0} carry hours a council, tourism body or directory published. ${p.estimate || 0} are `
+      + `estimates, ${p.neverChecked} of which nobody has looked for, and ${p.none || 0} carry no week at all.`);
+    state.notes.push(`Open or shut is a claim about the island for the ${(p.published || 0) + (p.listed || 0)} with `
+      + `published or listed hours and for nobody else. An estimate still runs the simulation, because 2,069 people `
+      + `have to be somewhere, but it is shown as the twin's own pattern in one line and never drawn as a week. And `
+      + `${p.notAskedOpenShut} records are never asked the question at all, because an Elders' council, a `
+      + `Traditional Owner corporation, an ambulance station, a hall, a school and a ferry line do not open and `
+      + `shut.`);
+  }
+
+  /* -------------------------------------------------------------- which week applies today
+
+  Chosen once a day, not once a tick. The published week, a school-holiday week, an Easter week or a
+  named public holiday, whichever the business itself published, plus one modelled stretch. */
+
+  function chooseWeeks(w, info) {
+    const month = w.clock.month;
+    const dayInfo = info.month === undefined ? Object.assign({ month }, info) : info;
+    for (const rec of B) {
+      rec.week = weekFor(rec.hours, dayInfo, month);
+      // The modelled summer stretch, and it is modelled: an island cafe that publishes nothing does
+      // not shut at two o'clock on the fourth of January the way it does on the fourth of June, and
+      // no listing anywhere says by how much. Only estimates get it, because a business that
+      // published a week has already told us what it does in January and it is not ours to extend.
+      rec.stretchMin = 0;
+      if (rec.hours.isEstimate && rec.trades && (rec.sector === 'hospitality' || rec.sector === 'retail')) {
+        if (info.schoolBlock === 'summer') rec.stretchMin = 60;
+        else if (info.isSchoolHoliday || info.isLongWeekend) rec.stretchMin = 30;
+      }
+    }
   }
 
   /* -------------------------------------------------------------- seeding stock */
@@ -378,6 +464,15 @@ export function registerBusinesses(world) {
   function newDay(w) {
     const info = cal.day(w.clock.date);
     const dow = w.clock.dayOfWeek;
+    // Which week each business is running today. Once a day, because a school holiday does not
+    // start halfway through a Tuesday.
+    chooseWeeks(w, info);
+    state.day = {
+      iso: info.iso,
+      publicHoliday: info.isPublicHoliday ? info.holidayName : null,
+      schoolHolidays: info.isSchoolHoliday ? info.schoolBlock : null,
+      longWeekend: info.longWeekendAnchor || null
+    };
     const pop = w.read('population') || {};
     residentsByTownship = {};
     for (const t of TOWNSHIP_IDS) {
@@ -613,6 +708,39 @@ export function registerBusinesses(world) {
       newDay(w);
       lastDay = w.clock.dayIndex;
       state.ready = B.length > 0;
+      state.hoursReviewed = (w.data.businesses && w.data.businesses.hours_last_reviewed) || null;
+      state.isOpen = (id) => state.openIds.has(id);
+      state.isKitchenOpen = (id) => {
+        const rec = byId.get(id);
+        return rec ? rec.kitchenOpen : null;
+      };
+      /**
+       * Everything a panel needs to answer "is it open, who says so and when did anybody last
+       * look". Built on a click and never in a tick: it walks the week and allocates.
+       */
+      state.hours = (id) => {
+        const rec = byId.get(id);
+        if (!rec) return null;
+        const info = cal.day(w.clock.date);
+        const month = w.clock.month;
+        // The week that applies today, tomorrow, the day after: enough to answer "when does it
+        // open again" across a holiday boundary rather than assuming this week runs forever.
+        const weekOf = (step) => (step === 0 ? rec.week
+          : weekFor(rec.hours, Object.assign({ month }, cal.day(new Date(w.clock.date.getTime() + step * 86400000))), month));
+        const card = hoursCard(rec.hours, weekOf, w.clock.dayOfWeek, w.clock.minuteOfDay, {
+          exposure: rec.exposure,
+          shutReason: rec.shutReason,
+          kitchenShort: rec.kitchenShortNote || null,
+          hoursCutPct: rec.hoursCutPct,
+          winterClosed: rec.winterClosed,
+          stretchMin: rec.stretchMin,
+          note: 'Weather, an early close to save wages, a quiet-season shutdown and the stretch a '
+            + 'shop puts on in January are all modelled here. Nobody publishes any of them.'
+        });
+        card.open = rec.open;
+        card.kitchenOpen = rec.kitchenOpen;
+        return card;
+      };
       state.card = (id) => {
         const rec = byId.get(id);
         if (!rec) return null;
@@ -620,8 +748,19 @@ export function registerBusinesses(world) {
           id: rec.id, name: rec.name, alsoKnownAs: rec.alsoKnownAs, type: rec.type, sector: rec.sector,
           township: rec.townshipLabel, status: rec.status, confidence: rec.confidence,
           priceBand: rec.priceBand, role: rec.role, source: rec.source, note: rec.note,
+          // Whether there is a till behind the door at all. The museum, the clinic, the waste
+          // centre, an Elders' council and a volunteer brigade are all in this pack and none of
+          // them takes money in this model, so a panel drawing A$0 takings and asking whether they
+          // can keep trading is asking a question about them that does not apply.
+          trades: rec.trades,
           hoursBasis: rec.hoursBasis === 'estimate' ? 'modelled, not published trading hours' : rec.hoursBasis,
-          openNow: rec.open, hoursCutPct: rec.hoursCutPct, winterClosed: rec.winterClosed,
+          hoursPosture: rec.hoursPosture,
+          // The header chip reads this and nothing else. Null means there is no sign to hang.
+          answersOpenShut: rec.answersOpenShut,
+          hoursSource: rec.hoursSource, hoursSourceKind: rec.hoursSourceKind,
+          hoursChecked: rec.hoursChecked, hoursConfidence: rec.hoursConfidence,
+          openNow: rec.open, kitchenOpen: rec.kitchenOpen, shutReason: rec.shutReason,
+          hoursCutPct: rec.hoursCutPct, winterClosed: rec.winterClosed,
           staff: {
           needed: rec.staffNeeded, filled: rec.staffed, fillRate: +rec.fillRate.toFixed(2),
           band: rec.employs, onShiftNow: Math.round((rec.onShift || 0) * 10) / 10,
@@ -660,28 +799,103 @@ export function registerBusinesses(world) {
       const dow = w.clock.dayOfWeek;
       const prices = w.read('prices') || {};
       const tour = w.read('tourism') || {};
+      // What the weather and the tide are doing to anybody trading out of doors. Read defensively:
+      // this file has to run on its own, and a missing weather system means nothing is weathered
+      // out rather than everything is.
+      const weather = w.read('weather');
+      const sched = w.read('schedule');
+      env.windKt = weather ? (weather.windKt || 0) : 0;
+      env.swellM = weather ? (weather.swellM || 0) : 0;
+      env.rainMmHr = weather ? (weather.rainMmHr || 0) : 0;
+      env.beachDrivingOpen = sched && sched.beachDrivingOpen !== undefined ? sched.beachDrivingOpen : null;
       const freightIdx = prices.freightIndex || 1;
       const premium = (prices.premium && prices.premium.total) || 20;
 
-      // --- who is open
-      let openNow = 0;
+      // --- who is open.
+      //
+      // Four things in order, and the order is the point. The published week decides the door. The
+      // modelled layer can only ever shut it: a business is never open at an hour nobody published
+      // it open at, because that would be the simulation inventing trade on a real street.
+      let openNow = 0, openPublished = 0, openEstimated = 0, kitchensOpen = 0, shutByWeather = 0, doorsOpen = 0;
+      const openIds = state.openIds, kitchenIds = state.kitchenOpenIds;
+      openIds.clear();
+      kitchenIds.clear();
       for (let i = 0; i < B.length; i++) {
         const rec = B[i];
-        if (!rec.trades) { rec.open = false; continue; }
-        if (rec.winterClosed) { rec.open = false; continue; }
-        let open = openAt(rec.hours, dow, minute);
-        if (open && rec.hoursCutPct > 0) {
-          // A place cutting hours takes them off the late end, which is where the wage cost is.
-          const d = rec.hours.days[dow];
-          if (d && d.open != null) {
-            const span = d.close - d.open;
-            if (minute >= d.close - span * (rec.hoursCutPct / 100)) open = false;
+        rec.kitchenOpen = null;
+        // The door is a different question from the till. A surf school, the museum, the health
+        // service and the waste centre all open and shut on published hours and none of them takes
+        // money in this model, and answering "is it open" with "it has no price band" would be a
+        // modelling artefact showing through as a lie about a real place.
+        //
+        // A business that has closed for good is genuinely shut and says so. That is a fact about
+        // the island, not a gap in the record, so it is settled before the gate below.
+        if (rec.status === 'closed' || rec.status === 'proposed') { rec.open = false; rec.shutReason = null; continue; }
+        // 0. is this even a question. The Elders' council, the Traditional Owner corporation, the
+        //    ambulance stations, the halls, the ferry lines and every record with no week from
+        //    anybody leave the model here, before a single comparison is made, and their `open`
+        //    stays null for the life of the run. This is a gate at the top of the loop rather than
+        //    a filter on the way out, because a value that is never computed cannot leak.
+        if (!rec.answersOpenShut) continue;
+        if (rec.winterClosed) { rec.open = false; rec.shutReason = 'shut for the quiet part of the week'; continue; }
+
+        // 1. the week the business published, or the one it published for the school holidays.
+        let open = openAt(rec.hours, rec.week, dow, minute);
+        // The modelled stretch only ever runs past a close that was itself an estimate.
+        if (!open && rec.stretchMin > 0) {
+          const day = dayFor(rec.week, dow);
+          if (day) for (const win of day.windows) {
+            if (minute >= win.open && minute < win.close + rec.stretchMin) { open = true; break; }
           }
         }
+        rec.shutReason = open ? null : 'shut at this hour';
+
+        // 2. the hours cut, which is a real thing a thin business does and is modelled here.
+        if (open && rec.hoursCutPct > 0) {
+          const day = dayFor(rec.week, dow);
+          const win = day && day.windows.length ? day.windows[day.windows.length - 1] : null;
+          if (win) {
+            const span = win.close - win.open;
+            if (minute >= win.close - span * (rec.hoursCutPct / 100)) { open = false; rec.shutReason = 'closing early to save the wage bill'; }
+          }
+        }
+
+        // 3. the weather, the tide and the beach. Only for trading that happens outside a building.
+        if (open && rec.exposure) {
+          const why = weatherClosure(rec.exposure, env);
+          if (why) { open = false; rec.shutReason = why; shutByWeather++; }
+        }
+
         rec.open = open;
-        if (open) { openNow++; rec.openHoursToday += 1 / 6; refreshStockFactors(rec); }
+        if (open) {
+          doorsOpen++;
+          openIds.add(rec.id);
+          if (!rec.trades) continue;      // the door is open; there is no till behind it
+          openNow++;
+          if (rec.hoursBasis === 'estimate') openEstimated++; else openPublished++;
+          rec.openHoursToday += 1 / 6;
+          refreshStockFactors(rec);
+
+          // 4. the kitchen, which is its own question and the one that disappoints people. The bar
+          //    can be open and the kitchen shut, and on this island that is most evenings.
+          let k = kitchenOpenAt(rec.hours, rec.week, dow, minute);
+          if (k) {
+            // The barge. Fresh food is the first thing off a missed run, so a kitchen with an empty
+            // cold room serves what it can and stops early. Modelled, out of the freight chain that
+            // already exists rather than out of anything anybody published.
+            const short = kitchenShortened(rec.outOf);
+            if (short && minute > 16 * 60) { k = false; rec.kitchenShortNote = short; } else rec.kitchenShortNote = null;
+          }
+          rec.kitchenOpen = k;
+          if (k) { kitchensOpen++; kitchenIds.add(rec.id); }
+        }
       }
       state.openNow = openNow;
+      state.doorsOpenNow = doorsOpen;
+      state.openOnPublishedHours = openPublished;
+      state.openOnEstimatedHours = openEstimated;
+      state.kitchensOpenNow = kitchensOpen;
+      state.shutByWeatherNow = shutByWeather;
 
       // --- the money looking for somewhere to go, this tick
       //     Residents first. A dearer island shelf pushes more of the weekly shop across the bay,
@@ -871,7 +1085,12 @@ export function registerBusinesses(world) {
           open: r.open, takingsA$: Math.round(r.salesTodayA$),
           staff: `${r.staffed}/${r.staffNeeded}`, viability: r.viability,
           outOf: r.outOf.length ? r.outOf.join(', ') : null,
-          unconfirmed: r.status === 'trading-unconfirmed'
+          unconfirmed: r.status === 'trading-unconfirmed',
+          // So a panel can draw a shut door as shut, and say on whose word it is open.
+          shutReason: r.open ? null : r.shutReason,
+          kitchenOpen: r.kitchenOpen,
+          hoursBasis: r.hoursBasis,
+          hoursChecked: r.hoursChecked
         })).sort((a, b) => b.takingsA$ - a.takingsA$);
         state.watchlist = B.filter((r) => r.trades && (r.strain > 0.55 || r.outOf.length))
           .sort((a, b) => b.strain - a.strain).slice(0, 10)
@@ -888,6 +1107,21 @@ export function registerBusinesses(world) {
       return {
         trading: state.counts.trading_now,
         openNow: state.openNow,
+        doorsOpenNow: state.doorsOpenNow,
+        // The traceability line. "34 open now" is only worth anything beside how many of those
+        // thirty-four are open on hours a human could go and check.
+        openOnPublishedHours: state.openOnPublishedHours,
+        openOnEstimatedHours: state.openOnEstimatedHours,
+        kitchensOpenNow: state.kitchensOpenNow,
+        shutByWeatherNow: state.shutByWeatherNow,
+        hoursPublished: state.hoursProvenance.published,
+        hoursListed: state.hoursProvenance.listed,
+        hoursEstimated: state.hoursProvenance.estimate,
+        hoursNoWeekAtAll: state.hoursProvenance.none,
+        hoursNeverChecked: state.hoursProvenance.neverChecked,
+        // How many records the twin declines to answer the question for at all, which is the
+        // number that says whether the rule is being kept.
+        neverAskedOpenShut: state.hoursProvenance.notAskedOpenShut,
         takingsTodayA$: state.revenueTodayA$,
         year365A$: state.revenueRolling365A$,
         marginPct: state.marginPct,
@@ -905,13 +1139,33 @@ export function registerBusinesses(world) {
       };
     },
 
+    /**
+     * What a save has to carry, and the part of it that was missing.
+     *
+     * A critic saved a paused world, fingerprinted it, loaded the same JSON back and got a
+     * different fingerprint, with `businesses` among six systems that differed. This system's share
+     * of that was the per-business rolling series: the island's totals were saved and every
+     * individual shop's year was not, so a loaded world had the right island economy made of the
+     * wrong businesses, and the board's takings column came back at zero until a year had run
+     * again. The series are the expensive part of a save and they are the part that cannot be
+     * recomputed from anything, which is exactly why they have to be in it.
+     *
+     * The whole-island rolling series are still saved separately rather than summed from these,
+     * because they are what the margin and the stockout rate are read from and a sum of a hundred
+     * float arrays is not free.
+     */
     save() {
       return {
         warmupDays,
         rev365: revenue365.save(), cost365: cost365.save(), so30: stockout30.save(),
         rows: B.map((r) => [
           r.id, Math.round(r.cashA$), +r.strain.toFixed(3), r.hoursCutPct, Math.round(r.dailyRateA$),
-          r.stockArr ? r.stockArr.map((s) => [s.line, Math.round(s.units), Math.round(s.onOrder), s.lastOrderDay, s.out ? 1 : 0]) : null
+          r.stockArr ? r.stockArr.map((s) => [s.line, Math.round(s.units), Math.round(s.onOrder), s.lastOrderDay, s.out ? 1 : 0]) : null,
+          // The day so far, so a save taken at two in the afternoon does not reopen with the
+          // morning's takings gone.
+          [r.salesTodayA$, r.costTodayA$, r.turnedAwayTodayA$, r.openHoursToday, r.staffed,
+            r.serviceLevel, r.stockoutDays, r.winterClosed ? 1 : 0, r.outOf.slice()],
+          r.revenue365.save(), r.recent14.save()
         ])
       };
     },
@@ -942,6 +1196,19 @@ export function registerBusinesses(world) {
             if (st) { st.units = units; st.onOrder = onOrder; st.lastOrderDay = lastOrderDay; st.out = !!out; }
           }
         }
+        // Written by a later version of save() than some files on disk were, so each block is
+        // taken only if it is there. An older save loads with the day and the series empty, which
+        // is what it did before, rather than throwing.
+        const today = row[6];
+        if (today) {
+          rec.salesTodayA$ = today[0]; rec.costTodayA$ = today[1]; rec.turnedAwayTodayA$ = today[2];
+          rec.openHoursToday = today[3]; rec.staffed = today[4]; rec.serviceLevel = today[5];
+          rec.stockoutDays = today[6]; rec.winterClosed = !!today[7];
+          rec.outOf = Array.isArray(today[8]) ? today[8].slice() : [];
+          rec.fillRate = rec.staffNeeded > 0 ? clamp(rec.staffed / rec.staffNeeded, 0, 1.4) : 1;
+        }
+        if (row[7]) rec.revenue365.load(row[7]);
+        if (row[8]) rec.recent14.load(row[8]);
       }
     }
   });
