@@ -89,13 +89,25 @@ formality here:** these are other people's businesses and in some cases their ho
 commercial frontage is a different question from a dwelling, and the answer for a dwelling is ask first.
 `docs/PARTICIPATION.md` governs it.
 
-**5. LOD6 last, and possibly never in this repository.** The pipeline document describes a per-asset
-LoRA of about 5 MB applied to a base generative model for on-demand variants. It is a good idea and it
-collides with two rules this build holds: the twin is offline and deterministic at runtime, and
-`no-synthetic-art` says generated imagery is not product imagery. A LoRA that renders a variant of a
-real building on demand is generated imagery of a real place. If it is built, it belongs in the
-pipeline that produces committed assets a human has looked at, never in the runtime, and never as the
-thing a player sees by default.
+**5. LOD6, the generative tier.** The pipeline document describes a per-asset LoRA of about 5 MB
+applied to a base generative model, producing variants on demand: the same shed aged ten years, or
+repainted, or dressed for an event. It is last in this order because it needs LOD5 to train on, not
+because it is doubtful. It is the owner's design and it is a good one.
+
+An earlier version of this file said it collided with a no-synthetic-art rule. **That was wrong.** That
+preference is scoped to a particular project and is not a constraint on this one, and using it to argue
+against the owner's own design was the exact error this repository has a note about.
+
+The one real constraint is an engineering one about **where it runs, not whether it is built**. The twin
+is offline and deterministic at runtime, so generation happens in the pipeline that produces committed
+assets, and the running island loads what came out of it. That is the same rule every other lane obeys:
+ingest is deliberate and offline, the runtime never fetches or generates. It costs the LOD6 idea nothing
+except immediacy, and it buys the thing that makes any of this citable, which is that two people opening
+the same seed see the same island.
+
+Worth building when there is something to train on, and the variant-on-demand capability is genuinely
+useful for the civic layer: showing a councillor the same building under three adaptation options is
+exactly the argument `docs/DIRECTION.md` item 5 wants scenario reports to make.
 
 ## The expert guild, and what this build already has of it
 
