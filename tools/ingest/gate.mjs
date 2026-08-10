@@ -20,6 +20,7 @@ import { readJSON, exists, Findings } from './lib.mjs';
 import { runLoreChecks } from './checks-lore.mjs';
 import { runRecordChecks, runSchemaChecks } from './checks-records.mjs';
 import { runEmDashCheck, runSpellingCheck, runRegistryChecks } from './checks-repo.mjs';
+import { runPersonalDataCheck, runContributionCultureCheck } from './checks-screens.mjs';
 
 const LEDGER_FILE = 'tools/ingest/ledger.json';
 const VOCAB_FILE = 'tools/ingest/vocabulary.json';
@@ -93,7 +94,13 @@ export function runGate({ only = null, registryPath = 'data/_provenance.json' } 
     ['schema', runSchemaChecks],
     ['registry', runRegistryChecks],
     ['em-dash', runEmDashCheck],
-    ['spelling', runSpellingCheck]
+    ['spelling', runSpellingCheck],
+    // The two screens the map lane needed. They are here rather than inside that lane because a rule
+    // that lives in the tool which happened to find the problem is a rule the next tool does not
+    // have. Both also read the staging area, which nothing else does, so a contribution is looked at
+    // before somebody promotes it rather than afterwards.
+    ['personal-data', runPersonalDataCheck],
+    ['contribution-culture', runContributionCultureCheck]
   ];
   // A typo in --only that silently ran nothing would report a green gate over an empty run, which is
   // the worst failure mode a checker has.

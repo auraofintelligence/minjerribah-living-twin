@@ -753,7 +753,21 @@ function injectStyle() {
   scrollbar-color: var(--edge-strong) transparent;
   background: var(--s-1); border: 1px solid var(--edge); border-radius: var(--r-3);
   box-shadow: var(--shadow-3); padding: var(--sp-6) var(--sp-6) var(--sp-5);
-  color: var(--t); font: var(--fs-base)/1.6 var(--f-ui); animation: slide-up var(--slow) var(--ease-out) both; }
+  color: var(--t); font: var(--fs-base)/1.6 var(--f-ui); animation: slide-up var(--slow) var(--ease-out) both;
+  /* The type scale in design.css is sized for the HUD, which is an instrument read at a glance while
+     you are looking at something else. This is the opposite: a full screen of prose and a keyboard
+     reference that somebody sits and reads. At the HUD's 13px base it came out too small to read
+     comfortably, which the owner reported. Redefining the tokens on this one element rather than
+     editing forty rules works because custom properties cascade, so every descendant using
+     var(--fs-*) scales with it and the proportions of the design system are kept exactly.
+     The clamp keeps it sane on a narrow split-screen window and on a wide one. */
+  --fs-micro: clamp(11px, 0.78vw + 7px, 13px);
+  --fs-label: clamp(12px, 0.85vw + 7px, 14px);
+  --fs-sm:    clamp(13px, 0.95vw + 8px, 15px);
+  --fs-base:  clamp(15px, 1.05vw + 9px, 17px);
+  --fs-lg:    clamp(17px, 1.25vw + 10px, 20px);
+  --fs-xl:    clamp(21px, 1.6vw + 12px, 25px);
+  --fs-display: clamp(28px, 2.6vw + 14px, 38px); }
 .ob-sheet.ack { background: rgba(12,18,22,.9); padding: var(--sp-7) var(--sp-6) var(--sp-6); }
 .ob-sheet::-webkit-scrollbar { width: 8px; }
 .ob-sheet::-webkit-scrollbar-thumb { background: var(--edge-strong); border-radius: var(--r-pill); }

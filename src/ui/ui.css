@@ -25,6 +25,18 @@ body { font-family: var(--font); color: var(--text); -webkit-font-smoothing: ant
 #ui-root { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
 #ui-root > * { pointer-events: auto; }
 
+/* A closed board does not take clicks, and this rule is why.
+   Every full-screen board and its scrim declares `pointer-events: none` in its own base class and
+   `auto` on `.on`. That was correct and it never worked, because `#ui-root > *` above is one id
+   selector, specificity (1,0,0), and a class like `.sub-board` is (0,1,0). The blanket rule won, so
+   all six closed boards and all six closed scrims sat over the island as invisible full-screen click
+   shields at z-index 40 and 41. The symptoms were that the rail buttons appeared dead, and that an
+   open board's own tabs could not be clicked because a different board's closed scrim lay on top.
+   The attribute-plus-:not form below is (1,2,0) and wins, and it needs no change in fourteen panels.
+   If you add a new board, name it `*-board` with a `*-scrim` and it is covered. */
+#ui-root > [class*="-board"]:not(.on),
+#ui-root > [class*="-scrim"]:not(.on) { pointer-events: none; }
+
 #boot {
   position: fixed; inset: 0; z-index: 100;
   display: grid; place-items: center;

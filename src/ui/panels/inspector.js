@@ -176,6 +176,13 @@ const CSS = `
 .hist .what { flex: 1; color: var(--t); }
 
 .insp-empty { padding: var(--sp-5) var(--sp-4); text-align: center; }
+/* Quiet enough not to shout over the person, loud enough that nobody can say they were not told. */
+/* --fs-sm, not --fs-micro. The first version of this rendered at 10px, and a disclosure nobody can
+   comfortably read is not a disclosure. It stays visually quiet through colour rather than size. */
+.insp-synthetic { font-size: var(--fs-sm); line-height: 1.5; color: var(--t-dim);
+  border-left: 2px solid var(--heath); padding: var(--sp-2) var(--sp-3);
+  background: rgba(180,138,196,.07); border-radius: 0 var(--r-2) var(--r-2) 0;
+  margin-bottom: var(--sp-3); }
 .insp-empty .big { font-size: var(--fs-lg); color: var(--t-dim); margin-bottom: var(--sp-2); }
 .insp-empty p { font-size: var(--fs-sm); color: var(--t-faint); line-height: 1.6; }
 .insp-empty .rows { margin-top: var(--sp-2); text-align: left; }
@@ -372,6 +379,26 @@ function mount(root, world) {
   function residentNow(p, card) {
     const needs = world.read('needs');
     const out = [];
+
+    // Say it before anything else, on every person, every time.
+    //
+    // A stranger reading "Wendy Eastwood, 71, sitting and looking at it, Polka Point" reads a person.
+    // She is not one. Names come from a curated pool of common Australian names, given names grouped
+    // by the decade someone that age would plausibly have been named in, surnames script-checked
+    // against every name in data/businesses.json and data/places.json. Ages are invented; the age
+    // DISTRIBUTION is the real ABS 2021 Census for this island. See the header of
+    // src/systems/agents/population.js for which numbers are published and which are modelled.
+    //
+    // The reason this is a permanent line and not a one-off note in the introduction: on an island of
+    // about two thousand real people, a pool of common Australian surnames will eventually produce a
+    // combination that matches a real islander by coincidence, and there is no register to check
+    // against, so it cannot be prevented. It can only be disclosed, and disclosure that appears once
+    // at the start is not disclosure by the time somebody is three hours in and screenshotting a card.
+    out.push(el('div', { class: 'insp-synthetic', title:
+      'Generated from data/residents.json name pools. The person is invented. The age distribution, '
+      + 'household composition and tenure mix are the published ABS 2021 Census for this island.' },
+      'A generated resident. Not a real person, and not based on one. '
+      + 'The island’s age and household figures behind them are real.'));
 
     // What they are doing, live, and why the needs system chose it.
     const doing = el('div', { class: 'lede' });
