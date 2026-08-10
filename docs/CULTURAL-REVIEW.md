@@ -843,3 +843,38 @@ names nothing it holds, and it strips contact details before it writes anything.
 `docs/PARTICIPATION.md` already says it plainly and it applies to the owner exactly as it applies to
 anybody else: Aboriginal language, story, ceremony, art and site knowledge are not accepted through
 this repository, from anyone, however offered. The route is QYAC or it does not exist.
+
+## L. The legislation pack names two Acts that touch Country (10 August 2026)
+
+### L1. Two instruments in `data/legislation.json` are about Aboriginal rights and heritage
+**Affects:** `data/legislation.json`, records `qld-aboriginal-cultural-heritage-2003` and
+`cth-native-title-1993`.
+
+The legislation pack records sixty-four Acts an ordinary person on this island is subject to. Two of
+them are the Aboriginal Cultural Heritage Act 2003 (Qld) and the Native Title Act 1993 (Cth). Both
+records deliberately describe the mechanism of the Act and nothing else: what the duty of care is,
+what a determination is, what an indigenous land use agreement does. Neither record names a place, a
+practice, a piece of knowledge or a holder of it, and neither restates what happened on this island.
+Where the island is relevant, the record points at the existing sourced entries in `data/civic.json`
+and `data/lore.json` rather than repeating them.
+
+That was a choice and it is worth a human confirming it is the right one. The alternative reading is
+that describing a heritage Act at all, in a twin of Quandamooka Country, is a thing to ask about
+before doing rather than after.
+
+**Ask QYAC:** whether recording these two Acts as instruments, described by mechanism only, is
+acceptable; and if so whether the description of the cultural heritage duty of care should say more
+about who the Aboriginal party for this area is, or deliberately less.
+
+### L2. Nothing in this pack may grow toward cultural content without that answer
+The catalogue entry for the cultural heritage Act carries this in its own review note: any expansion
+beyond the mechanism belongs here and is QYAC's call, not the lane's. The pack is built so that a
+later pass cannot quietly widen it without a person editing
+`tools/ingest/legislation-catalogue.json` by hand, in a committed file, under review.
+
+### L3. This is not legal advice and the pack is built so it cannot become advice
+Every record carries a line saying it is a description of published law rather than advice, and that
+a person's actual position depends on facts this twin does not know. That line is a required field in
+the pack schema, so a record without it fails the gate. It matters here more than anywhere: a person
+reading about the cultural heritage duty of care and treating this pack as their answer would be
+badly served, and so would everybody else.

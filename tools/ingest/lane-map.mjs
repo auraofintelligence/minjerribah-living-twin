@@ -1362,7 +1362,7 @@ export function reportMarkdown(result) {
     const tp = t.timing_points.length
       ? t.timing_points.map((x) => `${x.route.replace('svc-bus-', '')} ${x.timing_point}`).join('; ')
       : '';
-    w(`| ${r.name} | ${t.township || 'between townships'} | ${t.serves_routes.map((s) => s.replace('svc-bus-', '')).join(', ')} `
+    w(`| ${r.name} | ${r.township || 'between the townships'} | ${t.serves_routes.map((s) => s.replace('svc-bus-', '')).join(', ')} `
       + `| ${tp} | ${t.timing_points.length ? t.timing_points[0].basis : ''} |`);
   }
   w('');
@@ -1370,7 +1370,7 @@ export function reportMarkdown(result) {
   w('');
   for (const row of TIMING_POINTS) {
     if (!row.unmatched) continue;
-    w(`- **${row.waypoint}** on ${row.route.replace('svc-', '')}. ${row.unmatched}`);
+    w(`- **${row.waypoint}** on ${row.route.replace('svc-bus-', 'Route ')}. ${row.unmatched}`);
   }
   w('');
 

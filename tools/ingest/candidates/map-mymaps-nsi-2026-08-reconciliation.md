@@ -105,33 +105,33 @@ Route 880 and Route 881 in `data/transport.json` carry eleven waypoints between 
 
 | Stop, as contributed | Township | Routes through | Timing point | On what evidence |
 | --- | --- | --- | --- | --- |
-| Bus Stop | between townships | 880, 881 |  |  |
-| Bus Stop | between townships | 880, 881 | 880 Junner Street Ferry Terminal; 881 Junner Street Ferry Terminal | The waypoint refers to terminal-junner-street, which carries a coordinate, and the pin is 0 m from it. |
-| Bust Stop | between townships | 880, 881 | 880 One Mile Ferry Terminal; 881 One Mile Ferry Terminal | The waypoint refers to terminal-one-mile, which carries a coordinate, and the pin is 55 m from it. |
-| Bus Stop | between townships | 880, 881 |  |  |
-| Bus Stop and Exchange | between townships | 880, 881 |  |  |
-| Bus Stop; Amity General Store | between townships | 881 | 881 Amity Point (Pulan) | The contributed name carries the word that identifies this timing point and no other on this route, and the pin stands in amity-point. |
-| Bus Stop | between townships | 880 |  |  |
-| Bus Stop; Adder Rock | between townships | 880 | 880 Point Lookout, Adder Rock | The contributed name carries the word that identifies this timing point and no other on this route, and the pin stands in point-lookout. |
-| Bus Stop; Manta Lodge YHA | between townships | 880 |  |  |
-| Bus Stop; Anchorage Resort | between townships | 880 |  |  |
-| Bus Stop; Allure Resort | between townships | 880 |  |  |
-| Bus Stop; George Nothling Drive | between townships | 880 |  |  |
-| Bus Stop; Home Beach | between townships | 880 |  |  |
-| Bus Stop; Stradbroke Hotel | between townships | 880 |  |  |
-| Bus Stop; Cylinder Beach | between townships | 880 | 880 Point Lookout, Cylinder Beach | The contributed name carries the word that identifies this timing point and no other on this route, and the pin stands in point-lookout. |
-| Bus Stop; Bob's Shop | between townships | 880 |  |  |
-| Bus Stop | between townships | 880 |  |  |
-| Bus Stop; Bimba Street | between townships | 880 |  |  |
-| Bus Stop | between townships | 880 |  |  |
-| Bus Stop and Turnaround | between townships | 880 |  |  |
+| Bus Stop | dunwich | 880, 881 |  |  |
+| Bus Stop | dunwich | 880, 881 | 880 Junner Street Ferry Terminal; 881 Junner Street Ferry Terminal | The waypoint refers to terminal-junner-street, which carries a coordinate, and the pin is 0 m from it. |
+| Bust Stop | dunwich | 880, 881 | 880 One Mile Ferry Terminal; 881 One Mile Ferry Terminal | The waypoint refers to terminal-one-mile, which carries a coordinate, and the pin is 55 m from it. |
+| Bus Stop | dunwich | 880, 881 |  |  |
+| Bus Stop and Exchange | between the townships | 880, 881 |  |  |
+| Bus Stop; Amity General Store | amity-point | 881 | 881 Amity Point (Pulan) | The contributed name carries the word that identifies this timing point and no other on this route, and the pin stands in amity-point. |
+| Bus Stop | point-lookout | 880 |  |  |
+| Bus Stop; Adder Rock | point-lookout | 880 | 880 Point Lookout, Adder Rock | The contributed name carries the word that identifies this timing point and no other on this route, and the pin stands in point-lookout. |
+| Bus Stop; Manta Lodge YHA | point-lookout | 880 |  |  |
+| Bus Stop; Anchorage Resort | point-lookout | 880 |  |  |
+| Bus Stop; Allure Resort | point-lookout | 880 |  |  |
+| Bus Stop; George Nothling Drive | point-lookout | 880 |  |  |
+| Bus Stop; Home Beach | point-lookout | 880 |  |  |
+| Bus Stop; Stradbroke Hotel | point-lookout | 880 |  |  |
+| Bus Stop; Cylinder Beach | point-lookout | 880 | 880 Point Lookout, Cylinder Beach | The contributed name carries the word that identifies this timing point and no other on this route, and the pin stands in point-lookout. |
+| Bus Stop; Bob's Shop | point-lookout | 880 |  |  |
+| Bus Stop | point-lookout | 880 |  |  |
+| Bus Stop; Bimba Street | point-lookout | 880 |  |  |
+| Bus Stop | point-lookout | 880 |  |  |
+| Bus Stop and Turnaround | point-lookout | 880 |  |  |
 
 ### Timing points nothing joined to
 
-- **Amity Point turnoff** on bus-880. The Beehive Road junction on East Coast Road, which stands in no township. The nearest contributed pin, "Bus Stop and Exchange", is 393 m from where data/geography.json puts that junction: close enough to be a lead for somebody who knows the road and too far to assert.
-- **Point Lookout, Gorge Walk** on bus-880. No contributed pin names the Gorge Walk. "Bus Stop and Turnaround" is the last stop on Mooloomba Road and may be it, and only somebody who catches that bus can say.
-- **QUAMPI** on bus-881. Added as a timing point in the 1 December 2025 timetable change. No contributed pin names it.
-- **Amity Point turnoff** on bus-881. The same Beehive Road junction as on Route 880.
+- **Amity Point turnoff** on Route 880. The Beehive Road junction on East Coast Road, which stands in no township. The nearest contributed pin, "Bus Stop and Exchange", is 393 m from where data/geography.json puts that junction: close enough to be a lead for somebody who knows the road and too far to assert.
+- **Point Lookout, Gorge Walk** on Route 880. No contributed pin names the Gorge Walk. "Bus Stop and Turnaround" is the last stop on Mooloomba Road and may be it, and only somebody who catches that bus can say.
+- **QUAMPI** on Route 881. Added as a timing point in the 1 December 2025 timetable change. No contributed pin names it.
+- **Amity Point turnoff** on Route 881. The same Beehive Road junction as on Route 880.
 
 ## Held
 

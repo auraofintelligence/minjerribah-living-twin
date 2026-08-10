@@ -59,8 +59,8 @@ const PLATE_BACK = [0.16, 0.17, 0.18];
 
 const CAP = 96;                        // there are 42. The ceiling is headroom, not a target.
 const LABELS = 16;
-/** How many pixels across a pin head is, whatever the zoom. Sixteen is a legible dot, not a badge. */
-const PIN_PX = 17;
+/** How many pixels across a pin head is, whatever the zoom. Twenty-one is a legible dot, not a badge. */
+const PIN_PX = 21;
 
 /* ------------------------------------------------------------------ geometry
 

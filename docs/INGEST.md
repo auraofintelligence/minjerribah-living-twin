@@ -233,6 +233,19 @@ is not. `readMapFile` detects that case exactly, refuses, and prints what to do 
 menu, Export to KML/KMZ, tick "Export as KML instead of KMZ". Following the link once and saving the
 result is a fetch, which is an offline step; the running twin never touches any of it.
 
+**The bounds check moved into the gate, because a lane's check is a statement about one afternoon.**
+`tools/ingest/checks-geo.mjs` re-tests every coordinate in every registered pack on every run, which
+is a property of the repository rather than of the run that wrote it. A critic proved the gap in one
+move: move a committed pin to Trafalgar Square, leaving its envelope fields alone, and run
+`node tools/ingest/registry.mjs --refresh`, which runs the gate over the pack content before it will
+write. It wrote. A pin in central London was a clean pack, because the only thing standing between a
+hand edit and the registry was a checksum, and a refresh is the operation that legitimately replaces
+the checksum. Two boxes, because one would be wrong: **Moreton Bay and its shores** for every pack,
+which still holds the two mainland ferry terminals this twin models, and **the island itself** for a
+pack that came through the map lane, because that is somebody's map of Minjerribah and a pin off it is
+a pin somebody dragged. Where the numbers read correctly the other way round the finding says so and
+names the transposition, since lon,lat to lat,lon is the one mistake this project is built to make.
+
 **Two screens run before anything is written, and both are gate checks rather than code in this
 lane.** They are in `tools/ingest/checks-screens.mjs` and they run on every gate, over the staging
 area as well as the packs, so the next map is looked at before somebody promotes it rather than after.
@@ -260,6 +273,28 @@ to 250 metres through the same deterministic `coarsen` the contribution lane use
 before commit, never at display time, because a runtime filter is one bug away from publishing what it
 was hiding. For a coarsened record the reconciliation distance is published as a band rather than a
 number, because a distance to a known record would undo the rounding.
+
+**What a player sees, and the five clauses that decide it.** The first pass through this lane marked
+all 133 records `player_facing: false` and wrote "nothing in this pack renders" into the pack header.
+That was the right default and the wrong rule: the pack was fetched on every boot, 325 kB of it, and
+changed nothing on screen, while holding twenty bus stops with a first-hand position each on two
+routes the twin already models with not one coordinate between their eleven timing points. The rule is
+now narrow, and every record carries the clause that decided it in its own `player_facing_basis`:
+
+1. the contributor filed it under one of his four public folders, so no shopfront, no holiday let and
+   no mine lease, which are the three things his own data status says he cannot vouch for;
+2. the verdict is `NEW`, so there is no sourced record behind it to contradict or overwrite;
+3. it is an observation rather than a proposal, because proposed stays proposed and this world has no
+   register for proposals to sit in;
+4. the committed position is the one he pinned, not a coarsened one;
+5. and nothing shown asserts a current status, because that is exactly what nobody has checked.
+
+Forty-two of the 133 pass all five. A marker in the world says the thing is there; it never says the
+thing is open, running, staffed or serviced. Where a bus stop joins a published timing point, the
+lane records the join and the evidence for it at ingest, and
+`src/systems/infrastructure/contributed.js` reads the timetable that stop stands on so the departures
+appear at the stop. Where it joins nothing, no time is shown and the panel says why: a Translink
+timetable prints times at a handful of points and the bus calls at every stop in between.
 
 **What it gets wrong, honestly.** Name matching is Jaccard plus a guarded containment lift, and on an
 island where the shops sit ten metres apart and township names repeat it gets some of these wrong in
