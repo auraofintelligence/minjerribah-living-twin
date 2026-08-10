@@ -245,3 +245,25 @@ by plain fields, sharing by seed. Adopt those goals. Do not import the machinery
 
 For how people contribute to the twin, read `docs/PARTICIPATION.md`. For how scanned assets
 arrive, read `docs/CAPTURE-CONTRACT.md`.
+
+## A standing constraint: the difficulty here is never conflict
+
+Written down 10 August 2026 because it has held for the whole build without anyone restating it, and
+the moment somebody is asked to make this more compelling it is the first thing they will reach for.
+
+The founding brief named seven reference games and not one of them is a war game. That was not an
+oversight. The owner enrolled in game design in 2015 to gamify democracy and left the course because
+the material required students to build war games and war articles.
+
+So: no combat, no defence scenario, no enemy, and no current defence event. Not as squeamishness, but
+because this twin is an argument that a place can be genuinely hard to run without anyone attacking it,
+and reaching for conflict to create stakes would concede the argument.
+
+The stakes that are allowed are the real ones, and there are plenty: a barge that does not run, a
+housing market that cannot staff a bakery, a bird that loses the fat it needed to reach Siberia, a
+consent nobody sought, an approval that takes eleven weeks. Emergency is in scope and is not conflict:
+the hazard day is grounded in the Redland City local disaster management plan and reads as emergency
+management, which is what an island actually faces.
+
+If a future wave believes this build needs conflict to be interesting, that is a finding about the
+simulation being thin somewhere, and the fix is upstream.

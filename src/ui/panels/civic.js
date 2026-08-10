@@ -195,6 +195,42 @@ const STYLE = `
 .cb-form select, .cb-form input { background: var(--s-sunk); border: 1px solid var(--edge);
   border-radius: var(--r-2); color: var(--t-hi); font: var(--fs-sm) var(--f-ui); padding: 6px 8px; }
 .cb-form select:focus, .cb-form input:focus { outline: none; border-color: var(--edge-focus); }
+
+/* Tiers. The pip strip is the one thing on a lever card that answers "how hard is this" without
+   being read: one square per order of authority in play, always in the same order, so two cards
+   side by side compare at a glance. Squares rather than dots because a dot row reads as a rating. */
+.cb-pips { display: inline-flex; gap: 3px; align-items: center; vertical-align: middle; }
+.cb-pip { width: 7px; height: 7px; border-radius: 1.5px; display: block; background: var(--iron); }
+.cb-pip.heath { background: var(--heath); }
+.cb-pip.sun { background: var(--sun); }
+.cb-pip.sea { background: var(--sea); }
+.cb-pip.leaf { background: var(--leaf); }
+.cb-pip.coral { background: var(--coral); }
+.cb-pip.iron { background: var(--iron); }
+
+.cb-tiers { display: flex; flex-direction: column; gap: 6px; margin-top: var(--sp-2); }
+.cb-tier { display: flex; gap: var(--sp-2); align-items: baseline; font-size: var(--fs-sm);
+  padding: 6px 8px; border-radius: var(--r-2); background: var(--s-sunk); line-height: 1.45; }
+.cb-tier > .cb-pip { flex: none; margin-top: 5px; }
+.cb-tier b { color: var(--t-hi); font-weight: 500; }
+.cb-tier em { font-style: normal; color: var(--t-faint); font-size: var(--fs-micro); display: block; margin-top: 2px; }
+.cb-tier .who { flex: 1; min-width: 0; }
+
+.cb-tierhead { display: flex; align-items: baseline; gap: var(--sp-2); margin: var(--sp-4) 0 var(--sp-2); }
+.cb-tierhead:first-child { margin-top: 0; }
+.cb-tierhead .k { font-size: var(--fs-micro); letter-spacing: .16em; text-transform: uppercase;
+  color: var(--t-faint); font-weight: 600; }
+.cb-tierhead .n { font-size: var(--fs-micro); color: var(--t-faint); margin-left: auto;
+  font-family: var(--f-num); }
+
+.cb-reach { display: grid; grid-template-columns: 2.6em 1fr auto; gap: 4px var(--sp-2);
+  align-items: center; margin: var(--sp-2) 0; }
+.cb-reach .n { font: 400 var(--fs-base)/1 var(--f-num); color: var(--t-hi); text-align: right;
+  font-variant-numeric: tabular-nums; }
+.cb-reach .l { font-size: var(--fs-sm); color: var(--t-dim); }
+.cb-reach .b { height: 5px; background: var(--s-sunk); border-radius: var(--r-pill); overflow: hidden;
+  grid-column: 1 / -1; }
+.cb-reach .b > i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--sea); }
 `;
 
 /* ------------------------------------------------------------------ small helpers */
@@ -371,12 +407,14 @@ registerPanel({
     /* --- header ---------------------------------------------------- */
     const flash = el('div', { class: 'cb-flash' });
     const statBox = el('div', { class: 'cb-stats' });
+    // Counted, not written. The number of levers and the number of them that are the player's move
+    // every time somebody edits the pack, and a sentence that states them from memory is the first
+    // thing on this board to become untrue.
+    const seatLine = el('div', { class: 'cb-seat' });
     const head = el('div', { class: 'cb-top' },
       el('div', {},
         el('h2', {}, 'The civic board'),
-        el('div', { class: 'cb-seat' },
-          'You hold the island’s civic desk. You have a budget line, a mailing list, and no vote in anybody’s chamber. ' +
-          'Of the 62 researched levers, most belong to somebody else.'),
+        seatLine,
         flash),
       statBox,
       el('button', { class: 'btn ghost', type: 'button', title: 'Close (Esc)', onclick: () => toggle(false) }, 'Close'));
@@ -522,11 +560,26 @@ registerPanel({
         pendingOpens.map((x) => x.leverId).join(',')
       ].join('~');
     }
+    /** The seat sentence, counted out of the pack every draw. */
+    function paintSeat(w) {
+      const levers = packLevers(w);
+      const mine = levers.filter((l) => l.player_role === 'player_decides').length;
+      const cou = w.read('council');
+      const three = cou && cou.reach && cou.reach.byGovernments ? (cou.reach.byGovernments[3] || 0) : 0;
+      seatLine.textContent = 'You hold the island’s civic desk. You have a budget line, a mailing list, '
+        + 'and no vote in anybody’s chamber. '
+        + (levers.length
+          ? 'Of the ' + levers.length + ' researched levers, ' + mine + ' are yours to decide'
+            + (three ? ' and ' + three + ' need three governments to agree' : '') + '.'
+          : 'The civic pack has not loaded.');
+    }
+
     function refresh(force) {
       if (!open) return;
       const s = signature(world);
       if (!force && s === sig) { live(); return; }
       sig = s;
+      try { paintSeat(world); } catch (e) { /* the board must still draw */ }
       binds = [];
       for (const [id] of TABS) tabBtns[id].classList.toggle('on', view.tab === id);
       main.textContent = '';
@@ -552,11 +605,19 @@ registerPanel({
       const inst = who && who.institutions ? who.institutions[lv.who_decides[0]] : null;
       const st = STATUS_CHIP[rt ? rt.status : 'dormant'] || STATUS_CHIP.dormant;
       const notMod = NOT_MODELLED.has(lv.who_decides[0]);
+      const reach = reachOf(w, lv);
+      // The whole point of the chip: two governments is a different kind of hard from one, and a
+      // card that only listed four names would say nothing except that it is complicated.
+      const reachChip = reach && reach.governmentCount >= 2
+        ? chip(reach.governmentCount === 3 ? 'heath' : 'sun', reach.label, reach.plain
+          || (reach.governmentCount + ' orders of government have to agree'))
+        : null;
       const card = el('div', { class: 'cb-card pick' + (view.leverId === lv.id ? ' on' : ''), onclick: () => { view.leverId = lv.id; view.traceId = lv.id; refresh(true); } },
         el('h4', {}, lv.name),
         el('div', { class: 'cb-chips' },
           chip(st[0], st[1]),
           chip(role.cls === 'decides' ? 'sea' : role.cls === 'funds' ? 'sun' : role.cls === 'observes' ? 'coral' : 'iron', role.label),
+          reachChip,
           notMod ? chip('heath', 'not modelled', 'This twin does not simulate this body’s decisions.') : null,
           rt && rt.squeezed ? chip('sun', 'slowed') : null,
           rt && rt.stalled ? chip('coral', 'stopped, unbuilt') : null,
@@ -567,7 +628,9 @@ registerPanel({
           el('div', { class: 'cb-num' }, el('b', {}, leadText(lv.lead_time_months)), el('i', {}, 'lead time'))),
         el('div', { class: 'cb-who ' + role.cls },
           el('b', {}, 'Decided by'),
-          el('span', {}, inst ? inst.label : lv.who_decides[0])));
+          el('span', {}, (inst ? inst.label : lv.who_decides[0])
+            + (reach && reach.bodyCount > 1 ? ' and ' + (reach.bodyCount - 1) + ' other' + (reach.bodyCount > 2 ? 's' : '') : '')),
+          tierPips(reach)));
       if (rt && rt.status === 'delivering') {
         card.append(el('div', { class: 'cb-track', style: { marginTop: '8px' } },
           bindW(el('i'), () => {
@@ -615,7 +678,8 @@ registerPanel({
         onclick: () => { view.roleFilter = k; refresh(true); }
       }, label);
       mid.append(el('div', { class: 'cb-filters' }, search,
-        roleBtn('all', 'All'), roleBtn('mine', 'Mine'), roleBtn('theirs', 'Theirs'), roleBtn('unmodelled', 'Not modelled')));
+        roleBtn('all', 'All'), roleBtn('mine', 'Mine'), roleBtn('theirs', 'Theirs'),
+        roleBtn('crossing', 'Two or more governments'), roleBtn('unmodelled', 'Not modelled')));
 
       if (pol.qyacSqueeze && pol.qyacSqueeze.on) {
         mid.append(el('div', { class: 'cb-banner' },
@@ -632,6 +696,10 @@ registerPanel({
         if (view.roleFilter === 'mine' && lv.player_role !== 'player_decides' && lv.player_role !== 'player_funds') return false;
         if (view.roleFilter === 'theirs' && (lv.player_role === 'player_decides')) return false;
         if (view.roleFilter === 'unmodelled' && !NOT_MODELLED.has(first)) return false;
+        if (view.roleFilter === 'crossing') {
+          const r = reachOf(w, lv);
+          if (!r || r.governmentCount < 2) return false;
+        }
         return true;
       });
       const rank = { delivering: 0, ceasing: 1, active: 2, 'in-place': 3, lapsed: 4, dormant: 5 };
