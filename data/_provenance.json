@@ -3,7 +3,7 @@
   "schema": "minjerribah-provenance/1",
   "version": 1,
   "generated": "2026-08-10",
-  "fingerprint": "7677d76dde05",
+  "fingerprint": "4272fd5fb437",
   "about": "The pack registry. One entry per data pack, carrying its version, the lane it came through, the documents behind it, when it was ingested, by what extractor, a checksum over the file, and the spread of confidence inside it. src/world/data.js loads what this file lists, so adding a pack means adding it here. docs/INGEST.md is the contract; tools/gate-audit.mjs enforces it.",
   "offline_note": "This is a committed file, not a lookup. The running twin fetches these paths off its own origin and nothing else, ever. Ingestion is an offline step that produces committed, versioned, checksummed data.",
   "confidence_scale": {
@@ -62,6 +62,12 @@
       "tool": "tools/ingest/lane-map.mjs",
       "produces": "candidate records from a KML or KMZ map, screened for personal data and for the cultural prohibitions, bounds-checked against the island, and reconciled four ways against the packs that already exist",
       "note": "A map lane reads somebody's hand rather than a publisher's words, so every record carries a split confidence: high on the fact that a thing exists roughly where the pin is, lower on whether it still trades under that name. It never writes into data/places.json or data/businesses.json. A reconciliation verdict is a lead for a person, not an edit."
+    },
+    "legislation": {
+      "built": true,
+      "tool": "tools/ingest/lane-legislation.mjs",
+      "produces": "measured records for named Acts: the citation, the register identifier, the administering body where a register publishes one, the size in pages and provisions counted from the published consolidation, and a hand-written plain-English description of what the instrument does to an ordinary person",
+      "note": "It reads two official registers offline and never at runtime, verifies every identifier against the register's own index and then against the downloaded document's cover, and refuses to record a measurement for anything that fails either check. No full Act text is committed: the consolidations are enormous, they belong to their publishers, and the licence position differs between the two registers. Every record it produces carries the pack's not_advice line, because a list of Acts with descriptions is one step from being read as advice and it is not advice."
     }
   },
   "documents": {
@@ -178,24 +184,28 @@
       },
       "checksum": {
         "algorithm": "sha256-lf",
-        "value": "e5587cee9c3e75a95a38ad15cc481dd0fdcddc222a69177dacda66c6e6923d01"
+        "value": "03491aabccfa0337db7b684f0d080fa67b06ff276a7ad613bbb4394fda2d21e9"
       },
-      "bytes": 164054,
-      "records": 187,
+      "bytes": 209466,
+      "records": 215,
       "confidence": {
-        "high": 47,
-        "medium": 59,
+        "high": 67,
+        "medium": 67,
         "low": 52,
         "unrated": 29
       },
       "collections": [
         {
+          "path": "commonwealth_money.routes",
+          "records": 4
+        },
+        {
           "path": "institutions",
-          "records": 19
+          "records": 20
         },
         {
           "path": "instruments",
-          "records": 14
+          "records": 31
         },
         {
           "path": "interest_groups",
@@ -207,11 +217,15 @@
         },
         {
           "path": "levers",
-          "records": 62
+          "records": 64
         },
         {
           "path": "metrics",
           "records": 50
+        },
+        {
+          "path": "national_environmental_significance.matters",
+          "records": 4
         }
       ],
       "player_facing_collections": [
@@ -429,6 +443,51 @@
       "note": "Coastline, elevation control points, roads, lakes and vegetation zones. The island geometry in this pack is the strongest single asset in the repository and it came from outside the owner's document corpus, which holds no GIS at all."
     },
     {
+      "id": "legislation",
+      "file": "data/legislation.json",
+      "lane": "legislation",
+      "envelope": "v1",
+      "pack_status": "committed",
+      "sources": [
+        "frl-legislation-gov-au",
+        "oqpc-legislation-qld-gov-au",
+        "owner-law-stack-2012"
+      ],
+      "ingested_at": "2026-08-10",
+      "extractor": {
+        "id": "lane-legislation",
+        "version": "1.0"
+      },
+      "player_facing_collections": [
+        "instruments"
+      ],
+      "accepted_debt": {
+        "missing_source": 0,
+        "missing_confidence": 0,
+        "low_in_player_collection": 0
+      },
+      "note": "Sixty-four Acts an ordinary person on this island is subject to, twenty-nine Commonwealth and thirty-five Queensland. For each: the citation, the register identifier and a deep link, the administering department where the register publishes one, the size in pages and provisions counted from the current consolidation, a plain-English description of what it does, the parts that bear on an ordinary person, whether it mostly asks or mostly gives, and which life events bring it into a person's life. It answers a question the owner has carried since he read his own filing cabinet's worth of Acts in 2012: how much of this weight is crippling and how much is uplifting. The measured answer for these sixty-four is 38,520 pages and 34,954 numbered provisions. No Act text is committed. Nothing in the pack is legal advice and every record carries a line saying so, which the schema makes a required field.",
+      "version": "1.0.0",
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "3154d03f58987f7a317ed737a59e5822b373e28e5ba7d48b84c8c59fda3193ad"
+      },
+      "bytes": 308033,
+      "records": 64,
+      "confidence": {
+        "high": 64,
+        "medium": 0,
+        "low": 0,
+        "unrated": 0
+      },
+      "collections": [
+        {
+          "path": "instruments",
+          "records": 64
+        }
+      ]
+    },
+    {
       "id": "lore",
       "file": "data/lore.json",
       "version": "0.1.0",
@@ -515,19 +574,21 @@
         "id": "lane-map",
         "version": "1.0"
       },
-      "player_facing_collections": [],
+      "player_facing_collections": [
+        "pins"
+      ],
       "accepted_debt": {
         "missing_source": 0,
         "missing_confidence": 0,
         "low_in_player_collection": 0
       },
-      "note": "139 placemarks from the owner's own Google MyMaps of Minjerribah, fetched 10 August 2026, of which 133 are carried and 6 are held under the cultural screen and described in docs/CULTURAL-REVIEW.md section M. Every record carries a four-way reconciliation verdict against data/places.json, data/businesses.json, data/transport.json and data/geography.json: 86 NEW, 28 CONFIRMS, 11 CORRECTS, 8 CONFLICTS. Nothing has been applied to those packs. This pack is the record of what the map says and how it lines up, and no collection in it is player-facing until a person has worked through the corrections.",
-      "version": "0.1.0",
+      "note": "139 placemarks from the owner's own Google MyMaps of Minjerribah, fetched 10 August 2026, of which 133 are carried and 6 are held under the cultural screen and described in docs/CULTURAL-REVIEW.md section M. Every record carries a four-way reconciliation verdict against data/places.json, data/businesses.json, data/transport.json and data/geography.json: 86 NEW, 28 CONFIRMS, 11 CORRECTS, 8 CONFLICTS. Nothing has been applied to those packs. 42 of the 133 are drawn in the world: public features in the contributor's four public folders whose verdict is NEW, so there is no sourced record behind them to overwrite, and which carry no proposal and no coarsened position. Every record says in its own player_facing_basis which clause put it in or kept it out. The 91 that are not drawn are the businesses, the rentals, the leases, the two proposals and everything with an existing record behind it, and working through those corrections is still a person's decision and a separate commit.",
+      "version": "0.2.0",
       "checksum": {
         "algorithm": "sha256-lf",
-        "value": "74af42f3c9537771e83b79e39a933e68ccfd3c0579785ade7e449fd7ada661c2"
+        "value": "6269e95160c5f0c02c16bf53f734f898a6cf1ccb1fc7a3a1112718e878532d4b"
       },
-      "bytes": 324809,
+      "bytes": 395694,
       "records": 133,
       "confidence": {
         "high": 133,

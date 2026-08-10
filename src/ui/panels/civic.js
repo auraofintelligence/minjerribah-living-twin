@@ -296,6 +296,25 @@ function chip(cls, text, title) {
  *  future correction to the pack is not. */
 function txt(s) { return s == null ? '' : String(s).replace(/`/g, ''); }
 
+/**
+ * A source field into something a reader can act on.
+ *
+ * Records in data/civic.json cite by key into the pack's own `source_registry`, so the board was
+ * printing "Source: rbn-walker-exit", which is a fact about the file rather than about the island.
+ * This resolves the key, drops the scheme so a long URL does not blow the column, and falls back to
+ * the raw value when the key is not in the registry, because a key nobody registered is worth
+ * seeing rather than swallowing.
+ */
+function sourceText(w, key) {
+  if (!key) return 'not recorded';
+  const reg = (w.data && w.data.civic && w.data.civic.source_registry) || {};
+  const raw = String(key);
+  const resolved = reg[raw];
+  if (!resolved) return raw;
+  if (/^https?:\/\//.test(resolved)) return resolved.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  return resolved;
+}
+
 function moodColour(m) {
   if (m <= -0.3) return 'var(--coral)';
   if (m <= -0.12) return 'var(--sun)';
@@ -707,9 +726,11 @@ registerPanel({
         const ra = rank[(pol.levers[a.id] || {}).status] ?? 5, rb = rank[(pol.levers[b.id] || {}).status] ?? 5;
         return ra - rb || (a.name < b.name ? -1 : 1);
       });
+      const crossing = list.filter((l) => { const r = reachOf(w, l); return r && r.governmentCount >= 2; }).length;
       mid.append(el('div', { class: 'cb-quiet', style: { marginBottom: '8px' } },
         list.length + ' of ' + levers.length + ' levers. ' +
-        list.filter((l) => l.player_role === 'player_decides').length + ' of these are yours to decide.'));
+        list.filter((l) => l.player_role === 'player_decides').length + ' of these are yours to decide' +
+        (crossing ? ', and ' + crossing + ' need more than one government to agree.' : '.')));
       for (const lv of list) mid.append(leverRow(w, lv, pol.levers[lv.id]));
       if (!list.length) mid.append(el('div', { class: 'cb-p' }, 'Nothing matches that.'));
 
@@ -749,6 +770,39 @@ registerPanel({
           levers.length + ' levers, ' + bodies.size + ' different bodies holding the first call on them, and ' +
           notMod + ' whose decision this twin will not simulate at all.'));
 
+        /* How many governments, which is a different question from how many bodies and a more
+           useful one. Counted here rather than taken from the system, so this block still says
+           something true on the first frame before council publishes. */
+        const govBuckets = { 0: 0, 1: 0, 2: 0, 3: 0 };
+        for (const lv of levers) {
+          const r = reachOf(w, lv);
+          if (r) govBuckets[r.governmentCount] = (govBuckets[r.governmentCount] || 0) + 1;
+        }
+        const GOV_ROWS = [
+          [3, 'need all three governments', 'heath'],
+          [2, 'need two governments', 'sun'],
+          [1, 'need one government', 'sea'],
+          [0, 'need no government at all', 'leaf']
+        ];
+        wrap.append(el('div', { class: 'cb-h' }, 'How many governments have to agree'));
+        const reachBox = el('div', { class: 'cb-reach' });
+        for (const [n, label, tone] of GOV_ROWS) {
+          const v = govBuckets[n] || 0;
+          if (!v) continue;
+          reachBox.append(
+            el('span', { class: 'n' }, String(v)),
+            el('span', { class: 'l' }, label),
+            tierPips({ tiers: n === 0 ? ['native_title'] : ['commonwealth', 'state', 'local'].slice(3 - n), label }),
+            el('span', { class: 'b' }, el('i', { class: tone, style: { width: (100 * v / Math.max(1, levers.length)).toFixed(1) + '%', background: 'var(--' + tone + ')' } })));
+        }
+        wrap.append(reachBox);
+        wrap.append(el('div', { class: 'cb-quiet' },
+          'Counting names makes a long list. Counting governments says what kind of hard a thing is: '
+          + 'one government is a meeting, two is a meeting and a letter, three is a campaign. The '
+          + 'levers that need none are not the easy ones. They belong to the native title holders, '
+          + 'to joint management or to a private operator, and the first two of those are decisions '
+          + 'this twin will not simulate.'));
+
         wrap.append(el('div', { class: 'cb-h' }, 'The desk you inherited'));
         wrap.append(el('div', { class: 'cb-nums' },
           el('div', { class: 'cb-num' }, el('b', {}, String(running.length)), el('i', {}, 'already running')),
@@ -784,6 +838,108 @@ registerPanel({
       wrap.append(el('div', { class: 'cb-who ' + role.cls, style: { marginTop: '12px' } },
         el('b', {}, role.label),
         el('span', {}, decides ? decides.plain : '')));
+
+      /* Who has to agree, one row each, in tier order. This is the part a player has to be able to
+         read at a glance: a lever needing the council is a meeting, and a lever needing the council
+         and the state and the Commonwealth is a different animal, and until this block existed both
+         of them looked like a list of names. */
+      const reach = reachOf(w, lv);
+      if (reach && reach.bodies.length) {
+        const labels = tierPack(w).labels;
+        wrap.append(el('div', { class: 'cb-h' },
+          reach.governmentCount >= 2 ? 'Everybody who has to agree' : 'Who has to agree'));
+        if (reach.plain) wrap.append(el('div', { class: 'cb-p' }, reach.plain));
+        const rows = el('div', { class: 'cb-tiers' });
+        const ordered = reach.bodies.slice().sort((a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier));
+        for (const b of ordered) {
+          const instB = cou && cou.institutions ? cou.institutions[b.id] : null;
+          rows.append(el('div', { class: 'cb-tier' },
+            el('i', { class: 'cb-pip ' + (TIER_TONE[b.tier] || 'iron') }),
+            el('div', { class: 'who' },
+              el('b', {}, b.label),
+              el('em', {}, (labels[b.tier] || TIER_SHORT[b.tier] || b.tier)
+                + ' · ' + (b.notModelled
+                  ? 'this twin does not simulate this decision'
+                  : 'decides on ' + ((instB && instB.cadence) || b.cadence || 'an unmodelled cycle'))))));
+        }
+        wrap.append(rows);
+        const openApp0 = cou && cou.applications ? cou.applications.find((a) => a.leverId === id) : null;
+        if (openApp0 && openApp0.crossingWeeks) {
+          wrap.append(el('div', { class: 'cb-quiet' },
+            'The open file on this carries about ' + openApp0.crossingWeeks + ' extra weeks of assessment '
+            + 'for crossing governments. That is a modelling estimate, not a measured one: nobody has '
+            + 'published how much longer a multi-government approval takes on this island.'));
+        }
+      }
+
+      /* Native title is Commonwealth law, and fourteen levers named QYAC without ever naming it. */
+      if (reach && reach.tiers.includes('native_title')) {
+        const nta = ((w.data && w.data.civic && w.data.civic.instruments) || [])
+          .find((x) => x && x.id === 'native-title-act-1993');
+        if (nta) {
+          wrap.append(el('div', { class: 'cb-banner' },
+            el('b', {}, 'Under what law. '),
+            'QYAC decides this as the registered native title body corporate for the Quandamooka People, '
+            + 'under the ' + nta.label + ', a Commonwealth statute, following the Federal Court '
+            + 'determinations of 4 July 2011. ',
+            el('div', { class: 'cb-quiet', style: { marginTop: '6px' } }, txt(nta.the_part_that_bites || ''))));
+        }
+      }
+
+      /* The Commonwealth block. Only where the pack says so on this lever, and where it does the
+         board shows the live number the twin is already producing rather than a paragraph about it. */
+      if (lv.commonwealth_note) {
+        const box = el('div', { class: 'cb-banner' },
+          el('b', {}, 'The Commonwealth. '),
+          txt(lv.commonwealth_note));
+        const insts = (w.data && w.data.civic && w.data.civic.instruments) || [];
+        const named = (lv.instruments || []).map((iid) => insts.find((x) => x && x.id === iid)).filter(Boolean);
+        for (const ins of named) {
+          box.append(el('div', { class: 'cb-quiet', style: { marginTop: '6px' } },
+            el('b', {}, ins.label + (ins.the_part_that_bites ? '. ' : '')),
+            txt(ins.the_part_that_bites || ins.what_it_does || '')));
+        }
+        if (lv.commonwealth_source) {
+          box.append(el('div', { class: 'cb-src' }, 'Source: ' + sourceText(w, lv.commonwealth_source)));
+        }
+        wrap.append(box);
+      }
+
+      /* The join the pack now makes and the interface should show: a lever that touches shorebird
+         disturbance is a lever that touches listed migratory species, and the shorebird system is
+         running right now with a number for it. */
+      const touchesBirds = [...(lv.effects || []), ...(lv.side_effects || [])]
+        .some((e) => e && e.target === 'shorebird_disturbance');
+      if (touchesBirds) {
+        const sb = w.read('shorebirds');
+        const mnes = (w.data && w.data.civic && w.data.civic.national_environmental_significance) || null;
+        const migratory = mnes && Array.isArray(mnes.matters)
+          ? mnes.matters.find((m) => m && m.id === 'mnes-migratory') : null;
+        const box = el('div', { class: 'cb-banner' },
+          el('b', {}, 'A matter of national environmental significance. '),
+          migratory
+            ? 'This lever moves shorebird disturbance, and the birds it disturbs are listed migratory species under '
+              + (migratory.epbc_section || 'the EPBC Act') + '. ' + txt(migratory.here)
+            : 'This lever moves shorebird disturbance, which is a matter of national environmental significance under the EPBC Act.');
+        if (sb && sb.bySpecies && sb.bySpecies.length) {
+          const listed = sb.bySpecies.filter((s) => s && s.migrant && s.count > 0);
+          box.append(el('div', { class: 'cb-p', style: { marginTop: '6px' } },
+            listed.length
+              ? 'On the flats at this moment: ' + listed.map((s) => s.count + ' ' + s.name.toLowerCase().replace(/\s*\(.*\)$/, '') + ' (' + s.status + ')').join(', ') + '.'
+              : 'No migratory shorebirds on the flats at this moment. They are away in the northern hemisphere.'));
+          box.append(bind((ww) => {
+            const s2 = ww.read('shorebirds');
+            if (!s2 || typeof s2.disturbance365 !== 'number') return '';
+            return 'Roosts flushed in the last year: ' + Math.round(s2.roostFlushes365 || 0)
+              + '. Birds lifted: ' + Math.round(s2.disturbance365) + '.';
+          }, 'cb-quiet'));
+        }
+        box.append(el('div', { class: 'cb-quiet', style: { marginTop: '6px' } },
+          'Whether any particular action is likely to have a significant impact is a judgement for the '
+          + 'proponent and then for the minister. This board does not make it, and nothing here says '
+          + 'this lever needs a referral. It says the Act reaches this ground.'));
+        wrap.append(box);
+      }
 
       if (notMod) {
         const inst = cou && cou.institutions ? cou.institutions[first] : null;
@@ -870,7 +1026,7 @@ registerPanel({
           'This is already running, so it sits at zero: its work is in the island you started with. Stepping it up applies the effects above. Stopping it applies them in reverse, on the same delays, which is the cheapest thing a budget under pressure reaches for and the slowest to show.'));
       }
 
-      wrap.append(el('div', { class: 'cb-src' }, 'Source: ' + (card.source || 'not recorded') + (card.note ? '. ' + txt(card.note) : '')));
+      wrap.append(el('div', { class: 'cb-src' }, 'Source: ' + sourceText(w, card.source) + (card.note ? '. ' + txt(card.note) : '')));
       return wrap;
     }
 
@@ -1109,18 +1265,34 @@ registerPanel({
       const firsts = {};
       for (const lv of levers) firsts[lv.who_decides[0]] = (firsts[lv.who_decides[0]] || 0) + 1;
 
-      const left = el('div', { class: 'cb-pane' });
-      left.append(el('div', { class: 'cb-h' }, 'Nineteen decision makers'));
-      left.append(el('div', { class: 'cb-quiet', style: { marginBottom: '10px' } },
-        'Counted from the pack’s own who_decides field, which its honesty note calls the most important field in the file, and deliberately, frequently, not the player.'));
       const insts = Object.values(cou.institutions).sort((a, b) => (counts[b.id] || 0) - (counts[a.id] || 0) || (a.label < b.label ? -1 : 1));
-      for (const i of insts) {
-        left.append(el('div', { class: 'cb-card pick' + (view.instId === i.id ? ' on' : ''), onclick: () => { view.instId = i.id; refresh(true); } },
-          el('h4', {}, i.label),
-          el('div', { class: 'cb-chips' },
-            chip('iron', i.kind),
-            i.notModelled ? chip('heath', 'not modelled') : chip('sea', i.cadence),
-            (firsts[i.id] || 0) ? chip('sun', (firsts[i.id]) + ' levers') : null)));
+      const labels = tierPack(w).labels;
+      const tiersPresent = TIER_ORDER.filter((t) => insts.some((i) => i.tier === t));
+
+      const left = el('div', { class: 'cb-pane' });
+      // Counted, and grouped. A flat list ordered by lever count buried the fourth tier in the
+      // middle of it: the Commonwealth would have sat between Minjerribah Camping and TransLink,
+      // which tells a reader nothing about what kind of body it is.
+      left.append(el('div', { class: 'cb-h' },
+        insts.length + ' decision makers, across ' + tiersPresent.length + ' tiers'));
+      left.append(el('div', { class: 'cb-quiet', style: { marginBottom: '10px' } },
+        'Counted from the pack’s own who_decides field, which its honesty note calls the most important field in the file, and deliberately, frequently, not the player. Three of these tiers are orders of government and the rest are not, which is the difference that matters when you are working out how hard something will be.'));
+      for (const t of tiersPresent) {
+        const mine = insts.filter((i) => i.tier === t);
+        const leverCount = levers.filter((lv) => (lv.who_decides || []).some((d) => mine.some((m) => m.id === d))).length;
+        left.append(el('div', { class: 'cb-tierhead' },
+          el('i', { class: 'cb-pip ' + (TIER_TONE[t] || 'iron') }),
+          el('span', { class: 'k' }, labels[t] || TIER_SHORT[t] || t),
+          el('span', { class: 'n' }, leverCount + ' levers')));
+        for (const i of mine) {
+          left.append(el('div', { class: 'cb-card pick' + (view.instId === i.id ? ' on' : ''), onclick: () => { view.instId = i.id; refresh(true); } },
+            el('h4', {}, i.label),
+            el('div', { class: 'cb-chips' },
+              chip('iron', i.kind),
+              i.notModelled ? chip('heath', 'not modelled') : chip('sea', i.cadence),
+              (firsts[i.id] || 0) ? chip('sun', firsts[i.id] + (firsts[i.id] === 1 ? ' lever' : ' levers'),
+                'Levers where this body has the first call. It sits in ' + (counts[i.id] || 0) + ' altogether.') : null)));
+        }
       }
 
       const right = el('div', { class: 'cb-pane pad' });
@@ -1138,7 +1310,11 @@ registerPanel({
           right.append(qyacPositions(w));
         } else {
           const kv = el('dl', { class: 'cb-kv' });
-          kv.append(el('dt', {}, 'Decides'), el('dd', {}, (firsts[i.id] || 0) + ' levers outright, and sits in the decision on ' + (counts[i.id] || 0)));
+          kv.append(el('dt', {}, 'Tier'), el('dd', {}, labels[i.tier] || TIER_SHORT[i.tier] || i.tier));
+          const f0 = firsts[i.id] || 0;
+          kv.append(el('dt', {}, 'Decides'), el('dd', {},
+            (f0 === 0 ? 'nothing outright' : f0 + (f0 === 1 ? ' lever' : ' levers') + ' outright')
+            + ', and sits in the decision on ' + (counts[i.id] || 0)));
           kv.append(el('dt', {}, 'Cadence'), el('dd', {}, 'Modelled as ' + i.cadence + '. No meeting calendar was read for this build.'));
           const bud = w.read('budget');
           const fundLabel = i.fund === 'external' ? 'Not the island’s money'
@@ -1169,7 +1345,10 @@ registerPanel({
               return Math.round((x ? x.standing : 0.5) * 100) + '%';
             })));
           right.append(el('div', { class: 'cb-quiet', style: { marginTop: '5px' } },
-            'Standing drifts back toward neutral. A bad year with a council is not a life sentence, and a run of refusals should not feed itself.'));
+            i.tier === 'commonwealth'
+              ? 'Standing drifts back toward neutral, and it moves this body least of all: a national '
+                + 'round does not remember you, and a statutory test was never going to be about you.'
+              : 'Standing drifts back toward neutral. A bad year with a council is not a life sentence, and a run of refusals should not feed itself.'));
 
           if (i.constraint) {
             right.append(el('div', { class: 'cb-h' }, 'The constraint they are under'));
@@ -1177,17 +1356,48 @@ registerPanel({
           }
         }
 
-        right.append(el('div', { class: 'cb-h' }, 'The levers they decide'));
-        const theirs = levers.filter((lv) => lv.who_decides[0] === i.id);
-        if (!theirs.length) right.append(el('div', { class: 'cb-p' }, 'None on their own. They sit in other bodies’ decisions.'));
+        /* Instruments. This is where a tier stops being a colour and becomes an Act with a section
+           in it. The pack tags each instrument with the tier it belongs to; the Commonwealth ones
+           carry the part that bites, because "the EPBC Act applies" is not information and
+           "section 16, a declared Ramsar wetland" is. */
+        const instruments = ((w.data && w.data.civic && w.data.civic.instruments) || [])
+          .filter((x) => x && x.tier === i.tier);
+        if (instruments.length) {
+          right.append(el('div', { class: 'cb-h' }, 'The instruments at this tier'));
+          for (const ins of instruments) {
+            right.append(el('div', { class: 'cb-item' },
+              el('div', { class: 'body' },
+                el('div', {}, ins.label + (ins.date ? ' · ' + ins.date : '')),
+                el('em', {}, txt(ins.the_part_that_bites || ins.what_it_does || '')))));
+          }
+          right.append(el('div', { class: 'cb-quiet' },
+            'Read out of data/civic.json. Each carries its own source; where a record says a gap, that gap is in the pack rather than hidden here.'));
+        }
+
+        // Every lever they sit in, not only the ones where their name happens to be first. A body
+        // that shares eight decisions and leads none was previously rendered as deciding nothing,
+        // which is exactly how a whole tier stays invisible.
+        right.append(el('div', { class: 'cb-h' }, 'The levers they sit in'));
+        const theirs = levers.filter((lv) => (lv.who_decides || []).includes(i.id));
+        if (!theirs.length) right.append(el('div', { class: 'cb-p' }, 'None. They are in the pack as a body this island answers to rather than as a decider on any lever in it.'));
         for (const lv of theirs) {
+          const first = lv.who_decides[0] === i.id;
+          const r = reachOf(w, lv);
           right.append(el('div', { class: 'cb-item' },
             el('div', { class: 'body' },
               el('div', {}, lv.name),
-              el('em', {}, roleOf(lv.player_role).label + ' · ' + (lv.cost_aud.capital ? money(lv.cost_aud.capital) + ' to build' : 'no capital') + ' · ' + leadText(lv.lead_time_months))),
+              el('em', {}, (first ? 'Theirs to call' : 'Shared, and ' + ((cou.institutions[lv.who_decides[0]] || {}).label || lv.who_decides[0]) + ' has the first call')
+                + ' · ' + roleOf(lv.player_role).label
+                + ' · ' + (lv.cost_aud.capital ? money(lv.cost_aud.capital) + ' to build' : 'no capital')
+                + ' · ' + leadText(lv.lead_time_months)
+                + (r && r.governmentCount >= 2 ? ' · ' + r.label.toLowerCase() : ''))),
             el('button', { class: 'btn ghost', type: 'button', onclick: () => { view.tab = 'levers'; view.leverId = lv.id; view.issueId = null; refresh(true); } }, 'Open')));
         }
-        right.append(el('div', { class: 'cb-src' }, 'Source: ' + (i.source || 'not recorded')));
+        if (i.moneyNote) {
+          right.append(el('div', { class: 'cb-h' }, 'How their money actually gets here'));
+          right.append(el('div', { class: 'cb-p' }, txt(i.moneyNote)));
+        }
+        right.append(el('div', { class: 'cb-src' }, 'Source: ' + sourceText(w, i.source)));
       }
       main.append(el('div', { class: 'cb-cols', style: { gridTemplateColumns: 'minmax(230px, 24%) 1fr' } }, left, right));
     });
@@ -1258,10 +1468,14 @@ registerPanel({
           el('div', { class: 'cb-chips' },
             chip(a.origin === 'agenda' ? 'sun' : 'sea', a.origin === 'agenda' ? 'theirs' : 'yours'),
             chip('iron', a.stageLabel.toLowerCase()),
+            (a.governments || []).length >= 2
+              ? chip((a.governments || []).length === 3 ? 'heath' : 'sun', a.reachLabel, a.reachPlain)
+              : null,
             a.infoRequests ? chip('coral', a.infoRequests + ' info request' + (a.infoRequests > 1 ? 's' : '')) : null),
           el('div', { class: 'cb-quiet', style: { marginTop: '6px' } },
             a.deciderLabel + ' · open ' + daysText(Math.round(a.openedMonthsAgo * DAYS_PER_MONTH)) +
-            (a.waitingDays != null ? ' · ' + daysText(a.waitingDays) + ' to go' : ''))));
+            (a.waitingDays != null ? ' · ' + daysText(a.waitingDays) + ' to go' : '') +
+            (a.crossingWeeks ? ' · ' + a.crossingWeeks + ' weeks of that is crossing governments' : ''))));
       }
       const refs = (cou.referrals || []).filter((r) => r.status === 'open');
       if (refs.length) {

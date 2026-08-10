@@ -1018,10 +1018,16 @@ function mountHowItWorks(root, world) {
     const civic = pack(world, 'civic');
     const levers = (civic && Array.isArray(civic.levers)) ? civic.levers : [];
     const insts = (civic && Array.isArray(civic.institutions)) ? civic.institutions : [];
+    const instOf = (id) => insts.find((x) => x && x.id === id) || null;
     const labelOf = (id) => {
-      const i = insts.find((x) => x && x.id === id);
+      const i = instOf(id);
       return (i && i.label) || String(id || '').replace(/-/g, ' ');
     };
+    const tiersBlock = (civic && civic.jurisdiction && civic.jurisdiction.tiers) || {};
+    const tierLabels = tiersBlock.labels || {};
+    const GOVERNMENTS = Array.isArray(tiersBlock.governments) ? tiersBlock.governments : ['commonwealth', 'state', 'local'];
+    const TIER_ORDER = ['commonwealth', 'state', 'local', 'native_title', 'joint', 'private', 'none'];
+    const tierOf = (id) => (instOf(id) || {}).tier || 'none';
 
     const ROLE = [
       ['player_decides', 'Yours to decide', 'leaf'],
@@ -1031,13 +1037,18 @@ function mountHowItWorks(root, world) {
     ];
     const roleCount = {};
     const whoCount = {};
+    // How many orders of government a lever needs, which is the honest measure of how hard it is,
+    // as against how many names are on it, which is only a measure of how long the list looks.
+    const govCount = { 0: 0, 1: 0, 2: 0, 3: 0 };
     for (const l of levers) {
       roleCount[l.player_role] = (roleCount[l.player_role] || 0) + 1;
-      for (const w of (l.who_decides || [])) whoCount[w] = (whoCount[w] || 0) + 1;
+      const tiers = new Set();
+      for (const w of (l.who_decides || [])) { whoCount[w] = (whoCount[w] || 0) + 1; tiers.add(tierOf(w)); }
+      const n = GOVERNMENTS.filter((t) => tiers.has(t)).length;
+      govCount[n] = (govCount[n] || 0) + 1;
     }
     const decides = levers.filter((l) => l.player_role === 'player_decides');
     const decidesCouncil = decides.filter((l) => (l.who_decides || []).includes('redland-city-council')).length;
-    const top = Object.entries(whoCount).sort((a, b) => b[1] - a[1]).slice(0, 6);
     const division = (civic && civic.jurisdiction && Array.isArray(civic.jurisdiction.layers))
       ? civic.jurisdiction.layers.find((x) => x && x.body === 'rcc-division-2') : null;
 
@@ -1068,14 +1079,62 @@ function mountHowItWorks(root, world) {
         el('span', {}, division.covers + (division.why_it_matters ? ' ' + division.why_it_matters : ''))));
     }
 
-    root.append(h('Who holds the rest'));
-    const who = el('div', { class: 'hiw-who' });
-    for (const [id, n] of top) {
-      who.append(el('div', { class: 'hiw-wrow' },
-        el('span', { class: 'l' }, labelOf(id)),
-        el('span', { class: 'n' }, n)));
+    /* How many governments. This block exists because the one under it, the list of bodies, was
+       being cut at the six largest, and the moment a fourth order of government entered the pack
+       that list started hiding the very thing it was there to show. Governments first, because
+       three of them agreeing is a different kind of hard from one of them deciding, and then the
+       bodies in full so nobody is quietly dropped off the bottom again. */
+    const GOV_ROWS = [
+      [3, 'need all three governments', 'coral'],
+      [2, 'need two of them', 'sun'],
+      [1, 'need one', 'sea'],
+      [0, 'need no government at all', 'leaf']
+    ];
+    if (levers.length) {
+      root.append(h('How many governments have to agree'));
+      const gsplit = el('div', { class: 'hiw-split' });
+      for (const [n, label, tone] of GOV_ROWS) {
+        const v = govCount[n] || 0;
+        if (!v) continue;
+        gsplit.append(el('div', { class: 'hiw-srow' },
+          el('span', { class: 'n ' + tone }, String(v)),
+          el('span', { class: 'l' }, label),
+          el('span', { class: 'b' }, el('i', { class: tone, style: { width: (100 * v / Math.max(1, levers.length)).toFixed(1) + '%' } }))));
+      }
+      root.append(gsplit);
+      root.append(note('Four tiers reach this island and three of them are governments: the '
+        + 'Commonwealth, Queensland and the council. The levers needing none of the three are not '
+        + 'the easy ones. They belong to the native title holders, to joint management or to a '
+        + 'private operator, and the first two are decisions this twin will not simulate at all.'));
     }
-    root.append(who, note('Counted across every lever, so one needing two bodies is under both.'));
+
+    root.append(h('Who holds them'));
+    const who = el('div', { class: 'hiw-who' });
+    const seen = new Set();
+    for (const tier of TIER_ORDER) {
+      const ids = Object.keys(whoCount).filter((id) => tierOf(id) === tier)
+        .sort((a, b) => whoCount[b] - whoCount[a]);
+      if (!ids.length) continue;
+      who.append(el('div', { class: 'hiw-wrow head' },
+        el('span', { class: 'l' }, tierLabels[tier] || tier.replace(/_/g, ' ')),
+        el('span', { class: 'n' }, String(ids.reduce((s, id) => s + whoCount[id], 0)))));
+      for (const id of ids) {
+        seen.add(id);
+        who.append(el('div', { class: 'hiw-wrow' },
+          el('span', { class: 'l' }, labelOf(id)),
+          el('span', { class: 'n' }, whoCount[id])));
+      }
+    }
+    // Anything the pack has not placed in a tier still appears, because a body nobody has filed is
+    // worse to hide than a body in the wrong box.
+    for (const id of Object.keys(whoCount)) {
+      if (seen.has(id)) continue;
+      who.append(el('div', { class: 'hiw-wrow' },
+        el('span', { class: 'l' }, labelOf(id) + ' (no tier in the pack)'),
+        el('span', { class: 'n' }, whoCount[id])));
+    }
+    root.append(who, note('Every body, not the largest few, counted across every lever, so one '
+      + 'needing three bodies is under all three.'));
 
     root.append(
       h('So what do you actually do'),
@@ -1085,6 +1144,12 @@ function mountHowItWorks(root, world) {
       p('And where a decision belongs to a body this twin will not guess at, it stops and says so. '
         + 'Anything QYAC decides is in that category: the shape of the process is modelled, the '
         + 'decision is not.'),
+      p('The Commonwealth is the tier you will notice least and it changes the most. It has no '
+        + 'office here, it decides only a handful of these, and it holds the national environment '
+        + 'law over the wetland this island sits in, the law under which native title here was '
+        + 'determined at all, and most of the money that reaches the island having gone through '
+        + 'Queensland or the council first. That is why the count above is governments and not '
+        + 'names.'),
       el('div', { class: 'btn-row' },
         el('button', {
           class: 'btn', type: 'button',
@@ -1378,6 +1443,13 @@ body.twin-explainer .map-panel, body.twin-explainer .map-show { display: none; }
   border-top: 1px solid rgba(232,220,196,.07); font-size: var(--fs-sm); }
 .hiw-wrow .l { flex: 1; color: var(--t); }
 .hiw-wrow .n { font-family: var(--f-num); color: var(--t-hi); font-variant-numeric: tabular-nums; }
+/* The tier heading inside the body list. Small, uppercase and quiet: it is a divider that happens
+   to carry a total, not a row in its own right. */
+.hiw-wrow.head { border-bottom-color: var(--edge-strong); margin-top: var(--sp-3); padding-top: 0; }
+.hiw-wrow.head:first-child { margin-top: 0; }
+.hiw-wrow.head .l { font: 600 var(--fs-micro)/1.4 var(--f-ui); letter-spacing: .14em;
+  text-transform: uppercase; color: var(--sea); }
+.hiw-wrow.head .n { color: var(--t-faint); font-size: var(--fs-micro); }
 
 .hiw-states { display: flex; flex-direction: column; gap: var(--sp-2); }
 .hiw-states > div { display: grid; grid-template-columns: 70px 1fr; gap: var(--sp-3); align-items: start; }

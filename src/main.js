@@ -188,8 +188,26 @@ async function main() {
      * Three frames, not one. The sky layer eases the sun light rather than snapping it, so one
      * frame after a jump the lighting still belongs to the hour you left.
      */
+    /**
+     * Validated, for the same reason `setWeather` below it is.
+     *
+     * `TWIN.setTime('14:00')` is the obvious thing to try and it used to poison the clock for the
+     * rest of the session: `'14:00' * 60` is NaN, the scrub landed on NaN, `DAYS[NaN]` is undefined,
+     * and from then on every `TWIN.probe()` threw inside `islandDateText` while the bus filled with
+     * "any-handler failed for tide:day" once a tick. `TWIN.errors()` reported nothing the whole
+     * time, because nothing had thrown inside a system's own tick. A critic hit exactly that and had
+     * to reload to get a probe back. Hours and minutes now have to be numbers that are hours and
+     * minutes, and anything else says so and leaves the clock where it was.
+     */
     setTime: (h, m = 0) => {
-      world.time.scrubToMinuteOfDay(h * 60 + m);
+      const hh = typeof h === 'number' ? h : Number(h);
+      const mm = typeof m === 'number' ? m : Number(m);
+      if (!Number.isFinite(hh) || !Number.isFinite(mm) || hh < 0 || hh > 24 || mm < 0 || mm >= 60) {
+        console.warn('[TWIN] setTime(hour, minute) takes numbers: hour 0 to 24, minute 0 to 59. '
+          + `Got ${JSON.stringify(h)}, ${JSON.stringify(m)}. The clock has not moved.`);
+        return world.clock.format();
+      }
+      world.time.scrubToMinuteOfDay(hh * 60 + mm);
       if (stage) for (let i = 0; i < 3; i++) { world.frame(0.016); stage.render(0.016); }
       return world.clock.format();
     },

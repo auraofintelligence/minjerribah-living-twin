@@ -110,6 +110,7 @@ paid.
 | document | **yes** | `tools/ingest/lane-document.mjs` | A named published document to cited candidates with page numbers and verbatim quotes. |
 | contribution | **yes**, as far as intake | `tools/ingest/lane-contribution.mjs` | An intake batch to envelope records with attribution, consent, visibility and a coarsened location. |
 | map | **yes** | `tools/ingest/lane-map.mjs` | A KML or KMZ of the island to screened, bounds-checked records, each carrying a four-way reconciliation verdict against the packs that already exist. |
+| legislation | **yes** | `tools/ingest/lane-legislation.mjs` | A hand-written catalogue of named Acts to measured records: citation, register identifier, administering body, and size in pages and provisions counted from the published consolidation. |
 | era | **no, deliberately** | `tools/ingest/lane-era.mjs` | Historical layers. See below. |
 | scenario | partly | `tools/ingest/lane-scenario.mjs` | Stamps a scenario with the seed and the pack fingerprint so it replays. Running one belongs to the scenario system. |
 
@@ -267,6 +268,62 @@ a single shared word offered to move the township of Dunwich to the post office;
 paired a bus stop with the lodge it stands outside; and a beach-named holiday house was reported as
 corroborating the beach. The report the lane writes has a "same name, far apart" section listing every
 pair it could not separate, which is where a person who has been there settles each one in a sentence.
+
+### The legislation lane
+
+```bash
+node tools/ingest/lane-legislation.mjs --index      # the two official indexes
+node tools/ingest/lane-legislation.mjs --resolve    # every catalogue id checked against them
+node tools/ingest/lane-legislation.mjs --fetch      # the current consolidations, into the inbox
+node tools/ingest/lane-legislation.mjs --measure    # pages and structure, out of those files
+node tools/ingest/lane-legislation.mjs --extract --batch 2026-08
+node tools/ingest/lane-legislation.mjs --report
+```
+
+It answers a question the owner has been carrying since 2013, when he went through his filing cabinet,
+found every reference to an Act in the fine print of his own life, and read them: how much legislative
+weight is crippling, how much is uplifting, and in what measure. Weight has to be measured rather than
+felt, so this lane measures it.
+
+**The split is the design.** `tools/ingest/legislation-catalogue.json` is the hand-written half: which
+Acts, what each does in plain English, which of its parts bear on an ordinary person, whether it mostly
+asks or mostly gives, and which life events bring it into a person's life. The lane is the measured
+half: pages, volumes, provisions, chapters, parts, schedules, the compilation number and the currency
+date, all counted out of the published consolidation, plus the administering department where a register
+publishes one. A judgement is marked as a judgement and a measurement is marked with the file it came
+from.
+
+**The identifier is verified twice.** Queensland serves Acts at `act-YYYY-NNN` and guessing a number
+serves a real Act with a real cover and a real page count, which is how a confident lie gets made. So
+`--resolve` checks every catalogue entry against the register's own in-force index and refuses any whose
+short title does not match, and `--measure` then checks the downloaded document's own cover names the
+Act the catalogue asked for. Fail either and nothing is recorded.
+
+**No section number is published that the Act does not have.** Where the catalogue names a provision,
+`--extract` checks it against the set of provision numbers read out of that Act's own table of contents,
+and drops and prints any that is not there. A wrong section number in a civic explainer is worse than no
+section number, because the reader has no way to tell.
+
+**No full text is committed and that is deliberate.** The consolidations run to tens of thousands of
+pages, they belong to their publishers, and the licence position differs between the two registers. The
+PDFs land in `ingest-inbox/legislation/`, which is in `.gitignore`, and their sha256 is recorded so a
+measurement can be shown to have come from a specific file. What is committed is the citation, the
+structure, the size, the description and a deep link.
+
+**Fetching is an offline step.** `--index` and `--fetch` reach the two official registers and nothing
+else, when a person runs them. Everything after that works on what is on disk, and the running twin
+never touches any of it.
+
+**It is not legal advice and the pack is built so it cannot quietly become advice.** Every record carries
+the not_advice line, and that line is a required field in the pack schema, so a record without it fails
+the gate rather than rendering without it.
+
+**Two things it does not know.** Queensland does not publish an administering department on its
+legislation register and the current Administrative Arrangements Order is a Premier and Cabinet
+publication, so Queensland records name no department rather than guessing one. And subordinate
+legislation is not in the pack at all: every regulation, rule and local law made under these Acts is a
+larger body of law than the Acts themselves, which the pack says in the open rather than leaving a
+reader to infer that the Acts are the whole weight.
 
 ### The era lane, and why it is not built
 

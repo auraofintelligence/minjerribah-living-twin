@@ -21,6 +21,7 @@ import { runLoreChecks } from './checks-lore.mjs';
 import { runRecordChecks, runSchemaChecks } from './checks-records.mjs';
 import { runEmDashCheck, runSpellingCheck, runRegistryChecks } from './checks-repo.mjs';
 import { runPersonalDataCheck, runContributionCultureCheck } from './checks-screens.mjs';
+import { runCoordinateChecks } from './checks-geo.mjs';
 
 const LEDGER_FILE = 'tools/ingest/ledger.json';
 const VOCAB_FILE = 'tools/ingest/vocabulary.json';
@@ -100,7 +101,10 @@ export function runGate({ only = null, registryPath = 'data/_provenance.json' } 
     // have. Both also read the staging area, which nothing else does, so a contribution is looked at
     // before somebody promotes it rather than afterwards.
     ['personal-data', runPersonalDataCheck],
-    ['contribution-culture', runContributionCultureCheck]
+    ['contribution-culture', runContributionCultureCheck],
+    // Positions, re-checked against the map every run rather than once at ingest. A lane's own
+    // bounds check is a statement about the afternoon it ran; this is a property of the repository.
+    ['coordinates', runCoordinateChecks]
   ];
   // A typo in --only that silently ran nothing would report a green gate over an empty run, which is
   // the worst failure mode a checker has.

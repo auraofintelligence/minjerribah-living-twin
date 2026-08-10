@@ -36,6 +36,7 @@ export const MANIFEST = [
   () => import('./infrastructure/waste.js'),
   () => import('./infrastructure/telecoms.js'),
   () => import('./infrastructure/subterranean.js'), // the production graph below the sand
+  () => import('./infrastructure/contributed.js'),  // public features an islander pinned himself
 
   // --- economy
   () => import('./economy/businesses.js'),
@@ -81,6 +82,7 @@ export const MANIFEST = [
   () => import('../render/layers/roads.js'),
   () => import('../render/layers/people.js'),
   () => import('../render/layers/eventsite.js'),   // what is on, on the ground
+  () => import('../render/layers/contributed.js'), // the contributed map, on the ground
   () => import('../render/layers/vehicles.js'),
   () => import('../render/layers/fauna.js'),
   () => import('../render/layers/weatherfx.js'),

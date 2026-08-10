@@ -20,6 +20,8 @@
 //   nothing at low confidence reachable by player-facing code
 //   one confidence scale, three words, no second scale and no null rating
 //   a schema per pack, and every pack accounted for in data/_provenance.json with a live checksum
+//   every committed coordinate still on the map: Moreton Bay for every pack, the island itself for
+//     a contributed map, and a lat/lon transposition named as one
 //   no contact detail and no residential address inside a contributed record, from any lane
 //   the cultural prohibitions applied to contributed and staged material, with the routing named
 //   no em dash anywhere in the repository, code comments included

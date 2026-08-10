@@ -69,6 +69,70 @@ Neither a confirmation nor a correction. The name matches a record in the packs 
 - **North Stradbroke Island Aero Club** (Getting Around; Public Transport) against `businesses/north-stradbroke-island-golf-club`, 2838 m apart.
 - **Home Beach Camping Ground** (Point Lookout Holiday Rental Properties) against `places/home-beach-campground`, 802 m apart.
 
+## What is drawn in the world
+
+**42 of 133.** Every other record is in the pack and out of the world, and its own `player_facing_basis` says which clause held it back. The five clauses, in order: the contributor filed it under one of his four public folders; the verdict is NEW so there is no sourced record behind it to overwrite or contradict; it is an observation and not a proposal; the position is the one he pinned rather than a coarsened one; and nothing shown asserts a current status, because that is exactly what his own data status says nobody has checked.
+
+| What | How many |
+| --- | --- |
+| bus stop | 20 |
+| water treatment | 3 |
+| court | 2 |
+| toilet block | 2 |
+| waste bay | 2 |
+| airfield | 1 |
+| ambulance | 1 |
+| beach | 1 |
+| bmx track | 1 |
+| depot | 1 |
+| jetty | 1 |
+| park | 1 |
+| public phone | 1 |
+| skate park | 1 |
+| sports ground | 1 |
+| spring | 1 |
+| swimming enclosure | 1 |
+| waste transfer | 1 |
+
+### Held out of the world although the verdict is NEW
+
+- **Amity Point** (Natural Beauty). A proposal by the contributor rather than an observation. Proposed stays proposed, and this world has no register for proposals to sit in, so it is held out of the world rather than blended into it.
+- **Dream Space of Yarraman Mine** (Public Services and Utilities). A proposal by the contributor rather than an observation. Proposed stays proposed, and this world has no register for proposals to sit in, so it is held out of the world rather than blended into it.
+
+## Bus stops against the published timetable
+
+Route 880 and Route 881 in `data/transport.json` carry eleven waypoints between them and not one coordinate on any of them. This map supplies 20 bus stops with a first-hand position, and 5 of them join to a published timing point on the evidence shown below. The rest are stops between timing points, which is the ordinary case: a Translink timetable prints times at a handful of points and the bus stops at every stop in between, so no departure time is published for them and none is shown for them.
+
+| Stop, as contributed | Township | Routes through | Timing point | On what evidence |
+| --- | --- | --- | --- | --- |
+| Bus Stop | between townships | 880, 881 |  |  |
+| Bus Stop | between townships | 880, 881 | 880 Junner Street Ferry Terminal; 881 Junner Street Ferry Terminal | The waypoint refers to terminal-junner-street, which carries a coordinate, and the pin is 0 m from it. |
+| Bust Stop | between townships | 880, 881 | 880 One Mile Ferry Terminal; 881 One Mile Ferry Terminal | The waypoint refers to terminal-one-mile, which carries a coordinate, and the pin is 55 m from it. |
+| Bus Stop | between townships | 880, 881 |  |  |
+| Bus Stop and Exchange | between townships | 880, 881 |  |  |
+| Bus Stop; Amity General Store | between townships | 881 | 881 Amity Point (Pulan) | The contributed name carries the word that identifies this timing point and no other on this route, and the pin stands in amity-point. |
+| Bus Stop | between townships | 880 |  |  |
+| Bus Stop; Adder Rock | between townships | 880 | 880 Point Lookout, Adder Rock | The contributed name carries the word that identifies this timing point and no other on this route, and the pin stands in point-lookout. |
+| Bus Stop; Manta Lodge YHA | between townships | 880 |  |  |
+| Bus Stop; Anchorage Resort | between townships | 880 |  |  |
+| Bus Stop; Allure Resort | between townships | 880 |  |  |
+| Bus Stop; George Nothling Drive | between townships | 880 |  |  |
+| Bus Stop; Home Beach | between townships | 880 |  |  |
+| Bus Stop; Stradbroke Hotel | between townships | 880 |  |  |
+| Bus Stop; Cylinder Beach | between townships | 880 | 880 Point Lookout, Cylinder Beach | The contributed name carries the word that identifies this timing point and no other on this route, and the pin stands in point-lookout. |
+| Bus Stop; Bob's Shop | between townships | 880 |  |  |
+| Bus Stop | between townships | 880 |  |  |
+| Bus Stop; Bimba Street | between townships | 880 |  |  |
+| Bus Stop | between townships | 880 |  |  |
+| Bus Stop and Turnaround | between townships | 880 |  |  |
+
+### Timing points nothing joined to
+
+- **Amity Point turnoff** on bus-880. The Beehive Road junction on East Coast Road, which stands in no township. The nearest contributed pin, "Bus Stop and Exchange", is 393 m from where data/geography.json puts that junction: close enough to be a lead for somebody who knows the road and too far to assert.
+- **Point Lookout, Gorge Walk** on bus-880. No contributed pin names the Gorge Walk. "Bus Stop and Turnaround" is the last stop on Mooloomba Road and may be it, and only somebody who catches that bus can say.
+- **QUAMPI** on bus-881. Added as a timing point in the 1 December 2025 timetable change. No contributed pin names it.
+- **Amity Point turnoff** on bus-881. The same Beehive Road junction as on Route 880.
+
 ## Held
 
 Held items are not named here, do not carry a coordinate here, and are not in the pack. They are described in docs/CULTURAL-REVIEW.md, which is the queue, and the decision is not this project's to make.

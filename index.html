@@ -30,6 +30,9 @@
 <script src="vendor/babylon.js"></script>
 <script src="vendor/babylon.gui.js"></script>
 <script src="vendor/babylon.materials.js"></script>
+<!-- glTF and GLB loading. Vendored so a contributed scan can actually enter the world: docs/CAPTURE-CONTRACT.md
+     described a pipeline the build could not execute, because nothing here could read a GLB. See docs/BUILDINGS.md. -->
+<script src="vendor/babylon.loaders.js"></script>
 <script type="module" src="src/main.js"></script>
 </body>
 </html>

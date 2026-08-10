@@ -340,6 +340,7 @@ export function registerCouncil(world) {
         confidence: inst.confidence,
         note: inst.note || '',
         capacityNote: inst.capacity_note || '',
+        moneyNote: inst.money_note || '',
         cadenceDays: cad.days,
         cadenceLabel: cad.label,
         notModelled: !!NOT_MODELLED[inst.id],
@@ -1324,6 +1325,7 @@ export function registerCouncil(world) {
         openWithThem: i.openWithThem,
         constraint: i.constraint || '',
         capacityNote: i.capacityNote,
+        moneyNote: i.moneyNote || '',
         fund: i.fund,
         source: i.source
       };
@@ -1519,21 +1521,41 @@ export function registerCouncil(world) {
     }
   });
 
+  /**
+   * A readable list of names. Four bodies joined by "and" is what a fourth tier of government does
+   * to a sentence, and the fix is not to hide the fourth body: it is to name the first two, say how
+   * many others there are, and let the who-has-to-agree block underneath carry the full list.
+   */
+  function nameList(names) {
+    if (names.length <= 1) return names[0] || 'nobody';
+    if (names.length === 2) return `${names[0]} and ${names[1]}`;
+    if (names.length === 3) return `${names[0]}, ${names[1]} and ${names[2]}`;
+    return `${names[0]}, ${names[1]} and ${names.length - 2} others`;
+  }
+
   function plainWhoDecides(lv) {
     const names = lv.who_decides.map((id) => (INST.get(id) || {}).label || id);
+    const listed = nameList(names);
+    const plural = names.length > 1;
     const first = lv.who_decides[0];
     const nm = NOT_MODELLED[first];
+    const reach = reachOf(lv);
+    // How many governments, said once and up front, because it is the thing that decides how hard
+    // this is going to be and a list of names is not.
+    const across = reach && reach.governmentCount >= 2
+      ? ` ${reach.governmentCount === 3 ? 'Three' : 'Two'} governments have to agree.`
+      : '';
     switch (lv.player_role) {
       case 'player_decides':
-        return `You can decide this, through ${names[0]}. It still takes a report, a meeting and a budget line.`;
+        return `You can decide this, through ${names[0]}. It still takes a report, a meeting and a budget line.${across}`;
       case 'player_funds':
-        return `You can put money to this. ${names.join(' and ')} still has to agree to do it${nm ? ', and this twin does not model that decision' : ''}.`;
+        return `You can put money to this. ${listed} still ${plural ? 'have' : 'has'} to agree to do it${nm ? ', and this twin does not model that decision' : ''}.${across}`;
       case 'player_advocates':
-        return `You cannot do this. ${names.join(' and ')} decides. You can prepare a case, consult, and ask${nm ? ', and this twin will not guess at the answer' : ''}.`;
+        return `You cannot do this. ${listed} ${plural ? 'decide' : 'decides'} it. You can prepare a case, consult, and ask${nm ? ', and this twin will not guess at the answer' : ''}.${across}`;
       case 'player_observes':
-        return `You can only watch this one. ${names.join(', ')} runs it on their own schedule.`;
+        return `You can only watch this one. ${listed} ${plural ? 'run' : 'runs'} it on their own schedule.${across}`;
       default:
-        return `${names.join(', ')} decides.`;
+        return `${listed} ${plural ? 'decide' : 'decides'}.${across}`;
     }
   }
 }

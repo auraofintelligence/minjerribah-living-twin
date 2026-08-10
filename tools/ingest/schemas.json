@@ -705,6 +705,50 @@
           ]
         }
       }
+    },
+    "legislation": {
+      "pack": "legislation",
+      "required": [
+        "pack",
+        "version",
+        "about",
+        "not_advice",
+        "method",
+        "confidence_scale",
+        "bearing_scale",
+        "life_events",
+        "coverage",
+        "instruments"
+      ],
+      "collections": {
+        "instruments": {
+          "min_records": 48,
+          "record_required": [
+            "id",
+            "short_title",
+            "citation",
+            "jurisdiction",
+            "register",
+            "in_force",
+            "size",
+            "what_it_does",
+            "parts_that_bear_on_a_person",
+            "bearing",
+            "life_events",
+            "not_advice",
+            "source",
+            "locator",
+            "quote",
+            "confidence",
+            "status",
+            "asserts",
+            "extracted_at",
+            "extractor",
+            "reviewed_by",
+            "reviewed_on"
+          ]
+        }
+      }
     }
   }
 }

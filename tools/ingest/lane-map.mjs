@@ -651,6 +651,238 @@ function statusConfidenceFor(folder) {
   return 'medium';
 }
 
+// ------------------------------------------------------------------------------------------------
+// What a player may see
+// ------------------------------------------------------------------------------------------------
+
+/**
+ * WHY THIS SECTION EXISTS
+ *
+ * The first pass through this lane marked every one of the 133 records `player_facing: false` and
+ * wrote "nothing in this pack is player-facing" into the pack header. That was the right default and
+ * the wrong rule, and a critic driving the running build found out exactly how wrong: the pack was
+ * fetched on every boot, 325 kB of it, and changed nothing on screen. Twenty bus stops with a
+ * first-hand position each, on two routes the twin already models with not one coordinate between
+ * their eleven timing points; three water treatment plants; the tip; the ambulance station; two
+ * toilet blocks; the fishing jetty; the shark-proof swimming enclosure at Amity Point. All of it in
+ * a file, drawn nowhere.
+ *
+ * The blanket rule was holding back records that have nothing to hold back for. So the rule is now
+ * narrow, and it is five questions rather than one, every one of them answerable from the record:
+ *
+ *   1. Which folder did the contributor file it under? Only the four public ones. A shopfront, a
+ *      holiday let and a mine lease are the three things his own data_status says he cannot vouch
+ *      for, and a dwelling's position is coarsened before it is committed anyway.
+ *   2. Is the verdict NEW? A NEW record contradicts nothing and overwrites nothing, so showing it
+ *      cannot put a contribution over the top of a sourced record. CONFIRMS, CORRECTS and CONFLICTS
+ *      all name an existing record, and what to do about that is still a person's decision.
+ *   3. Is it an observation rather than a proposal? Proposed stays proposed, and this world has no
+ *      register for proposals yet, so a proposal is held out of it rather than blended into it.
+ *   4. Is the position the one he pinned, uncoarsened?
+ *   5. Does anything shown assert a current status? Nothing here does. A marker says the thing is
+ *      there. It never says it is open, running, staffed or serviced, because that is precisely what
+ *      `status_confidence` says nobody has checked.
+ *
+ * What comes through: 42 public features. What does not: every business, every rental, every lease,
+ * every record with an existing record behind it, and the two proposals.
+ */
+const PUBLIC_FOLDERS = /^(natural beauty|active community spaces|getting around|public services and utilities)/i;
+
+/**
+ * What kind of thing a marker is, so the world can draw a bus stop as a bus stop and a tip as a tip.
+ *
+ * Read off the contributor's own name for the pin and nothing else. Ordered, first match wins. The
+ * fallback is a plain marker rather than a guess: a kind this table does not know is not a reason to
+ * invent one.
+ */
+const FACILITY_KINDS = [
+  [/^bus.?\s*stop/i, 'bus_stop'],
+  [/aero club|airfield|airstrip/i, 'airfield'],
+  [/water treatment/i, 'water_treatment'],
+  [/refuse tip|waste transfer|\btip\b/i, 'waste_transfer'],
+  [/metal waste|green waste|plant\/green/i, 'waste_bay'],
+  [/depot/i, 'depot'],
+  [/ambulance/i, 'ambulance'],
+  [/public phone|pay ?phone/i, 'public_phone'],
+  [/toilet/i, 'toilet_block'],
+  [/jetty|boat ramp/i, 'jetty'],
+  [/skate/i, 'skate_park'],
+  [/bmx/i, 'bmx_track'],
+  [/court/i, 'court'],
+  [/cricket|tennis|bowls|oval/i, 'sports_ground'],
+  [/swimming enclosure/i, 'swimming_enclosure'],
+  [/spring/i, 'spring'],
+  [/park|playground/i, 'park'],
+  [/beach/i, 'beach']
+];
+
+export function facilityKind(name) {
+  for (const [rx, kind] of FACILITY_KINDS) if (rx.test(name)) return kind;
+  return 'facility';
+}
+
+/**
+ * The only wording this project changes, and it changes it in a separate field with the original
+ * kept. One of the twenty bus stops is typed "Bust Stop". Showing that to a player as the name of a
+ * place would be repeating a slip of the finger as a fact about the island; silently rewriting the
+ * `name` field would be editing somebody's contribution. So both are on the record and the note says
+ * which is which.
+ */
+const DISPLAY_FIXES = [
+  { rx: /^Bust Stop$/, to: 'Bus Stop', why: 'The contributed name reads "Bust Stop". Shown as "Bus Stop": a typing slip, not a place name. The contributed spelling is kept in `name`.' }
+];
+
+export function displayNameFor(name) {
+  for (const f of DISPLAY_FIXES) if (f.rx.test(name)) return { display: name.replace(f.rx, f.to), why: f.why };
+  return null;
+}
+
+/** Decide clause by clause, and record the clause that decided it either way. */
+export function playerFacingDecision({ folder, verdict, proposal, coarsened, geometry }) {
+  if (!PUBLIC_FOLDERS.test(folder)) {
+    return { ok: false, basis: `Filed by the contributor under "${folder}", which is a folder of businesses, rentals or leases. His own data status says current trading and tenure is exactly what he cannot vouch for, so nothing from these folders is drawn.` };
+  }
+  if (verdict !== 'NEW') {
+    return { ok: false, basis: `The verdict is ${verdict}, so this record names an existing sourced record. What to do about that is a person's decision and a separate commit, and until it is made the sourced record is the one the world uses.` };
+  }
+  if (proposal) {
+    return { ok: false, basis: 'A proposal by the contributor rather than an observation. Proposed stays proposed, and this world has no register for proposals to sit in, so it is held out of the world rather than blended into it.' };
+  }
+  if (coarsened) {
+    return { ok: false, basis: 'The committed position is coarsened, so it is not a position to draw a marker at.' };
+  }
+  return {
+    ok: true,
+    basis: 'A public feature the contributor stood in front of, in one of his four public folders, with '
+      + 'no existing record behind it to reconcile and no proposal in it. Drawn at the position he '
+      + `pinned${geometry === 'polygon' ? ', which for a hand-drawn outline is the centre of the outline and not its edge' : ''}. `
+      + 'Nothing about its current state is shown, because that is what nobody has checked.'
+  };
+}
+
+// ------------------------------------------------------------------------------------------------
+// Joining a bus stop to the routes that already exist
+// ------------------------------------------------------------------------------------------------
+
+/**
+ * `data/transport.json` models Route 880 and Route 881 in full: operator, capacity, the whole
+ * published timetable, the roads used. Between them their eleven waypoints carry not one coordinate.
+ * Four resolve through a `ref` into `terminals`; the other seven are a name and nothing else, so
+ * nothing in the twin could put a bus stop on the ground.
+ *
+ * This map supplies a position and a name for twenty of them. Joining the two up is the whole reason
+ * the slice brief says to join rather than to add a second parallel truth, so the join is computed
+ * here, at ingest, with its evidence on the record, rather than guessed at runtime.
+ *
+ * Two kinds of evidence are accepted and no others:
+ *
+ *   name      the contributor's own name for the stop contains the words that distinguish that
+ *             timing point. "Bus Stop; Adder Rock" against "Point Lookout, Adder Rock".
+ *   distance  the timing point resolves through its `ref` to a terminal that carries a coordinate,
+ *             and the pin is within 150 m of it.
+ *
+ * Where there is neither, the join is null and says so. A bus stop that is not a published timing
+ * point is the normal case: a Translink timetable publishes times at a handful of timing points and
+ * the bus stops at every stop in between, and saying otherwise would invent a departure time.
+ */
+/**
+ * One row per published timing point, written out rather than matched by a clever general rule.
+ *
+ * A general matcher was tried first and it put the Amity Point general store stop onto the "Amity
+ * Point turnoff" waypoint, which is the Beehive Road junction four and a half kilometres away on the
+ * other side of the island, because both strings contain the word Amity. On an island where "Point
+ * Lookout" prefixes four of the six waypoints on one route and every township name repeats inside
+ * the names of the things in it, a matcher clever enough to be right is a matcher nobody can audit.
+ * Eleven rows is the whole problem. Here they are.
+ *
+ *   ref        the waypoint resolves to a terminal that carries a coordinate: match within 150 m
+ *   word       a word in the contributed name that identifies this stop and no other
+ *   township   the stop must also stand in this township, so a word cannot travel
+ *   unmatched  a note saying why nothing can join to it, which is a finding, not a gap
+ */
+const TIMING_POINTS = [
+  { route: 'svc-bus-880', waypoint: 'Junner Street Ferry Terminal', ref: 'terminal-junner-street' },
+  { route: 'svc-bus-880', waypoint: 'One Mile Ferry Terminal', ref: 'terminal-one-mile' },
+  { route: 'svc-bus-880', waypoint: 'Amity Point turnoff', unmatched: 'The Beehive Road junction on East Coast Road, which stands in no township. The nearest contributed pin, "Bus Stop and Exchange", is 393 m from where data/geography.json puts that junction: close enough to be a lead for somebody who knows the road and too far to assert.' },
+  { route: 'svc-bus-880', waypoint: 'Point Lookout, Adder Rock', word: /\badder rock\b/i, township: 'point-lookout' },
+  { route: 'svc-bus-880', waypoint: 'Point Lookout, Cylinder Beach', word: /\bcylinder\b/i, township: 'point-lookout' },
+  { route: 'svc-bus-880', waypoint: 'Point Lookout, Gorge Walk', word: /\bgorge\b/i, township: 'point-lookout', unmatched: 'No contributed pin names the Gorge Walk. "Bus Stop and Turnaround" is the last stop on Mooloomba Road and may be it, and only somebody who catches that bus can say.' },
+  { route: 'svc-bus-881', waypoint: 'One Mile Ferry Terminal', ref: 'terminal-one-mile' },
+  { route: 'svc-bus-881', waypoint: 'Junner Street Ferry Terminal', ref: 'terminal-junner-street' },
+  { route: 'svc-bus-881', waypoint: 'QUAMPI', word: /\bquampi\b/i, township: 'dunwich', unmatched: 'Added as a timing point in the 1 December 2025 timetable change. No contributed pin names it.' },
+  { route: 'svc-bus-881', waypoint: 'Amity Point turnoff', unmatched: 'The same Beehive Road junction as on Route 880.' },
+  { route: 'svc-bus-881', waypoint: 'Amity Point (Pulan)', word: /\bamity\b/i, township: 'amity-point' }
+];
+
+/** Which routes serve the township a stop stands in, read off the routes' own waypoint lists. */
+function routesForTownship(township) {
+  if (township === 'point-lookout') return ['svc-bus-880'];
+  if (township === 'amity-point') return ['svc-bus-881'];
+  return ['svc-bus-880', 'svc-bus-881'];
+}
+
+/** Which township a lat/lon is in, by nearest of the three, and only within 3.5 km of one. */
+const TOWNSHIP_POINTS = [
+  { id: 'dunwich', lat: -27.4989, lon: 153.4017 },
+  { id: 'amity-point', lat: -27.3997, lon: 153.4390 },
+  { id: 'point-lookout', lat: -27.4295, lon: 153.5330 }
+];
+export function townshipOf(point) {
+  let best = null;
+  for (const t of TOWNSHIP_POINTS) {
+    const d = metresBetween(point, t);
+    if (!best || d < best.d) best = { id: t.id, d };
+  }
+  return best && best.d <= 3500 ? best.id : null;
+}
+
+export function transportJoin(pin, kind) {
+  if (kind !== 'bus_stop') return null;
+  let transport = null;
+  try { transport = readJSON('data/transport.json'); } catch { return null; }
+  const terminals = new Map((transport.terminals || []).map((t) => [t.id, t]));
+  const services = new Map((transport.services || []).map((s) => [s.id, s]));
+  const township = townshipOf(pin.point);
+
+  // Junner Street and One Mile are timing points on both routes, so a stop can join more than one.
+  const matches = [];
+  for (const row of TIMING_POINTS) {
+    const svc = services.get(row.route);
+    if (!svc || !(svc.waypoints || []).some((w) => w.name === row.waypoint)) continue;
+    const term = row.ref ? terminals.get(row.ref) : null;
+    const dist = term && Number.isFinite(term.lat)
+      ? Math.round(metresBetween(pin.point, { lat: term.lat, lon: term.lon }))
+      : null;
+    const byDistance = dist !== null && dist <= 150;
+    const byName = !!row.word && row.word.test(pin.name) && (!row.township || row.township === township);
+    if (!byDistance && !byName) continue;
+    matches.push({
+      route: svc.id,
+      route_name: svc.name,
+      timing_point: row.waypoint,
+      basis: byDistance
+        ? `The waypoint refers to ${row.ref}, which carries a coordinate, and the pin is ${dist} m from it.`
+        : `The contributed name carries the word that identifies this timing point and no other on this route, and the pin stands in ${row.township}.`,
+      distance_m: dist
+    });
+  }
+
+  return {
+    township,
+    serves_routes: routesForTownship(township),
+    serves_routes_basis: 'Inferred from the routes\' own waypoint lists in data/transport.json: Route 880 '
+      + 'runs Dunwich to Point Lookout and Route 881 runs Dunwich to Amity Point. It is an inference from '
+      + 'that pack, not something the contributor wrote and not something Translink published per stop.',
+    timing_points: matches,
+    timing_point_note: matches.length
+      ? 'This stop is one of the timing points the published timetable prints a time against, so a '
+        + 'departure from this stop is a published time and not an estimate.'
+      : 'Not one of the published timing points. A Translink timetable prints times at a handful of them '
+        + 'and the bus stops at every stop in between, so no departure time is published for this stop and '
+        + 'none is shown for it.'
+  };
+}
+
 export function toRecord(pin, batch, reconciliation) {
   const commercial = COMMERCIAL_PREMISES.test(pin.name);
   const dwelling = DWELLING_FOLDERS.test(pin.folder) && !commercial;
@@ -696,6 +928,7 @@ export function toRecord(pin, batch, reconciliation) {
     method: 'map',
     visibility: 'public_twin',
     consent: batch.consent,
+    facility_kind: facilityKind(pin.name),
     player_facing: false,
     reconciliation,
     note: proposal
@@ -722,7 +955,37 @@ export function toRecord(pin, batch, reconciliation) {
       return [Math.round(ll.lat * 1e7) / 1e7, Math.round(ll.lon * 1e7) / 1e7];
     });
     record.outline_note = 'Drawn by hand by the contributor on a web map. Treat it as an indication of '
-      + 'extent, never as a boundary.';
+      + 'extent, never as a boundary. Nothing draws it: the world puts a marker at the centre of it and '
+      + 'says the thing is here, which is what a hand-drawn outline actually supports.';
+  }
+
+  // May a player see it, and if so what is it and what does it join to. The decision and its reason
+  // are both on the record, so a reader who disagrees can see which clause they are arguing with.
+  const decision = playerFacingDecision({
+    folder: pin.folder,
+    verdict: reconciliation.verdict,
+    proposal,
+    coarsened: published.coarsened,
+    geometry: record.geometry
+  });
+  record.player_facing = decision.ok;
+  record.player_facing_basis = decision.basis;
+  if (decision.ok) {
+    const display = displayNameFor(pin.name);
+    if (display) {
+      record.display_name = display.display;
+      record.display_name_note = display.why;
+    }
+    const township = townshipOf(pin.point);
+    if (township) record.township = township;
+    const join = transportJoin(pin, record.facility_kind);
+    if (join) {
+      delete join.township;
+      record.transport = join;
+    }
+    record.shown_as = 'A marker at the pinned position, its name, who contributed it and when, and the '
+      + 'verbatim text of the placemark. No opening hours, no operating status, no service level: the '
+      + 'record does not carry them and nobody has checked them.';
   }
   return record;
 }
@@ -867,12 +1130,18 @@ export function runLane(file, opts = {}) {
 export function packHeader(result) {
   const b = result.batch;
   const strippedKinds = [...new Set(result.stripped.flatMap((s) => s.kinds))].sort();
+  const drawn = result.candidates.filter((c) => c.player_facing);
+  const stops = drawn.filter((c) => c.facility_kind === 'bus_stop');
+  const timingPoints = stops.filter((c) => c.transport && c.transport.timing_points.length);
   return {
+    version: '0.2.0',
     about: `Pins from ${b.contributor}'s own map of Minjerribah, screened, bounds-checked and `
       + 'reconciled against the packs that already exist. This pack is the record of what the map says '
-      + 'and how it lines up. Nothing in it has been applied to data/places.json or data/businesses.json, '
-      + 'and nothing in it renders: applying a correction to a sourced record is a person\'s decision and '
-      + 'a separate commit, and the corrected record has to say whose pin it came from.',
+      + 'and how it lines up. Nothing in it has been applied to data/places.json or data/businesses.json: '
+      + 'applying a correction to a sourced record is a person\'s decision and a separate commit, and the '
+      + `corrected record has to say whose pin it came from. ${drawn.length} of the ${result.candidates.length} `
+      + 'records are drawn in the world, and `player_facing_basis` on every record says in a sentence why '
+      + 'it is or is not one of them.',
     crs: 'EPSG:4326',
     coordinate_order: 'lat then lon in every record. The KML this came from is lon,lat,alt, and '
       + 'tools/ingest/kml.mjs toLatLon is the single place that turns one into the other.',
@@ -918,8 +1187,18 @@ export function packHeader(result) {
         + 'still one person\'s map.',
       'A reconciliation verdict is a lead, not an edit. CORRECTS means somebody should look, not that '
         + 'anything has changed.',
-      'Nothing in this pack is player-facing. Held is a normal state, and unreviewed is invisible rather '
-        + 'than caveated.',
+      `${drawn.length} of these records are drawn in the world and ${result.candidates.length - drawn.length} `
+        + 'are not. The line is drawn by the five clauses in `player_facing_basis`, not by taste: a public '
+        + 'feature in one of the contributor\'s four public folders, with a NEW verdict so there is no '
+        + 'sourced record behind it, no proposal in it and an uncoarsened position. Held is a normal state, '
+        + 'and unreviewed is invisible rather than caveated.',
+      'A marker in the world says a thing is there. It never says the thing is open, running, staffed or '
+        + 'serviced, because `status_confidence` is the contributor saying that is exactly what he has not '
+        + 'checked.',
+      `${stops.length} of the drawn records are bus stops, and ${timingPoints.length} of those join to a `
+        + 'timing point the Translink timetable in data/transport.json prints a time against. The other '
+        + `${stops.length - timingPoints.length} are stops between timing points, which is the ordinary case, `
+        + 'and no departure time is shown for them because none is published.',
       'Positions of dwellings let as holiday rentals are coarsened to 250 m before commit, not filtered '
         + 'at display time, because a runtime filter is one bug away from publishing what it was hiding.',
       'The four verdicts are computed by name and by distance. Names on this island repeat between '
@@ -1035,6 +1314,65 @@ export function reportMarkdown(result) {
     }
     w('');
   }
+
+  /* ------------------------------------------------------------ what a player sees */
+
+  const drawn = result.candidates.filter((r) => r.player_facing);
+  const stops = drawn.filter((r) => r.facility_kind === 'bus_stop');
+  const joined = stops.filter((r) => r.transport && r.transport.timing_points.length);
+
+  w('## What is drawn in the world');
+  w('');
+  w(`**${drawn.length} of ${result.candidates.length}.** Every other record is in the pack and out of the `
+    + 'world, and its own `player_facing_basis` says which clause held it back. The five clauses, in order: '
+    + 'the contributor filed it under one of his four public folders; the verdict is NEW so there is no '
+    + 'sourced record behind it to overwrite or contradict; it is an observation and not a proposal; the '
+    + 'position is the one he pinned rather than a coarsened one; and nothing shown asserts a current '
+    + 'status, because that is exactly what his own data status says nobody has checked.');
+  w('');
+  const byKind = new Map();
+  for (const r of drawn) byKind.set(r.facility_kind, (byKind.get(r.facility_kind) || 0) + 1);
+  w('| What | How many |');
+  w('| --- | --- |');
+  for (const [k, n] of [...byKind.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))) {
+    w(`| ${k.replace(/_/g, ' ')} | ${n} |`);
+  }
+  w('');
+  w('### Held out of the world although the verdict is NEW');
+  w('');
+  const heldBack = result.candidates.filter((r) => !r.player_facing && r.reconciliation.verdict === 'NEW'
+    && PUBLIC_FOLDERS.test(r.folder));
+  if (!heldBack.length) w('None.');
+  for (const r of heldBack) w(`- **${r.name}** (${r.folder}). ${r.player_facing_basis}`);
+  w('');
+
+  w('## Bus stops against the published timetable');
+  w('');
+  w(`Route 880 and Route 881 in \`data/transport.json\` carry eleven waypoints between them and not one `
+    + `coordinate on any of them. This map supplies ${stops.length} bus stops with a first-hand position, `
+    + `and ${joined.length} of them join to a published timing point on the evidence shown below. The rest `
+    + 'are stops between timing points, which is the ordinary case: a Translink timetable prints times at a '
+    + 'handful of points and the bus stops at every stop in between, so no departure time is published for '
+    + 'them and none is shown for them.');
+  w('');
+  w('| Stop, as contributed | Township | Routes through | Timing point | On what evidence |');
+  w('| --- | --- | --- | --- | --- |');
+  for (const r of stops) {
+    const t = r.transport;
+    const tp = t.timing_points.length
+      ? t.timing_points.map((x) => `${x.route.replace('svc-bus-', '')} ${x.timing_point}`).join('; ')
+      : '';
+    w(`| ${r.name} | ${t.township || 'between townships'} | ${t.serves_routes.map((s) => s.replace('svc-bus-', '')).join(', ')} `
+      + `| ${tp} | ${t.timing_points.length ? t.timing_points[0].basis : ''} |`);
+  }
+  w('');
+  w('### Timing points nothing joined to');
+  w('');
+  for (const row of TIMING_POINTS) {
+    if (!row.unmatched) continue;
+    w(`- **${row.waypoint}** on ${row.route.replace('svc-', '')}. ${row.unmatched}`);
+  }
+  w('');
 
   w('## Held');
   w('');

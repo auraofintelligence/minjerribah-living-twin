@@ -351,6 +351,28 @@ export function registerMapPanel(world) {
           g.fillText(p.name, lx, q.py - 5.5 * k);
         }
 
+        // The contributed public map: bus stops, jetties, toilets, water plants, the tip. Always on,
+        // because a map of an island whose only public transport is two bus routes should show where
+        // the stops are, and until this pack arrived nothing in this project knew. Bus stops are
+        // squares and everything else is a circle, the same two shapes the world uses, and the whole
+        // set is drawn under the info view's markers so an active view still wins the foreground.
+        const cm = w.read('contributed');
+        if (cm && cm.ready) {
+          for (const f of cm.features) {
+            const q = toPx(canvas, f.x, f.z);
+            if (q.px < -10 || q.py < -10 || q.px > W + 10 || q.py > H + 10) continue;
+            const isStop = f.kind === 'bus_stop';
+            const r = (isStop ? 1.9 : 1.7) * k;
+            g.fillStyle = TONE[f.tone] || TONE.sand;
+            g.strokeStyle = 'rgba(6,9,11,.75)';
+            g.lineWidth = 1 * k;
+            g.beginPath();
+            if (isStop) g.rect(q.px - r, q.py - r, r * 2, r * 2);
+            else g.arc(q.px, q.py, r, 0, Math.PI * 2);
+            g.fill(); g.stroke();
+          }
+        }
+
         // The active info view's markers.
         const marks = iv.activeId() ? iv.markers() : [];
         const shown = marks.slice().sort((a, c) => (a.rank || 5) - (c.rank || 5)).slice(0, big ? 30 : 14);

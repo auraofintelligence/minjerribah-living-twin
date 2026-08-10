@@ -1655,6 +1655,167 @@ function mount(root, world) {
     return sb && sb.roosts ? sb.roosts.find((r) => r.id === id) || null : null;
   }
 
+  /* ---------------------------------------------------------------- contributed facility
+
+  A public feature somebody who lives here pinned on his own map of the island.
+
+  This card is the one place in the interface where a player can walk the whole chain back: what it
+  is, where it stands, who put it there, on what day, under what consent, in his own words, and how
+  far the person who supplied it said he could be trusted about it. Nothing else in this build can
+  do that, and it is the reason the contribution spine was built.
+
+  The one thing it will not do is tell you the place is open. Every one of these records carries
+  existence high, position high and status medium, which is the contributor writing "I don't know
+  what information on this map is up to date" about his own map. So the card says what is there and
+  says plainly what nobody has checked. */
+
+  function facility(id) {
+    const c = world.read('contributed');
+    if (!c || !c.ready) return null;
+    return typeof c.byId === 'function' ? c.byId(id) : null;
+  }
+
+  VIEWS.facility = {
+    tabs(id) {
+      const f = facility(id);
+      const board = f && f.kind === 'bus_stop' && f.transport && f.transport.timing_points.length;
+      return board ? ['Here', 'Next buses', 'Who put it here'] : ['Here', 'Who put it here'];
+    },
+    header(id) {
+      const f = facility(id);
+      if (!f) return null;
+      const chips = [chip('Contributed', 'heath')];
+      if (f.kind === 'bus_stop' && f.transport) {
+        for (const r of f.transport.serves_routes) chips.push(chip(r.replace('svc-bus-', 'Route '), 'sun'));
+      }
+      return {
+        name: f.name,
+        sub: `${f.kindLabel} · ${f.townshipLabel || f.region || 'Minjerribah'}`,
+        chips
+      };
+    },
+    build(id, tab) {
+      const f = facility(id);
+      const c = world.read('contributed') || {};
+      if (!f) return [el('div', { class: 'insp-empty' }, el('p', {}, 'That feature is no longer in the pack.'))];
+      const out = [];
+
+      if (tab === 'Next buses') {
+        const board = el('div', { class: 'rows' });
+        const head = el('div', {});
+        bind(() => {
+          const rows = typeof c.departuresAt === 'function' ? c.departuresAt(f.id, 6) : [];
+          head.textContent = rows.length
+            ? `Next ${rows.length === 1 ? 'departure' : rows.length + ' departures'} from this stop, island time.`
+            : 'No more published departures from this stop today.';
+          board.replaceChildren(...rows.map((r) => el('div', { class: 'row' },
+            el('div', { class: 'lead' },
+              el('div', { class: 'name' }, `${r.at_text}  ${r.routeLabel} towards ${r.towards}`),
+              el('div', { class: 'sub' }, r.flag === 'A'
+                ? 'weekend, public holiday and school holiday weekdays only'
+                : 'runs every day the timetable runs')),
+            el('div', { class: 'v' }, r.inMinutes < 1 ? 'now' : `${r.inMinutes} min`))));
+        });
+        out.push(sec('At this stop', head, board));
+        out.push(sec('Which runs are on today', el('div', { class: 'stat-row' },
+          readout('Today', () => c.serviceDayLabel || ''),
+          readout('Due island-wide, next hour', () => String(c.busesDueWithinHour || 0)))));
+        const tps = (f.transport && f.transport.timing_points) || [];
+        out.push(sec('How this stop was matched to the timetable',
+          kv(tps.map((t) => [t.route.replace('svc-bus-', 'Route ') + ', ' + t.timing_point, t.basis])),
+          basis(f.transport ? f.transport.timing_point_note : '')));
+        out.push(sec('What this timetable is', basis(...(c.notes || []).filter((n) => /timetable/i.test(n)),
+          'The bus you can watch drive past on the road is spawned from the same published table, in '
+          + 'src/systems/movement/traffic.js. Two readings of one file.')));
+        return out;
+      }
+
+      if (tab === 'Who put it here') {
+        out.push(sec('The contribution', kv([
+          ['Contributed by', f.contributedBy],
+          ['As', f.role ? cap(plain(f.role)) : ''],
+          ['How', f.kind ? 'A pin on his own map of the island' : ''],
+          ['Recorded', f.extractedAt],
+          ['Pack', 'data/contributions/map-contributions.json']
+        ])));
+        out.push(sec('In his own words', whyBox('', el('i', {}, f.quote || '')),
+          basis('The verbatim text of the placemark: its folder, its name and its description, joined '
+            + 'with line breaks and otherwise unchanged.')));
+        out.push(sec('What he said about his own map', whyBox('warn', el('i', {}, c.dataStatus || '')),
+          basis('His words, carried through as this pack\'s data status and not overridden anywhere. '
+            + 'It is why the confidence below is split rather than averaged.')));
+        out.push(sec('How sure, and about what', kv([
+          ['That it exists', confWord(f.existenceConfidence) + ': he stood there and put the pin there himself'],
+          ['That it is here', confWord(f.positionConfidence) + (f.fromOutline
+            ? ': the centre of an outline he drew by hand, so the marker says the thing is here and not where its fence is'
+            : ': the position he pinned, uncoarsened')],
+          ['That it is like this today', confWord(f.statusConfidence) + ': nobody has checked, and this build shows nothing about its current state']
+        ])));
+        out.push(sec('Why it is drawn at all', basis(f.basis), basis(f.shownAs)));
+        out.push(sec('Against what already existed', whyBox('', el('b', {}, (f.verdict || '') + ': '), f.verdictReason || ''),
+          basis('Every record in this pack carries a verdict against data/places.json, '
+            + 'data/businesses.json, data/transport.json and data/geography.json. Nothing in it has been '
+            + 'applied to any of them.')));
+        out.push(sec('Consent, and taking it back', basis(f.consentWording),
+          'A contributor can withdraw a record. Withdrawal is honoured at the next release through a '
+          + 'tombstone that keeps the id with a withdrawn marker, and a public git history persists, so '
+          + 'revocation after publication is best-effort. docs/PARTICIPATION.md says so rather than '
+          + 'promising otherwise.'));
+        return out;
+      }
+
+      /* ---- Here ---- */
+      out.push(sec('What it is', whyBox('', f.what || ''), kv([
+        ['Kind', f.kindLabel],
+        ['Where', f.townshipLabel || f.region || 'Minjerribah'],
+        ['Position', `${f.lat.toFixed(5)}, ${f.lon.toFixed(5)}`],
+        ['Contributed name', f.nameNote ? f.contributedName : null]
+      ]), f.nameNote ? basis(f.nameNote) : null));
+
+      if (f.kind === 'bus_stop' && f.transport) {
+        const t = f.transport;
+        const live = el('div', {});
+        bind(() => {
+          const next = typeof c.departuresAt === 'function' ? c.departuresAt(f.id, 1)[0] : null;
+          live.textContent = next
+            ? `Next published departure ${next.at_text}, ${next.routeLabel} towards ${next.towards}, in ${next.inMinutes} minutes.`
+            : t.timing_points.length
+              ? 'No more published departures from this stop today.'
+              : 'No departure time is published for this stop.';
+        });
+        out.push(sec('The buses', whyBox(t.timing_points.length ? '' : 'warn', live),
+          kv([['Routes through here', t.serves_routes.map((r) => r.replace('svc-bus-', 'Route ')).join(' and ')]]),
+          basis(t.serves_routes_basis), basis(t.timing_point_note)));
+        if (!t.timing_points.length) {
+          out.push(sec(null, basis('Route 880 and Route 881 in data/transport.json carry eleven waypoints '
+            + 'between them and not one coordinate on any of them. This map is where every bus stop position '
+            + 'in this world came from.')));
+        }
+      }
+
+      out.push(sec('The state of it', whyBox('warn',
+        'Nothing here says whether this is open, running, staffed, serviced or safe. The contributor '
+        + 'wrote that current information is exactly what he could not vouch for on his own map, and '
+        + 'nobody has checked since. A marker on this island says the thing is there.')));
+
+      out.push(sec('Where it came from', kv([
+        ['Contributed by', f.contributedBy],
+        ['Recorded', f.extractedAt],
+        ['Verdict against the packs', f.verdict]
+      ]), basis('Open "Who put it here" for his own words, the consent basis and the confidence split.')));
+
+      const others = (c.features || []).filter((o) => o.township && o.township === f.township && o.id !== f.id).slice(0, 5);
+      if (others.length) {
+        out.push(sec(`Others in ${f.townshipLabel || 'this township'}`,
+          el('div', { class: 'rows' }, others.map((o) => pickRow(o.name, o.kindLabel, { kind: 'facility', id: o.id })))));
+      }
+      return out;
+    }
+  };
+
+  const CONF_WORD = { high: 'High', medium: 'Medium', low: 'Low' };
+  const confWord = (v) => CONF_WORD[v] || 'Not rated';
+
   /* ---------------------------------------------------------------- road */
 
   /** The road classes in data/geography.json, said the way an islander would say them. */

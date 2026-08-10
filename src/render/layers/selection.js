@@ -52,6 +52,11 @@ const KINDS = {
   vehicle: { px: 26, weight: 0.80, ring: 2.6, priority: 7 },
   business: { px: 34, weight: 0.90, ring: 11, priority: 5 },
   roost: { px: 34, weight: 0.90, ring: 30, priority: 5 },
+  // A contributed public feature: a bus stop, a jetty, a toilet block, a water treatment plant.
+  // It outranks the house behind it for the same reason a koala does, which is that it is the
+  // rarer and more useful answer to "what is that", and it is the only marker on this island a
+  // player can follow back to the person who put it there.
+  facility: { px: 32, weight: 0.84, ring: 7, priority: 6 },
   building: { px: 30, weight: 1.00, ring: 8, priority: 4 }
 };
 
@@ -177,6 +182,10 @@ export function registerSelection(world) {
         const v = vehicleById(id);
         return v ? { x: v.x, z: v.z } : null;
       }
+      case 'facility': {
+        const f = facilityById(id);
+        return f ? { x: f.x, z: f.z } : null;
+      }
       case 'road': {
         const e = roadEdge(id);
         if (!e || !e.pts || !e.pts.length) return null;
@@ -207,6 +216,13 @@ export function registerSelection(world) {
   function vehicleById(id) {
     const list = vehicleList();
     return list ? list.find((v) => v.id === id) || null : null;
+  }
+
+  /** A contributed public feature. The read model carries a byId() so this is a lookup, not a scan. */
+  function facilityById(id) {
+    const c = world.read('contributed');
+    if (!c || !c.ready) return null;
+    return typeof c.byId === 'function' ? c.byId(id) : (c.features || []).find((f) => f.id === id) || null;
   }
 
   /* ------------------------------------------------------------ labels
@@ -306,6 +322,25 @@ export function registerSelection(world) {
       case 'vehicle': {
         const v = vehicleById(id);
         return v ? { label: v.label || v.kind || 'vehicle', sub: v.doing || v.mode || 'on the road' } : null;
+      }
+      case 'facility': {
+        const f = facilityById(id);
+        if (!f) return null;
+        const c = world.read('contributed');
+        // For a bus stop that is a published timing point, the next departure is the most useful
+        // thing anybody standing at it wants to know, and it is the one live fact these records have.
+        let why = null;
+        if (f.kind === 'bus_stop' && c && typeof c.departuresAt === 'function') {
+          const next = c.departuresAt(f.id, 1)[0];
+          why = next
+            ? `${next.routeLabel} at ${next.at_text} towards ${next.towards}, in ${next.inMinutes} minutes`
+            : 'no published departure from this stop';
+        }
+        return {
+          label: f.name,
+          sub: `${f.kindLabel}, ${f.townshipLabel || f.region || 'the island'}`,
+          why
+        };
       }
       case 'cell': {
         const p = locate('cell', id);
@@ -771,12 +806,14 @@ void main(void) {
     }
     const sb = world.read('shorebirds');
     if (sb && sb.roosts) for (const r of sb.roosts) staticGrid.add(r.x, r.z, { kind: 'roost', id: r.id, x: r.x, z: r.z });
+    const cm = world.read('contributed');
+    if (cm && cm.ready) for (const f of cm.features) staticGrid.add(f.x, f.z, { kind: 'facility', id: f.id, x: f.x, z: f.z });
     staticReady = true;
   }
   // The buildings layer moves every dwelling onto a lot with a road in front of it when the
   // population system is ready, so an index built before that points at the wrong houses.
   for (const ev of ['population:ready', 'household:moved-in', 'household:dissolved',
-    'household:left-the-island', 'businesses:ready', 'shorebirds:ready']) {
+    'household:left-the-island', 'businesses:ready', 'shorebirds:ready', 'contributed:ready']) {
     world.bus.on(ev, () => { staticReady = false; });
   }
 
@@ -861,7 +898,12 @@ void main(void) {
       const k = KINDS[c.kind];
       if (!k) continue;
       const y = (c.water ? (island ? island.seaLevel : 0) : (island ? island.height(c.x, c.z) : 0))
-        + (c.kind === 'building' || c.kind === 'business' ? 2.4 : c.kind === 'whale' ? 0.5 : 0.9);
+        + (c.kind === 'building' || c.kind === 'business' ? 2.4
+          // A marker's plate is the part of it a cursor is aimed at, and the layer scales the post
+          // with distance, so the target moves up as you pull back. Read the scale the layer
+          // published rather than guessing at it.
+          : c.kind === 'facility' ? 2.3 * ((world.read('contributedlayer') || {}).scale || 1)
+            : c.kind === 'whale' ? 0.5 : 0.9);
       _pv.set(c.x, y, c.z);
       // Behind the camera projects to nonsense, so reject it before it can win.
       if ((c.x - camPos.x) * d.x + (y - camPos.y) * d.y + (c.z - camPos.z) * d.z <= 0) continue;
