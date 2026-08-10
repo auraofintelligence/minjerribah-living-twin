@@ -662,6 +662,49 @@
           ]
         }
       }
+    },
+    "map-contributions": {
+      "pack": "map-contributions",
+      "required": [
+        "pack",
+        "version",
+        "crs",
+        "coordinate_order",
+        "contribution",
+        "confidence_scale",
+        "honesty",
+        "screens",
+        "reconciliation",
+        "pins"
+      ],
+      "collections": {
+        "pins": {
+          "min_records": 100,
+          "record_required": [
+            "id",
+            "name",
+            "folder",
+            "geometry",
+            "lat",
+            "lon",
+            "position_precision_m",
+            "source",
+            "locator",
+            "quote",
+            "asserts",
+            "status",
+            "confidence",
+            "existence_confidence",
+            "status_confidence",
+            "extracted_at",
+            "extractor",
+            "contributed_by",
+            "visibility",
+            "player_facing",
+            "reconciliation"
+          ]
+        }
+      }
     }
   }
 }

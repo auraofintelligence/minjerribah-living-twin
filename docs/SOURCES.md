@@ -285,3 +285,66 @@ For any agent importing that folder:
 - the rehabilitated ground is one of the more interesting things about this island and reads as a real
   landscape story rather than a footnote: an even-aged forest with a straight edge is visible from the
   air, and the twin can already show it.
+
+## The 2012 stack: the owner's own reading, and where this project came from
+
+Staged 10 August 2026 at `ingest-inbox/law-2012/`, 61 files, 91 MB, gitignored. All PDFs are
+text-extractable with pdftotext: sampled the Constitution, Magna Carta and the TransLink Act and each
+returned clean text.
+
+**This is primary material and it outranks anything an agent researches from scratch.** In 2012 the
+owner went through his own filing cabinet, took every document with fine print naming a legislative
+act, downloaded the Act, and read it. Then followed the chain up and out. Sixty instruments. This is
+that stack, with his own relevance judgement in the folder name.
+
+He has said what it did to him: after reading it he wanted to remove himself from Australia. A couple
+of years later, in 2015, he started game design to gamify democracy and to build Aura of Intelligence.
+So this twin's civic layer is not a feature that happened to get built. It is the thing that reading
+produced, thirteen years downstream, and the reason the civic board says you are not the mayor and
+models persuading, applying and waiting rather than deciding.
+
+### Why the selection matters more than the count
+
+It is not a library, it is a paper trail, and the method is visible in what sits beside what:
+
+- The fine-print documents he started from are still in the stack: `TFN Application Form`,
+  `nat3346 Statement by a Supplier`, `Westpac Personal Accounts PDS`, `QSuper Accumulation Acc PDS`.
+- Beside each is the Act it cites. The bank PDS next to the `Banking Act 1959` and the
+  `Bills of Exchange Act 1909`. The super PDS next to four Superannuation Acts and two volumes of the
+  SIS Regulations. The TFN form next to `Taxation Administration Act 1953` and PAYG.
+- Then the chain outward: `The Magna Carta`, `UN - Universal Declaration of Human Rights`,
+  `UN Treaties with Australia as Signatory`, and a `UCC-1 Form`.
+
+An agent building the corpus should follow that structure, because the edge from a personal document to
+the Act that governs it is the most useful edge in the entire graph and it is the one nobody draws.
+
+### Three findings in the stack itself
+
+**1. He collected both halves of the UCC question and probably did not know it.**
+The `UCC-1 Form` is the financing statement under the United States Uniform Commercial Code, Article 9,
+which is the law of US states and has no operation in Australia. Sitting in the same folder is the
+`Personal Property Securities Act 2009`, twice. The PPSA is Australia's answer to UCC Article 9: it is
+what actually creates and perfects a security interest over personal property here, and it has its own
+register. So the honest edges are: `UCC-1` to an Australian, `foreign-domestic`, no operation; and
+`UCC Article 9` to `PPSA 2009`, `functionally-equivalent`, different instrument, same job, this one
+binds. That pair is a better teaching object than either document alone.
+
+**2. The treaty spreadsheet already carries the in-force distinction.**
+`UN Treaties with Australia as Signatory.xls` is not a spreadsheet: it is an HTML table saved with an
+xls extension, a United Nations Treaty Series export. Parse it as HTML. It holds 1,500 registration
+rows and 1,253 distinct titles, with columns Registration Number, Title, Participants, Conclusion Date,
+Entry into Force Date, Treaty Type.
+
+The registration prefix is the thing to read: `I-` 1,116 registered, `A-` 351 subsequent actions such
+as protocols and amendments, `NIF-` 5 **not in force**, plus `NEW-`, `II-`, `C-` and `CH-`.
+The dataset distinguishes in force from not in force at the source. Use its own distinction rather than
+asserting one, and remember that UN registration and entry into force are still not the same thing as
+being part of Australian domestic law, which needs implementing legislation.
+
+**3. He caught a transition in the maritime cluster.**
+Both `Navigation Act 1912` and `Navigation Act 2012` are in the stack, with `Shipping Registration Act
+1981` and `Limitation of Liability for Maritime Claims Act 1989`. On an island where everything arrives
+by boat, that cluster is directly load-bearing and it is already researched.
+
+And `QLD - Transport Operations (Translink Transit Authority) Act 2008` is in there, which is the
+statutory basis for the TransLink correction he made on 10 August 2026. He had the source in 2012.

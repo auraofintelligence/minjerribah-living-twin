@@ -3,7 +3,7 @@
   "schema": "minjerribah-provenance/1",
   "version": 1,
   "generated": "2026-08-10",
-  "fingerprint": "aef69c808fba",
+  "fingerprint": "7677d76dde05",
   "about": "The pack registry. One entry per data pack, carrying its version, the lane it came through, the documents behind it, when it was ingested, by what extractor, a checksum over the file, and the spread of confidence inside it. src/world/data.js loads what this file lists, so adding a pack means adding it here. docs/INGEST.md is the contract; tools/gate-audit.mjs enforces it.",
   "offline_note": "This is a committed file, not a lookup. The running twin fetches these paths off its own origin and nothing else, ever. Ingestion is an offline step that produces committed, versioned, checksummed data.",
   "confidence_scale": {
@@ -56,6 +56,12 @@
       "tool": "tools/connectors/sync.mjs",
       "produces": "a committed, checksummed feed in data/feeds, stamped with the source commit it read and how long a record from it can be believed",
       "note": "A connector reads a real island source that belongs to a real organisation and changes over time. A sync is an offline step, never a runtime fetch: nothing under tools/connectors opens a socket, and the running twin never touches any of it. A feed is not a pack. It is what a source said, staged for a person, and it becomes pack content only through tools/ingest/promote.mjs. Every connector, its cadence, its freshness policy, what it can and cannot know, and what its source organisation is being asked for and promised, is in docs/CONNECTORS.md."
+    },
+    "map": {
+      "built": true,
+      "tool": "tools/ingest/lane-map.mjs",
+      "produces": "candidate records from a KML or KMZ map, screened for personal data and for the cultural prohibitions, bounds-checked against the island, and reconciled four ways against the packs that already exist",
+      "note": "A map lane reads somebody's hand rather than a publisher's words, so every record carries a split confidence: high on the fact that a thing exists roughly where the pin is, lower on whether it still trades under that name. It never writes into data/places.json or data/businesses.json. A reconciliation verdict is a lead for a person, not an edit."
     }
   },
   "documents": {
@@ -84,6 +90,22 @@
       "sha256": "899417864b4fbb0f5e8bd5157c37b5007cadb2e2f078fb1d5c2285962d86310b",
       "read_on": "2026-08-09",
       "licence_note": "A public document held by its publisher. This repository records where the copy that was read lives and what it says, and does not republish it."
+    },
+    "mymaps-nsi-2026-08": {
+      "id": "mymaps-nsi-2026-08",
+      "title": "North Stradbroke Island, a Google MyMaps by Luke Hayes",
+      "publisher": "Luke Hayes",
+      "published": "",
+      "kind": "kml",
+      "local_path": "ingest-inbox/mymaps/north-stradbroke-island.kml",
+      "in_repo": false,
+      "map_id": "1aXxQjzsDoE5-7DVcgVSVjm0k_5g",
+      "placemarks": 139,
+      "folders": 10,
+      "read_on": "2026-08-10",
+      "fetch_note": "Download KMZ from MyMaps returns a NetworkLink stub of about two kilobytes with no map data in it. The KML came from following that link once and saving the result. Export to KML/KMZ with \"Export as KML instead of KMZ\" ticked avoids the stub. Fetching is an offline step and the running twin never touches any of it.",
+      "data_status": "UNDER CONSTRUCTION. I don't know what information on this map is up to date or accurate so just use this as a starting point to do your own research.",
+      "licence_note": "The contributor's own map, supplied to this project by him. The staged copy is not committed: it carries contact details, and ingest-inbox is ignored by git for that reason. What is committed is what survived the screens."
     }
   },
   "packs": [
@@ -478,6 +500,47 @@
         "low_in_player_collection": 0
       },
       "note": "Acknowledgement, protocol notes, cultural guidance and its sources, plus the thirteen prohibitions this gate executes. QYAC has not seen this project and the pack says so."
+    },
+    {
+      "id": "map-contributions",
+      "file": "data/contributions/map-contributions.json",
+      "lane": "map",
+      "envelope": "v1",
+      "pack_status": "contributed",
+      "sources": [
+        "mymaps-nsi-2026-08"
+      ],
+      "ingested_at": "2026-08-10",
+      "extractor": {
+        "id": "lane-map",
+        "version": "1.0"
+      },
+      "player_facing_collections": [],
+      "accepted_debt": {
+        "missing_source": 0,
+        "missing_confidence": 0,
+        "low_in_player_collection": 0
+      },
+      "note": "139 placemarks from the owner's own Google MyMaps of Minjerribah, fetched 10 August 2026, of which 133 are carried and 6 are held under the cultural screen and described in docs/CULTURAL-REVIEW.md section M. Every record carries a four-way reconciliation verdict against data/places.json, data/businesses.json, data/transport.json and data/geography.json: 86 NEW, 28 CONFIRMS, 11 CORRECTS, 8 CONFLICTS. Nothing has been applied to those packs. This pack is the record of what the map says and how it lines up, and no collection in it is player-facing until a person has worked through the corrections.",
+      "version": "0.1.0",
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "74af42f3c9537771e83b79e39a933e68ccfd3c0579785ade7e449fd7ada661c2"
+      },
+      "bytes": 324809,
+      "records": 133,
+      "confidence": {
+        "high": 133,
+        "medium": 0,
+        "low": 0,
+        "unrated": 0
+      },
+      "collections": [
+        {
+          "path": "pins",
+          "records": 133
+        }
+      ]
     },
     {
       "id": "narrative",

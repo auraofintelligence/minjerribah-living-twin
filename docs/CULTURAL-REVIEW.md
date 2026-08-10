@@ -714,3 +714,132 @@ on-call services and five transport operators, plus the school. None of them is 
 open. That list is a judgement about what kind of thing each body is, made by an agent, and it is
 worth a reader's eye. It is checked mechanically by `node tools/hours-envelope.mjs`, which fails the
 build if a record that is not a shopfront ever carries a guessed week again.
+
+---
+
+## M. From the owner's own map of the island (10 August 2026)
+
+The map lane, `tools/ingest/lane-map.mjs`, took 139 placemarks from the owner's own Google MyMaps of
+Minjerribah into `data/contributions/map-contributions.json`. **Six were held.** A held placemark does
+not enter the world, is not rendered, is not named in the interface, does not become a place record
+and carries no coordinate anywhere in this repository except in the owner's own file, which is not
+committed. This section is the only place any of them is described, and it describes them without
+reproducing what they propose.
+
+Every one of these is a question, not a refusal. They are his pins, on his island, and the twin is
+simply not the place where any of them gets decided. The screen that caught them is
+`tools/ingest/checks-screens.mjs`, which runs on every gate over every future map.
+
+### M1. A proposed ceremonial space at Amity Point
+**Affects:** `data/contributions/map-contributions.json`, held ids `held-f98bba54` and
+`held-1b3eb0e1`. Prohibitions `no-invented-ceremony` and `no-sacred-or-restricted-sites` in
+`data/lore.json`.
+
+The owner walked to a clearing in the bush near Amity Point, marked it with a pin and drew a small
+polygon around it, and proposed that it become a multi-purpose ceremonial space. **His own text names
+a memorandum of understanding as the prerequisite**, which is the same judgement this file would have
+reached from the other direction.
+
+Both the pin and the polygon are held. The polygon carries no wording that any rule catches; it is
+held because it outlines the same ground, and the harm the sacred-sites prohibition names is the
+publishing of a location, not the wording beside it. The placemark also carried a mobile number, which
+was removed at ingest and is recorded nowhere.
+
+**Ask QYAC:** whether a place on Quandamooka Country may be proposed for ceremonial use by anybody
+outside the process QYAC already has for that, and whether a proposal of that kind may be modelled,
+mapped or named in a digital twin at all before the agreement he himself names exists. Also worth
+asking, because it is the question underneath: is a bush clearing near Amity Point a place about which
+this project should be holding a coordinate at all.
+
+**Ask the owner:** whether he wants this taken to QYAC as his proposal, in his name, or held out of
+the project entirely. Both are honest answers and this file cannot pick one for him.
+
+### M2. A proposed open-air arena at Dunwich whose listed uses include ceremony
+**Affects:** `data/contributions/map-contributions.json`, held ids `held-9cc1a8f7` and
+`held-e9000f1f`.
+
+A polygon on a small block at Dunwich, with a pin pointing at it, proposing a small outdoor
+multi-purpose arena. Six uses are listed and ceremony is one of them; the other five are ordinary
+civic uses that this project models happily elsewhere.
+
+This is the lighter of the two and it is held on the same footing on purpose, because the rule is
+about a place being proposed for ceremony and not about how many other uses are listed beside it. It
+is the one most likely to come back released, and releasing it is a line in this file.
+
+**Ask QYAC:** whether a civic venue proposal that lists ceremony among its uses may appear in the twin
+with that use present, with that use removed, or not at all.
+
+### M3. A proposal to rename a named beach
+**Affects:** `data/contributions/map-contributions.json`, held id `held-1b4422c2`. Section A3 above.
+
+A pin on a real, named ocean beach proposing that it be renamed, with a sentence about the deaths the
+current name refers to that this project is not going to republish.
+
+Place naming on Minjerribah is already the open question in A3, where published sources disagree and
+QYAC has given no ruling. A rename proposed by a resident is a live civic question and a good one; it
+is not a thing a twin gets to model, and the beach itself is already in `data/places.json` under its
+published name with its position corroborated by his own map.
+
+**Ask QYAC:** nothing new. A3 already asks it. This is one more reason A3 matters.
+
+**Ask the owner:** whether he wants the renaming proposal recorded anywhere in this project, and if so
+where, given that it is a proposal about a place name rather than about a building.
+
+### M4. One hold that is probably the screen being wrong
+**Affects:** `data/contributions/map-contributions.json`, held id `held-27706ee8`.
+
+A proposal for a community workshop on an existing council site, so that the repair and recycling the
+locals want has somewhere to happen. It is held because its name contains the name of a national
+community-organisation movement, and one of the tokens in the `no-sacred-or-restricted-sites` rule is
+a possessive that appears inside that name. Nothing about the proposal is cultural.
+
+The screen cannot tell the difference and it should not try: a token scan that started guessing which
+possessives are innocent would stop being a check. So it holds, and a person releases it. **This is
+the one item in section M that a reader can almost certainly clear in a line**, and it is written down
+here rather than quietly ledgered so that clearing it is a decision somebody made rather than a number
+somebody raised.
+
+**Ask the owner:** confirm this is the community workshop proposal and not something else, and it can
+be carried in the next pass with `proposed` status like his other proposals.
+
+### M5. Two contributed proposals that were carried, and why they were not held
+**Affects:** `data/contributions/map-contributions.json`, the record named for the Amity Point
+character overlay and the record named for the Yarraman mine re-imagining.
+
+Two of the owner's proposals were carried rather than held, both marked `proposed`, both with
+`player_facing: false`, and both are worth a reader's eye because neither is a small thing.
+
+The first is a hand-drawn character overlay over the village of Amity Point, asking that development
+there keep to the fishing-village character. His own description says the boundary is his and
+represents no authority, and that sentence is carried verbatim in the record's quote.
+
+The second re-imagines the Yarraman mine site as a university, a cultural precinct and an adventure
+playground. It is a proposal about the future use of a large area of Country under native title and
+under joint management, made by somebody who is not a Traditional Owner. It is marked proposed, it is
+not rendered, and nothing is derived from it.
+
+**Ask QYAC:** whether a proposal by a resident about the future use of a rehabilitated mine site on
+Quandamooka Country belongs in this project at all, even carried as an unrendered proposal with the
+proposer's name on it.
+
+### M6. Two property names on the map may be language words
+**Affects:** `data/contributions/map-contributions.json`, one holiday rental record in the Point
+Lookout folder whose name is two words that look like they may be from an Aboriginal language.
+
+Neither word is in `tools/ingest/vocabulary.json` and neither is in `lore.language.allowlist`. They
+sit in a property name rather than in a cultural position, so `no-invented-language` does not block,
+which is the rule working as written. They have deliberately not been added to the vocabulary file,
+because `docs/INGEST.md` is explicit that a word which turns out to be an Aboriginal language word
+belongs in the allowlist with a published source and never in the vocabulary file, and that the
+reading is the whole point. Nobody has read these two.
+
+**Ask:** whether a holiday house whose advertised name may be a Quandamooka word should carry that
+name in this project, and if so whether the name belongs in the allowlist with a source or stays where
+it is as an unresolved advisory.
+
+### M7. What the map lane does not do, recorded so nobody has to ask twice
+No cultural material entered this project through this map. The lane holds rather than judges, it
+names nothing it holds, and it strips contact details before it writes anything.
+`docs/PARTICIPATION.md` already says it plainly and it applies to the owner exactly as it applies to
+anybody else: Aboriginal language, story, ceremony, art and site knowledge are not accepted through
+this repository, from anyone, however offered. The route is QYAC or it does not exist.

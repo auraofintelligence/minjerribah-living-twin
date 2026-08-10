@@ -109,6 +109,7 @@ paid.
 | research | yes, historically | none | How every existing pack got here: an agent reading public sources and writing JSON. Not repeatable by machine. **No new pack should use it.** |
 | document | **yes** | `tools/ingest/lane-document.mjs` | A named published document to cited candidates with page numbers and verbatim quotes. |
 | contribution | **yes**, as far as intake | `tools/ingest/lane-contribution.mjs` | An intake batch to envelope records with attribution, consent, visibility and a coarsened location. |
+| map | **yes** | `tools/ingest/lane-map.mjs` | A KML or KMZ of the island to screened, bounds-checked records, each carrying a four-way reconciliation verdict against the packs that already exist. |
 | era | **no, deliberately** | `tools/ingest/lane-era.mjs` | Historical layers. See below. |
 | scenario | partly | `tools/ingest/lane-scenario.mjs` | Stamps a scenario with the seed and the pack fingerprint so it replays. Running one belongs to the scenario system. |
 
@@ -175,6 +176,97 @@ deterministic, so the same input always coarsens to the same output and the twin
 
 Which of the ten lanes in `docs/PARTICIPATION.md` open first, the default for contributor credit,
 and the consent wording are all on the ask list in that document and none of them is decided here.
+
+### The map lane
+
+```bash
+node tools/ingest/lane-map.mjs --extract ingest-inbox/mymaps/north-stradbroke-island.kml \
+     --batch mymaps-nsi-2026-08 --contributor "Luke Hayes" --role builder \
+     --source "Google MyMaps mid=..." --fetched 2026-08-10 --consent "<what was agreed>"
+node tools/ingest/lane-map.mjs --extract <file> --dry      parse, screen and report, write nothing
+node tools/ingest/promote.mjs tools/ingest/candidates/map-<batch>.json \
+     --pack map-contributions --collection pins --lane map \
+     --file data/contributions/map-contributions.json
+```
+
+A document lane reads a publisher's words. A map lane reads somebody's hand, and the differences are
+the whole design.
+
+**The confidence is split, not averaged.** The first map through this lane is the owner's own Google
+MyMaps of the island he lives on, and it carries his own statement about itself: *under construction,
+he does not know what on it is up to date or accurate, use it as a starting point*. That is the pack's
+`data_status` and nothing overrides it. So every record carries `existence_confidence: high`, because
+he stood there and put the pin there, and `status_confidence: low` for a shop, a rental or a lease,
+because whether it still trades is exactly what he says he cannot vouch for. A beach and a boat ramp
+get `medium`, because they do not open and shut. Folding those into one number would throw away the
+most useful thing the source said, which is the reading `docs/SOURCES.md` already takes of the events
+engine's own `dataStatus`.
+
+**The four-way reconciliation is the output, not a side effect.** Every pin is matched against
+`data/places.json`, `data/businesses.json`, `data/transport.json` and `data/geography.json` by name
+and by distance, and lands on one of four verdicts with the reason recorded on the record:
+
+| Verdict | What it means |
+| --- | --- |
+| NEW | Nothing in the packs looks like this. |
+| CONFIRMS | An existing record, and his pin corroborates its position. |
+| CORRECTS | The existing record carries a different position, or none, and his is first hand, so his wins on position. |
+| CONFLICTS | They disagree about something the source's own `data_status` says it is unsure of. The existing sourced record wins on status; his pin wins on position. |
+
+**A verdict is a lead, never an edit.** The lane writes into its own contribution pack and touches
+nothing else. Applying a CORRECTS into `data/places.json` or `data/businesses.json` is a person's
+decision and a separate commit, and the corrected record has to say whose pin it came from, because
+`docs/PARTICIPATION.md` says corrections are provenance rather than overwrite. A machine that silently
+replaced a sourced coordinate with a contributed one would be exactly the lower-trust lane this
+project promises not to have, running in the opposite direction.
+
+**KML is lon,lat,alt.** `toLatLon` in `tools/ingest/kml.mjs` is the one place that turns a KML triple
+into a lat and a lon, and it is named so a reader can check it. Every point is tested against the
+island's bounding box, and a point outside it is reported rather than dropped: a placemark in the
+wrong ocean is a fact about the file that somebody needs to know.
+
+**The NetworkLink trap, because the next person will hit it.** Download KMZ from Google MyMaps returns
+a zip containing a two kilobyte `doc.kml` that holds a `<NetworkLink>` and no map data at all. A
+parser reads it happily and reports nought placemarks, which tells a person their map is empty when it
+is not. `readMapFile` detects that case exactly, refuses, and prints what to do instead: three dot
+menu, Export to KML/KMZ, tick "Export as KML instead of KMZ". Following the link once and saving the
+result is a fetch, which is an offline step; the running twin never touches any of it.
+
+**Two screens run before anything is written, and both are gate checks rather than code in this
+lane.** They are in `tools/ingest/checks-screens.mjs` and they run on every gate, over the staging
+area as well as the packs, so the next map is looked at before somebody promotes it rather than after.
+
+- `personal-data`. No contact detail and no residential address enters this repository through a
+  contribution, under any consent, from anyone. The rule is not "no phone numbers in data": a twin
+  that models wildlife rescue carries the rescue hotline and a twin that models the ferry carries the
+  operator's booking line, and those are published, sit on a record that names where they were
+  published, and a player who needs one needs the real one. So the severity turns on three questions
+  the check can answer. In a contribution pack, blocking. Elsewhere with a citation on the record,
+  advisory and printed every run. Elsewhere without one, blocking. **Nothing in the check or the lane
+  ever prints the value**, because a gate log is a file, a scrollback and a screen share.
+- `contribution-culture`. The two cultural prohibitions in `data/lore.json`, read out of the pack
+  rather than restated, applied to contributed and staged material. A placemark either of them touches
+  is **held**: no record, no coordinate, no name in the interface, no place record. So is any other
+  placemark drawn over the same ground, within 25 metres or inside a held polygon, because the harm
+  the sacred-sites rule names is the publishing of a location and not the wording beside it. Held
+  items go to `docs/CULTURAL-REVIEW.md` as questions for QYAC, described accurately and without
+  reproducing the detail, and nothing the lane writes names them.
+
+**Positions of dwellings are coarsened before commit.** A resort with a reception desk is a business
+with a street frontage and keeps its exact pin. A house let out by its owners is a house, and the fact
+that it is advertised does not make its precise position this project's to publish, so it is rounded
+to 250 metres through the same deterministic `coarsen` the contribution lane uses. Rounding happens
+before commit, never at display time, because a runtime filter is one bug away from publishing what it
+was hiding. For a coarsened record the reconciliation distance is published as a band rather than a
+number, because a distance to a known record would undo the rounding.
+
+**What it gets wrong, honestly.** Name matching is Jaccard plus a guarded containment lift, and on an
+island where the shops sit ten metres apart and township names repeat it gets some of these wrong in
+both directions. Three guards exist because they were each caught doing damage: a containment lift on
+a single shared word offered to move the township of Dunwich to the post office; a whole-name match
+paired a bus stop with the lodge it stands outside; and a beach-named holiday house was reported as
+corroborating the beach. The report the lane writes has a "same name, far apart" section listing every
+pair it could not separate, which is where a person who has been there settles each one in a sentence.
 
 ### The era lane, and why it is not built
 

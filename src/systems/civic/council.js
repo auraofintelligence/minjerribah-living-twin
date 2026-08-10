@@ -4,13 +4,31 @@
 // pulling a lever is a click. Here you are not the government. You hold the island's civic desk: a
 // budget line, a mailing list, and no vote in anybody's chamber.
 //
-// Read the pack and count. Of the sixty-two levers in data/civic.json, forty are decided by Redland
-// City Council, twenty-five by the Queensland Government, fourteen by QYAC, ten by the joint
-// management arrangement of the national park, six by a private ferry operator, four by Minjerribah
-// Camping, three each by TransLink, Redland Water, Seqwater and the Australian Government, two by
-// Economic Development Queensland, and one each by Sibelco, by private landowners at Amity Point,
-// and by nobody at all. The pack's own honesty note puts it plainly: "who_decides is the most
-// important field in the file. It is deliberately, frequently, not the player."
+// Read the pack and count. Every number below is derived at runtime, in `countReach()`, and
+// published on the read model, because a count typed into a comment goes stale the first time
+// somebody adds a lever. As at the Commonwealth pass the pack holds sixty-four levers across
+// fifteen bodies, and the largest holders are Redland City Council, the Queensland Government,
+// QYAC, the joint management arrangement of the national park, SeaLink and the Commonwealth. The
+// pack's own honesty note puts it plainly: "who_decides is the most important field in the file.
+// It is deliberately, frequently, not the player."
+//
+// COUNTING BODIES IS THE WRONG MEASURE, AND THIS IS THE FILE THAT FIXES IT.
+// A list of six names beside a lever tells a player nothing except that it is complicated. What
+// they actually need to know is how many *governments* have to agree, because that is the thing
+// that changes the kind of difficulty rather than the amount of it. Three of the pack's seven
+// tiers are orders of government: the Commonwealth, Queensland and the council. Every institution
+// in data/civic.json carries a tier, `reachOf()` reduces a lever's who_decides to the distinct
+// tiers in it, and the answer comes out at nought, one, two or three governments. Nought is not
+// easy; it means the decision belongs to a native title body, a joint arrangement or a private
+// operator, and this file will not simulate the first two of those at all.
+//
+// The Commonwealth is a real and small presence and both halves of that matter. It decides seven
+// levers and constrains many more, it has no office here, and most of its money arrives having
+// already passed through Queensland or the council. So it enters this file three ways: as a
+// decision maker on the levers it genuinely holds, as an extra referral on the form for anything
+// that touches a matter of national environmental significance, and as an extra wait, because a
+// thing that needs three governments does not take three times as long but it certainly does not
+// take the same time as one.
 //
 // So the verbs here are not "enact". They are:
 //   PREPARE   commission the assessments an application actually needs, and pay for them
@@ -60,6 +78,11 @@ const CADENCE = {
   sibelco: { days: 182, label: 'a rehabilitation program review' },
   'private-landowners': { days: 60, label: 'whenever the owners can agree and afford it' },
   'australian-government': { days: 365, label: 'a federal funding round' },
+  // Not a meeting cycle: a statutory clock. Section 75 of the EPBC Act gives the minister twenty
+  // business days to decide whether a referred action is a controlled action, which is about
+  // twenty-eight calendar days. What follows that decision has no such clock, and the Toondah
+  // referral sat with the Commonwealth from 2018 to 2024.
+  dcceew: { days: 28, label: 'a statutory referral clock of twenty business days' },
   qyac: { days: 0, label: 'not modelled' },
   'minjerribah-camping': { days: 0, label: 'not modelled' },
   community: { days: 30, label: 'whenever somebody volunteers' }
@@ -91,8 +114,49 @@ const FUND_OF = {
   'stradbroke-flyer': 'external',
   sibelco: 'external',
   'private-landowners': 'external',
-  'australian-government': 'external'
+  'australian-government': 'external',
+  dcceew: 'external'
 };
+
+/**
+ * Which tier a body belongs to when the pack does not say.
+ *
+ * The pack is the authority: every institution in data/civic.json carries a `tier`, and this map
+ * exists so a pack written before that field still resolves rather than reporting every body as
+ * unknown. If you are adding a body, add it to the pack, not here.
+ */
+const TIER_FALLBACK = {
+  'redland-city-council': 'local', 'rcc-division-2': 'local', 'redland-water': 'local',
+  seqwater: 'state', 'qld-government': 'state', detsi: 'state', qpws: 'state',
+  'tmr-translink': 'state', edq: 'state',
+  'joint-management': 'joint', qyac: 'native_title', 'minjerribah-camping': 'native_title',
+  'transit-systems': 'private', sealink: 'private', 'stradbroke-flyer': 'private',
+  sibelco: 'private', 'private-landowners': 'private',
+  'australian-government': 'commonwealth', dcceew: 'commonwealth', community: 'none'
+};
+
+/** The three tiers that are orders of government. The other four are hard in a different way. */
+const GOVERNMENT_TIERS = ['commonwealth', 'state', 'local'];
+
+const TIER_LABEL = {
+  commonwealth: 'the Commonwealth',
+  state: 'the state',
+  local: 'the council',
+  native_title: 'the native title holders',
+  joint: 'joint management',
+  private: 'a private operator',
+  none: 'nobody in particular'
+};
+
+/**
+ * How much longer a thing takes when more than one government has to agree.
+ *
+ * Not a multiplier, on purpose. Two governments does not mean twice the wait: it means one more
+ * body that has to see the file, and the file mostly sits in an in tray while it does. These are
+ * modelling values in weeks added to the assessment, and they are labelled as modelling values
+ * wherever a player sees them. Nobody has published a measured figure for this island.
+ */
+const EXTRA_WEEKS_PER_GOVERNMENT = [0, 0, 6, 14];
 
 /**
  * The form. Every item is derived from something in the lever's own record: what it costs, what it
@@ -132,6 +196,34 @@ const FORM_RULES = [
     cost: () => 45000,
     when: (lv, touches) => touches('shorebird_disturbance') || touches('koala_population') || touches('dune_condition') || touches('water_quality_nearshore'),
     why: 'It touches habitat, so it needs someone to say by how much.'
+  },
+  {
+    // THE COMMONWEALTH ON THE FORM.
+    //
+    // The island already carries four matters of national environmental significance and the civic
+    // layer never knew. data/ecology.json has the eastern curlew at Critically Endangered and the
+    // bar-tailed godwit at Endangered under the EPBC Act, shorebirds.js flushes them off the western
+    // flats, the koala has been Endangered nationally since February 2022, and half the island sits
+    // inside the Moreton Bay Ramsar site listed in 1993. So an action likely to have a significant
+    // impact on any of those is referred to the Commonwealth before anybody local gets to decide it.
+    //
+    // What this models is the referral and the wait, and nothing else. The twenty business days in
+    // section 75 is the decision on whether it is a controlled action, so it is short and it is
+    // real; everything after it depends on an answer this file does not generate. The twin does not
+    // decide that a given lever is a controlled action, does not produce a finding and does not
+    // approve or refuse anything on the Commonwealth's behalf. It puts the referral on the form,
+    // because that is what a proponent actually has to do, and it says who is being asked.
+    id: 'epbc-referral',
+    label: 'A referral to the Australian Government',
+    weeks: 10,
+    cost: () => 32000,
+    when: (lv, touches) => touches('shorebird_disturbance') || touches('koala_population')
+      || touches('water_quality_nearshore'),
+    why: 'It touches a matter of national environmental significance: the Ramsar wetland the island '
+      + 'sits in, the listed migratory shorebirds on the western flats, or the koala, which has been '
+      + 'listed as Endangered nationally since February 2022. Six weeks to prepare it and about four '
+      + 'for the minister to decide whether it is a controlled action. If it is, the assessment after '
+      + 'that has no clock this twin can give you.'
   },
   {
     id: 'coastal-hazard-assessment',
@@ -194,6 +286,11 @@ export function registerCouncil(world) {
     inTrayCount: 0,
     stats: { lodged: 0, approved: 0, withConditions: 0, refused: 0, deferred: 0, withdrawn: 0, infoRequests: 0, referred: 0 },
     notes: [],
+    // How the levers split by how many governments have to agree. Derived from the pack at init and
+    // never typed in, because the whole point of publishing it is that a screen can print it
+    // instead of hard-coding a number that was true the week somebody wrote it.
+    reach: { byGovernments: { 0: 0, 1: 0, 2: 0, 3: 0 }, byTier: {}, tiers: [], governmentTiers: GOVERNMENT_TIERS.slice(), total: 0 },
+    reachOf: () => null,
     whoDecides: () => null,
     canPlayer: () => null,
     applicationCard: () => null
@@ -234,6 +331,10 @@ export function registerCouncil(world) {
         id: inst.id,
         label: inst.label,
         kind: inst.kind,
+        // The pack decides, this file only fills in. An unknown tier reports itself as unknown
+        // rather than being quietly folded into one of the seven, because a body nobody has placed
+        // is a thing somebody needs to see.
+        tier: inst.tier || TIER_FALLBACK[inst.id] || 'unknown',
         role: inst.role,
         source: inst.source,
         confidence: inst.confidence,
@@ -251,12 +352,96 @@ export function registerCouncil(world) {
         fund: FUND_OF[inst.id] || 'external'
       });
     }
-    state.notes.push(`${INST.size} decision makers. ${[...INST.values()].filter((i) => i.notModelled).length} of them make decisions this twin will not simulate.`);
+    const unplaced = [...INST.values()].filter((i) => i.tier === 'unknown');
+    state.notes.push(`${INST.size} decision makers across ${new Set([...INST.values()].map((i) => i.tier)).size} tiers. ${[...INST.values()].filter((i) => i.notModelled).length} of them make decisions this twin will not simulate.`);
+    if (unplaced.length) state.notes.push(`${unplaced.length} body without a tier in the pack: ${unplaced.map((i) => i.label).join(', ')}.`);
+    countReach();
     publish();
     state.ready = true;
   }
 
   const lever = (id) => (pack.levers || []).find((l) => l.id === id) || null;
+
+  /* ------------------------------------------------------------------ how far a lever reaches
+
+  The one idea this file adds to who_decides. A list of names says a thing is complicated. The
+  number of distinct governments in that list says what kind of complicated, and that is the number
+  a player can act on: one government is a meeting, two is a meeting and a letter, three is a
+  campaign. Everything below is derived from the pack, so it moves when the pack moves. */
+
+  /**
+   * The tiers a lever's deciders belong to, the governments among them, and a plain sentence.
+   * Returns null for a lever that does not exist, so a caller can tell absent from empty.
+   */
+  function reachOf(lv) {
+    if (!lv || !Array.isArray(lv.who_decides)) return null;
+    const tiers = [];
+    const bodies = [];
+    for (const id of lv.who_decides) {
+      const inst = INST.get(id);
+      const tier = inst ? inst.tier : (TIER_FALLBACK[id] || 'unknown');
+      if (!tiers.includes(tier)) tiers.push(tier);
+      bodies.push({ id, label: inst ? inst.label : id, tier, cadence: inst ? inst.cadenceLabel : '', notModelled: inst ? inst.notModelled : false });
+    }
+    const governments = GOVERNMENT_TIERS.filter((t) => tiers.includes(t));
+    return {
+      tiers,
+      bodies,
+      governments,
+      governmentCount: governments.length,
+      bodyCount: lv.who_decides.length,
+      label: reachLabel(governments, tiers),
+      plain: reachPlain(governments, tiers)
+    };
+  }
+
+  /** Two or three words for a chip. Short enough to sit on a card next to the cost. */
+  function reachLabel(governments, tiers) {
+    if (governments.length === 0) {
+      if (tiers.includes('native_title')) return 'Outside government';
+      if (tiers.includes('joint')) return 'Outside government';
+      if (tiers.includes('private')) return 'Not government at all';
+      return 'Nobody in particular';
+    }
+    if (governments.length === 1) return 'One government';
+    if (governments.length === 2) return 'Two governments';
+    return 'Three governments';
+  }
+
+  /** The sentence under the chip. Says which ones, because which ones is most of the difficulty. */
+  function reachPlain(governments, tiers) {
+    const named = governments.map((t) => TIER_LABEL[t]);
+    const others = tiers.filter((t) => !GOVERNMENT_TIERS.includes(t)).map((t) => TIER_LABEL[t]);
+    const join = (list) => (list.length <= 1 ? (list[0] || '') : list.slice(0, -1).join(', ') + ' and ' + list[list.length - 1]);
+    if (!governments.length) {
+      return others.length
+        ? `No order of government decides this. It belongs to ${join(others)}.`
+        : 'Nothing in the pack decides this.';
+    }
+    const head = governments.length === 1
+      ? `One government decides this, ${named[0]}.`
+      : `${governments.length === 2 ? 'Two' : 'Three'} governments have to agree: ${join(named)}.`;
+    return others.length ? `${head} ${join(others).replace(/^./, (c) => c.toUpperCase())} as well.` : head;
+  }
+
+  /** The whole pack reduced to a split, once, at init. Published so screens can print it. */
+  function countReach() {
+    const byGovernments = { 0: 0, 1: 0, 2: 0, 3: 0 };
+    const byTier = {};
+    for (const lv of pack.levers || []) {
+      const r = reachOf(lv);
+      if (!r) continue;
+      byGovernments[r.governmentCount] = (byGovernments[r.governmentCount] || 0) + 1;
+      for (const t of r.tiers) byTier[t] = (byTier[t] || 0) + 1;
+    }
+    state.reach = {
+      byGovernments,
+      byTier,
+      tiers: [...new Set([...INST.values()].map((i) => i.tier))],
+      governmentTiers: GOVERNMENT_TIERS.slice(),
+      total: (pack.levers || []).length
+    };
+  }
 
   function touchesFactory(lv) {
     const set = new Set();
@@ -389,6 +574,7 @@ export function registerCouncil(world) {
 
     const decider = lv.who_decides[0];
     const inst = INST.get(decider);
+    const reach = reachOf(lv);
     const app = {
       id: 'app-' + (++seq),
       leverId,
@@ -398,6 +584,11 @@ export function registerCouncil(world) {
       decider,
       deciderLabel: inst ? inst.label : decider,
       allDeciders: lv.who_decides.slice(),
+      // Carried on the file rather than looked up, so a saved application still knows how far it
+      // reaches after a load, and so the in tray can say why it is taking as long as it is.
+      governments: reach ? reach.governments.slice() : [],
+      reachLabel: reach ? reach.label : '',
+      reachPlain: reach ? reach.plain : '',
       fund: inst ? inst.fund : 'external',
       capital: lv.cost_aud.capital || 0,
       recurring: lv.cost_aud.recurring_per_year || 0,
@@ -453,12 +644,20 @@ export function registerCouncil(world) {
     app.stageLabel = app.role === 'player_advocates' ? 'Lodged and waiting' : 'Under assessment';
     const base = app.role === 'player_advocates' ? 10 * WEEK : 8 * WEEK;
     const heavy = app.capital > 2000000 ? 4 * WEEK : 0;
-    app.stageEndsDay = dayOf(w) + base + heavy;
+    // Every extra government is another body that has to see the file, and mostly the file waits
+    // while it does. A modelling value, said to be one wherever a player sees it.
+    const govs = (app.governments || []).length;
+    const crossing = (EXTRA_WEEKS_PER_GOVERNMENT[Math.min(govs, 3)] || 0) * WEEK;
+    app.crossingWeeks = crossing / WEEK;
+    app.stageEndsDay = dayOf(w) + base + heavy + crossing;
     app.lodgedIncomplete = missing.length;
     state.stats.lodged++;
     note(w, app, missing.length
       ? `Lodged with ${missing.length} item${missing.length > 1 ? 's' : ''} outstanding. The clock runs anyway.`
       : 'Lodged complete.');
+    if (crossing > 0) {
+      note(w, app, `${app.reachPlain} That adds about ${app.crossingWeeks} weeks to the assessment before anybody has said yes or no, and it is a modelling estimate rather than a measured one.`);
+    }
     w.bus.emit('civic:application', { applicationId: app.id, leverId: app.leverId, stage: app.stage, decider: app.decider });
     if (inst) inst.openWithThem++;
     return true;
@@ -730,8 +929,14 @@ export function registerCouncil(world) {
       } else if (inst.id === 'private-landowners') {
         a = 0.3;
         inst.constraint = 'Under the shoreline plan, works in the central reach that protect private property are paid for and maintained by the owners of that property.';
-      } else if (inst.id === 'australian-government') {
-        a = 0.25;
+      } else if (inst.tier === 'commonwealth') {
+        // Not a budget and not a chamber. A competitive national round, or a statutory test.
+        // Either way the island is one small place among a great many asking, and being deserving
+        // is not the variable.
+        a = inst.id === 'dcceew' ? 0.2 : 0.25;
+        inst.constraint = inst.id === 'dcceew'
+          ? 'The environment minister decides against a statutory test, not against how much the island wants it. Twenty business days to say whether it is a controlled action, and no clock at all on what comes after that.'
+          : 'A national program, decided in a competitive round against every other regional place in Australia. Nobody from here is in the room, and most Commonwealth money that does arrive comes through Queensland or the council rather than as a decision about this island.';
       } else if (inst.id === 'community') {
         const vm = mood('volunteers-and-emergency');
         const er = metric('emergency_readiness');
@@ -801,6 +1006,11 @@ export function registerCouncil(world) {
       if (app.capital > carryingCapacity) {
         brokeReason = `Refused. At ${moneyShort(app.capital)} this is bigger than ${f.label} could carry in eight years of its whole capital program. It needs a separate funding decision, and that is not ${inst.label}'s to make.`;
       }
+    } else if (inst.tier === 'commonwealth') {
+      // The Commonwealth is not asking whether it pays and it is not asking whether the island can
+      // afford it. It is asking whether this beats the other applications, or whether the statute
+      // is satisfied. Size barely matters, competition does, and neither is in the island's hands.
+      costPressure = 0.18;
     } else if (inst.fund === 'external') {
       // A commercial operator asks one question: does this pay.
       const revenueish = (lv.effects || []).some((e) => ['visitor_volume', 'day_visitor_share', 'campground_revenue', 'business_viability'].includes(e.target) && e.magnitude > 0);
@@ -878,6 +1088,11 @@ export function registerCouncil(world) {
   }
 
   function refusalReason(app, evidence, costPressure, publicCase, inst) {
+    if (inst.tier === 'commonwealth') {
+      return inst.id === 'dcceew'
+        ? 'Refused. The Commonwealth was not satisfied on the statutory test, and nothing about how much the island wanted it was part of that question.'
+        : 'Unsuccessful. It went into a national round against every other regional place in Australia and did not come out of it. You can apply again next round.';
+    }
     if (inst.fund === 'external' && costPressure > 0.2) return `Declined. ${inst.label} is a commercial operator and the numbers did not work.`;
     if (evidence < 0.5) return 'Refused. The application was never complete.';
     if (costPressure > 0.35) return 'Refused. It creates an ongoing cost with no ongoing funding.';
@@ -1102,7 +1317,7 @@ export function registerCouncil(world) {
     state.institutions = {};
     for (const i of INST.values()) {
       state.institutions[i.id] = {
-        id: i.id, label: i.label, kind: i.kind, role: i.role,
+        id: i.id, label: i.label, kind: i.kind, tier: i.tier, role: i.role,
         cadence: i.cadenceLabel, notModelled: i.notModelled, why: i.notModelledWhy,
         appetite: i.appetite == null ? null : +i.appetite.toFixed(3),
         standing: +i.standing.toFixed(3),
@@ -1117,6 +1332,10 @@ export function registerCouncil(world) {
       id: a.id, leverId: a.leverId, leverName: a.leverName, issue: a.issue, role: a.role,
       decider: a.decider, deciderLabel: a.deciderLabel, stage: a.stage, stageLabel: a.stageLabel,
       origin: a.origin || 'player',
+      governments: (a.governments || []).slice(),
+      reachLabel: a.reachLabel || '',
+      reachPlain: a.reachPlain || '',
+      crossingWeeks: a.crossingWeeks || 0,
       whose: a.origin === 'agenda' ? `${a.deciderLabel} put this up. You did not.` : 'Yours.',
       waitingDays: a.stageEndsDay != null ? Math.max(0, a.stageEndsDay - state.day) : null,
       form: a.form.map((f) => ({
@@ -1156,16 +1375,26 @@ export function registerCouncil(world) {
       w.bus.on('civic:budget-adopted', (p) => { budgetAdoptedDay = dayOf(w); fyCapitalOpen = false; });
       w.bus.on('civic:budget-open', () => { fyCapitalOpen = true; });
 
+      state.reachOf = (leverId) => reachOf(lever(leverId));
       state.whoDecides = (leverId) => {
         const lv = lever(leverId);
         if (!lv) return null;
+        const reach = reachOf(lv);
         return {
           leverId,
           role: lv.player_role,
           deciders: lv.who_decides.map((id) => {
             const i = INST.get(id);
-            return { id, label: i ? i.label : id, notModelled: i ? i.notModelled : false, cadence: i ? i.cadenceLabel : '' };
+            return {
+              id, label: i ? i.label : id, tier: i ? i.tier : (TIER_FALLBACK[id] || 'unknown'),
+              notModelled: i ? i.notModelled : false, cadence: i ? i.cadenceLabel : ''
+            };
           }),
+          governments: reach ? reach.governments.slice() : [],
+          governmentCount: reach ? reach.governmentCount : 0,
+          tiers: reach ? reach.tiers.slice() : [],
+          reachLabel: reach ? reach.label : '',
+          reachPlain: reach ? reach.plain : '',
           plain: plainWhoDecides(lv)
         };
       };
@@ -1224,10 +1453,17 @@ export function registerCouncil(world) {
       const theirs = open.filter((a) => a.origin === 'agenda').length;
       const rcc = INST.get('redland-city-council');
       const qld = INST.get('qld-government');
+      // How many of the open files need more than one government. A critic reading a probe should
+      // be able to see the fourth tier doing something rather than take a comment's word for it.
+      const openByGovernments = {};
+      for (const a of open) openByGovernments[(a.governments || []).length] = (openByGovernments[(a.governments || []).length] || 0) + 1;
       return {
         open: open.length,
         theirs,
         byStage,
+        leverReach: state.reach.byGovernments,
+        openByGovernments,
+        commonwealthOpen: open.filter((a) => (a.governments || []).includes('commonwealth')).length,
         referralsOpen: referrals.filter((r) => r.status === 'open').length,
         stats: state.stats,
         appetite: {

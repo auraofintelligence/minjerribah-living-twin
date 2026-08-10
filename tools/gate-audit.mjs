@@ -20,6 +20,8 @@
 //   nothing at low confidence reachable by player-facing code
 //   one confidence scale, three words, no second scale and no null rating
 //   a schema per pack, and every pack accounted for in data/_provenance.json with a live checksum
+//   no contact detail and no residential address inside a contributed record, from any lane
+//   the cultural prohibitions applied to contributed and staged material, with the routing named
 //   no em dash anywhere in the repository, code comments included
 //   Australian English in player-facing strings
 //   anything proposed still marked proposed by the time src/world/data.js labels it

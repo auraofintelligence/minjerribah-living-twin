@@ -1,110 +1,95 @@
 {
-  "kind": "ingest-candidates",
-  "lane": "map",
-  "schema": "minjerribah-candidates/1",
-  "batch": "mymaps-nsi-2026-08",
-  "contributed_by": "Luke Hayes",
-  "extractor": {
-    "id": "lane-map",
-    "version": "1.0"
+  "pack": "map-contributions",
+  "version": "0.1.0",
+  "generated": "2026-08-10",
+  "about": "Pins from Luke Hayes's own map of Minjerribah, screened, bounds-checked and reconciled against the packs that already exist. This pack is the record of what the map says and how it lines up. Nothing in it has been applied to data/places.json or data/businesses.json, and nothing in it renders: applying a correction to a sourced record is a person's decision and a separate commit, and the corrected record has to say whose pin it came from.",
+  "confidence_scale": {
+    "high": "The contributor put the pin there himself and the thing is there. Existence and position.",
+    "medium": "A physical public feature whose current state nobody has checked. It can be closed, removed or renamed, but it does not change month to month the way a shopfront does.",
+    "low": "A hand-drawn extent, or a current trading status the contributor says himself he cannot vouch for. Not to be shown to a player as fact."
   },
-  "document": {
-    "id": "mymaps-nsi-2026-08",
-    "title": "North Stradbroke Island",
+  "crs": "EPSG:4326",
+  "coordinate_order": "lat then lon in every record. The KML this came from is lon,lat,alt, and tools/ingest/kml.mjs toLatLon is the single place that turns one into the other.",
+  "contribution": {
+    "contributed_by": "Luke Hayes",
+    "role": "builder",
+    "method": "map",
     "source": "Google MyMaps mid=1aXxQjzsDoE5-7DVcgVSVjm0k_5g",
-    "fetched": "2026-08-10"
+    "fetched": "2026-08-10",
+    "fetch_note": "The KMZ that Google MyMaps hands back from Download KMZ was a NetworkLink stub: about two kilobytes, one link, no map data. The data came from following that link once and saving the KML. The next person exporting this map will hit the same thing, so: three dot menu, Export to KML/KMZ, tick \"Export as KML instead of KMZ\". Fetching is an offline step; the running twin never touches any of it.",
+    "data_status": "UNDER CONSTRUCTION. I don't know what information on this map is up to date or accurate so just use this as a starting point to do your own research.",
+    "data_status_note": "The author's own words about his own map, carried through as this pack's dataStatus and not overridden anywhere. docs/SOURCES.md takes the same reading of the events engine: when a source tells you how far to trust it, that is the confidence, and a twin that computes a more flattering one is overstating.",
+    "attribution": "Credit is a name in a manifest, and this is it: Luke Hayes. docs/PARTICIPATION.md applies to the owner exactly as it applies to anybody else, which is the point of there being one spine.",
+    "consent": {
+      "given": true,
+      "wording": "Supplied his own public Google MyMaps of the island to this project for ingest on 10 August 2026. The per-record consent wording in docs/PARTICIPATION.md has not been settled, so this records the basis rather than quoting a form nobody has written yet.",
+      "recorded_by": "Luke Hayes"
+    },
+    "withdrawal": "Withdrawal is honoured at the next release through a tombstone that keeps the id with a withdrawn marker. A public git history persists, so revocation after publication is best-effort, and docs/PARTICIPATION.md says so rather than promising otherwise."
   },
-  "pack_header": {
-    "about": "Pins from Luke Hayes's own map of Minjerribah, screened, bounds-checked and reconciled against the packs that already exist. This pack is the record of what the map says and how it lines up. Nothing in it has been applied to data/places.json or data/businesses.json, and nothing in it renders: applying a correction to a sourced record is a person's decision and a separate commit, and the corrected record has to say whose pin it came from.",
-    "crs": "EPSG:4326",
-    "coordinate_order": "lat then lon in every record. The KML this came from is lon,lat,alt, and tools/ingest/kml.mjs toLatLon is the single place that turns one into the other.",
-    "contribution": {
-      "contributed_by": "Luke Hayes",
-      "role": "builder",
-      "method": "map",
-      "source": "Google MyMaps mid=1aXxQjzsDoE5-7DVcgVSVjm0k_5g",
-      "fetched": "2026-08-10",
-      "fetch_note": "The KMZ that Google MyMaps hands back from Download KMZ was a NetworkLink stub: about two kilobytes, one link, no map data. The data came from following that link once and saving the KML. The next person exporting this map will hit the same thing, so: three dot menu, Export to KML/KMZ, tick \"Export as KML instead of KMZ\". Fetching is an offline step; the running twin never touches any of it.",
-      "data_status": "UNDER CONSTRUCTION. I don't know what information on this map is up to date or accurate so just use this as a starting point to do your own research.",
-      "data_status_note": "The author's own words about his own map, carried through as this pack's dataStatus and not overridden anywhere. docs/SOURCES.md takes the same reading of the events engine: when a source tells you how far to trust it, that is the confidence, and a twin that computes a more flattering one is overstating.",
-      "attribution": "Credit is a name in a manifest, and this is it: Luke Hayes. docs/PARTICIPATION.md applies to the owner exactly as it applies to anybody else, which is the point of there being one spine.",
-      "consent": {
-        "given": true,
-        "wording": "Supplied his own public Google MyMaps of the island to this project for ingest on 10 August 2026. The per-record consent wording in docs/PARTICIPATION.md has not been settled, so this records the basis rather than quoting a form nobody has written yet.",
-        "recorded_by": "Luke Hayes"
-      },
-      "withdrawal": "Withdrawal is honoured at the next release through a tombstone that keeps the id with a withdrawn marker. A public git history persists, so revocation after publication is best-effort, and docs/PARTICIPATION.md says so rather than promising otherwise."
+  "confidence_split": "Every pin carries two ratings rather than one average. `existence_confidence` is high because he stood there. `status_confidence` is low for a shop, a rental or a lease, because his own note says that is exactly what he does not know, and medium for a beach, a boat ramp or a water treatment plant, because those do not open and shut. Averaging the two into one number would throw away the most useful thing the source said about itself.",
+  "honesty": [
+    "This is one person's map. It is the highest-trust contribution this project has had, and it is still one person's map.",
+    "A reconciliation verdict is a lead, not an edit. CORRECTS means somebody should look, not that anything has changed.",
+    "Nothing in this pack is player-facing. Held is a normal state, and unreviewed is invisible rather than caveated.",
+    "Positions of dwellings let as holiday rentals are coarsened to 250 m before commit, not filtered at display time, because a runtime filter is one bug away from publishing what it was hiding.",
+    "The four verdicts are computed by name and by distance. Names on this island repeat between townships and shops sit ten metres apart, so a machine gets some of these wrong and the report beside this pack says which ones it is least sure of."
+  ],
+  "screens": {
+    "personal_data": {
+      "rule": "No contact detail and no residential address enters this repository through a contribution, under any consent. tools/ingest/checks-screens.mjs runs this on every gate.",
+      "removed": 2,
+      "kinds": [
+        "a mobile number"
+      ],
+      "where": [
+        "the map description",
+        "held placemark held-f98bba54"
+      ],
+      "note": "The values are not recorded anywhere in this repository, including in this note and in the gate log."
     },
-    "confidence_scale": {
-      "high": "The contributor put the pin there himself and the thing is there. Existence and position.",
-      "medium": "A physical public feature whose current state nobody has checked. It can be closed, removed or renamed, but it does not change month to month the way a shopfront does.",
-      "low": "A hand-drawn extent, or a current trading status the contributor says himself he cannot vouch for. Not to be shown to a player as fact."
+    "cultural": {
+      "rule": "The two cultural prohibitions in data/lore.json are read out of the pack and applied to every placemark before anything is written. A placemark either of them touches does not enter the world, is not rendered, is not named in the interface and does not become a place record, and neither does any other placemark drawn over the same ground. The rules are not restated here, because a copy of a rule is a copy that goes stale.",
+      "held": 6,
+      "held_ids": [
+        "held-e9000f1f",
+        "held-9cc1a8f7",
+        "held-1b4422c2",
+        "held-1b3eb0e1",
+        "held-f98bba54",
+        "held-27706ee8"
+      ],
+      "note": "Held items are not named here and carry no coordinate here. They are described in docs/CULTURAL-REVIEW.md section M, as questions for QYAC. This is not a refusal of the contributor's idea; the twin is not the place it gets decided."
     },
-    "confidence_split": "Every pin carries two ratings rather than one average. `existence_confidence` is high because he stood there. `status_confidence` is low for a shop, a rental or a lease, because his own note says that is exactly what he does not know, and medium for a beach, a boat ramp or a water treatment plant, because those do not open and shut. Averaging the two into one number would throw away the most useful thing the source said about itself.",
-    "honesty": [
-      "This is one person's map. It is the highest-trust contribution this project has had, and it is still one person's map.",
-      "A reconciliation verdict is a lead, not an edit. CORRECTS means somebody should look, not that anything has changed.",
-      "Nothing in this pack is player-facing. Held is a normal state, and unreviewed is invisible rather than caveated.",
-      "Positions of dwellings let as holiday rentals are coarsened to 250 m before commit, not filtered at display time, because a runtime filter is one bug away from publishing what it was hiding.",
-      "The four verdicts are computed by name and by distance. Names on this island repeat between townships and shops sit ten metres apart, so a machine gets some of these wrong and the report beside this pack says which ones it is least sure of."
-    ],
-    "screens": {
-      "personal_data": {
-        "rule": "No contact detail and no residential address enters this repository through a contribution, under any consent. tools/ingest/checks-screens.mjs runs this on every gate.",
-        "removed": 2,
-        "kinds": [
-          "a mobile number"
-        ],
-        "where": [
-          "the map description",
-          "held placemark held-f98bba54"
-        ],
-        "note": "The values are not recorded anywhere in this repository, including in this note and in the gate log."
-      },
-      "cultural": {
-        "rule": "The two cultural prohibitions in data/lore.json are read out of the pack and applied to every placemark before anything is written. A placemark either of them touches does not enter the world, is not rendered, is not named in the interface and does not become a place record, and neither does any other placemark drawn over the same ground. The rules are not restated here, because a copy of a rule is a copy that goes stale.",
-        "held": 6,
-        "held_ids": [
-          "held-e9000f1f",
-          "held-9cc1a8f7",
-          "held-1b4422c2",
-          "held-1b3eb0e1",
-          "held-f98bba54",
-          "held-27706ee8"
-        ],
-        "note": "Held items are not named here and carry no coordinate here. They are described in docs/CULTURAL-REVIEW.md section M, as questions for QYAC. This is not a refusal of the contributor's idea; the twin is not the place it gets decided."
-      },
-      "external_media": {
-        "rule": "No external image and no network reference. The twin is offline at runtime.",
-        "dropped": 2
-      },
-      "bounds": {
-        "rule": "Every point is checked against lat -27.75 to -27.35, lon 153.35 to 153.55. A point outside it is reported, never dropped.",
-        "outside": 0,
-        "no_geometry": 0
-      }
+    "external_media": {
+      "rule": "No external image and no network reference. The twin is offline at runtime.",
+      "dropped": 2
     },
-    "reconciliation": {
-      "counts": {
-        "NEW": 86,
-        "CONFIRMS": 28,
-        "CORRECTS": 11,
-        "CONFLICTS": 8
-      },
-      "total_placemarks": 139,
-      "carried": 133,
-      "verdicts": {
-        "NEW": "Nothing in the packs looks like this.",
-        "CONFIRMS": "An existing record, and his pin corroborates its position.",
-        "CORRECTS": "An existing record carries a different position, or none at all, and his is first hand, so his wins on position.",
-        "CONFLICTS": "They disagree about something his own data_status says he is unsure of, such as whether a business still trades. The existing sourced record wins on status and his pin wins on position."
-      },
-      "applied": "none",
-      "note": "Read the reconciliation report the lane wrote beside the candidates file. Every CORRECTS and every CONFLICTS is listed there by name with its reason."
+    "bounds": {
+      "rule": "Every point is checked against lat -27.75 to -27.35, lon 153.35 to 153.55. A point outside it is reported, never dropped.",
+      "outside": 0,
+      "no_geometry": 0
     }
   },
-  "note": "Screened, bounds-checked and reconciled. Not promoted. A person reads the reconciliation report beside this file, and tools/ingest/promote.mjs runs the whole gate before anything reaches data/.",
-  "candidates": [
+  "reconciliation": {
+    "counts": {
+      "NEW": 86,
+      "CONFIRMS": 28,
+      "CORRECTS": 11,
+      "CONFLICTS": 8
+    },
+    "total_placemarks": 139,
+    "carried": 133,
+    "verdicts": {
+      "NEW": "Nothing in the packs looks like this.",
+      "CONFIRMS": "An existing record, and his pin corroborates its position.",
+      "CORRECTS": "An existing record carries a different position, or none at all, and his is first hand, so his wins on position.",
+      "CONFLICTS": "They disagree about something his own data_status says he is unsure of, such as whether a business still trades. The existing sourced record wins on status and his pin wins on position."
+    },
+    "applied": "none",
+    "note": "Read the reconciliation report the lane wrote beside the candidates file. Every CORRECTS and every CONFLICTS is listed there by name with its reason."
+  },
+  "pins": [
     {
       "id": "map-natural-beauty-brown-lake-picnic-area-and-park-bbce15",
       "name": "Brown Lake; Picnic Area and Park",

@@ -2,11 +2,26 @@
 //
 // Democracy 4 puts you in the chair. You are the government, the levers are yours, and pulling one is
 // a click. This board is built on the opposite fact, and it is the truest thing about this island:
-// of the sixty-two researched levers in data/civic.json, the player decides twenty-one. The rest
-// belong to Redland City Council, the Queensland Government, Queensland Parks, QYAC as native title
-// holder, a joint management arrangement, two private ferry operators, a former mine operator, and
-// in one case to nobody at all. So the first thing every lever on this board shows is who decides it,
-// and the board never offers an action the player does not actually have.
+// most of the researched levers in data/civic.json are not the player's. They belong to Redland City
+// Council, the Queensland Government, the Commonwealth, Queensland Parks, QYAC as native title
+// holder, a joint management arrangement, private ferry operators, a former mine operator, and in one
+// case to nobody at all. So the first thing every lever on this board shows is who decides it, and the
+// board never offers an action the player does not actually have.
+//
+// NOT ONE NUMBER ON THIS SCREEN IS TYPED IN. An earlier version of this comment said the player
+// decides twenty-one levers, and by the time anybody read it the answer was nineteen. Every count
+// the board prints, the split, the body list, the tier list, the number of decision makers, is
+// counted out of the pack at the moment it is drawn. If you find yourself writing a number in this
+// file, that is the bug.
+//
+// THE FOURTH TIER, AND WHY IT DID NOT TURN THIS INTO A WALL OF BODIES. The Commonwealth was missing
+// from the pack entirely and it binds real decisions here: national environment law over the Ramsar
+// wetland the island sits in and the listed shorebirds on its western flats, the Native Title Act
+// under which QYAC exists at all, telecommunications, postal and aviation obligations, and the grant
+// programs. Adding a fourth order of government to a who_decides list makes every hard lever look the
+// same, so the board does not count names, it counts governments: nought, one, two or three. One
+// government is a meeting. Three is a campaign. The chip on every lever card says which, the detail
+// panel says who and on whose cycle, and the count comes from `council.reachOf()`.
 //
 // Seven views, each answering a question a person at a civic desk actually asks:
 //
@@ -254,6 +269,79 @@ function moodColour(m) {
 
 /** Bodies this twin will not simulate. Matches src/systems/civic/council.js. */
 const NOT_MODELLED = new Set(['qyac', 'minjerribah-camping', 'joint-management']);
+
+/* ------------------------------------------------------------------ tiers
+
+   How many governments have to agree, drawn rather than described.
+
+   The pack carries a tier on every institution and `jurisdiction.tiers` names them, so all of this
+   reads out of the pack and none of it is a list kept in step by hand. What lives here is only the
+   look: which colour a tier wears and in which order the pips read left to right. The three
+   government tiers come first because the pip strip is a sentence about government, and the other
+   four sit after it because a native title body, a joint arrangement, a private operator and nobody
+   are each hard in a way that is not counted in governments. */
+
+const TIER_ORDER = ['commonwealth', 'state', 'local', 'native_title', 'joint', 'private', 'none', 'unknown'];
+const TIER_TONE = {
+  commonwealth: 'heath', state: 'sun', local: 'sea',
+  native_title: 'leaf', joint: 'leaf', private: 'iron', none: 'iron', unknown: 'coral'
+};
+/** Short enough for a pip's tooltip and a legend row. The pack's own labels are longer. */
+const TIER_SHORT = {
+  commonwealth: 'Commonwealth', state: 'State', local: 'Council',
+  native_title: 'Native title', joint: 'Joint management', private: 'Private', none: 'Nobody',
+  unknown: 'Unplaced'
+};
+
+/** The pack's tier block, or a usable shape if the pack has not loaded. */
+function tierPack(w) {
+  const t = w.data && w.data.civic && w.data.civic.jurisdiction && w.data.civic.jurisdiction.tiers;
+  return {
+    labels: (t && t.labels) || {},
+    governments: (t && Array.isArray(t.governments)) ? t.governments : ['commonwealth', 'state', 'local']
+  };
+}
+
+/**
+ * How far a lever reaches, asked of the council system first because that is where the rule lives.
+ * Falls back to counting the pack directly so the board still says something true before the system
+ * publishes, and returns null only when there is no lever.
+ */
+function reachOf(w, lv) {
+  if (!lv) return null;
+  const cou = w.read('council');
+  if (cou && typeof cou.reachOf === 'function') {
+    const r = cou.reachOf(lv.id);
+    if (r) return r;
+  }
+  const insts = (w.data && w.data.civic && w.data.civic.institutions) || [];
+  const govs = tierPack(w).governments;
+  const tiers = [];
+  const bodies = [];
+  for (const id of lv.who_decides || []) {
+    const inst = insts.find((x) => x && x.id === id);
+    const tier = (inst && inst.tier) || 'unknown';
+    if (!tiers.includes(tier)) tiers.push(tier);
+    bodies.push({ id, label: (inst && inst.label) || id, tier, cadence: '' });
+  }
+  const governments = govs.filter((t) => tiers.includes(t));
+  return {
+    tiers, bodies, governments, governmentCount: governments.length,
+    bodyCount: (lv.who_decides || []).length,
+    label: ['Outside government', 'One government', 'Two governments', 'Three governments'][governments.length] || '',
+    plain: ''
+  };
+}
+
+/** The pip strip: one filled square per tier in play, in a fixed order so it reads the same twice. */
+function tierPips(reach) {
+  const strip = el('span', { class: 'cb-pips', title: reach ? reach.label : '' });
+  for (const t of TIER_ORDER) {
+    if (!reach || !reach.tiers.includes(t)) continue;
+    strip.append(el('i', { class: 'cb-pip ' + (TIER_TONE[t] || 'iron'), title: TIER_SHORT[t] || t }));
+  }
+  return strip;
+}
 
 /* ------------------------------------------------------------------ the panel */
 

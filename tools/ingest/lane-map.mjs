@@ -120,7 +120,12 @@ export function nameTokens(name) {
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
   for (const [rx, to] of NAME_SYNONYMS) s = s.replace(rx, to);
-  return s.split(' ').filter((t) => t && !NAME_NOISE.has(t));
+  // One plural rule, applied to both sides, so "Gold Cat Flyer" and "Gold Cats" are the same boat.
+  // Anything more than this is a stemmer, and a stemmer inside a matcher is a source of confident
+  // wrong pairings that nobody can debug.
+  return s.split(' ')
+    .filter((t) => t && !NAME_NOISE.has(t))
+    .map((t) => (t.length > 3 && t.endsWith('s') && !t.endsWith('ss') ? t.slice(0, -1) : t));
 }
 
 /**
@@ -151,12 +156,26 @@ export function nameScore(a, b) {
   const B = new Set(nameTokens(b));
   if (!A.size || !B.size) return 0;
   let shared = 0;
-  for (const t of A) if (B.has(t)) shared++;
+  let sharedDistinct = 0;
+  for (const t of A) {
+    if (!B.has(t)) continue;
+    shared++;
+    if (!PLACE_WORDS.has(t)) sharedDistinct++;
+  }
   const jaccard = shared / (A.size + B.size - shared);
   const smaller = Math.min(A.size, B.size);
-  const containment = smaller >= 2 ? (shared / smaller) * 0.85 : 0;
+  // Two names that share only the township they sit in have nothing in common. "Point Lookout Public
+  // Toilet Block" and "Point Lookout Pharmacy" share two words out of three and scored 0.57, which
+  // was enough to offer to move the pharmacy to the toilet block.
+  const containment = (smaller >= 2 && sharedDistinct > 0) ? (shared / smaller) * 0.85 : 0;
   return Math.max(jaccard, containment);
 }
+
+/** Township and island words. They locate a name; they never distinguish one. */
+const PLACE_WORDS = new Set([
+  'point', 'lookout', 'dunwich', 'amity', 'stradbroke', 'straddie', 'north', 'island', 'minjerribah',
+  'nsi', 'goompi', 'gumpi', 'koompe', 'mulumba', 'mooloomba', 'pulan', 'bulan', 'queensland', 'qld'
+]);
 
 /**
  * Feature types whose recorded coordinate is a representative point rather than a doorway.
@@ -178,8 +197,13 @@ const SAME_EXTENDED_M = 600;
 const NEAR_SPOT_M = 600;
 const WEAK_CLOSE_M = 80;
 
+/** The same idea, for packs whose `type` is a trade category rather than a shape of ground. */
+const EXTENDED_WORDS = /\b(golf|course|oval|field|reserve|precinct|trail|walk|beach|lake|park|campground|camping|cemetery|foreshore|national)\b/i;
+
 function sameSpotTolerance(record) {
-  return EXTENDED_TYPES.has(String(record.type || '').toLowerCase()) ? SAME_EXTENDED_M : SAME_SPOT_M;
+  if (EXTENDED_TYPES.has(String(record.type || '').toLowerCase())) return SAME_EXTENDED_M;
+  if (EXTENDED_WORDS.test(`${record.name} ${record.type}`)) return SAME_EXTENDED_M;
+  return SAME_SPOT_M;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -199,6 +223,23 @@ function sameSpotTolerance(record) {
 const COMMERCIAL_PREMISES = /\b(resort|lodge|hotel|motel|apartments?|units|camping|campground|caravan|cabins|hostel|camp|scuba|bed and breakfast|holiday park|marina|pavilion)\b/i;
 
 const DWELLING_FOLDERS = /holiday (rental|accommodation)|holiday rentals/i;
+const ACCOMMODATION_FOLDER = DWELLING_FOLDERS;
+
+/**
+ * Natural features, and the folders in which a pin is definitely not one.
+ *
+ * "Amity Beach House" and "Amity Beach House on Birch" are two holiday houses. Both matched
+ * `places/amity-beach` at 0.85 and were reported as corroborating the beach's position, which is how
+ * a matcher ends up moving a beach to a driveway. A pin in a holiday rental folder is a place to
+ * stay: it is named after the beach, it is not the beach.
+ */
+const NATURAL_TYPES = new Set([
+  'beach', 'lake', 'headland', 'spring', 'rock', 'gorge', 'walk', 'township', 'national_park',
+  'conservation_park', 'water_body', 'hazard_zone', 'lighthouse', 'lookout', 'jetty'
+]);
+
+/** A body with no address is not a point, and a pin never supplies one. */
+const NOT_A_POINT = /island[- ]wide|mainland/i;
 
 /** Placemarks that propose renaming a real place. Held, and asked about, never applied. */
 const RENAMING = /\bre-?nam(e|es|ed|ing)\b/i;
@@ -257,7 +298,15 @@ export function screenCulture(items, tokens) {
     const text = [it.name, it.description].filter(Boolean).join('\n');
     const token = hitsCulturalToken(text, tokens);
     if (token) {
-      held.set(it.index, { reason: 'cultural-token', token, detail: `the placemark's own text uses "${token}"` });
+      // The token is recorded on the hold so the lane can reason about it, and it is never written
+      // into the candidates file or the report. Naming the word beside the folder is halfway to
+      // naming the placemark, and docs/CULTURAL-REVIEW.md is the one file where this gets described.
+      held.set(it.index, {
+        reason: 'cultural-token',
+        token,
+        detail: 'its own text uses one of the tokens the two cultural prohibitions in data/lore.json '
+          + 'declare, which is a stop and ask'
+      });
       continue;
     }
     if (RENAMING.test(text)) {
@@ -337,6 +386,7 @@ export function existingRecords() {
         .concat(r.name_quandamooka ? [r.name_quandamooka] : [])
         .filter(Boolean),
       type: r.type || '',
+      township: r.township || '',
       status: r.status || '',
       lat: typeof lat === 'number' ? lat : null,
       lon: typeof lon === 'number' ? lon : null,
@@ -417,6 +467,11 @@ export function reconcileOne(pin, records) {
     // A township is the one type where a containing name means the opposite of a match: everything
     // in Dunwich has Dunwich in its name. Nothing pairs with a township unless the names are the
     // same words.
+    if (ACCOMMODATION_FOLDER.test(pin.folder) && NATURAL_TYPES.has(String(r.type).toLowerCase())) {
+      const A = nameTokens(subject).sort().join(' ');
+      const B = nameTokens(r.name).sort().join(' ');
+      if (A !== B) score = 0;
+    }
     if (String(r.type).toLowerCase() === 'township') {
       const A = nameTokens(subject).sort().join(' ');
       const B = nameTokens(r.name).sort().join(' ');
@@ -437,6 +492,7 @@ export function reconcileOne(pin, records) {
   let verdict = 'NEW';
   let against = null;
   let reason = '';
+  let sameNameFarApart = null;
   const winsOn = [];
 
   const best = byName[0] || null;
@@ -449,7 +505,15 @@ export function reconcileOne(pin, records) {
   if (best && best.score >= STRONG_NAME) {
     const tolerance = sameSpotTolerance(best.record);
     against = best;
-    if (best.dist === null) {
+    if (best.dist === null && NOT_A_POINT.test(String(best.record.township || ''))) {
+      // Redland City Council is not at its depot, and the depot is not the council. A record whose
+      // own township field says island-wide has no position for a pin to supply.
+      verdict = 'NEW';
+      against = null;
+      reason = `The name matches ${best.record.pack}/${best.record.id}, but that record's own township `
+        + `is "${best.record.township}": it is a body, not a building, and it has no position for a pin `
+        + 'to supply. This pin is a facility of that body and is a new record, not a correction to it.';
+    } else if (best.dist === null) {
       verdict = 'CORRECTS';
       winsOn.push('position');
       reason = `The name matches ${best.record.pack}/${best.record.id}, which carries no coordinate at all. `
@@ -468,9 +532,11 @@ export function reconcileOne(pin, records) {
     } else {
       verdict = 'NEW';
       against = null;
+      sameNameFarApart = { id: `${best.record.pack}/${best.record.id}`, distance_m: Math.round(best.dist) };
       reason = `The nearest record sharing this name, ${best.record.pack}/${best.record.id}, is `
-        + `${Math.round(best.dist)} m away, which is too far to be the same thing on an island where `
-        + 'names repeat between townships. Treated as new and worth a person\'s eye.';
+        + `${Math.round(best.dist)} m away. Either these are two different things whose names repeat `
+        + 'between townships, which happens here, or one of the two positions is wrong. A machine cannot '
+        + 'tell which, and a person who has been there can tell in a second. Treated as new until then.';
     }
   } else if (weakAndClose) {
     verdict = 'CONFIRMS';
@@ -480,14 +546,15 @@ export function reconcileOne(pin, records) {
   } else {
     reason = nearest && nearest.dist !== null
       ? `Nothing in the packs matches this name. The nearest record of any kind is ${nearest.record.pack}/${nearest.record.id}, `
-        + `${Math.round(nearest.dist)} m away, and it is a different thing.`
+        + `${Math.round(nearest.dist)} m away, and nothing in either name says whether it is the same thing. `
+        + 'On a street where the shops are ten metres apart, that is a question for somebody who has been there.'
       : 'Nothing in the packs matches this name and nothing is near it.';
   }
 
   // A proposal is about a place; it is not evidence about where that place is. Whatever the names
   // and the distances said above, the verdict is NEW and the match is recorded as what it is about.
   if (isProposal(pin)) {
-    const about = against || nearest;
+    const about = against || (best && best.score >= WEAK_NAME ? best : nearest);
     return {
       verdict: 'NEW',
       against: null,
@@ -508,18 +575,25 @@ export function reconcileOne(pin, records) {
   // name because nobody had verified which mine is which. Proximity alone is enough to pair them,
   // and the pairing is worth more than the verdict, because it closes a gap the pack names itself.
   if (/mine lease/i.test(pin.folder) && (!against || against.record.pack !== 'geography')) {
-    const rehab = scored
+    const near = scored
       .filter((s) => s.record.collection === 'rehabilitation_areas' && s.dist !== null && s.dist <= 2000)
-      .sort((a, b) => a.dist - b.dist)[0];
+      .sort((a, b) => a.dist - b.dist);
+    const rehab = near[0];
     if (rehab) {
       against = rehab;
       verdict = 'CONFLICTS';
       winsOn.push('position', 'the name of the matched polygon');
       reason = `His pin sits ${Math.round(rehab.dist)} m from ${rehab.record.pack}/${rehab.record.id}, which `
-        + `data/geography.json records as a sand mining rehabilitation area and deliberately leaves unnamed, `
+        + 'data/geography.json records as a sand mining rehabilitation area and deliberately leaves unnamed, '
         + 'because which of the three mine names belongs to which polygon had not been verified. His folder '
         + 'files it as a current private lease. The sourced record wins on status, mining having ended; his '
-        + 'pin wins on position and, subject to a person checking it, supplies the name.';
+        + 'pin wins on position and, subject to a person checking it, supplies the name.'
+        + (near.length > 1
+          ? ` ${near.length - 1} other rehabilitation polygon(s) sit within 2 km: `
+            + near.slice(1).map((s) => `${s.record.id} at ${Math.round(s.dist)} m`).join(', ')
+            + '. Which polygon carries which mine name is exactly the question the pack says is open, so this '
+            + 'pairing is a lead for a person and not a fact.'
+          : '');
     }
   }
 
@@ -545,6 +619,7 @@ export function reconcileOne(pin, records) {
       : null,
     distance_m: against && against.dist !== null ? Math.round(against.dist) : null,
     wins_on: [...new Set(winsOn)],
+    same_name_far_apart: sameNameFarApart,
     reason
   };
 }
@@ -696,10 +771,15 @@ export function runLane(file, opts = {}) {
 
   // The document description is screened too. The owner's map carries a contact number in it, and a
   // tool that screened the pins and copied the header verbatim would have published the thing.
+  const docFound = findContactDetails(parsed.documentDescription);
   const docScreen = stripContactDetails(parsed.documentDescription);
   out.documentDescription = docScreen.text;
   if (docScreen.removed) {
-    out.stripped.push({ where: 'the map description', kinds: ['a contact detail'], count: docScreen.removed });
+    out.stripped.push({
+      where: 'the map description',
+      kinds: [...new Set(docFound.map((h) => h.label))].sort(),
+      count: docScreen.removed
+    });
   }
 
   for (const item of parsed.placemarks) {
@@ -779,6 +859,127 @@ export function runLane(file, opts = {}) {
 // The report
 // ------------------------------------------------------------------------------------------------
 
+/**
+ * The top-level fields the pack has to carry, so a reader who opens the file alone knows who made
+ * it, what its author said about it, what came out of it before it was written, and what its four
+ * verdicts mean. tools/ingest/promote.mjs merges this when it creates the pack.
+ */
+export function packHeader(result) {
+  const b = result.batch;
+  const strippedKinds = [...new Set(result.stripped.flatMap((s) => s.kinds))].sort();
+  return {
+    about: `Pins from ${b.contributor}'s own map of Minjerribah, screened, bounds-checked and `
+      + 'reconciled against the packs that already exist. This pack is the record of what the map says '
+      + 'and how it lines up. Nothing in it has been applied to data/places.json or data/businesses.json, '
+      + 'and nothing in it renders: applying a correction to a sourced record is a person\'s decision and '
+      + 'a separate commit, and the corrected record has to say whose pin it came from.',
+    crs: 'EPSG:4326',
+    coordinate_order: 'lat then lon in every record. The KML this came from is lon,lat,alt, and '
+      + 'tools/ingest/kml.mjs toLatLon is the single place that turns one into the other.',
+    contribution: {
+      contributed_by: b.contributor,
+      role: b.role,
+      method: 'map',
+      source: b.source,
+      fetched: b.fetched,
+      fetch_note: 'The KMZ that Google MyMaps hands back from Download KMZ was a NetworkLink stub: about '
+        + 'two kilobytes, one link, no map data. The data came from following that link once and saving '
+        + 'the KML. The next person exporting this map will hit the same thing, so: three dot menu, Export '
+        + 'to KML/KMZ, tick "Export as KML instead of KMZ". Fetching is an offline step; the running twin '
+        + 'never touches any of it.',
+      data_status: 'UNDER CONSTRUCTION. I don\'t know what information on this map is up to date or '
+        + 'accurate so just use this as a starting point to do your own research.',
+      data_status_note: 'The author\'s own words about his own map, carried through as this pack\'s '
+        + 'dataStatus and not overridden anywhere. docs/SOURCES.md takes the same reading of the events '
+        + 'engine: when a source tells you how far to trust it, that is the confidence, and a twin that '
+        + 'computes a more flattering one is overstating.',
+      attribution: `Credit is a name in a manifest, and this is it: ${b.contributor}. `
+        + 'docs/PARTICIPATION.md applies to the owner exactly as it applies to anybody else, which is the '
+        + 'point of there being one spine.',
+      consent: b.consent,
+      withdrawal: 'Withdrawal is honoured at the next release through a tombstone that keeps the id with '
+        + 'a withdrawn marker. A public git history persists, so revocation after publication is '
+        + 'best-effort, and docs/PARTICIPATION.md says so rather than promising otherwise.'
+    },
+    confidence_scale: {
+      high: 'The contributor put the pin there himself and the thing is there. Existence and position.',
+      medium: 'A physical public feature whose current state nobody has checked. It can be closed, '
+        + 'removed or renamed, but it does not change month to month the way a shopfront does.',
+      low: 'A hand-drawn extent, or a current trading status the contributor says himself he cannot '
+        + 'vouch for. Not to be shown to a player as fact.'
+    },
+    confidence_split: 'Every pin carries two ratings rather than one average. `existence_confidence` '
+      + 'is high because he stood there. `status_confidence` is low for a shop, a rental or a lease, '
+      + 'because his own note says that is exactly what he does not know, and medium for a beach, a boat '
+      + 'ramp or a water treatment plant, because those do not open and shut. Averaging the two into one '
+      + 'number would throw away the most useful thing the source said about itself.',
+    honesty: [
+      'This is one person\'s map. It is the highest-trust contribution this project has had, and it is '
+        + 'still one person\'s map.',
+      'A reconciliation verdict is a lead, not an edit. CORRECTS means somebody should look, not that '
+        + 'anything has changed.',
+      'Nothing in this pack is player-facing. Held is a normal state, and unreviewed is invisible rather '
+        + 'than caveated.',
+      'Positions of dwellings let as holiday rentals are coarsened to 250 m before commit, not filtered '
+        + 'at display time, because a runtime filter is one bug away from publishing what it was hiding.',
+      'The four verdicts are computed by name and by distance. Names on this island repeat between '
+        + 'townships and shops sit ten metres apart, so a machine gets some of these wrong and the report '
+        + 'beside this pack says which ones it is least sure of.'
+    ],
+    screens: {
+      personal_data: {
+        rule: 'No contact detail and no residential address enters this repository through a '
+          + 'contribution, under any consent. tools/ingest/checks-screens.mjs runs this on every gate.',
+        removed: result.stripped.reduce((n, s) => n + s.count, 0),
+        kinds: strippedKinds,
+        where: result.stripped.map((s) => s.where),
+        note: 'The values are not recorded anywhere in this repository, including in this note and in '
+          + 'the gate log.'
+      },
+      cultural: {
+        rule: 'The two cultural prohibitions in data/lore.json are read out of the pack and applied to '
+          + 'every placemark before anything is written. A placemark either of them touches does not '
+          + 'enter the world, is not rendered, is not named in the interface and does not become a place '
+          + 'record, and neither does any other placemark drawn over the same ground. The rules are not '
+          + 'restated here, because a copy of a rule is a copy that goes stale.',
+        held: result.heldItems.length,
+        held_ids: result.heldItems.map((h) => h.id),
+        note: 'Held items are not named here and carry no coordinate here. They are described in '
+          + 'docs/CULTURAL-REVIEW.md section M, as questions for QYAC. This is not a refusal of the '
+          + 'contributor\'s idea; the twin is not the place it gets decided.'
+      },
+      external_media: {
+        rule: 'No external image and no network reference. The twin is offline at runtime.',
+        dropped: result.mediaDropped.reduce((n, m) => n + m.count, 0)
+      },
+      bounds: {
+        rule: `Every point is checked against lat ${ISLAND_BOUNDS.minLat} to ${ISLAND_BOUNDS.maxLat}, `
+          + `lon ${ISLAND_BOUNDS.minLon} to ${ISLAND_BOUNDS.maxLon}. A point outside it is reported, `
+          + 'never dropped.',
+        outside: result.outOfBounds.length,
+        no_geometry: result.noGeometry.length
+      }
+    },
+    reconciliation: {
+      counts: result.counts,
+      total_placemarks: result.total,
+      carried: result.candidates.length,
+      verdicts: {
+        NEW: 'Nothing in the packs looks like this.',
+        CONFIRMS: 'An existing record, and his pin corroborates its position.',
+        CORRECTS: 'An existing record carries a different position, or none at all, and his is first '
+          + 'hand, so his wins on position.',
+        CONFLICTS: 'They disagree about something his own data_status says he is unsure of, such as '
+          + 'whether a business still trades. The existing sourced record wins on status and his pin '
+          + 'wins on position.'
+      },
+      applied: 'none',
+      note: 'Read the reconciliation report the lane wrote beside the candidates file. Every CORRECTS '
+        + 'and every CONFLICTS is listed there by name with its reason.'
+    }
+  };
+}
+
 export function reportMarkdown(result) {
   const L = [];
   const w = (s = '') => L.push(s);
@@ -815,6 +1016,22 @@ export function reportMarkdown(result) {
         : (r.reconciliation.distance_band || 'no position on the existing record');
       w(`- **${r.name}** (${r.folder}) against \`${a ? a.pack + '/' + a.id : 'nothing'}\`, ${d}.`);
       w(`  ${r.reconciliation.reason}`);
+    }
+    w('');
+  }
+
+  const farApart = result.candidates.filter((r) => r.reconciliation.same_name_far_apart);
+  if (farApart.length) {
+    w(`## Same name, far apart (${farApart.length})`);
+    w('');
+    w('Neither a confirmation nor a correction. The name matches a record in the packs and the two '
+      + 'positions are too far apart to be the same thing. Either the names repeat, which they do here, '
+      + 'or one of the two positions is wrong. Somebody who has been there settles each of these in a '
+      + 'sentence.');
+    w('');
+    for (const r of farApart) {
+      const s = r.reconciliation.same_name_far_apart;
+      w(`- **${r.name}** (${r.folder}) against \`${s.id}\`, ${s.distance_m} m apart.`);
     }
     w('');
   }
@@ -864,11 +1081,13 @@ export function reportMarkdown(result) {
     w('| Placemark | Verdict | Against | Distance |');
     w('| --- | --- | --- | --- |');
     for (const r of rows) {
-      const a = r.reconciliation.against;
-      const d = r.reconciliation.distance_m !== null && r.reconciliation.distance_m !== undefined
-        ? `${r.reconciliation.distance_m} m`
-        : (r.reconciliation.distance_band || '');
-      w(`| ${r.name} | ${r.reconciliation.verdict} | ${a ? a.pack + '/' + a.id : ''} | ${d} |`);
+      const rec = r.reconciliation;
+      const a = rec.against || rec.about || (rec.same_name_far_apart ? { pack: '', id: rec.same_name_far_apart.id } : null);
+      const label = a ? (a.pack ? `${a.pack}/${a.id}` : a.id) + (rec.against ? '' : ' (about)') : '';
+      const d = rec.distance_m !== null && rec.distance_m !== undefined
+        ? `${rec.distance_m} m`
+        : (rec.distance_band || (rec.same_name_far_apart ? `${rec.same_name_far_apart.distance_m} m` : ''));
+      w(`| ${r.name} | ${rec.verdict} | ${label} | ${d} |`);
     }
     w('');
   }
@@ -919,6 +1138,7 @@ if (RAN_DIRECTLY) {
       contributed_by: result.batch.contributor,
       extractor: EXTRACTOR,
       document: { id: result.batch.id, title: result.document, source: result.batch.source, fetched: result.batch.fetched },
+      pack_header: packHeader(result),
       note: 'Screened, bounds-checked and reconciled. Not promoted. A person reads the reconciliation '
         + 'report beside this file, and tools/ingest/promote.mjs runs the whole gate before anything '
         + 'reaches data/.',

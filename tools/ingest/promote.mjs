@@ -45,7 +45,7 @@ function unread(candidates) {
   return candidates.filter((c) => c.needs || c.review === 'pending');
 }
 
-export function promote({ candidatesFile, packId, collection, lane }) {
+export function promote({ candidatesFile, packId, collection, lane, file }) {
   const batch = readJSON(candidatesFile);
   if (batch.kind !== 'ingest-candidates') throw new Error(`${candidatesFile} is not a candidates file.`);
   const candidates = batch.candidates || [];
@@ -59,7 +59,11 @@ export function promote({ candidatesFile, packId, collection, lane }) {
       + `First: ${notRead[0].id}`);
   }
 
-  const packFile = `data/${packId}.json`;
+  // Most packs sit at data/<id>.json. A contribution pack goes to data/contributions/, because
+  // checks-lore.mjs widens the sacred-sites prohibition to cover that directory: a pack of pins
+  // somebody else drew is exactly the material that rule was widened for. --file names the path.
+  const packFile = file || `data/${packId}.json`;
+  fs.mkdirSync(path.dirname(path.join(ROOT, packFile)), { recursive: true });
   const packBefore = backup(packFile);
   const registryBefore = backup(REGISTRY);
 
@@ -74,8 +78,14 @@ export function promote({ candidatesFile, packId, collection, lane }) {
         medium: 'The document supports it but the reading involves a judgement, or the figure may have moved.',
         low: 'Plausible and useful for the simulation, but not verified. Do not show it to a player as fact.'
       },
+      // A lane may declare the top-level fields its own pack has to carry. This skeleton is generic
+      // and a schema is per pack, so without this a pack from a new lane fails its own schema on the
+      // first promotion and there is nowhere honest to put the fix. The pack id and the collection
+      // are set after it, so a header cannot rename either.
+      ...(batch.pack_header || {}),
       [collection]: []
     };
+    pack.pack = packId;
     pack[collection] = pack[collection] || [];
     const existing = new Set(pack[collection].map((r) => r.id));
     let added = 0;
@@ -140,17 +150,18 @@ const RAN_DIRECTLY = process.argv[1] && process.argv[1].replace(/\\/g, '/').ends
 if (RAN_DIRECTLY) {
   const args = process.argv.slice(2);
   const val = (f, d = null) => (args.indexOf(f) >= 0 ? args[args.indexOf(f) + 1] : d);
-  const file = args.find((a) => !a.startsWith('--') && a !== val('--pack') && a !== val('--collection') && a !== val('--lane'));
-  if (!file) {
-    console.log('usage: node tools/ingest/promote.mjs <candidates.json> --pack <id> --collection <name> [--lane document]');
+  const candidatesArg = args.find((a) => !a.startsWith('--') && a !== val('--pack') && a !== val('--collection') && a !== val('--lane') && a !== val('--file'));
+  if (!candidatesArg) {
+    console.log('usage: node tools/ingest/promote.mjs <candidates.json> --pack <id> --collection <name> [--lane document] [--file data/contributions/<id>.json]');
     process.exit(1);
   }
   try {
     const r = promote({
-      candidatesFile: file,
+      candidatesFile: candidatesArg,
       packId: val('--pack'),
       collection: val('--collection', 'records'),
-      lane: val('--lane', JSON.parse(fs.readFileSync(file, 'utf8')).lane || 'document')
+      file: val('--file'),
+      lane: val('--lane', JSON.parse(fs.readFileSync(candidatesArg, 'utf8')).lane || 'document')
     });
     console.log(`Promoted into ${r.packFile}: ${r.added} added, ${r.replaced} replaced.`);
     console.log(`The gate passed over the result. Registry fingerprint is now ${r.fingerprint}.`);
