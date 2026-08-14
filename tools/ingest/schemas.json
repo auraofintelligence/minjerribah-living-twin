@@ -323,6 +323,11 @@
           "why": "An issue listing a lever that does not exist offers the player a door with nothing behind it."
         },
         {
+          "from": "levers[].instruments",
+          "into": "instruments[].id",
+          "why": "The law under a lever. src/ui/panels/civic.js resolves each id against instruments and filters out what it cannot find, so a dangling one does not error and does not draw: the lever reads as resting on an Act and shows nothing where the Act should be."
+        },
+        {
           "from": "jurisdiction.layers[].body",
           "into": "institutions[].id",
           "why": "Each layer of authority names the body that holds it. A layer pointing at no institution is a tier with nobody in it."

@@ -26,6 +26,21 @@
 //   published departure from that stop is inside ten minutes, and goes out again when the bus has
 //   gone, which is a thing a player can notice without being told.
 //
+// TELLING FORTY-TWO THINGS APART, WHICH IS WHAT THIS LAYER FAILED AT
+//   A critic flew the island at five hundred metres and found nine identical yellow squares. Every
+//   bus stop wore `--sun`, the interface's attention colour, all day and all night, twenty of them
+//   in a row along one road, including the fifteen with no bus for hours. So the brightest colour in
+//   the palette meant "bus stop" rather than "look at this", and an island of different public
+//   things read as one repeated thing.
+//
+//   Three changes, and they work together. Every marker takes the quiet colour of the family the
+//   contributor filed it under, out of his own folders, so the four families that reach the world
+//   are four colours and four plate shapes. Every kind wears a pictogram of itself, drawn into an
+//   atlas at boot in vector paths with no font and no file, so a water treatment plant is a drop and
+//   a tip is a bin and neither is a dot. And `--sun` is spent on exactly one state: a stop with a
+//   published departure inside ten minutes, which grows a quarter and becomes the brightest thing in
+//   the view because it is the only thing on this layer that is about to matter.
+//
 // NAMING THEM
 //   `TWIN.shot()` captures the canvas and the canvas cannot contain text this project would trust,
 //   so the names are DOM nameplates projected onto the canvas: the nearest fourteen, inside two and
@@ -43,7 +58,13 @@ const B = (typeof window !== 'undefined' && window.BABYLON) ? window.BABYLON : n
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 
-/** Marker tints, from src/ui/design.css. The same five words the rest of the interface uses. */
+/**
+ * Marker tints, from src/ui/design.css. The same seven words the rest of the interface uses.
+ *
+ * A fall-back only. The colour a marker actually wears comes off its own record as `plate`, set by
+ * the family the contributor filed it under, in src/systems/infrastructure/contributed.js. This
+ * table stays so that a record arriving without one still lands on a sensible colour.
+ */
 const TONE = {
   sea: [0.247, 0.714, 0.769],
   sun: [0.941, 0.706, 0.161],
@@ -54,13 +75,22 @@ const TONE = {
   sand: [0.910, 0.863, 0.769]
 };
 
+/** `--sun`. Spent on one state and no other: a stop with a published bus inside ten minutes. */
+const SUN = TONE.sun;
+
 const POST = [0.28, 0.30, 0.32];      // galvanised post
 const PLATE_BACK = [0.16, 0.17, 0.18];
 
 const CAP = 96;                        // there are 42. The ceiling is headroom, not a target.
 const LABELS = 16;
-/** How many pixels across a pin head is, whatever the zoom. Twenty-one is a legible dot, not a badge. */
-const PIN_PX = 21;
+/**
+ * How many pixels across a pin head is, whatever the zoom.
+ *
+ * Twenty-four, of which the sign itself is about twenty-one: the same legible dot as before, with
+ * the extra three pixels of transparent margin the atlas cell needs so bilinear filtering has
+ * something to fade into rather than the next cell along.
+ */
+const PIN_PX = 24;
 
 /* ------------------------------------------------------------------ geometry
 
@@ -68,7 +98,7 @@ Built in metres with the pivot on the ground, so an instance scale of 1 is the r
 mesh helpers as src/render/layers/eventsite.js, kept local because a shared geometry module would
 couple two layers that have no business knowing about each other. */
 
-function mesh() { return { pos: [], nrm: [], col: [], idx: [] }; }
+function mesh() { return { pos: [], nrm: [], col: [], uv: [], idx: [] }; }
 
 function box(m, cx, cy, cz, w, h, d, col) {
   const faces = [
@@ -89,22 +119,37 @@ function box(m, cx, cy, cz, w, h, d, col) {
       );
       m.nrm.push(f.n[0], f.n[1], f.n[2]);
       m.col.push(col[0], col[1], col[2]);
+      // A post carries no sign, so it samples the transparent corner of its cell and comes out as
+      // galvanised pipe. Only the plate faces below are given real coordinates.
+      m.uv.push(0, 0);
     }
     m.idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
   }
 }
 
-/** A flat quad from four corners, both sides given the same colour. */
-function quad(m, p0, p1, p2, p3, n, col) {
+/**
+ * A flat quad from four corners, both sides given the same colour.
+ *
+ * `uvs` is four pairs in the same corner order, and it is what turns a blank plate into a sign: the
+ * fragment shader prints that patch of the glyph atlas onto it. Omit it and the quad is plain.
+ */
+function quad(m, p0, p1, p2, p3, n, col, uvs) {
   const base = m.pos.length / 3;
-  for (const p of [p0, p1, p2, p3]) { m.pos.push(p[0], p[1], p[2]); m.nrm.push(n[0], n[1], n[2]); m.col.push(col[0], col[1], col[2]); }
+  const corners = [p0, p1, p2, p3];
+  for (let i = 0; i < 4; i++) {
+    const p = corners[i];
+    m.pos.push(p[0], p[1], p[2]);
+    m.nrm.push(n[0], n[1], n[2]);
+    m.col.push(col[0], col[1], col[2]);
+    m.uv.push(uvs ? uvs[i][0] : 0, uvs ? uvs[i][1] : 0);
+  }
   m.idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
 }
 
 function finish(m) {
   return {
     pos: new Float32Array(m.pos), nrm: new Float32Array(m.nrm),
-    col: new Float32Array(m.col), idx: new Uint16Array(m.idx)
+    col: new Float32Array(m.col), uv: new Float32Array(m.uv), idx: new Uint16Array(m.idx)
   };
 }
 
@@ -119,12 +164,14 @@ function markerMesh() {
   const h = 2.4;
   box(m, 0, h / 2, 0, 0.06, h, 0.06, POST);
   box(m, 0, 0.10, 0, 0.30, 0.20, 0.30, PLATE_BACK);
-  // The plate: two quads back to back, canted 14 degrees so it catches the sun from above.
+  // The plate: two quads back to back, canted 14 degrees so it catches the sun from above. The
+  // front one is square and takes the whole cell, so the pictogram on it is the same drawing you
+  // read as a dot from orbit, at 420 mm instead of twenty pixels.
   const y0 = h - 0.02, w = 0.21, tilt = 0.052;
   quad(m,
     [-w, y0 - w + tilt, -0.035], [w, y0 - w + tilt, -0.035],
     [w, y0 + w - tilt, 0.035], [-w, y0 + w - tilt, 0.035],
-    [0, 0.26, -0.97], [1, 1, 1]);
+    [0, 0.26, -0.97], [1, 1, 1], [[0, 1], [1, 1], [1, 0], [0, 0]]);
   quad(m,
     [w, y0 - w + tilt, -0.045], [-w, y0 - w + tilt, -0.045],
     [-w, y0 + w - tilt, 0.025], [w, y0 + w - tilt, 0.025],
@@ -137,6 +184,10 @@ function markerMesh() {
  * number on a real one. The panel takes the tint and the lamp, so a stop with a bus due lights its
  * flag. There is no seat and no shelter: most stops on this island have neither, and drawing one
  * would be inventing street furniture.
+ *
+ * The panel is taller than it is wide, so the atlas cell is sampled over a centred band rather than
+ * stretched: a round sign on a tall sign face has to stay round. Both faces carry the glyph, the
+ * back one mirrored, so the stop reads as a stop from either side of the road.
  */
 function busStopMesh() {
   const m = mesh();
@@ -144,10 +195,12 @@ function busStopMesh() {
   box(m, 0, h / 2, 0, 0.07, h, 0.07, POST);
   box(m, 0, 0.09, 0, 0.34, 0.18, 0.34, PLATE_BACK);
   const top = h - 0.06, w = 0.15, hh = 0.23;
-  quad(m, [-w, top - hh * 2, 0.045], [w, top - hh * 2, 0.045], [w, top, 0.045], [-w, top, 0.045], [0, 0, 1], [1, 1, 1]);
-  quad(m, [w, top - hh * 2, -0.045], [-w, top - hh * 2, -0.045], [-w, top, -0.045], [w, top, -0.045], [0, 0, -1], [1, 1, 1]);
-  // A thin white band across the panel, so the flag reads as a sign and not as a lolly.
-  quad(m, [-w, top - hh - 0.03, 0.05], [w, top - hh - 0.03, 0.05], [w, top - hh + 0.03, 0.05], [-w, top - hh + 0.03, 0.05], [0, 0, 1], [0.96, 0.96, 0.94]);
+  const inset = (1 - (w * 2) / (hh * 2)) / 2;          // keeps the cell square on a 300 by 460 face
+  const lo = inset, hi = 1 - inset;
+  quad(m, [-w, top - hh * 2, 0.045], [w, top - hh * 2, 0.045], [w, top, 0.045], [-w, top, 0.045],
+    [0, 0, 1], [1, 1, 1], [[0, hi], [1, hi], [1, lo], [0, lo]]);
+  quad(m, [w, top - hh * 2, -0.045], [-w, top - hh * 2, -0.045], [-w, top, -0.045], [w, top, -0.045],
+    [0, 0, -1], [1, 1, 1], [[1, hi], [0, hi], [0, lo], [1, lo]]);
   return finish(m);
 }
 
@@ -166,6 +219,292 @@ function pinMesh() {
   const m = mesh();
   quad(m, [-0.5, -0.5, 0], [0.5, -0.5, 0], [0.5, 0.5, 0], [-0.5, 0.5, 0], [0, 0, 1], [1, 1, 1]);
   return finish(m);
+}
+
+/* ================================================================== the glyph atlas
+
+WHY THERE IS A TEXTURE IN A LAYER THAT HAD NONE
+
+A critic flew this at five hundred metres and found nine identical yellow squares where an island of
+different public things should have been. Twenty bus stops, three water treatment plants, a tip, an
+ambulance station and a swimming enclosure all reduced to the same dot, and the brightest colour in
+the palette spent on every one of them including the fifteen with no bus for hours.
+
+Colour alone cannot carry eighteen kinds. Four families of colour can carry four families, and shape
+can carry a bit more, but the thing that actually tells a person a plant from a tip from a jetty is
+a picture of it. So the layer draws its own: nineteen pictograms, in vector paths on a canvas, at
+boot, offline, into one 512 by 256 texture. No font is used, because a font is a file this project
+does not have and a glyph that arrives differently on two machines is a glyph that cannot be trusted.
+
+HOW THE CHANNELS WORK
+  alpha  where the sign is at all
+  red    1 where the family colour goes, 0 where the ink goes
+
+One texture then serves both the map pin, where the sign is a coloured dot with a dark picture in
+it, and the physical plate on the post at head height, where it is the same picture at 420 mm. When
+a stop has a bus inside ten minutes the same cell is drawn in `--sun` instead, which is how the
+attention colour gets spent on the one thing that has earned it. */
+
+const CELL = 64;
+const ATLAS_COLS = 8;
+const ATLAS_ROWS = 4;
+const ATLAS_W = CELL * ATLAS_COLS;
+const ATLAS_H = CELL * ATLAS_ROWS;
+const R = 26;                     // sign radius inside the cell, leaving a margin for bilinear
+const BORDER = 0.20;              // the dark rim, as a fraction of R
+const U = R * (1 - BORDER) * 0.68; // the glyph half-extent, inside the coloured core
+
+const TINT = 'rgba(255,0,0,1)';   // red channel high: the family colour lands here
+const INK = 'rgba(0,0,0,1)';      // red channel zero: stays dark whatever the family is
+
+/**
+ * How much room a plate shape leaves the pictogram inside it.
+ *
+ * A diamond of radius r has an inscribed square only 0.7 r across, so a glyph drawn to the edge of
+ * its own box lands outside the plate at the corners: ink on nothing, which reads as a broken sign
+ * rather than a picture. Written per shape rather than fixed per glyph, so a glyph that moves
+ * family keeps working.
+ */
+const SHAPE_ROOM = { circle: 1, square: 1, hex: 0.95, diamond: 0.80 };
+
+/** The four plate shapes, one per family, because shape reads before colour at twenty pixels. */
+function platePath(g, r, shape) {
+  g.beginPath();
+  if (shape === 'square') {
+    const k = r * 0.34;
+    g.moveTo(-r + k, -r);
+    g.arcTo(r, -r, r, -r + k, k); g.arcTo(r, r, r - k, r, k);
+    g.arcTo(-r, r, -r, r - k, k); g.arcTo(-r, -r, -r + k, -r, k);
+    g.closePath();
+  } else if (shape === 'hex') {
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2;
+      const x = Math.cos(a) * r, y = Math.sin(a) * r * 0.94;
+      if (i) g.lineTo(x, y); else g.moveTo(x, y);
+    }
+    g.closePath();
+  } else if (shape === 'diamond') {
+    g.moveTo(0, -r); g.lineTo(r * 0.92, 0); g.lineTo(0, r); g.lineTo(-r * 0.92, 0);
+    g.closePath();
+  } else {
+    g.arc(0, 0, r, 0, Math.PI * 2);
+  }
+}
+
+/* The pictograms. Each draws inside a box of plus or minus one, scaled by U, with the origin at the
+   centre of the sign. Ink is the drawing; painting in TINT over ink puts the family colour back,
+   which is how a bus gets windows without a second texture. */
+
+const rect = (g, x0, y0, x1, y1) => { g.beginPath(); g.rect(x0, y0, x1 - x0, y1 - y0); g.fill(); };
+const disc = (g, x, y, r) => { g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); };
+const poly = (g, pts) => {
+  g.beginPath();
+  pts.forEach((p, i) => (i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])));
+  g.closePath(); g.fill();
+};
+
+const GLYPH = {
+  dot(g) { disc(g, 0, 0, 0.52); },
+
+  bus(g) {
+    g.fillStyle = INK;
+    g.beginPath();
+    const k = 0.22;
+    g.moveTo(-0.72 + k, -0.66);
+    g.arcTo(0.72, -0.66, 0.72, -0.66 + k, k); g.arcTo(0.72, 0.5, 0.72 - k, 0.5, k);
+    g.arcTo(-0.72, 0.5, -0.72, 0.5 - k, k); g.arcTo(-0.72, -0.66, -0.72 + k, -0.66, k);
+    g.closePath(); g.fill();
+    disc(g, -0.44, 0.62, 0.24); disc(g, 0.44, 0.62, 0.24);
+    g.fillStyle = TINT;
+    rect(g, -0.5, -0.42, -0.05, -0.02); rect(g, 0.05, -0.42, 0.5, -0.02);
+    rect(g, -0.5, 0.16, 0.5, 0.3);
+  },
+
+  plane(g) {
+    poly(g, [[0, -0.92], [0.16, -0.5], [0.16, -0.1], [0.92, 0.32], [0.92, 0.5], [0.16, 0.3],
+      [0.16, 0.62], [0.4, 0.82], [0.4, 0.94], [0, 0.82], [-0.4, 0.94], [-0.4, 0.82],
+      [-0.16, 0.62], [-0.16, 0.3], [-0.92, 0.5], [-0.92, 0.32], [-0.16, -0.1], [-0.16, -0.5]]);
+  },
+
+  jetty(g) {
+    rect(g, -0.92, -0.42, 0.92, -0.18);
+    for (const x of [-0.62, -0.1, 0.42]) rect(g, x, -0.18, x + 0.16, 0.42);
+    g.lineWidth = 0.17; g.strokeStyle = INK; g.lineCap = 'round';
+    g.beginPath();
+    g.moveTo(-0.92, 0.72); g.quadraticCurveTo(-0.46, 0.42, 0, 0.72); g.quadraticCurveTo(0.46, 1.0, 0.92, 0.72);
+    g.stroke();
+  },
+
+  drop(g) {
+    g.beginPath();
+    g.moveTo(0, -0.95);
+    g.bezierCurveTo(0.66, -0.16, 0.72, 0.34, 0, 0.92);
+    g.bezierCurveTo(-0.72, 0.34, -0.66, -0.16, 0, -0.95);
+    g.fill();
+  },
+
+  spring(g) {
+    disc(g, 0, -0.5, 0.3);
+    g.lineWidth = 0.16; g.strokeStyle = INK; g.lineCap = 'round';
+    for (const r of [0.34, 0.62, 0.9]) {
+      g.beginPath(); g.arc(0, 0.02, r, Math.PI * 0.14, Math.PI * 0.86); g.stroke();
+    }
+  },
+
+  bin(g) {
+    g.fillStyle = INK;
+    rect(g, -0.8, -0.76, 0.8, -0.5);
+    rect(g, -0.22, -0.95, 0.22, -0.76);
+    poly(g, [[-0.62, -0.42], [0.62, -0.42], [0.48, 0.9], [-0.48, 0.9]]);
+    g.fillStyle = TINT;
+    rect(g, -0.28, -0.24, -0.1, 0.68); rect(g, 0.1, -0.24, 0.28, 0.68);
+  },
+
+  bays(g) {
+    // Two open-topped bays side by side, which is the shape of a separated bay at a transfer
+    // station and, at twenty pixels, is not the shape of the courts.
+    g.lineWidth = 0.17; g.strokeStyle = INK; g.lineJoin = 'miter';
+    for (const x of [-0.48, 0.48]) {
+      g.beginPath();
+      g.moveTo(x - 0.38, -0.52); g.lineTo(x - 0.38, 0.56);
+      g.lineTo(x + 0.38, 0.56); g.lineTo(x + 0.38, -0.52);
+      g.stroke();
+    }
+  },
+
+  shed(g) {
+    g.fillStyle = INK;
+    poly(g, [[-0.96, -0.1], [0, -0.88], [0.96, -0.1]]);
+    rect(g, -0.76, -0.1, 0.76, 0.86);
+    g.fillStyle = TINT;
+    rect(g, -0.34, 0.16, 0.34, 0.86);
+  },
+
+  cross(g) { rect(g, -0.27, -0.9, 0.27, 0.9); rect(g, -0.9, -0.27, 0.9, 0.27); },
+
+  phone(g) {
+    // A handset: flared at both ends, narrow through the middle, tilted the way one sits in a
+    // cradle. Drawn as one outline rather than two circles and a bar, which came out as a bone.
+    g.save(); g.rotate(-0.7);
+    poly(g, [[-0.92, -0.36], [-0.3, -0.36], [-0.22, -0.06], [0.22, -0.06], [0.3, -0.36],
+      [0.92, -0.36], [0.92, 0.22], [0.36, 0.22], [0.22, 0.38], [-0.22, 0.38], [-0.36, 0.22],
+      [-0.92, 0.22]]);
+    g.restore();
+  },
+
+  toilet(g) {
+    disc(g, -0.44, -0.6, 0.24);
+    poly(g, [[-0.68, -0.24], [-0.2, -0.24], [-0.28, 0.9], [-0.6, 0.9]]);
+    disc(g, 0.44, -0.6, 0.24);
+    poly(g, [[0.2, -0.24], [0.68, -0.24], [0.8, 0.42], [0.08, 0.42]]);
+    rect(g, 0.26, 0.42, 0.62, 0.9);
+    rect(g, -0.03, -0.86, 0.03, 0.9);
+  },
+
+  net(g) {
+    g.lineWidth = 0.16; g.strokeStyle = INK;
+    g.beginPath(); g.arc(0, 0, 0.82, 0, Math.PI * 2); g.stroke();
+    g.lineWidth = 0.11;
+    for (const d of [-0.4, 0.4]) {
+      g.beginPath(); g.moveTo(d, -0.72); g.lineTo(d, 0.72); g.stroke();
+      g.beginPath(); g.moveTo(-0.72, d); g.lineTo(0.72, d); g.stroke();
+    }
+  },
+
+  court(g) {
+    // A court seen from above, with the net across it and a ball on one side. Thin lines: the first
+    // version drew a thick outline with three thick verticals inside and read as a barcode.
+    g.lineWidth = 0.13; g.strokeStyle = INK;
+    g.strokeRect(-0.8, -0.54, 1.6, 1.08);
+    g.beginPath(); g.moveTo(0, -0.74); g.lineTo(0, 0.74); g.stroke();
+    disc(g, 0.42, 0, 0.16);
+  },
+
+  posts(g) {
+    rect(g, -0.5, -0.95, -0.28, 0.9);
+    rect(g, 0.28, -0.95, 0.5, 0.9);
+    rect(g, -0.5, -0.34, 0.5, -0.14);
+  },
+
+  ramp(g) {
+    g.beginPath();
+    g.moveTo(-0.95, 0.9); g.lineTo(0.95, 0.9); g.lineTo(0.95, -0.75);
+    g.quadraticCurveTo(0.3, 0.55, -0.95, 0.62);
+    g.closePath(); g.fill();
+  },
+
+  bike(g) {
+    g.lineWidth = 0.16; g.strokeStyle = INK;
+    g.beginPath(); g.arc(-0.5, 0.32, 0.5, 0, Math.PI * 2); g.stroke();
+    g.beginPath(); g.arc(0.5, 0.32, 0.5, 0, Math.PI * 2); g.stroke();
+    g.lineWidth = 0.13; g.lineCap = 'round';
+    g.beginPath();
+    g.moveTo(-0.5, 0.32); g.lineTo(-0.06, -0.42); g.lineTo(0.5, 0.32);
+    g.moveTo(-0.06, -0.42); g.lineTo(0.42, -0.42);
+    g.stroke();
+  },
+
+  tree(g) {
+    rect(g, -0.15, 0.06, 0.15, 0.9);
+    disc(g, 0, -0.34, 0.56);
+    disc(g, -0.4, 0.02, 0.36); disc(g, 0.4, 0.02, 0.36);
+  },
+
+  wave(g) {
+    g.lineWidth = 0.2; g.strokeStyle = INK; g.lineCap = 'round';
+    for (const y of [-0.5, 0.02]) {
+      g.beginPath();
+      g.moveTo(-0.78, y); g.quadraticCurveTo(-0.39, y - 0.36, 0, y);
+      g.quadraticCurveTo(0.39, y + 0.36, 0.78, y);
+      g.stroke();
+    }
+    g.lineWidth = 0.24;
+    g.beginPath(); g.moveTo(-0.78, 0.56); g.lineTo(0.78, 0.56); g.stroke();
+  }
+};
+
+/**
+ * Draw the whole atlas once and hand back the pixels plus the cell each sign landed in.
+ *
+ * `wanted` is the list of shape-and-glyph pairs actually on the ground, so an island that grows a
+ * new kind gets a new cell and an island that has none of something spends no texture on it.
+ */
+function buildAtlas(wanted) {
+  const canvas = document.createElement('canvas');
+  canvas.width = ATLAS_W;
+  canvas.height = ATLAS_H;
+  const g = canvas.getContext('2d', { willReadFrequently: true });
+  const index = new Map();
+  let cell = 0;
+  for (const key of wanted) {
+    if (cell >= ATLAS_COLS * ATLAS_ROWS) break;
+    const [shape, glyph] = key.split(':');
+    const cx = (cell % ATLAS_COLS) * CELL + CELL / 2;
+    const cy = Math.floor(cell / ATLAS_COLS) * CELL + CELL / 2;
+    g.save();
+    g.translate(cx, cy);
+    // The plate: an ink shape with a slightly smaller tinted one inside it, which gives the rim
+    // without a stroke and therefore without a stroke's half-outside-the-path surprise.
+    g.fillStyle = INK;
+    platePath(g, R, shape);
+    g.fill();
+    g.fillStyle = TINT;
+    platePath(g, R * (1 - BORDER), shape);
+    g.fill();
+    // The pictogram, in a box of plus or minus one, shrunk to whatever this plate shape can hold.
+    g.save();
+    g.scale(U * (SHAPE_ROOM[shape] || 1), U * (SHAPE_ROOM[shape] || 1));
+    g.fillStyle = INK;
+    g.strokeStyle = INK;
+    g.lineJoin = 'round';
+    (GLYPH[glyph] || GLYPH.dot)(g);
+    g.restore();
+    g.restore();
+    index.set(key, cell);
+    cell++;
+  }
+  const px = g.getImageData(0, 0, ATLAS_W, ATLAS_H).data;
+  return { data: new Uint8Array(px), index, cells: cell };
 }
 
 /* ------------------------------------------------------------------ shaders
@@ -198,20 +537,34 @@ vec3 hazed(vec3 col, vec3 P) {
 }
 `;
 
+/** Cell index to the patch of atlas it occupies. Shared by both shaders, in one place. */
+const CELL_UV = `
+uniform vec4 uAtlas;    // cols, rows, 0, 0
+vec2 cellUv(float cell, vec2 within) {
+  float col = mod(cell, uAtlas.x);
+  float row = floor(cell / uAtlas.x + 0.0001);
+  return (vec2(col, row) + within) / uAtlas.xy;
+}
+`;
+
 const MARK_VERT = `
 precision highp float;
 attribute vec3 position;
 attribute vec3 normal;
 attribute vec3 colour;
+attribute vec2 uv;      // 0..1 across the sign face, (0,0) on everything else
 attribute vec4 iPos;    // x, y, z, yaw
-attribute vec4 iSize;   // x uniform scale, y selected 0..1, z hover 0..1, w unused
+attribute vec4 iSize;   // x uniform scale, y selected 0..1, z hover 0..1, w atlas cell
 attribute vec4 iTint;   // rgb plate tint, a lamp 0..1
 uniform mat4 viewProjection;
+${CELL_UV}
 varying vec3 vPos;
 varying vec3 vNrm;
 varying vec3 vCol;
+varying vec2 vUv;
 varying float vLamp;
 varying float vMark;
+varying float vPlate;
 
 void main(void) {
   vec3 p = position * iSize.x;
@@ -227,23 +580,34 @@ void main(void) {
   vCol = mix(colour, iTint.rgb, isPlate);
   vLamp = iTint.a * isPlate;
   vMark = max(iSize.y, iSize.z * 0.55);
+  vPlate = isPlate;
+  vUv = cellUv(iSize.w, uv);
   gl_Position = viewProjection * vec4(vPos, 1.0);
 }
 `;
 
 const MARK_FRAG = `
 precision highp float;
+uniform sampler2D uAtlasTex;
 varying vec3 vPos;
 varying vec3 vNrm;
 varying vec3 vCol;
+varying vec2 vUv;
 varying float vLamp;
 varying float vMark;
+varying float vPlate;
 ${COMMON_LIGHT}
 void main(void) {
-  vec3 col = litColour(vCol, normalize(vNrm), vPos);
+  // The pictogram, printed on the sign face. Red high in the atlas means the family colour goes
+  // there and red low means ink, so the picture stays dark whatever colour the sign is, including
+  // when a stop turns --sun because a bus is coming.
+  vec4 sign_ = texture2D(uAtlasTex, vUv);
+  float on = sign_.a * vPlate;
+  vec3 base = mix(vCol, mix(vec3(0.05, 0.07, 0.08), vCol, sign_.r), on);
+  vec3 col = litColour(base, normalize(vNrm), vPos);
   // After dark a lit plate is the only thing you can see of a marker, and a bus stop with a bus due
   // lifts further. Off in daylight: at noon a marker is lit by the sun like everything else.
-  col += vCol * vec3(1.0, 0.92, 0.72) * vLamp * (1.0 - uSun.w) * 1.1;
+  col += base * vec3(1.0, 0.92, 0.72) * vLamp * (1.0 - uSun.w) * 1.1;
   // Selected or hovered: a cool rim, the same --sea the selection band uses.
   col += vec3(0.247, 0.714, 0.769) * vMark * 0.55;
   gl_FragColor = vec4(hazed(col, vPos), 1.0);
@@ -255,23 +619,25 @@ precision highp float;
 attribute vec3 position;
 attribute vec3 normal;
 attribute vec3 colour;
+attribute vec2 uv;
 attribute vec4 iPos;    // x, y, z, unused
 attribute vec4 iSize;   // x size in metres, y selected, z hover, w alpha
-attribute vec4 iTint;   // rgb, a square 0 round 1 square
+attribute vec4 iTint;   // rgb, a atlas cell
 uniform mat4 viewProjection;
 uniform vec3 uRight;
 uniform vec3 uUp;
+${CELL_UV}
 varying vec2 vUv;
 varying vec3 vCol;
 varying float vMark;
 varying float vAlpha;
-varying float vSquare;
 void main(void) {
-  vUv = position.xy * 2.0;
+  // The quad runs from -0.5 to 0.5. The atlas runs top down, so v is flipped once here rather than
+  // at upload, where it would flip the whole sheet and every cell with it.
+  vUv = cellUv(iTint.a, vec2(position.x + 0.5, 0.5 - position.y));
   vCol = iTint.rgb;
   vMark = max(iSize.y, iSize.z * 0.6);
   vAlpha = iSize.w;
-  vSquare = iTint.a;
   vec3 p = iPos.xyz + (uRight * position.x + uUp * position.y) * iSize.x;
   gl_Position = viewProjection * vec4(p, 1.0);
 }
@@ -279,22 +645,18 @@ void main(void) {
 
 const PIN_FRAG = `
 precision highp float;
+uniform sampler2D uAtlasTex;
 varying vec2 vUv;
 varying vec3 vCol;
 varying float vMark;
 varying float vAlpha;
-varying float vSquare;
 void main(void) {
-  // Round for a place, square for a bus stop. One bit of shape is enough to tell twenty stops from
-  // twenty-two other things at a glance, and it costs nothing.
-  float dRound = length(vUv);
-  float dSquare = max(abs(vUv.x), abs(vUv.y));
-  float d = mix(dRound, dSquare, vSquare);
-  float body = 1.0 - smoothstep(0.66, 0.80, d);
-  float ring = smoothstep(0.80, 0.88, d) * (1.0 - smoothstep(0.94, 1.0, d));
-  float a = (body + ring) * vAlpha;
+  // One texture read is the whole pin: the family's plate shape, its dark rim, and the pictogram
+  // for the kind knocked out of it. Nineteen different things at twenty pixels, from one draw call.
+  vec4 sign_ = texture2D(uAtlasTex, vUv);
+  float a = sign_.a * vAlpha;
   if (a < 0.02) discard;
-  vec3 col = mix(vCol, vec3(0.04, 0.07, 0.09), ring * 0.86);
+  vec3 col = mix(vec3(0.04, 0.07, 0.09), vCol, sign_.r);
   col = mix(col, vec3(0.247, 0.714, 0.769), vMark * 0.7);
   col += vec3(1.0) * vMark * 0.25;
   gl_FragColor = vec4(col, a);
@@ -308,6 +670,8 @@ export function registerContributedLayer(world) {
     rendered: false,
     markers: 0,
     busStops: 0,
+    /** Distinct signs drawn into the glyph atlas: one per family shape and kind pictogram in use. */
+    signs: 0,
     lit: 0,
     labels: 0,
     drawCalls: 0,
@@ -325,6 +689,7 @@ export function registerContributedLayer(world) {
         rendered: state.rendered,
         markers: state.markers,
         busStops: state.busStops,
+        signs: state.signs,
         lit: state.lit,
         labels: state.labels,
         camAltM: state.camAltM,
@@ -365,21 +730,28 @@ export function registerContributedLayer(world) {
   const vRight = new B.Vector3(1, 0, 0);
   const vUp = new B.Vector3(0, 1, 0);
 
-  const ATTRS = ['position', 'normal', 'colour', 'world0', 'world1', 'world2', 'world3', 'iPos', 'iSize', 'iTint'];
+  const ATTRS = ['position', 'normal', 'colour', 'uv', 'world0', 'world1', 'world2', 'world3', 'iPos', 'iSize', 'iTint'];
+  const vAtlas = new B.Vector4(ATLAS_COLS, ATLAS_ROWS, 0, 0);
+  let atlasTex = null;
 
   function material(name) {
     return new B.ShaderMaterial(name, stage.scene,
       { vertexSource: MARK_VERT, fragmentSource: MARK_FRAG },
       {
         attributes: ATTRS,
-        uniforms: ['viewProjection', 'uCam', 'uSun', 'uSunCol', 'uSky', 'uSkyHz', 'uTune']
+        uniforms: ['viewProjection', 'uCam', 'uSun', 'uSunCol', 'uSky', 'uSkyHz', 'uTune', 'uAtlas'],
+        samplers: ['uAtlasTex']
       });
   }
 
   function pinMaterial(name) {
     const m = new B.ShaderMaterial(name, stage.scene,
       { vertexSource: PIN_VERT, fragmentSource: PIN_FRAG },
-      { attributes: ATTRS, uniforms: ['viewProjection', 'uRight', 'uUp'] });
+      {
+        attributes: ATTRS,
+        uniforms: ['viewProjection', 'uRight', 'uUp', 'uAtlas'],
+        samplers: ['uAtlasTex']
+      });
     m.backFaceCulling = false;
     m.needAlphaBlending = () => true;
     // Drawn last and writing no depth, so a pin never punches a hole in the sea behind it, and
@@ -393,6 +765,7 @@ export function registerContributedLayer(world) {
     const vd = new B.VertexData();
     vd.positions = data.pos;
     vd.normals = data.nrm;
+    vd.uvs = data.uv;
     vd.indices = data.idx;
     vd.applyToMesh(m, false);
     m.setVerticesData('colour', data.col, false, 3);
@@ -437,6 +810,17 @@ export function registerContributedLayer(world) {
       state.notes.push('The contributed pack is loaded and holds nothing this build may draw.');
       return false;
     }
+    // Which signs this island actually needs, in a stable order so the atlas is the same sheet on
+    // every run. Sorted by the key rather than by encounter order, because encounter order is pack
+    // order and a pack edit would silently reshuffle every cell.
+    const wanted = new Set();
+    for (const f of c.features) wanted.add(`${f.shape || 'circle'}:${f.glyph || 'dot'}`);
+    const atlas = buildAtlas([...wanted].sort());
+    atlasTex = new B.RawTexture(atlas.data, ATLAS_W, ATLAS_H, B.Engine.TEXTUREFORMAT_RGBA,
+      stage.scene, false, false, B.Texture.BILINEAR_SAMPLINGMODE);
+    atlasTex.wrapU = atlasTex.wrapV = B.Texture.CLAMP_ADDRESSMODE;
+    state.signs = atlas.cells;
+
     for (const f of c.features) {
       if (items.length >= CAP * 2) break;
       const isStop = f.kind === 'bus_stop';
@@ -448,7 +832,11 @@ export function registerContributedLayer(world) {
         // latitude and a longitude and nothing about elevation, and the terrain is what a player
         // sees a post standing on.
         y: island ? island.height(f.x, f.z) - 0.06 : 0,
-        tint: TONE[f.tone] || TONE.sand
+        // The family's own quiet colour, from his own folder, out of the read model. The attention
+        // colour is not in this table: it is applied per frame, to a stop with a bus due, and to
+        // nothing else on the island.
+        tint: Array.isArray(f.plate) ? f.plate : (TONE[f.tone] || TONE.sand),
+        cell: atlas.index.get(`${f.shape || 'circle'}:${f.glyph || 'dot'}`) || 0
       });
     }
     items.sort((a, b) => (a.f.id < b.f.id ? -1 : 1));
@@ -532,14 +920,26 @@ export function registerContributedLayer(world) {
       if (_proj.z < 0 || _proj.z > 1) { el.style.display = 'none'; continue; }
       el.style.display = '';
       el.style.transform = `translate(${Math.round(_proj.x)}px, ${Math.round(_proj.y)}px)`;
-      el.className = 'cm-label' + (row.sel ? ' on' : '') + (row.near || row.sel ? '' : ' far');
       // A departure, when there is a published one for this stop. Nothing else is live, because
       // nothing else about these records is known to be current.
       let sub = it.f.kindLabel;
-      if (it.bucket === 'stop' && contributed && typeof contributed.departuresAt === 'function') {
-        const next = contributed.departuresAt(it.f.id, 1)[0];
-        if (next) sub = `${next.routeLabel} ${next.at_text} towards ${next.towards}`;
+      let due = false;
+      if (it.bucket === 'stop' && contributed) {
+        if (typeof contributed.departuresAt === 'function' && contributed.hasBoard(it.f.id)) {
+          const next = contributed.departuresAt(it.f.id, 1)[0];
+          if (next) {
+            sub = `${next.routeLabel} ${next.at_text} towards ${next.towards}`;
+            due = next.inMinutes <= 10;
+          }
+        } else if (typeof contributed.runsAt === 'function') {
+          // A stop the timetable does not name gets the run rather than a minute, because the run
+          // is published and the minute is not. A range reads as a range.
+          const run = contributed.runsAt(it.f.id, 1)[0];
+          if (run) sub = `${run.routeLabel} run ${run.calls[0].at_text} to ${run.calls[run.calls.length - 1].at_text}`;
+        }
       }
+      el.className = 'cm-label' + (row.sel ? ' on' : '') + (due ? ' due' : '')
+        + (row.near || row.sel || due ? '' : ' far');
       el.innerHTML = `<b>${esc(it.f.name)}</b><span>${esc(sub)}</span>`;
     }
   }
@@ -570,6 +970,10 @@ export function registerContributedLayer(world) {
         if (!build()) return;
         mats.mark = material('contributed-mark');
         mats.pin = pinMaterial('contributed-pin');
+        for (const m of [mats.mark, mats.pin]) {
+          m.setVector4('uAtlas', vAtlas);
+          m.setTexture('uAtlasTex', atlasTex);
+        }
         meshes.marker = realise('contributed-markers', markerMesh(), mats.mark);
         meshes.stop = realise('contributed-busstops', busStopMesh(), mats.mark);
         meshes.pin = realise('contributed-pins', pinMesh(), mats.pin);
@@ -584,7 +988,8 @@ export function registerContributedLayer(world) {
         ready = true;
         state.rendered = true;
         state.drawCalls = 3;
-        console.info(`[contributed] ${state.markers} markers and ${state.busStops} bus stops: three draw calls.`);
+        console.info(`[contributed] ${state.markers} markers and ${state.busStops} bus stops, `
+          + `${state.signs} different signs in one atlas: three draw calls.`);
       }
 
       const cam = st.scene.activeCamera;
@@ -651,6 +1056,25 @@ export function registerContributedLayer(world) {
         if (b.n >= CAP) continue;
         const d = Math.max(20, Math.hypot(vCam.x - it.f.x, vCam.y - (it.y + 2.4), vCam.z - it.f.z));
         const mpp = perMetre * d;
+
+        /* --- the one thing wearing the attention colour ---
+
+        Every marker on this island now carries its family's own quiet plate, and exactly one state
+        takes `--sun`: a bus stop with a published departure inside ten minutes. Before this, all
+        twenty stops wore it all day, so the colour that means look here meant bus stop, which is
+        the same as meaning nothing. A stop that is about to be useful is now the brightest thing
+        in the view and the only one, and it grows a quarter so it carries at five hundred metres. */
+        let tint = it.tint;
+        let lamp = dark * 0.35;
+        let due = false;
+        if (it.bucket === 'stop' && contributed && typeof contributed.departuresAt === 'function'
+          && contributed.hasBoard(it.f.id)) {
+          const next = contributed.departuresAt(it.f.id, 1)[0];
+          if (next && next.inMinutes <= 10) {
+            tint = SUN; lamp = Math.max(lamp, 0.9); due = true; lit++;
+          }
+        }
+
         // Capped low on purpose. Beyond a few hundred metres the pin head takes over the job of
         // being seen, and a post that kept growing would stand a hundred metres over the township
         // like a mast, which is a different and much worse picture than a marker.
@@ -660,15 +1084,8 @@ export function registerContributedLayer(world) {
         b.pos[o] = it.f.x; b.pos[o + 1] = it.y; b.pos[o + 2] = it.f.z; b.pos[o + 3] = it.yaw;
         const selected = sel && sel.kind === 'facility' && sel.id === it.f.id ? 1 : 0;
         const hovered = sel && sel.hover && sel.hover.kind === 'facility' && sel.hover.id === it.f.id ? 1 : 0;
-        b.size[o] = scale; b.size[o + 1] = selected; b.size[o + 2] = hovered; b.size[o + 3] = 0;
-        // A stop with a published departure inside ten minutes warms its flag. Everything else gets
-        // the ordinary night lamp, which is what makes a marker findable after dark.
-        let lamp = dark * 0.35;
-        if (it.bucket === 'stop' && contributed && typeof contributed.departuresAt === 'function') {
-          const next = contributed.departuresAt(it.f.id, 1)[0];
-          if (next && next.inMinutes <= 10) { lamp = Math.max(lamp, 0.85); lit++; }
-        }
-        b.tint[o] = it.tint[0]; b.tint[o + 1] = it.tint[1]; b.tint[o + 2] = it.tint[2]; b.tint[o + 3] = lamp;
+        b.size[o] = scale; b.size[o + 1] = selected; b.size[o + 2] = hovered; b.size[o + 3] = it.cell;
+        b.tint[o] = tint[0]; b.tint[o + 1] = tint[1]; b.tint[o + 2] = tint[2]; b.tint[o + 3] = lamp;
         b.n++;
 
         // The pin head, per marker, sized in pixels and faded out as you walk up to the thing.
@@ -680,9 +1097,10 @@ export function registerContributedLayer(world) {
         // pipe and the pin is the only thing that can be seen at all.
         const alpha = clamp((d - 55) / 130, 0, 1) * (selected || hovered ? 1 : 0.92);
         p.pos[q] = it.f.x; p.pos[q + 1] = it.y + Math.max(3.4, 2.9 * scale); p.pos[q + 2] = it.f.z; p.pos[q + 3] = 0;
-        p.size[q] = Math.max(0.6, mpp * PIN_PX); p.size[q + 1] = selected; p.size[q + 2] = hovered; p.size[q + 3] = alpha;
-        p.tint[q] = it.tint[0]; p.tint[q + 1] = it.tint[1]; p.tint[q + 2] = it.tint[2];
-        p.tint[q + 3] = it.bucket === 'stop' ? 1 : 0;
+        p.size[q] = Math.max(0.6, mpp * PIN_PX * (due ? 1.26 : 1));
+        p.size[q + 1] = selected; p.size[q + 2] = hovered; p.size[q + 3] = alpha;
+        p.tint[q] = tint[0]; p.tint[q + 1] = tint[1]; p.tint[q + 2] = tint[2];
+        p.tint[q + 3] = it.cell;
         p.n++;
       }
       state.lit = lit;
@@ -702,6 +1120,7 @@ export function registerContributedLayer(world) {
     dispose() {
       for (const k of Object.keys(meshes)) meshes[k].dispose();
       for (const k of Object.keys(mats)) mats[k].dispose();
+      if (atlasTex) { atlasTex.dispose(); atlasTex = null; }
       if (overlay) { overlay.remove(); overlay = null; labelPool.length = 0; }
       ready = false;
     }
@@ -731,6 +1150,9 @@ function injectCss() {
 .cm-label.far span { display: none; }
 .cm-label.on { border-left-color: var(--sea, #3fb6c4); background: rgba(10, 30, 36, .88); color: #fff; }
 .cm-label.on span { color: #cfe9ee; }
+/* The same rule the ground follows: --sun means a bus inside ten minutes and means nothing else. */
+.cm-label.due { border-left-color: var(--sun, #f0b429); }
+.cm-label.due span { color: var(--sun, #f0b429); }
 @media (prefers-reduced-motion: no-preference) { .cm-label { transition: opacity .18s linear; } }
 `;
   document.head.append(s);

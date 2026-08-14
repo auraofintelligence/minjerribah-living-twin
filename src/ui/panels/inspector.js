@@ -1675,18 +1675,57 @@ function mount(root, world) {
     return typeof c.byId === 'function' ? c.byId(id) : null;
   }
 
+  /**
+   * Which moment a number on this card belongs to, said out loud.
+   *
+   * Every live figure on a bus stop is computed from `world.clock`, which follows a time
+   * projection. That is right, and it is invisible: a player who has scrubbed three hours forward
+   * and reads "4 due island-wide in the next hour" has no way of knowing which hour that is. This
+   * puts it on the card, in the same words for every figure, and it is also the thing that proves
+   * the two figures agree: they carry the same stamp because they came out of the same call.
+   */
+  function momentLine(s) {
+    if (!s) return '';
+    const at = `${s.atText}${s.dateText ? ' on ' + s.dateText : ''}`;
+    if (s.moment === 'present') return `Counted at ${at}, which is the island's own present.`;
+    const span = Math.abs(s.scrubMinutes);
+    const how = span >= 1440 ? `${Math.round(span / 1440)} days` : span >= 60 ? `${Math.round(span / 60)} hours` : `${span} minutes`;
+    return s.moment === 'ahead'
+      ? `Counted at ${at}, which is a projection ${how} ahead of the island's present.`
+      : `Counted at ${at}, which is ${how} back from the island's present.`;
+  }
+
   VIEWS.facility = {
     tabs(id) {
       const f = facility(id);
-      const board = f && f.kind === 'bus_stop' && f.transport && f.transport.timing_points.length;
-      return board ? ['Here', 'Next buses', 'Who put it here'] : ['Here', 'Who put it here'];
+      // Every stop gets the buses tab, not just the five the timetable prints a time against. The
+      // other fifteen have a real answer too: the runs that have not finished, as published.
+      return f && f.kind === 'bus_stop' && f.transport
+        ? ['Here', 'Next buses', 'Who put it here']
+        : ['Here', 'Who put it here'];
     },
     header(id) {
       const f = facility(id);
       if (!f) return null;
+      const c = world.read('contributed') || {};
       const chips = [chip('Contributed', 'heath')];
+      // The family he filed it under, which is what the colour and the shape on the ground mean.
+      if (f.familyLabel) chips.push(chip(f.familyLabel, f.tone || 'sand'));
+      if (f.former) chips.push(chip('former, closed 2019', 'iron'));
       if (f.kind === 'bus_stop' && f.transport) {
-        for (const r of f.transport.serves_routes) chips.push(chip(r.replace('svc-bus-', 'Route '), 'sun'));
+        // Route chips are quiet. --sun on this card means the same thing it means on the island:
+        // a bus inside ten minutes, and nothing else.
+        for (const r of f.transport.serves_routes) chips.push(chip(r.replace('svc-bus-', 'Route '), 'sea'));
+        const dueChip = chip('', 'sun');
+        bind(() => {
+          const next = typeof c.departuresAt === 'function' && c.hasBoard && c.hasBoard(f.id)
+            ? c.departuresAt(f.id, 1)[0] : null;
+          const say = next && next.inMinutes <= 10
+            ? (next.inMinutes < 1 ? 'bus now' : `bus in ${next.inMinutes} min`) : '';
+          dueChip.textContent = say;
+          dueChip.style.display = say ? '' : 'none';
+        });
+        chips.push(dueChip);
       }
       return {
         name: f.name,
@@ -1701,29 +1740,96 @@ function mount(root, world) {
       const out = [];
 
       if (tab === 'Next buses') {
-        const board = el('div', { class: 'rows' });
-        const head = el('div', {});
+        const timed = typeof c.hasBoard === 'function' && c.hasBoard(f.id);
+
+        if (timed) {
+          /* ---- one of the five stops Translink prints a time against ---- */
+          const board = el('div', { class: 'rows' });
+          const head = el('div', {});
+          const last = el('div', { class: 'basis' });
+          bind(() => {
+            const rows = typeof c.departuresAt === 'function' ? c.departuresAt(f.id, 6) : [];
+            head.textContent = rows.length
+              ? `Next ${rows.length === 1 ? 'departure' : rows.length + ' departures'} from this stop.`
+              : 'No more published departures from this stop today.';
+            board.replaceChildren(...rows.map((r) => el('div', { class: 'row' + (r.inMinutes <= 10 ? ' on' : '') },
+              el('div', { class: 'lead' },
+                el('div', { class: 'name' }, `${r.at_text}  ${r.routeLabel} towards ${r.towards}`),
+                el('div', { class: 'sub' }, r.flag === 'A'
+                  ? 'weekend, public holiday and school holiday weekdays only'
+                  : 'runs every day the timetable runs')),
+              el('div', { class: 'v', style: { color: r.inMinutes <= 10 ? 'var(--sun)' : '' } },
+                r.inMinutes < 1 ? 'now' : `${r.inMinutes} min`))));
+            const l = typeof c.lastToday === 'function' ? c.lastToday(f.id) : null;
+            last.textContent = l
+              ? `The last published departure from this stop today is ${l.at_text}, ${l.routeLabel} towards ${l.towards}.`
+              : '';
+          });
+          out.push(sec('At this stop', head, board, last));
+        } else {
+          /* ---- one of the fifteen it does not ----
+
+          The honest thing here is not a blank and it is not a minute. It is the run: every time the
+          timetable prints for the bus that is coming, first to last, with this stop somewhere inside
+          it. A person reads the line and places themselves on it, which is what they would do at the
+          real stop with the real printed table. */
+          const board = el('div', { class: 'rows' });
+          const head = el('div', {});
+          bind(() => {
+            const list = typeof c.runsAt === 'function' ? c.runsAt(f.id, 4) : [];
+            head.textContent = list.length
+              ? 'No departure time is published for this stop, so these are the runs that have not finished.'
+              : 'No published run is still to come through here today.';
+            board.replaceChildren(...list.map((r) => el('div', { class: 'row' },
+              el('div', { class: 'lead' },
+                el('div', { class: 'name' }, `${r.routeLabel} towards ${r.towards}`),
+                el('div', { class: 'sub' }, r.calls.map((k) => `${k.at_text} ${k.label}`).join(' · ')),
+                el('div', { class: 'sub' }, (r.skips && r.skips.length
+                  ? `Does not travel via ${r.skips.join(' or ')}. ` : '')
+                  + (r.flag === 'A'
+                    ? 'weekend, public holiday and school holiday weekdays only'
+                    : 'runs every day the timetable runs'))),
+              el('div', { class: 'v', style: { fontSize: 'var(--fs-micro)' } },
+                r.underway ? 'on the road' : r.startsIn < 1 ? 'leaving' : `starts in ${r.startsIn} min`))));
+          });
+          out.push(sec('The runs still to come', head, board,
+            basis('A Translink timetable prints times at a handful of points and the bus stops at '
+              + 'every stop in between. This is one of the in-between ones, so no minute for it has '
+              + 'ever been published and none is invented here. What is published is the whole run, '
+              + 'and the bus calls here somewhere inside it. "On the road" means the run has left its '
+              + 'first published point and has not reached its last, which is as close as anybody can '
+              + 'honestly put it.')));
+        }
+
+        /* ---- the island-wide figure, and the moment it belongs to ----
+
+        This used to read `c.busesDueWithinHour`, a field the system wrote on its tick. Ticks stop
+        while the clock is parked, so under a projection the board above followed the scrubbed
+        moment and this number stayed at whenever the island was last lived to. Both now come out of
+        one call, `c.summary()`, evaluated at the moment on screen. */
+        const wide = el('div', { class: 'stat-row' });
+        const stamp = el('div', { class: 'basis' });
         bind(() => {
-          const rows = typeof c.departuresAt === 'function' ? c.departuresAt(f.id, 6) : [];
-          head.textContent = rows.length
-            ? `Next ${rows.length === 1 ? 'departure' : rows.length + ' departures'} from this stop, island time.`
-            : 'No more published departures from this stop today.';
-          board.replaceChildren(...rows.map((r) => el('div', { class: 'row' },
-            el('div', { class: 'lead' },
-              el('div', { class: 'name' }, `${r.at_text}  ${r.routeLabel} towards ${r.towards}`),
-              el('div', { class: 'sub' }, r.flag === 'A'
-                ? 'weekend, public holiday and school holiday weekdays only'
-                : 'runs every day the timetable runs')),
-            el('div', { class: 'v' }, r.inMinutes < 1 ? 'now' : `${r.inMinutes} min`))));
+          const s = typeof c.summary === 'function' ? c.summary() : null;
+          wide.replaceChildren(
+            readout('Today', () => (s ? s.serviceDayLabel : '')),
+            readout('Due island-wide, next hour', () => String(s ? s.dueWithinHour : 0),
+              s && s.moment !== 'present' ? 'warn' : ''));
+          stamp.textContent = momentLine(s)
+            + ' The board above is counted from the same moment, so the two agree by construction.';
         });
-        out.push(sec('At this stop', head, board));
-        out.push(sec('Which runs are on today', el('div', { class: 'stat-row' },
-          readout('Today', () => c.serviceDayLabel || ''),
-          readout('Due island-wide, next hour', () => String(c.busesDueWithinHour || 0)))));
+        out.push(sec('Which runs are on today', wide, stamp));
+
         const tps = (f.transport && f.transport.timing_points) || [];
-        out.push(sec('How this stop was matched to the timetable',
-          kv(tps.map((t) => [t.route.replace('svc-bus-', 'Route ') + ', ' + t.timing_point, t.basis])),
-          basis(f.transport ? f.transport.timing_point_note : '')));
+        if (tps.length) {
+          out.push(sec('How this stop was matched to the timetable',
+            kv(tps.map((t) => [t.route.replace('svc-bus-', 'Route ') + ', ' + t.timing_point, t.basis])),
+            basis(f.transport ? f.transport.timing_point_note : '')));
+        } else {
+          out.push(sec('Which routes come past', kv([['Routes',
+            (f.transport.serves_routes || []).map((r) => r.replace('svc-bus-', 'Route ')).join(' and ')]]),
+          basis(f.transport.serves_routes_basis)));
+        }
         out.push(sec('What this timetable is', basis(...(c.notes || []).filter((n) => /timetable/i.test(n)),
           'The bus you can watch drive past on the road is spawned from the same published table, in '
           + 'src/systems/movement/traffic.js. Two readings of one file.')));
@@ -1767,6 +1873,7 @@ function mount(root, world) {
       /* ---- Here ---- */
       out.push(sec('What it is', whyBox('', f.what || ''), kv([
         ['Kind', f.kindLabel],
+        ['Family', f.familyLabel],
         ['Where', f.townshipLabel || f.region || 'Minjerribah'],
         ['Position', `${f.lat.toFixed(5)}, ${f.lon.toFixed(5)}`],
         ['Contributed name', f.nameNote ? f.contributedName : null]
@@ -1774,16 +1881,27 @@ function mount(root, world) {
 
       if (f.kind === 'bus_stop' && f.transport) {
         const t = f.transport;
+        const timed = typeof c.hasBoard === 'function' && c.hasBoard(f.id);
         const live = el('div', {});
+        const when = el('div', { class: 'basis' });
         bind(() => {
-          const next = typeof c.departuresAt === 'function' ? c.departuresAt(f.id, 1)[0] : null;
-          live.textContent = next
-            ? `Next published departure ${next.at_text}, ${next.routeLabel} towards ${next.towards}, in ${next.inMinutes} minutes.`
-            : t.timing_points.length
-              ? 'No more published departures from this stop today.'
-              : 'No departure time is published for this stop.';
+          const s = typeof c.summary === 'function' ? c.summary() : null;
+          if (timed) {
+            const next = typeof c.departuresAt === 'function' ? c.departuresAt(f.id, 1)[0] : null;
+            live.textContent = next
+              ? `Next published departure ${next.at_text}, ${next.routeLabel} towards ${next.towards}, in ${next.inMinutes} minutes.`
+              : 'No more published departures from this stop today.';
+          } else {
+            const run = typeof c.runsAt === 'function' ? c.runsAt(f.id, 1)[0] : null;
+            live.textContent = run
+              ? (run.underway
+                ? `${run.routeLabel} towards ${run.towards} is on the road: it left ${run.from} at ${run.calls[0].at_text} and is due at ${run.to} at ${run.calls[run.calls.length - 1].at_text}. This stop is between two published points, so no minute for it exists.`
+                : `Next run through here is ${run.routeLabel} towards ${run.towards}, ${run.calls[0].at_text} from ${run.from}, reaching ${run.to} at ${run.calls[run.calls.length - 1].at_text}. No departure time for this stop is published.`)
+              : 'No published run is still to come through here today.';
+          }
+          when.textContent = momentLine(s);
         });
-        out.push(sec('The buses', whyBox(t.timing_points.length ? '' : 'warn', live),
+        out.push(sec('The buses', whyBox(timed ? '' : 'warn', live), when,
           kv([['Routes through here', t.serves_routes.map((r) => r.replace('svc-bus-', 'Route ')).join(' and ')]]),
           basis(t.serves_routes_basis), basis(t.timing_point_note)));
         if (!t.timing_points.length) {
@@ -1791,6 +1909,22 @@ function mount(root, world) {
             + 'between them and not one coordinate on any of them. This map is where every bus stop position '
             + 'in this world came from.')));
         }
+      }
+
+      /* The one family whose folder name is wrong, and the correction that outranks it.
+         The owner's own words on 10 August 2026, recorded in docs/SOURCES.md: the leases were closed
+         in 2019 but they are still the old mine sites. Nothing in this twin presents that ground as
+         operating, and a card for one of them says so before it says anything else. */
+      if (f.former) {
+        out.push(sec('This is a former site', whyBox('warn',
+          el('b', {}, 'Not operating. '),
+          'Sand mining on Minjerribah ended in 2019 under the North Stradbroke Island Protection and '
+          + 'Sustainability Act 2011, amended in 2016 to bring the end date back to the end of that '
+          + 'year. This is the ground the mining happened on, in whatever state of rehabilitation it '
+          + 'is now in. It is not a current lease and nobody holds a right to mine here.'),
+        basis('The contributor filed these under a folder named for leases and corrected it himself: '
+          + 'the leases were closed, the sites remain. The Act rather than the map is cited, because '
+          + 'the map is a pin and the Act is the reason. It is nsipsa-2011 in data/civic.json.')));
       }
 
       out.push(sec('The state of it', whyBox('warn',
@@ -1803,6 +1937,28 @@ function mount(root, world) {
         ['Recorded', f.extractedAt],
         ['Verdict against the packs', f.verdict]
       ]), basis('Open "Who put it here" for his own words, the consent basis and the confidence split.')));
+
+      /* ---- his own folders, which are what the colours on the ground mean ----
+
+      He sorted his map of the island into nine folders before anybody here saw it, and that sorting
+      is a classification of public life on Minjerribah made by somebody who lives on it. It is what
+      decides the colour and the plate shape of every marker in the world, so it belongs on the card
+      that explains the marker. Four of the nine reach the ground; the rest are held at ingest and
+      the panel says so rather than leaving a person to wonder why a shop is not on the map. */
+      const fams = c.families || [];
+      if (fams.length) {
+        const rows = fams.map((fam) => el('div', { class: 'need' },
+          el('div', { class: 'n', style: { color: fam.id === f.family ? 'var(--t-hi)' : 'var(--t-dim)' } },
+            fam.label),
+          el('div', { style: { fontSize: 'var(--fs-micro)', color: 'var(--t-faint)' } },
+            fam.drawn ? `${fam.drawn} of ${fam.inPack} on the ground` : `${fam.inPack} held at ingest`),
+          el('div', { class: 's' }, fam.id === f.family ? 'this one' : '')));
+        out.push(sec('His folders', el('div', {}, rows),
+          basis(f.familyWhat || '',
+            'Nine folders on his own map. The four with anything on the ground are the four the gate '
+            + 'passed: a public feature, no sourced record already behind it, no proposal in it and an '
+            + 'uncoarsened position. Held is a normal state here, not a rejection.')));
+      }
 
       const others = (c.features || []).filter((o) => o.township && o.township === f.township && o.id !== f.id).slice(0, 5);
       if (others.length) {

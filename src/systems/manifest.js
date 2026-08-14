@@ -95,6 +95,7 @@ export const MANIFEST = [
   () => import('../audio/audio.js'),
 
   // --- UI panels
+  () => import('../ui/panels/today.js'),          // the noticeboard the island opens as
   () => import('../ui/panels/hud.js'),
   () => import('../ui/panels/notifications.js'),
   () => import('../ui/panels/infoviews.js'),

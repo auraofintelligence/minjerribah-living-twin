@@ -130,9 +130,60 @@ export function checkPlfc() {
   return found;
 }
 
+/**
+ * The Bureau of Meteorology's internal weather interface. Refused, and refused differently.
+ *
+ * The other two refusals here re-read a local checkout every run, because a refusal held in a
+ * document is a memory and a refusal that re-reads its source is a check. This one cannot, and the
+ * reason it cannot is the reason it is refused: the evidence sits inside a response, and fetching
+ * the response is the act the refusal forbids. So this check does not fetch, it does not pretend to
+ * have fetched, and it says which of the two kinds of refusal it is.
+ *
+ * What was found when a person looked, on 14 August 2026: the service works, Point Lookout has its
+ * own geohash on it, and every response carries a notice from the Bureau stating that it owns the
+ * interface and that you must not use, copy or share it. That is an owner saying no in the payload.
+ * This repository is public.
+ *
+ * The refusal does not rest on that notice alone, which is what makes it durable. Even if the notice
+ * were withdrawn tomorrow, the interface is undocumented and internal, and a public twin whose
+ * weather rests on an undocumented internal interface cannot cite its own weather. The sanctioned
+ * route is the Bureau's registered data services, and taking it is the owner's decision, not an
+ * agent's. docs/CONNECTORS.md carries what registering would get and what it would cost.
+ */
+export function checkBomWeatherApi() {
+  const spec = declared('bom-weather-api');
+  return {
+    connector: 'bom-weather-api',
+    checked_at: nowIso(),
+    source: { kind: 'http-endpoint', id: spec.source.id, present: 'not checked, on purpose' },
+    verdict: 'refused',
+    kind: 'refusal that cannot re-read its own evidence',
+    evidence: [
+      'Nothing was fetched by this check, and nothing will be. The evidence for this refusal is a '
+        + 'notice carried inside the responses, so re-reading it would mean performing the request the '
+        + 'refusal exists to prevent.',
+      'What a person found on 14 August 2026: the service answers, the island has its own geohash on '
+        + 'it, and every response states that the Bureau owns the interface and that you must not use, '
+        + 'copy or share it.',
+      'The second ground stands whatever the notice says: an undocumented internal interface cannot be '
+        + 'cited by a public repository, and a weather figure this twin cannot cite is a weather figure '
+        + 'it should not draw.',
+      'What is built instead: tools/connectors/weather.mjs, on Open-Meteo, free, no key, CC BY 4.0, '
+        + 'attributed on screen, and honest about being model output rather than a station reading.'
+    ],
+    still_true: true,
+    rule: 'Nothing enters this twin whose owner has said not to use it, and nothing a public repository '
+      + 'cannot cite reaches a player as a fact.',
+    ask: 'The Bureau\'s registered data services are the sanctioned route to actual station observations. '
+      + 'Registering is a decision for the owner of this project to make, and docs/CONNECTORS.md sets out '
+      + 'what it would get and what it would cost.'
+  };
+}
+
 export const REFUSALS = {
   'straddie-news': checkStraddieNews,
-  plfc: checkPlfc
+  plfc: checkPlfc,
+  'bom-weather-api': checkBomWeatherApi
 };
 
 export function runRefusal(id) {

@@ -261,6 +261,15 @@ function mountOnboarding(root, world) {
     const cam = document.getElementById('cam-hint');
     if (cam) cam.remove();
     try { localStorage.setItem('twin.camera.hint', '1'); } catch (e) { /* fine */ }
+    // The arrival is over, so whatever else wanted the screen may have it.
+    //
+    // This exists for src/ui/panels/today.js, which is what the island opens as on every visit
+    // after the first and must not open on top of the acknowledgement on the first. The ordering is
+    // not a preference: data/lore.json's own rules say the acknowledgement is never put behind a
+    // menu somebody has to find, and a noticeboard laid over it would be exactly that. So Today
+    // waits for this message rather than racing a localStorage read, and nothing else in the build
+    // is allowed to jump the queue either.
+    world.bus.emit('onboarding:done', { skipped: step < STEPS.length - 1 });
   }
 
   skip.addEventListener('click', finish);
@@ -690,7 +699,7 @@ function mountOnboarding(root, world) {
 
   /** A board being open means the player is already reading something. Do not talk over it. */
   function boardOpen() {
-    return open || !!document.querySelector('.cb-board.on, .ev-board.on, .st-board.on, .bd-board.on, .cr-board.on, .sub-board.on, .map-full.on');
+    return open || !!document.querySelector('.cb-board.on, .ev-board.on, .st-board.on, .bd-board.on, .cr-board.on, .sub-board.on, .td-board.on, .map-full.on');
   }
 
   function pumpHints() {

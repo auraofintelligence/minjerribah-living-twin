@@ -417,6 +417,23 @@ the line.
 - **A schema per pack** in `tools/ingest/schemas.json`: the top-level fields it must carry, the
   collections it must contain, the fields every record must have, and a floor under each collection
   so a pack that quietly empties fails instead of a system quietly stopping.
+- **Every citation resolves.** `source`, and every field ending `_source`: `second_source`,
+  `third_source`, `quote_source` and the rest. A pack that declares
+  `citation_rule.mode = "registry"` has to cite a key of its own `source_registry` and nothing else,
+  a bare URL included; the older packs cite by pasting a URL or a sentence, so there only the atoms
+  shaped like a registry key are resolved. Either way a citation that names nothing is blocking.
+  This check exists because a critic renamed one key in `data/civic.json`, left the EPBC Act's only
+  citation pointing at an id that was no longer there, ran `registry.mjs --refresh`, and watched it
+  write a fresh checksum over content the gate had just called clean. A dangling citation is worse
+  than a missing one: a missing one is visible, and a dangling one reads as cited, renders as cited,
+  and resolves to nothing.
+- **Every other pointer resolves too**, from the `references` map beside each pack's schema in
+  `tools/ingest/schemas.json`: a lever naming a decider no institution defines, a matter naming an
+  ecology record that is not in `data/ecology.json`, a lever naming an Act that is not in the pack.
+  The map is audited against the pack on every run, because a map only checks what somebody
+  remembered to write into it: any field holding that pack's own ids and covered by no entry is
+  reported, which is how `levers[].instruments` was found running unchecked while the panel quietly
+  filtered out what it could not resolve.
 - **Registry integrity**: every pack accounted for, checksums live, versions agreeing with the pack's
   own, extractor and ingest date recorded, the confidence spread still matching what is in the file,
   and the fingerprint current.

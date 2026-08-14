@@ -68,6 +68,79 @@ export function daysBetween(isoA, isoB) {
   return Math.floor((b - a) / 1440);
 }
 
+/** Whole minutes from the first moment to the second. Negative when the second is earlier. */
+export function minutesBetween(isoA, isoB) {
+  const a = islandMinutes(isoA);
+  const b = islandMinutes(isoB);
+  if (a === null || b === null) return null;
+  return Math.floor(b - a);
+}
+
+/**
+ * How long one weather reading may be believed, in minutes, one field at a time.
+ *
+ * A day is the wrong unit for weather and a single number is the wrong shape. An hour-old
+ * temperature is still worth having, because air warms and cools with the sun and it takes hours to
+ * do it. An hour-old rain reading is worth nothing at all, because rain on this island arrives in
+ * cells that cross a township in twenty minutes, and a reading half an hour old can be a dry road
+ * under a black sky or the other way about. So the shelf life sits on the field rather than on the
+ * record, and the interface says which fields it is still standing on.
+ *
+ * These are policy, not measurement, written where they can be argued with. The ordering is the
+ * argument: the faster a thing changes on this coast, the shorter its shelf life.
+ */
+export const OBSERVATION_STALE_AFTER_MINUTES = {
+  rainMmHr: { minutes: 25, why: 'Rain here arrives in cells. Half an hour is the difference between a wet road and a dry one.' },
+  gustKt: { minutes: 45, why: 'A gust figure is the peak over the interval it was measured in, and it is the number that decides whether a barge master sails.' },
+  windKt: { minutes: 90, why: 'The nor\'easter builds and drops over about two hours, so ninety minutes is roughly half a turn of it.' },
+  windDirDeg: { minutes: 90, why: 'The direction turns with the sea breeze on the same clock as the speed.' },
+  cloud: { minutes: 90, why: 'Cloud makes and clears in an hour on a storm day, and holds all afternoon on a ridge day.' },
+  tempC: { minutes: 180, why: 'Air temperature follows the sun and takes hours to move a useful amount.' },
+  apparentC: { minutes: 180, why: 'It is built from temperature, humidity and wind, so it moves no faster than the slowest of them.' },
+  humidity: { minutes: 180, why: 'Humidity swings with the sea breeze and the dew point, both of which are hours-scale here.' },
+  pressure: { minutes: 360, why: 'Surface pressure is a synoptic-scale number. Six hours of it is one small step on a chart.' },
+  swellM: { minutes: 360, why: 'Total sea height builds and decays over hours as the local wind works on it.' },
+  swellPeriodS: { minutes: 360, why: 'Period follows the same sea that produced the height.' },
+  swellDirDeg: { minutes: 360, why: 'Direction follows the same sea again.' },
+  groundSwellM: { minutes: 720, why: 'Ground swell is generated a long way offshore and takes the better part of a day to change character.' },
+  groundSwellPeriodS: { minutes: 720, why: 'The long period is the slowest-moving number in the whole set.' },
+  groundSwellDirDeg: { minutes: 720, why: 'Swell direction turns as slowly as the system that made it.' },
+  /** Anything with no declared limit. Short on purpose: a reading nobody has given a shelf life to is a reading nobody has thought about. */
+  default: { minutes: 60, why: 'No shelf life was declared for this field, so it gets the shortest defensible one.' }
+};
+
+/**
+ * How old one reading is at a given moment, in the same four words and on the same thirds rule as
+ * `freshnessAt`, but counted in minutes.
+ *
+ * Reads no clock, exactly as the rest of this module reads none: the connector layer passes the
+ * real datetime it ran at, and the running twin passes the moment its own declared clock is at.
+ */
+export function observedAt(observedIso, isoNow, staleAfterMinutes) {
+  const limit = Number(staleAfterMinutes) > 0
+    ? Number(staleAfterMinutes)
+    : OBSERVATION_STALE_AFTER_MINUTES.default.minutes;
+  const age = minutesBetween(observedIso, isoNow);
+  if (age === null) return { state: 'unknown', ageMin: null, limitMin: limit, note: 'no observation time on this reading' };
+  if (age < 0) return { state: 'unknown', ageMin: age, limitMin: limit, note: 'observed after the moment being asked about' };
+  if (age <= Math.ceil(limit / 3)) return { state: 'fresh', ageMin: age, limitMin: limit, note: '' };
+  if (age <= limit) return { state: 'ageing', ageMin: age, limitMin: limit, note: '' };
+  return { state: 'stale', ageMin: age, limitMin: limit, note: 'older than this reading may be believed for' };
+}
+
+/** How long ago, as the words a panel puts on screen. Minutes while minutes mean something. */
+export function agoText(ageMin) {
+  if (ageMin === null || ageMin === undefined) return 'at an unknown time';
+  if (ageMin < 0) return 'from later than the moment on screen';
+  if (ageMin < 1) return 'just now';
+  if (ageMin < 60) return `${ageMin} min ago`;
+  const h = Math.floor(ageMin / 60);
+  const m = ageMin % 60;
+  if (h < 24) return m ? `${h} h ${m} min ago` : `${h} h ago`;
+  const d = Math.floor(h / 24);
+  return d === 1 ? '1 day ago' : `${d} days ago`;
+}
+
 /**
  * How old a record is, computed by whoever is looking rather than baked in when it was written.
  *

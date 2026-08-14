@@ -1435,6 +1435,28 @@ registerPanel({
           right.append(el('div', { class: 'cb-h' }, 'How their money actually gets here'));
           right.append(el('div', { class: 'cb-p' }, txt(i.moneyNote)));
         }
+        /* The named routes, which the pack researched and nothing rendered. The note above gives
+           the shape of it and this gives the programs, each naming the Act or the arrangement it
+           runs on. A tier statement rather than a body one, like the instruments above, because the
+           money does not come from whichever federal body a player happens to have open: it arrives
+           through Queensland or through the council, having been paid to one of them first, which
+           is the thing worth learning here and the reason a player who goes looking for a
+           Commonwealth lever finds almost none. */
+        const cwMoney = (w.data && w.data.civic && w.data.civic.commonwealth_money) || null;
+        if (i.tier === 'commonwealth' && cwMoney && Array.isArray(cwMoney.routes) && cwMoney.routes.length) {
+          right.append(el('div', { class: 'cb-h' }, 'The ways the money gets here'));
+          if (!i.moneyNote && cwMoney.the_honest_note) right.append(el('div', { class: 'cb-p' }, txt(cwMoney.the_honest_note)));
+          for (const r of cwMoney.routes) {
+            const ins = instruments.find((x) => x.id === r.instrument);
+            right.append(el('div', { class: 'cb-item' },
+              el('div', { class: 'body' },
+                el('div', {}, r.route + ' · ' + (r.tied ? 'tied to what it is for' : 'untied')),
+                el('em', {}, txt(r.reaches_the_island_via + '.'
+                  + (ins ? ' ' + ins.label + '.' : '')
+                  + (r.note ? ' ' + r.note : ''))))));
+          }
+          if (cwMoney.gap) right.append(el('div', { class: 'cb-quiet' }, txt(cwMoney.gap)));
+        }
         right.append(el('div', { class: 'cb-src' }, 'Source: ' + sourceText(w, i.source)));
       }
       main.append(el('div', { class: 'cb-cols', style: { gridTemplateColumns: 'minmax(230px, 24%) 1fr' } }, left, right));

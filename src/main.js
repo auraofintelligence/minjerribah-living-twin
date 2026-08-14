@@ -10,18 +10,43 @@ import { mountUI } from './ui/mount.js';
 import { makeTimeControl, liveStartISO, DEFAULT_START_ISO } from './kernel/clock.js';
 
 /**
- * What kind of time this island opens in. Three inputs, in this order, because an address bar is
- * an explicit instruction and a remembered preference is not:
+ * What kind of time this island opens in.
+ *
+ * THE DEFAULT IS LIVE, and it changed on 14 August 2026 on the owner's instruction: open on live
+ * time and speed, with the tide, the timetable and what is on today, the way a noticeboard would.
+ * A twin of a real island that opens on a date in the future is a demonstration; one that opens on
+ * the real Queensland moment is a thing you can use, and everything on
+ * `src/ui/panels/today.js` is arranged around that being true.
+ *
+ * Live does not cost determinism and this is the sentence worth reading twice: live is an anchor,
+ * not a feed. The real datetime it started from is stamped into the clock's record and into the
+ * save, so a live session replays exactly. See the header of src/kernel/clock.js.
+ *
+ * Four inputs, in this order, because an address bar is an explicit instruction, a setting somebody
+ * chose is a preference, and a setting nobody chose is neither:
  *
  *   ?clock=live        open at the real Queensland moment and keep pace with it
- *   ?clock=simulated   open at ?start=, or at the moment in DEFAULT_START_ISO
  *   ?start=<ISO>       a specific island moment, in island time, e.g. 2026-12-27T16:00
- *   the setting        src/ui/panels/settings.js writes { clock: { mode, startISO } } into the
- *                      localStorage key it owns, and this reads it. The two ends of that contract
- *                      are named in each other's comments and nowhere else keeps a copy.
- *   nothing            DEFAULT_START_ISO, simulated. This is the default on purpose: the headless
- *                      harness constructs a world with no start at all, so the deterministic
- *                      baseline and a browser opened with no query string are the same island.
+ *   ?clock=simulated   the old default: a seeded run from DEFAULT_START_ISO. This is the escape
+ *                      hatch, and it is what a critic uses to reproduce the deterministic baseline
+ *                      in a browser.
+ *   the setting        src/ui/panels/settings.js writes { clock: { mode, startISO, chosen } } into
+ *                      the localStorage key it owns, and this reads it. The two ends of that
+ *                      contract are named in each other's comments and nowhere else keeps a copy.
+ *                      `chosen` matters: that panel writes its whole object back on any change, so
+ *                      a stored `clock.mode` exists the moment somebody drags the interface scale,
+ *                      and honouring that would let a preference nobody expressed quietly override
+ *                      the default. Only the two controls in Settings that are actually about time
+ *                      set it, so an older stored blob with no `chosen` field reads as not chosen
+ *                      and lands on live, which is the honest answer.
+ *   nothing            live.
+ *
+ * THE HEADLESS HARNESS IS UNTOUCHED BY ALL OF IT, and that is the trap this note exists for.
+ * `tools/headless.mjs` constructs `new World({ seed })` directly: it never loads this module, has
+ * no query string, no localStorage and no clock boot at all, so it still opens at
+ * DEFAULT_START_ISO, simulated, and `node tools/headless.mjs --determinism` produces the same
+ * fingerprint it did before this changed. Anything that would make that untrue belongs in the
+ * World constructor and not here.
  */
 const CLOCK_SETTINGS_KEY = 'twin.settings';
 function resolveClockBoot(params) {
@@ -32,12 +57,33 @@ function resolveClockBoot(params) {
   } catch (e) { /* private browsing, or a setting written by an older build */ }
 
   const asked = (params.get('clock') || '').toLowerCase();
-  const wantLive = asked === 'live' || (!asked && !params.get('start') && stored && stored.mode === 'live');
-  if (wantLive) {
-    return { mode: 'live', startISO: liveStartISO(), why: asked ? 'the address bar asked for live' : 'the last choice made in Settings was live' };
+  const askedStart = params.get('start');
+  const chose = !!(stored && stored.chosen);
+
+  if (asked === 'live') {
+    return { mode: 'live', startISO: liveStartISO(), why: 'the address bar asked for live' };
   }
-  const startISO = params.get('start') || (asked ? null : (stored && stored.startISO)) || DEFAULT_START_ISO;
-  return { mode: 'simulated', startISO, why: params.get('start') ? 'the address bar named a moment' : 'the default moment' };
+  if (askedStart) {
+    return { mode: 'simulated', startISO: askedStart, why: 'the address bar named a moment' };
+  }
+  if (asked === 'simulated') {
+    return { mode: 'simulated', startISO: DEFAULT_START_ISO, why: 'the address bar asked for a simulation' };
+  }
+  if (chose && stored.mode === 'simulated') {
+    return {
+      mode: 'simulated',
+      startISO: stored.startISO || DEFAULT_START_ISO,
+      why: 'the last choice made in Settings was a simulated island'
+    };
+  }
+  if (chose && stored.mode === 'live') {
+    return { mode: 'live', startISO: liveStartISO(), why: 'the last choice made in Settings was live' };
+  }
+  return {
+    mode: 'live',
+    startISO: liveStartISO(),
+    why: 'nobody asked for anything else, and this island opens at the real Queensland moment'
+  };
 }
 
 const bootStatus = document.getElementById('boot-status');

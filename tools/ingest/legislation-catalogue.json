@@ -1095,6 +1095,42 @@
       }
     },
     {
+      "id": "cth-ahrc-1986",
+      "short_title": "Australian Human Rights Commission Act 1986",
+      "citation": "Australian Human Rights Commission Act 1986 (Cth)",
+      "jurisdiction": "Commonwealth",
+      "year": 1986,
+      "register_id": "C2004A03366",
+      "plain_english": "The Act that sets up the Australian Human Rights Commission and says what it may do. It carries the English text of the International Covenant on Civil and Political Rights as schedule 2, and defines human rights, for the purposes of the Act, as the rights recognised in that Covenant, declared by the declarations it also schedules, or recognised in an instrument the Minister declares. What the Commission may then do about them is inquire into an act or practice that may be inconsistent with a human right, try to conciliate it, examine enactments and report to the Minister, and intervene in a proceeding with the leave of the court. It is also the Act under which a complaint of unlawful discrimination under the four federal discrimination Acts is lodged and conciliated before it can reach a court.",
+      "touches": [
+        "It is where a complaint under the Sex Discrimination Act, the Racial Discrimination Act, the Disability Discrimination Act or the Age Discrimination Act starts: with the Commission, not with a court.",
+        "It is the clearest illustration in this pack of what a treaty is in Australian law, because it prints one in full and then says exactly what may be done about it.",
+        "The Commission answers an inconsistency with the Covenant by inquiring, conciliating and reporting. It does not order a remedy, and the Act says so by listing what its functions are."
+      ],
+      "key_provisions": [
+        {
+          "ref": "11",
+          "label": "Functions of Commission"
+        }
+      ],
+      "bearing": "mostly_protects",
+      "bearing_reason": "It exists to give a person somewhere to go. Its limits are real and the description says them, because a reader who expects a court and finds a conciliator has been misled by the summary rather than by the Act.",
+      "life_events": [
+        "deal-with-government",
+        "work-for-wages",
+        "live-with-disability",
+        "grow-old",
+        "get-sick-or-injured"
+      ],
+      "why_listed": "The 2012 stack held the Universal Declaration and a list of treaties Australia has signed, and the question underneath both is what a treaty does here. This is the Act that answers it from the inside.",
+      "confidence": "high",
+      "reviewed": {
+        "by": "corpus slice, reading the consolidation cover, the definitions in section 3 and the functions in section 11",
+        "on": "2026-08-14",
+        "note": "The description says what the Commission may do rather than what a person gains, because the difference between those two is the whole point of the entry."
+      }
+    },
+    {
       "id": "cth-aml-ctf-2006",
       "short_title": "Anti-Money Laundering and Counter-Terrorism Financing Act 2006",
       "citation": "Anti-Money Laundering and Counter-Terrorism Financing Act 2006 (Cth)",
@@ -1222,6 +1258,52 @@
         "by": "corpus slice, reading the consolidation cover and table of contents",
         "on": "2026-08-10",
         "note": "Described by function. The Commonwealth Act is the companion record."
+      }
+    },
+    {
+      "id": "qld-imperial-acts-application-1984",
+      "short_title": "Imperial Acts Application Act 1984",
+      "citation": "Imperial Acts Application Act 1984 (Qld)",
+      "jurisdiction": "Queensland",
+      "year": 1984,
+      "register_id": "act-1984-070",
+      "plain_english": "The Act that decides which centuries old English statutes still operate in Queensland. Section 7 terminates the application in Queensland of the whole body of Imperial enactments that were in force in England when the Australian Courts Act 1828 was passed, and section 5 preserves the ones listed in schedule 1, each of which continues to have the same force and effect it had immediately before this Act commenced. Schedule 1 names sixteen enactments, numbered 1 to 17 with one number no longer used. The first is Magna Carta, cited as (1297) 25 Edward 1 ch 29. The ninth is the Bill of Rights of 1688. Others are habeas corpus, due process and the Petition of Right. Schedule 3 replaces five more with named Queensland provisions, so that a reference to the old enactment is read as a reference to the new one.",
+      "touches": [
+        "It is the answer to whether Magna Carta is law in Queensland. One chapter of it is, by name, in schedule 1, and it carries the force it had and no more.",
+        "It is why the Bill of Rights of 1688 can be cited in a Queensland court at all: it is entry 9 in the same schedule.",
+        "It ends the application of everything else in that body of law, so an old English statute that is not in the schedules is one whose application here was terminated by section 7.",
+        "Habeas corpus, due process and the Petition of Right are in the schedule by name, which is where the phrase ancient rights, used in Queensland, has a statute behind it."
+      ],
+      "key_provisions": [
+        {
+          "ref": "5",
+          "label": "Preserved Imperial enactments"
+        },
+        {
+          "ref": "6",
+          "label": "Imperial enactments not affected"
+        },
+        {
+          "ref": "7",
+          "label": "Termination of application of Imperial enactments"
+        },
+        {
+          "ref": "14",
+          "label": "References to Imperial enactments"
+        }
+      ],
+      "bearing": "machinery",
+      "bearing_reason": "It does nothing to a person directly. It decides which other law exists, which is felt through everything that stands on it and through every argument that leans on something it terminated.",
+      "life_events": [
+        "deal-with-government",
+        "deal-with-police"
+      ],
+      "why_listed": "The 2013 read followed the chain of authority upward and ended at Magna Carta. This is the Act that says what happened to Magna Carta in Queensland, and without it the top of that chain is a guess.",
+      "confidence": "high",
+      "reviewed": {
+        "by": "corpus slice, reading the consolidation cover, the sections and both schedules",
+        "on": "2026-08-14",
+        "note": "The schedule count was taken from the schedule itself rather than from the contents, because this reprint sets its contents in two columns and a line by line read of it pairs the wrong number with the wrong heading."
       }
     },
     {
@@ -2690,27 +2772,31 @@
       },
       {
         "file": "The Magna Carta.pdf",
-        "instrument": null,
-        "status": "not_australian_law",
-        "note": "He followed the chain of authority all the way up and out. Parts of it survive in some Australian jurisdictions by reception, but it is not an instrument this pack can measure against a register."
+        "instrument": "qld-imperial-acts-application-1984",
+        "status": "partially_in_force",
+        "note": "He followed the chain of authority all the way up and out, and this is where it ends. Part of it is Queensland law: schedule 1 of the Imperial Acts Application Act 1984 (Qld) continues (1297) 25 Edward 1 ch 29 in force with the same force and effect it had, and that Act is now in this pack. What the chapter is worth against a later Queensland Act is a separate question, and the edge record answers it with a judgment rather than an opinion.",
+        "edge": "edge-magna-carta-in-queensland"
       },
       {
         "file": "UCC-1 Form.pdf",
-        "instrument": null,
-        "status": "not_australian_law",
-        "note": "A financing statement form under the United States Uniform Commercial Code, which has no operation in Australia. The Australian instrument that does the same job is the Personal Property Securities Act 2009, which he also filed and which is now in this pack."
+        "instrument": "cth-pps-2009",
+        "status": "foreign_domestic",
+        "note": "A financing statement form under the United States Uniform Commercial Code, which has no operation in Australia. The Australian instrument that does the same job is the Personal Property Securities Act 2009, which he also filed and which is in this pack.",
+        "edge": "edge-ucc-financing-statement"
       },
       {
         "file": "UN - Universal Declaration of Human Rights.pdf",
-        "instrument": null,
-        "status": "not_australian_law",
-        "note": "A declaration rather than a treaty, and not part of Australian domestic law without implementing legislation. The domestic instruments closest to it in this pack are the Queensland Human Rights Act 2019 and the discrimination Acts."
+        "instrument": "qld-human-rights-2019",
+        "status": "declaration_not_a_treaty",
+        "note": "A declaration rather than a treaty, and not part of Australian domestic law without implementing legislation. Queensland says the same thing from its own side: section 12 of the Human Rights Act 2019 gives rights under the Declaration that are not stated in that Act as an example of another law the Act leaves alone.",
+        "edge": "edge-covenant-not-yet-law"
       },
       {
         "file": "UN Treaties with Australia as Signatory.xls",
-        "instrument": null,
-        "status": "not_an_instrument",
-        "note": "A United Nations Treaty Series export listing treaties Australia has signed. Registration and entry into force are not the same as being part of Australian domestic law, which needs implementing legislation."
+        "instrument": "cth-ahrc-1986",
+        "status": "treaty_unincorporated",
+        "note": "A United Nations Treaty Series export listing treaties Australia has signed. Registration and entry into force are not the same as being part of Australian domestic law, which needs an Act. The edge record shows both sides of that: the Covenant printed in schedule 2 of the Commission Act with the Commission able to inquire and report, and the Convention on the Elimination of All Forms of Discrimination Against Women given effect by the Sex Discrimination Act 1984, which makes conduct unlawful.",
+        "edge": "edge-covenant-not-yet-law"
       },
       {
         "file": "Westpac Personal Accounts PDS.pdf",
@@ -2724,6 +2810,264 @@
         "status": "personal_document",
         "note": "A tax office form he started from."
       }
-    ]
-  }
+    ],
+    "status_words": {
+      "in_this_pack": "The instrument he read is in this pack, measured against the current consolidation.",
+      "same_subject_now_elsewhere": "What that Act did has moved into another Act, which is in this pack.",
+      "amending_act": "An amending Act. Its content is inside the consolidation of the Act it amended.",
+      "repealed_since_2012": "Repealed since he read it. Nothing in this pack measures it.",
+      "subordinate_legislation": "A regulation or a rule made under an Act rather than an Act. This pack counts Acts.",
+      "not_in_this_pack": "A real instrument, left out for a reason recorded in left_out.",
+      "personal_document": "A piece of fine print he started from rather than an instrument: a product disclosure statement, a form, a policy. The edge from one of these to the Act it cites is the most useful edge in this graph.",
+      "not_an_instrument": "A paper, a list or an export. Not law and not held out as law.",
+      "partially_in_force": "Not Australian law as a whole, and not nothing either. A named part of it is continued in force by an Australian Act, which is in this pack, and the edge record says which part and on what terms.",
+      "foreign_domestic": "The domestic law of another country. It has no operation here, and the edge record names the Australian instrument that does the same job.",
+      "treaty_unincorporated": "Treaty material. A treaty becomes law a court here applies when a parliament passes something that makes it so, and the edge record shows both an Act that has done that and one that has not.",
+      "declaration_not_a_treaty": "A declaration rather than a treaty, so it is not even the thing that a parliament would incorporate. The edge record carries the distinction."
+    }
+  },
+  "edge_types": [
+    {
+      "key": "partially_in_force",
+      "label": "Partly in force here",
+      "meaning": "Old imperial law that a Queensland Act keeps alive, named chapter by chapter in a schedule. It is law here, on the terms of the Act that preserved it, and everything outside that schedule is not."
+    },
+    {
+      "key": "foreign_domestic",
+      "label": "Another country law",
+      "meaning": "An instrument of another country legal system. It has no operation in Australia, and the Australian instrument that does the same job is named beside it so the reader has somewhere to go."
+    },
+    {
+      "key": "treaty_unincorporated",
+      "label": "A treaty, until a parliament acts",
+      "meaning": "A treaty Australia has agreed to. It becomes part of the law a court here applies when a parliament passes something that makes it so, and not before. Printing a treaty in a schedule is not that step; what the Act then does with it is."
+    },
+    {
+      "key": "asserted_rejected",
+      "label": "Argued, and decided",
+      "meaning": "A chain of reasoning a person may have been handed, and what an Australian court held about it, stated flatly with the judgment cited so a reader can go and read it rather than take this pack word for it."
+    }
+  ],
+  "judgments": [
+    {
+      "id": "carnes-v-essenberg-1999-qca-339",
+      "case_name": "Carnes v Essenberg",
+      "citation": "[1999] QCA 339",
+      "court": "Supreme Court of Queensland, Court of Appeal",
+      "decided": "1999-08-23",
+      "bench": "McMurdo P, McPherson JA, Chesterman J",
+      "what_was_argued": "That Magna Carta remains a source of legal obligation binding all courts and governments, that anything enacted since which reduces it is invalid, and that the Bill of Rights of 1688 preserved a right which the Weapons Act 1990 (Qld) could not take away.",
+      "what_was_held": "The court accepted that Magna Carta and the Bill of Rights formed part of the imperial law that applied to the eastern Australian colonies on settlement, and held that it is inaccurate to say that a colonial parliament, or the Parliament at Westminster, could not alter, modify or repeal centuries old legislation. The applications were refused.",
+      "why_it_is_here": "It is the judgment that answers the question the 2013 read ended on, in this State, from a court whose decisions bind the courts a person on this island would appear in.",
+      "island_link": "",
+      "source": "qj:qca/1999/339",
+      "source_url": "https://www.queenslandjudgments.com.au/caselaw/qca/1999/339",
+      "locator": "the reasons of Chesterman J",
+      "quote": "it is completely inaccurate to say that colonial parliaments, or indeed the Parliament of Westminster, could not alter, modify or even repeal the provisions of centuries old legislation.",
+      "reviewed": {
+        "by": "corpus slice, reading the consolidation and the published judgment",
+        "on": "2026-08-14"
+      }
+    },
+    {
+      "id": "kosteska-v-manthey-2013-qca-105",
+      "case_name": "Kosteska v Magistrate Manthey & Anor",
+      "reported_as": "Kosteska v Manthey",
+      "citation": "[2013] QCA 105",
+      "court": "Supreme Court of Queensland, Court of Appeal",
+      "decided": "2013-05-10",
+      "bench": "Margaret McMurdo P, Atkinson J, Martin J",
+      "what_was_argued": "That the whole Australian legal system has lacked a constitutional foundation since 1986, that the statutes made since are therefore void, and that a coat of arms above the bench required the magistrate to apply a different body of law.",
+      "what_was_held": "The court held that the presence of a coat of arms in a courtroom is a symbol of authority which provides no power and creates no duty, that the applicant had not been denied natural justice, and that the constitutional arguments had been dismissed in many earlier decisions and fared no differently here. Leave to appeal was refused and indemnity costs were ordered.",
+      "why_it_is_here": "It is the Queensland answer to the broadest of these chains, the one that says none of the statutes in this pack are valid at all.",
+      "island_link": "The offences underneath it were under the Police Powers and Responsibilities Act 2000, which is in this pack and is the Act the police on this island work under.",
+      "source": "qj:qca/2013/105",
+      "source_url": "https://www.queenslandjudgments.com.au/caselaw/qca/2013/105",
+      "locator": "paragraph 15",
+      "quote": "The presence of a coat of arms in a courtroom is merely a symbol of authority. It provides no power. It creates no duty.",
+      "reviewed": {
+        "by": "corpus slice, reading the consolidation and the published judgment",
+        "on": "2026-08-14"
+      }
+    },
+    {
+      "id": "r-v-sweet-2021-qdc-216",
+      "case_name": "R v Sweet",
+      "citation": "[2021] QDC 216",
+      "court": "District Court of Queensland",
+      "decided": "2021-09-06",
+      "bench": "Cash QC DCJ",
+      "what_was_argued": "That the applicant was constituted by two separate legal entities, that the name in capital letters on the indictment was the other one, and that the charges were therefore brought against the wrong entity. The material filed with the argument referred to overseas law, including the Uniform Commercial Code of the United States.",
+      "what_was_held": "The court held that in Australia a human being is also a legal person, that an adult with full capacity can sue and be sued and is subject to the criminal law of the State, and that a natural person who creates a company adds a legal personality rather than replacing their own. The documents relied on, including those drawing on overseas law, were held to have no legal effect. The application was dismissed.",
+      "why_it_is_here": "It is the Queensland judgment that deals with both the two persons argument and the use of United States commercial law, which are the two edges the 2012 stack itself carries.",
+      "island_link": "",
+      "source": "qj:qdc/2021/216",
+      "source_url": "https://www.queenslandjudgments.com.au/caselaw/qdc/2021/216",
+      "locator": "paragraph 6",
+      "quote": "In Australia, a human being is also a legal person.",
+      "reviewed": {
+        "by": "corpus slice, reading the consolidation and the published judgment",
+        "on": "2026-08-14"
+      }
+    },
+    {
+      "id": "wells-v-qps-2024-qdc-38",
+      "case_name": "Wells v Queensland Police Service",
+      "citation": "[2024] QDC 38",
+      "court": "District Court of Queensland",
+      "decided": "2024-02-08",
+      "bench": "Allen KC DCJ",
+      "what_was_argued": "On an appeal against a conviction for exceeding the speed limit: that the appellant had not consented to the government or to legislative authority, that no contract demonstrated her consent, and that she was therefore not subject to the traffic law.",
+      "what_was_held": "The court held that those arguments were devoid of merit and provided no ground of appeal, conducted its own review of the evidence, and found the charge proved beyond reasonable doubt. The appeal was dismissed and the appellant was ordered to pay the costs of the respondent in the sum of $1,800, on top of the $183 fine and the costs already ordered below.",
+      "why_it_is_here": "Driving is the life event this island runs on, and this is a Queensland appeal about a speed camera under the same Act the road here is governed by.",
+      "island_link": "The charge was under the road rules made under the Transport Operations (Road Use Management) Act 1995, which is in this pack and applies on every road on Minjerribah.",
+      "source": "qj:qdc/2024/38",
+      "source_url": "https://www.queenslandjudgments.com.au/caselaw/qdc/2024/38",
+      "locator": "paragraph 16",
+      "quote": "The appellant has not established any error of fact or law by the learned Magistrate.",
+      "reviewed": {
+        "by": "corpus slice, reading the consolidation and the published judgment",
+        "on": "2026-08-14"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-magna-carta-in-queensland",
+      "type": "partially_in_force",
+      "title": "Magna Carta in Queensland",
+      "citation": "(1297) 25 Edward 1 ch 29, continued by the Imperial Acts Application Act 1984 (Qld), schedule 1",
+      "jurisdiction": "Queensland",
+      "what_it_is": "The charter of 1215, in the form confirmed by statute in 1297. Most of it was repealed in England over the centuries that followed, and the question for a person here is never what the charter said but which part of it a Queensland Parliament has kept.",
+      "how_it_stands_here": "One chapter of it is Queensland statute law. The Imperial Acts Application Act 1984 (Qld) terminated the application in Queensland of the body of Imperial enactments in force in England when the Australian Courts Act 1828 was passed, and then preserved the enactments listed in its schedule 1. The first entry in that schedule is (1297) 25 Edward 1 ch 29, Magna Carta. Section 5 says each preserved enactment continues to have the same force and effect it had immediately before that Act commenced. So it is not survival by reception and it is not folklore: it is a Queensland Act, on the Queensland register, naming a chapter and continuing it.",
+      "what_people_are_told": "That Magna Carta is a higher law which no Parliament may touch, and that a modern statute conflicting with it is void.",
+      "what_a_court_held": "The Court of Appeal in Queensland has held otherwise. In Carnes v Essenberg the court accepted that Magna Carta and the Bill of Rights formed part of the imperial law applying to the eastern colonies on settlement, and held that it is inaccurate to say a colonial parliament, or the Parliament at Westminster, could not alter, modify or repeal centuries old legislation. Section 5 of the 1984 Act says the same thing in its own way: what is preserved carries the force it had, which is the force of a statute that a later statute can change.",
+      "mechanism": "Imperial Acts Application Act 1984 (Qld) section 5 and schedule 1, with section 7 ending the application of the rest of that body of law and section 6 preserving anything that reached Queensland by a different route.",
+      "instruments": [
+        "qld-imperial-acts-application-1984"
+      ],
+      "judgments": [
+        "carnes-v-essenberg-1999-qca-339"
+      ],
+      "what_to_do_with_it": "Read schedule 1. It is one page and it names sixteen enactments, Magna Carta first and the Bill of Rights ninth, with habeas corpus, due process and the Petition of Right among them. If a document quotes an Imperial statute that is not in that schedule, section 7 of the same Act is the answer to what happened to it here.",
+      "source": "oqpc:act-1984-070",
+      "locator": "section 5, with schedule 1 entry 1",
+      "quote": "Each Imperial enactment specified in Schedule 1 shall, from the commencement of this Act, continue to have the same force and effect (if any) as it had in Queensland immediately prior to the commencement of this Act.",
+      "confidence": "high",
+      "reviewed": {
+        "by": "corpus slice, reading the Act and both schedules on the Queensland register",
+        "on": "2026-08-14"
+      }
+    },
+    {
+      "id": "edge-ucc-financing-statement",
+      "type": "foreign_domestic",
+      "title": "The UCC-1 financing statement",
+      "citation": "Uniform Commercial Code (United States)",
+      "jurisdiction": "United States",
+      "what_it_is": "A form used in the United States to give notice of a security interest in personal property, under a code enacted state by state in that country.",
+      "how_it_stands_here": "It has no operation in Australia. The Australian instrument that does the same job is the Personal Property Securities Act 2009 (Cth), which sets up the Register of Personal Property Securities and says that registration is one of the ways a security interest is perfected. That Act is in this pack, and it was also in the 2012 stack, filed a few folders from the American form.",
+      "what_people_are_told": "That lodging a financing statement drawn from that code, or serving a document citing it, creates a claim, a lien or a charge that an Australian court, council or agency must recognise.",
+      "what_a_court_held": "In R v Sweet the District Court of Queensland recorded that the material filed referred to overseas law, naming the Uniform Commercial Code of the United States, and held that none of those documents were of any legal effect.",
+      "mechanism": "Personal Property Securities Act 2009 (Cth), which is where a security interest over personal property in Australia is registered.",
+      "instruments": [
+        "cth-pps-2009"
+      ],
+      "judgments": [
+        "r-v-sweet-2021-qdc-216"
+      ],
+      "what_to_do_with_it": "If the subject is a genuine security interest, the register that matters is the one the 2009 Act sets up. If the subject is a debt or a fine, an American commercial form does not answer it.",
+      "source": "frl:C2009A00130",
+      "locator": "section 3, guide to this Act",
+      "quote": "The Register of Personal Property Securities enables secured parties to give notice of actual or prospective security interests.",
+      "confidence": "high",
+      "reviewed": {
+        "by": "corpus slice, reading the guide in section 3 of the consolidation",
+        "on": "2026-08-14"
+      }
+    },
+    {
+      "id": "edge-covenant-not-yet-law",
+      "type": "treaty_unincorporated",
+      "title": "The International Covenant on Civil and Political Rights",
+      "citation": "International Covenant on Civil and Political Rights, set out in schedule 2 to the Australian Human Rights Commission Act 1986 (Cth)",
+      "jurisdiction": "Commonwealth",
+      "what_it_is": "A United Nations treaty. Its English text is printed in full as a schedule to a Commonwealth Act, which is why a person can read it on the Federal Register of Legislation.",
+      "how_it_stands_here": "Being in a schedule is not the same as being enforceable. The Australian Human Rights Commission Act 1986 defines human rights, for its own purposes, as the rights recognised in that Covenant, and then says what may be done about them: the Commission may inquire into an act or practice that may be inconsistent with a human right, try to conciliate it, examine enactments and report to the Minister, and intervene in a proceeding with the leave of the court. Nothing in it makes a breach of the Covenant an offence or a cause of action. Set that beside the Sex Discrimination Act 1984, whose first stated object is to give effect to certain provisions of the Convention on the Elimination of All Forms of Discrimination Against Women, and which then makes named conduct unlawful. Both Acts carry a treaty. Only one of them turns it into a rule a person can be held to.",
+      "what_people_are_told": "That because Australia has signed or ratified a treaty, its articles can be relied on directly in an Australian court, or that a domestic law which conflicts with a treaty is void.",
+      "what_a_court_held": "No judgment is cited on this edge. It rests on the two Acts themselves, which is a stronger citation for what they do, and this pack would rather say that plainly than borrow a judgment it has not read.",
+      "mechanism": "A parliament passes an Act that gives effect to the treaty, in whole or in the part it chooses. The Sex Discrimination Act 1984 is what that looks like when it has happened. Queensland shows the same line from the State side: section 12 of the Human Rights Act 2019 (Qld) gives, as an example of another law it does not abrogate, rights under the Covenant that are not stated in that Act.",
+      "instruments": [
+        "cth-ahrc-1986",
+        "cth-sex-discrimination-1984",
+        "qld-human-rights-2019"
+      ],
+      "judgments": [],
+      "what_to_do_with_it": "Look for the Act. If a right matters to a person here, the question is which Australian Act carries it and what that Act says may be done about it, not which treaty mentions it.",
+      "source": "frl:C2004A03366",
+      "locator": "section 3, definition of Covenant",
+      "quote": "Covenant means the International Covenant on Civil and Political Rights, a copy of the English text of which is set out in Schedule 2, as that International Covenant applies in relation to Australia.",
+      "confidence": "high",
+      "reviewed": {
+        "by": "corpus slice, reading the definitions in section 3 and the functions in section 11 of the Commission Act, the objects in section 3 of the Sex Discrimination Act, and section 12 of the Queensland Act",
+        "on": "2026-08-14"
+      }
+    },
+    {
+      "id": "edge-consent-and-jurisdiction",
+      "type": "asserted_rejected",
+      "title": "The claim that a statute binds only a person who has agreed to it",
+      "citation": "",
+      "jurisdiction": "Queensland",
+      "what_it_is": "A chain of reasoning that treats an Act as a contract and a court as a party to it, so that a person who has not consented, or who says on the record that they rebut a presumption, is outside it.",
+      "how_it_stands_here": "It has been run in Queensland courts many times, in traffic matters, in criminal matters and against the validity of the courts themselves, and it has not succeeded.",
+      "what_people_are_told": "That the law is a contract; that a person who has not agreed to it is not bound; that a court has no jurisdiction without consent; and that saying the right words on the record settles it.",
+      "what_a_court_held": "In Wells v Queensland Police Service, an appeal against a conviction for exceeding the speed limit, the District Court held that the arguments that the appellant had not consented to the government or to legislative authority, and that there was no contract demonstrating consent, were devoid of merit and provided no ground of appeal. In Kosteska v Magistrate Manthey the Court of Appeal dealt with the wider version, that the courts and the statutes are not validly established, and held that it had been dismissed in many earlier decisions and would fare no differently.",
+      "mechanism": "",
+      "instruments": [
+        "qld-torum-1995",
+        "qld-police-powers-2000"
+      ],
+      "judgments": [
+        "wells-v-qps-2024-qdc-38",
+        "kosteska-v-manthey-2013-qca-105"
+      ],
+      "what_to_do_with_it": "The cost is the part usually left out of the telling. In Wells a $183 fine and $107.95 in costs became an order to pay a further $1,800 after the appeal. This pack records that because a person deciding what to do is entitled to know what it cost the last person who tried it.",
+      "source": "qj:qdc/2024/38",
+      "locator": "paragraph 19, order 2",
+      "quote": "The appellant will pay the costs of the respondent in the sum of $1,800.",
+      "confidence": "high",
+      "reviewed": {
+        "by": "corpus slice, reading the consolidation and the published judgment",
+        "on": "2026-08-14"
+      }
+    },
+    {
+      "id": "edge-two-legal-persons",
+      "type": "asserted_rejected",
+      "title": "The claim that the name in capital letters is a different person",
+      "citation": "",
+      "jurisdiction": "Queensland",
+      "what_it_is": "A chain of reasoning in which the registration of a birth is said to create a second entity, the name in capitals on an official document is said to be that entity, and a charge, a fine or a debt is said to attach to it rather than to the human being.",
+      "how_it_stands_here": "The District Court of Queensland has dealt with it directly and rejected it, and set out why the answer matters rather than dismissing it in a line.",
+      "what_people_are_told": "That a birth certificate creates a legal fiction, that the person in capitals is that fiction, and that separating the two puts the human being beyond the reach of the charge.",
+      "what_a_court_held": "In R v Sweet the District Court held that in Australia a human being is also a legal person, that an adult with full capacity can sue and be sued and is subject to the criminal law of the State, and that a natural person who creates a company adds a legal personality rather than replacing their own. The court also observed what renouncing legal personality would actually mean, which is a person with no rights, and dismissed the application.",
+      "mechanism": "",
+      "instruments": [
+        "qld-criminal-code-1899"
+      ],
+      "judgments": [
+        "r-v-sweet-2021-qdc-216"
+      ],
+      "what_to_do_with_it": "The argument is usually attached to a real problem, which is still there afterwards. The Act that answers the real problem is the one named on the charge or the notice.",
+      "source": "qj:qdc/2021/216",
+      "locator": "paragraph 6",
+      "quote": "In Australia, a human being is also a legal person.",
+      "confidence": "high",
+      "reviewed": {
+        "by": "corpus slice, reading the consolidation and the published judgment",
+        "on": "2026-08-14"
+      }
+    }
+  ]
 }

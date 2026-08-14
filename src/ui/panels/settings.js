@@ -79,7 +79,17 @@ const DEFAULTS = {
   // What kind of time the island opens in, and from what moment. Read at boot by src/main.js,
   // which is the only other file that knows this key exists; the two ends of that contract name
   // each other in their comments and nowhere keeps a second copy.
-  clock: { mode: 'simulated', startISO: DEFAULT_START_ISO },
+  //
+  // `mode` is live because the island opens live, on the owner's instruction of 11 August 2026.
+  // `chosen` is the field that makes that default hold. This panel writes its whole object back on
+  // any change at all, so within a minute of anyone touching the interface scale there is a stored
+  // `clock.mode`, and boot honouring that would be boot honouring a preference nobody expressed.
+  // Only the two controls below that are actually about time set `chosen`, and an older stored blob
+  // with no such field reads as false and lands on the default. See resolveClockBoot in main.js.
+  clock: { mode: 'live', startISO: DEFAULT_START_ISO, chosen: false },
+  // Whether the noticeboard in src/ui/panels/today.js is what the island opens as. It is, unless
+  // somebody says otherwise here or on the surface itself, and T brings it back either way.
+  today: { openOnStart: true },
   autosaveDays: 7,              // 0 is off
   lastSaveDay: -1
 };
@@ -272,6 +282,17 @@ function mountSettings(root, world) {
   }
   world.bus.on('ui:drawer', (p) => { if (p && p.id !== 'settings' && open) toggle(false); });
   world.bus.on('ui:open', (p) => { if (p && p.id === 'settings') { if (p.tab && tabBtns[p.tab]) tab = p.tab; toggle(true); } });
+  // Two writers, one localStorage key, and this is what keeps them from clobbering each other. The
+  // Today surface owns a toggle on its own footer and writes the field itself, read-modify-write,
+  // so nothing else in this object is disturbed. This copy has to follow, or the next time anybody
+  // moves a slider in here the whole object goes back to disk with a stale answer in it. Neither
+  // side re-emits on receiving, so there is no loop.
+  world.bus.on('today:preference', (p) => {
+    if (!p || typeof p.openOnStart !== 'boolean') return;
+    if (S.today.openOnStart === p.openOnStart) return;
+    S.today.openOnStart = p.openOnStart;
+    if (open && tab === 'sim') refresh();
+  });
 
   const TYPING = { INPUT: 1, TEXTAREA: 1, SELECT: 1 };
   addEventListener('keydown', (e) => {
@@ -947,7 +968,8 @@ function mountSettings(root, world) {
       + 'all times. Live means the island is at the real Queensland moment. Simulated means a '
       + 'seeded run forward from a moment somebody chose. Scrub means you have parked the clock '
       + 'somewhere and are looking, which the ribbon under the bar does and this panel does not '
-      + 'duplicate.');
+      + 'duplicate. This island opens live unless you choose otherwise here, and choosing here is '
+      + 'what makes it remember: nothing else this panel saves counts as an answer to this question.');
 
     g.append(row('Mode, right now',
       segmented([
@@ -966,10 +988,14 @@ function mountSettings(root, world) {
           say('Simulated from ' + c.formatMoment() + '.');
         }
         S.clock.mode = v;
+        // The one place, with the input below, where a person answers the question "what kind of
+        // time should this island open in". Everything else this panel writes is a preference about
+        // something else that happens to travel in the same object. See resolveClockBoot in main.js.
+        S.clock.chosen = true;
         save();
       }),
-      'Changes the island you already have. Live re-anchors the clock to the real moment and '
-      + 'stamps the real datetime that happened at into the record.'));
+      'Changes the island you already have, and is remembered for the next one. Live re-anchors the '
+      + 'clock to the real moment and stamps the real datetime that happened at into the record.'));
 
     const startInput = el('input', {
       type: 'datetime-local', class: 'st-when', value: S.clock.startISO || DEFAULT_START_ISO,
@@ -978,6 +1004,7 @@ function mountSettings(root, world) {
         if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)) return;
         S.clock.startISO = v;
         S.clock.mode = 'simulated';
+        S.clock.chosen = true;
         save();
         refresh();
       }
@@ -986,9 +1013,27 @@ function mountSettings(root, world) {
       el('div', { class: 'btn-row st-when-row' }, startInput,
         el('button', {
           class: 'btn ghost', type: 'button',
-          onclick: () => { S.clock.startISO = liveStartISO(); S.clock.mode = 'simulated'; save(); refresh(); }
+          onclick: () => {
+            S.clock.startISO = liveStartISO();
+            S.clock.mode = 'simulated';
+            S.clock.chosen = true;
+            save();
+            refresh();
+          }
         }, 'The real moment')),
-      'Island time, ' + ISLAND_TZ + '. This is the moment the next island starts from, not this one.'));
+      'Island time, ' + ISLAND_TZ + '. Setting this asks for a simulated island next time, from that '
+      + 'moment, rather than the live one this build opens with by default.'));
+
+    g.append(row('Open live every time',
+      segmented([[true, 'Live'], [false, 'That moment, simulated']],
+        !(S.clock.chosen && S.clock.mode === 'simulated'), (v) => {
+          S.clock.mode = v ? 'live' : 'simulated';
+          S.clock.chosen = true;
+          save();
+          refresh();
+        }),
+      'What a fresh page load does with no query string on it. The address bar still overrules both: '
+      + '?clock=live, ?clock=simulated and ?start= are read before anything remembered here.'));
 
     g.append(el('div', { class: 'btn-row' },
       el('button', {
@@ -1004,6 +1049,24 @@ function mountSettings(root, world) {
       + 'Nothing is fetched that was not already fetched at boot; the twin makes no network '
       + 'request while it is running, in any mode.'));
     main.append(g);
+
+    // The opening surface. It lives beside the clock controls rather than under Interface because
+    // it is one answer to the same question those are: what does this island open as. The toggle on
+    // the surface itself writes the same field, and each tells the other through the bus so the two
+    // can never disagree while both are on screen.
+    const gToday = group('The noticeboard',
+      'Today is the surface the island opens as: the moment, the tide, the light, the crossing, what '
+      + 'is on and what is open. It replaces nothing. The island and every board are behind it, one '
+      + 'button away, and T opens and closes it at any time.');
+    gToday.append(row('Open it when the island starts',
+      toggleBtn(S.today.openOnStart !== false, 'Yes, open it', 'No, go straight to the island', (v) => {
+        S.today.openOnStart = !!v;
+        save();
+        world.bus.emit('today:preference', { openOnStart: !!v });
+      }),
+      'On a genuinely first visit the Acknowledgement of Country still comes first, whatever this '
+      + 'says. Nothing opens over it.'));
+    main.append(gToday);
 
     const g1 = group('Go to now',
       'Two different nows, and they are not the same thing. One is the furthest this island has '

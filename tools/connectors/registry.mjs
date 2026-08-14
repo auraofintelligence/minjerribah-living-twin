@@ -167,9 +167,104 @@ export const CONNECTORS = [
     ]
   },
 
+  {
+    id: 'weather',
+    title: 'Weather and sea state for the island, as model output',
+    organisation: 'Open-Meteo',
+    direction: 'in',
+    built: true,
+    module: 'tools/connectors/weather.mjs',
+    source: {
+      kind: 'http-endpoint',
+      id: 'open-meteo',
+      files: [
+        'https://api.open-meteo.com/v1/forecast latitude=-27.43 longitude=153.54',
+        'https://marine-api.open-meteo.com/v1/marine latitude=-27.43 longitude=153.56'
+      ],
+      licence: 'CC BY 4.0',
+      attribution: 'Weather data by Open-Meteo.com, CC BY 4.0',
+      public: 'https://open-meteo.com/',
+      note: 'The only connector in this layer that reaches a network at all, and it reaches these two '
+        + 'hosts and nothing else. It is still an offline step: a person or a scheduled job runs it, it '
+        + 'writes a stamped feed, and the running twin reads the feed off its own origin. Run it with '
+        + '--inbox instead and it reads two saved responses off disk, so a machine with no network can '
+        + 'still sync.'
+    },
+    cadence: {
+      every: 'hourly while anybody is looking at a live island, and before any session that opens in live',
+      run_by: 'a scheduled job on the machine that publishes the build, or a person before a demonstration',
+      reason: 'The source updates roughly every fifteen minutes and the shortest shelf life on any field '
+        + 'here is twenty-five minutes, for rain. An hourly sync keeps the slow fields inside their limits '
+        + 'and lets the fast ones fall out of them honestly, which is the behaviour to want: a rain figure '
+        + 'that goes quiet after half an hour is better than one that keeps talking.'
+    },
+    stale_after_days: 1,
+    can_know: [
+      'what a global weather model has for the grid cell nearest this island, at a stamped moment',
+      'wave height, wave period and wave direction for the ocean side, which is the number that decides '
+        + 'whether the Gorge is spectacular or shut, and the long-period swell component separately',
+      'how far the cell it answered for sits from the point that was asked about, because the response '
+        + 'names its own coordinates and they are not the ones in the request'
+    ],
+    cannot_know: [
+      'anything observed. This is model output for a grid cell and not a reading from an instrument at '
+        + 'Point Lookout. The word model appears everywhere it surfaces, and the word observed appears nowhere',
+      'the weather on one side of the island as against the other. One land cell and one marine cell '
+        + 'answer for the whole of a 27 km island that makes its own sea breeze',
+      'the weather at any moment the island has not lived through. A simulated Tuesday and a scrubbed '
+        + 'Tuesday have no observation and cannot have one, so they get the synoptic model and say so',
+      'whether it rained. The source returns a precipitation total and stamps it with an interval, and '
+        + 'this connector reads it as the sum over the preceding hour because that is how the current-weather '
+        + 'aggregation is documented. The interval is carried beside it so the reading can be checked rather '
+        + 'than assumed'
+    ],
+    asks: [
+      'Open-Meteo: nothing beyond what the licence already grants. The attribution it requires is on the '
+        + 'record, in the feed, and on screen beside the numbers rather than only in a file'
+    ],
+    promises: [
+      'every figure carries the moment it was modelled for and the moment it was fetched, and neither is '
+        + 'ever the moment it was drawn',
+      'the word model, never the word observed, wherever any of this reaches a person',
+      'nothing is fetched by the running twin. The fetch is an offline step and the twin reads a committed file',
+      'a stale reading stops being used and says so, one field at a time, rather than sitting on screen '
+        + 'looking current'
+    ]
+  },
+
   // -------------------------------------------------------------------------------------------
   // Built, and built to refuse
   // -------------------------------------------------------------------------------------------
+  {
+    id: 'bom-weather-api',
+    title: 'Station observations and forecasts from the Bureau of Meteorology',
+    organisation: 'Bureau of Meteorology',
+    direction: 'none',
+    built: 'refused',
+    module: 'tools/connectors/refusals.mjs',
+    source: {
+      kind: 'http-endpoint',
+      id: 'api.weather.bom.gov.au',
+      note: 'Considered, tested, and refused. Point Lookout has its own geohash on that service. '
+        + 'Nothing from it is in this repository and nothing ever will be through this route.'
+    },
+    cadence: { every: 'never', run_by: 'nobody', reason: 'There is nothing here this project may read.' },
+    stale_after_days: null,
+    can_know: [],
+    cannot_know: ['everything it serves, for the reason below'],
+    reason: 'api.weather.bom.gov.au is an undocumented internal interface and every response it returns '
+      + 'carries a notice from the Bureau saying it owns the interface and that you must not use, copy or '
+      + 'share it. This repository is public. A twin built on a source whose owner has said in the payload '
+      + 'itself not to use it would be a twin that cannot cite its own weather, which is worse than having '
+      + 'no weather. It was considered rather than overlooked, and this entry exists so the next agent who '
+      + 'finds that it works also finds that somebody looked.',
+    asks: [
+      'nothing, through this route. The Bureau publishes registered data services, which are the sanctioned '
+        + 'way to actual station observations, and registering is the owner\'s decision rather than an '
+        + 'agent\'s. What registering would get and what it would cost is written up in docs/CONNECTORS.md'
+    ],
+    promises: ['nothing from that interface enters this repository, at any confidence, in any pack, ever']
+  },
   {
     id: 'straddie-news',
     title: 'Island news',

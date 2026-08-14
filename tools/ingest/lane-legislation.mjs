@@ -8,6 +8,8 @@
 //   node tools/ingest/lane-legislation.mjs --resolve        check every catalogue id against them
 //   node tools/ingest/lane-legislation.mjs --fetch          download the current consolidations
 //   node tools/ingest/lane-legislation.mjs --measure        measure pages and structure
+//   node tools/ingest/lane-legislation.mjs --judgments      check every judgment against its publisher
+//   node tools/ingest/lane-legislation.mjs --edges          check every edge quote against its document
 //   node tools/ingest/lane-legislation.mjs --extract --batch legislation-2026-08
 //   node tools/ingest/lane-legislation.mjs --report         what is verified and what is not
 //
@@ -557,8 +559,32 @@ export function measureDocument(pages) {
   // why, and `extract` falls back to the headings printed in the body of the Act itself.
   const offsetContents = orphanNumbers >= 3 && orphanNumbers >= entries;
 
+  // Schedules are counted from where they actually begin, not from the contents.
+  //
+  // A schedule is the last thing an Act lists and the contents entry for one often wraps onto a
+  // second line, so the page it sits on can fall below the leader density that marks the end of the
+  // contents and drop out of the region entirely. The Australian Human Rights Commission Act 1986
+  // came back as having no schedules while carrying five, one of which is the whole text of a
+  // treaty this pack cites. A schedule announces itself on the page where it starts, so that is
+  // where this counts them: a short line beginning with the word and its number, taken as a set so
+  // a running header repeated on ninety pages counts once.
+  const scheduleIds = new Set();
+  for (const p of pages) {
+    for (const rawLine of p.split('\n')) {
+      const l = tidy(rawLine);
+      if (!l || l.length > 80) continue;
+      // The number has to end the line or be followed by the dash that opens a heading. Without
+      // that, "Schedule 1 to that Act" in a cross reference and a row of an endnote table both
+      // count, and the Income Tax Assessment Act 1997 comes back with fourteen schedules it does
+      // not have. A heading stands alone; a mention sits inside a sentence.
+      const m = /^Schedules?\s+([0-9]{1,3}[A-Z]{0,2})(?:--|\s*$)/.exec(l);
+      if (m) scheduleIds.add(m[1]);
+    }
+  }
+
   return {
     pages: pages.length,
+    schedule_ids: [...scheduleIds],
     contents_pages: [start + 1, end + 1],
     contents_layout: offsetContents ? 'offset-columns' : 'inline',
     contents_entries: offsetContents ? null : entries,
@@ -707,6 +733,7 @@ export function measureAll() {
     let countable = true;
     let contentsLayout = 'inline';
     const allProvisions = new Set();
+    const allSchedules = new Set();
     const bodyHeads = [];
     const structure = { chapters: 0, parts: 0, divisions: 0, subdivisions: 0, schedules: 0 };
     let cover = null;
@@ -726,8 +753,16 @@ export function measureAll() {
       for (const n of m.provision_numbers) allProvisions.add(n);
       for (const h of m.body_headings) bodyHeads.push(h);
       for (const k of Object.keys(structure)) structure[k] += m.structure[k];
+      for (const s of m.schedule_ids || []) allSchedules.add(s);
       per.push({ volume: file.volume, pages: m.pages, contents_entries: m.contents_entries, contents_pages: m.contents_pages });
     }
+    // Schedules are the one part of the structure that is counted as a set rather than a sum,
+    // because a compilation split into twelve volumes prints "Schedule 1" in every volume that
+    // touches it, and adding those up says an Act has twenty-seven schedules when it has one.
+    // Where an Act numbers its schedules the set answers it; where it has a single unnumbered
+    // Schedule, as the Sex Discrimination Act 1984 does, the set is empty and the contents count
+    // stands.
+    if (allSchedules.size) structure.schedules = allSchedules.size;
     const distinct = allProvisions.size;
     if (!per.length) continue;
     if (!titleOk) {
@@ -806,9 +841,17 @@ export function measured() {
  * given a case name as well, and half of those case names are misremembered, misattributed or from
  * another country. So this lane will not carry a judgment on the strength of anybody's recall,
  * including its own. Every judgment in the catalogue names a published source, and this step
- * fetches that page, strips it to text, and refuses the record unless the page carries both the
- * case name as the catalogue writes it and the quote, character for character. A quote that is not
- * in the document is not a quote.
+ * fetches it and refuses the record unless three separate things hold.
+ *
+ * TWO DOCUMENTS, BECAUSE THEY CARRY DIFFERENT FACTS. The case page carries the name and the medium
+ * neutral citation, which is what a reader needs to find the case again, and it does not carry the
+ * reasons. The authorised PDF carries the reasons, which is where a quote has to come from, and an
+ * older one carries neither the name in the form a reporter would write it nor the medium neutral
+ * citation, because those were assigned to a transcript that prints its file number instead. So the
+ * name and the citation are checked against the page, the quote is checked against the PDF, and the
+ * PDF is checked to be the right document by requiring every party name in the case name to appear
+ * in it. Checking the quote against the page would pass every judgment in this pack, because the
+ * page does not contain the reasons at all, and a check that cannot fail is not a check.
  *
  * WHERE THE TEXT COMES FROM AND WHY. Queensland judgments are read from Queensland Judgments,
  * which is published by the Incorporated Council of Law Reporting for the State of Queensland with
@@ -823,49 +866,150 @@ export async function verifyJudgments({ force = false } = {}) {
   ensureDir(`${INBOX}/judgments`);
   const rows = [];
   for (const j of list) {
-    const dest = `${INBOX}/judgments/${j.id}.judgment`;
-    const full = abs(dest);
-    let text = '';
+    const pageFile = `${INBOX}/judgments/${j.id}.page`;
+    const pdfFile = `${INBOX}/judgments/${j.id}.pdf`;
+    const textFile = `${INBOX}/judgments/${j.id}.judgment`;
+    const fail = (why) => rows.push({ id: j.id, verified: false, why });
+
+    // The case page: the name and the citation.
+    let page = '';
     let fetchedNow = false;
-    if (!force && fs.existsSync(full)) {
-      text = fs.readFileSync(full, 'utf8');
+    if (!force && exists(pageFile)) {
+      page = readText(pageFile);
     } else {
       try {
         const res = await fetch(j.source_url, { redirect: 'follow', headers: { 'user-agent': UA } });
-        if (!res.ok) { rows.push({ id: j.id, verified: false, why: `the source returned ${res.status}` }); continue; }
-        text = plainText(await res.text());
-        fs.writeFileSync(full, text, 'utf8');
+        if (!res.ok) { fail(`the case page returned ${res.status}`); continue; }
+        page = plainText(await res.text());
+        fs.writeFileSync(abs(pageFile), page, 'utf8');
         fetchedNow = true;
-      } catch (err) {
-        rows.push({ id: j.id, verified: false, why: `the source could not be reached: ${err.message}` });
-        continue;
-      }
+      } catch (err) { fail(`the case page could not be reached: ${err.message}`); continue; }
     }
-    const hay = tidy(text);
-    const nameOk = hay.includes(tidy(j.case_name)) || hay.includes(tidy(j.reported_as || '~none~'));
-    const citeOk = hay.includes(tidy(j.citation));
-    const quoteAt = hay.indexOf(tidy(j.quote));
+
+    // The judgment itself, as the publisher serves it, and then as words.
+    const docUrl = j.document_url || `${String(j.source_url).replace(/\/$/, '')}/pdf`;
+    let text = '';
+    if (!force && exists(textFile)) {
+      text = readText(textFile);
+    } else {
+      try {
+        const res = await fetch(docUrl, { redirect: 'follow', headers: { 'user-agent': UA } });
+        if (!res.ok) { fail(`the judgment returned ${res.status}`); continue; }
+        const buf = Buffer.from(await res.arrayBuffer());
+        if (buf.subarray(0, 4).toString('latin1') !== '%PDF') { fail('the judgment did not come back as a PDF'); continue; }
+        fs.writeFileSync(abs(pdfFile), buf);
+        text = pdfPages(abs(pdfFile)).join('\n');
+        fs.writeFileSync(abs(textFile), text, 'utf8');
+        fetchedNow = true;
+      } catch (err) { fail(`the judgment could not be read: ${err.message}`); continue; }
+    }
+
+    const onPage = tidy(page);
+    const inJudgment = tidy(text);
+    const nameOk = onPage.includes(tidy(j.case_name)) || onPage.includes(tidy(j.reported_as || '~none~'));
+    const citeOk = onPage.includes(tidy(j.citation));
+    // Is this PDF the case the page is about? Every party name of four letters or more has to be in
+    // it. That is what stops a correct-looking path serving a real judgment in some other matter.
+    const parties = String(j.case_name).split(/\bv\b/).map((s) => s.trim().split(/\s+/).pop() || '')
+      .filter((w) => w.length >= 4);
+    const missing = parties.filter((w) => !new RegExp(w.replace(/[^A-Za-z]/g, ''), 'i').test(inJudgment));
+    const quoteAt = inJudgment.indexOf(tidy(j.quote));
+    const ok = Boolean(nameOk && citeOk && !missing.length && quoteAt >= 0);
     rows.push({
       id: j.id,
-      verified: Boolean(nameOk && citeOk && quoteAt >= 0),
+      verified: ok,
       case_name_found: nameOk,
       citation_found: citeOk,
+      parties_in_judgment: !missing.length,
       quote_found: quoteAt >= 0,
       quote_at: quoteAt >= 0 ? quoteAt : null,
       characters: text.length,
       sha256: crypto.createHash('sha256').update(text).digest('hex'),
-      file: dest,
+      page_sha256: crypto.createHash('sha256').update(page).digest('hex'),
+      page_file: pageFile,
+      file: textFile,
+      document_url: docUrl,
       fetched: fetchedNow,
-      why: nameOk && citeOk && quoteAt >= 0 ? '' : [
-        nameOk ? null : `the page does not carry the case name "${j.case_name}"`,
-        citeOk ? null : `the page does not carry the citation "${j.citation}"`,
-        quoteAt >= 0 ? null : 'the page does not carry the quote character for character'
+      why: ok ? '' : [
+        nameOk ? null : `the case page does not carry the case name "${j.case_name}"`,
+        citeOk ? null : `the case page does not carry the citation "${j.citation}"`,
+        missing.length ? `the judgment does not name ${missing.join(' or ')}, so it may not be this case` : null,
+        quoteAt >= 0 ? null : 'the judgment does not carry the quote character for character'
       ].filter(Boolean).join('; ')
     });
   }
   const file = `${INBOX}/judgments.json`;
   fs.writeFileSync(abs(file), JSON.stringify({ verified_at: today(), extractor: EXTRACTOR, judgments: rows }, null, 1) + '\n', 'utf8');
   return { file, rows };
+}
+
+/**
+ * The same rule, applied to the edges themselves.
+ *
+ * An edge record carries a quote like every other record in this pack, and the quote is the reason
+ * a reader should believe the sentence next to it. Three of these quotes come out of an Act and two
+ * out of a judgment, and both kinds are already on disk: the consolidations from --fetch, the
+ * judgments from --judgments. So there is no excuse for an unchecked one, and `extract` refuses an
+ * edge whose quote it cannot find rather than publishing the edge without it.
+ */
+export function verifyEdgeQuotes() {
+  const cat = loadCatalogue();
+  const byRegister = new Map(cat.instruments.map((e) => [e.register_id, e]));
+  const got = new Map((exists(`${INBOX}/fetched.json`) ? fetched().instruments || [] : []).map((r) => [r.id, r]));
+  const judgments = new Map((cat.judgments || []).map((j) => [j.source, j]));
+  const cache = new Map();
+
+  /** The words of a document, whichever kind it is, read once per run. */
+  const wordsOf = (source) => {
+    if (cache.has(source)) return cache.get(source);
+    let out = null;
+    const [kind, ref] = String(source).split(/:(.*)/);
+    if (kind === 'oqpc' || kind === 'frl') {
+      const inst = byRegister.get(ref);
+      const f = inst ? got.get(inst.id) : null;
+      if (f && !f.failure) {
+        let all = '';
+        for (const vol of f.files || []) {
+          if (!exists(vol.file)) continue;
+          all += pdfPages(abs(vol.file)).join('\n') + '\n';
+        }
+        out = all ? { text: tidy(all), where: `the consolidation of ${ref} as downloaded` } : null;
+      }
+    } else if (kind === 'qj') {
+      const j = judgments.get(source);
+      const file = j ? `${INBOX}/judgments/${j.id}.judgment` : null;
+      if (file && exists(file)) out = { text: tidy(readText(file)), where: `the judgment at ${j.source_url}` };
+    }
+    cache.set(source, out);
+    return out;
+  };
+
+  const rows = [];
+  for (const e of cat.edges || []) {
+    const doc = wordsOf(e.source);
+    if (!doc) {
+      rows.push({ id: e.id, verified: false, why: `nothing on this machine answers to the source "${e.source}". `
+        + 'Run --fetch and --judgments first.' });
+      continue;
+    }
+    const found = doc.text.includes(tidy(e.quote));
+    rows.push({
+      id: e.id,
+      verified: found,
+      source: e.source,
+      checked_against: doc.where,
+      why: found ? '' : 'the document does not carry the quote character for character'
+    });
+  }
+  const file = `${INBOX}/edges.json`;
+  fs.writeFileSync(abs(file), JSON.stringify({ verified_at: today(), extractor: EXTRACTOR, edges: rows }, null, 1) + '\n', 'utf8');
+  return { file, rows };
+}
+
+export function edgeChecks() {
+  const file = `${INBOX}/edges.json`;
+  if (!exists(file)) return null;
+  return readJSON(file);
 }
 
 export function judgmentChecks() {
@@ -1134,7 +1278,13 @@ export function extract({ batch }) {
     pack_header: packHeader(cat, refused, candidates, dropped, edgeWork),
     candidates
   }, null, 1) + '\n', 'utf8');
-  return { file: out, candidates, refused, dropped, edges: edgeWork.edges, judgments: edgeWork.judgments, judgmentsRefused: edgeWork.refused };
+  return {
+    file: out, candidates, refused, dropped,
+    edges: edgeWork.edges,
+    edgesRefused: edgeWork.edgesRefused,
+    judgments: edgeWork.judgments,
+    judgmentsRefused: edgeWork.refused
+  };
 }
 
 /**
@@ -1164,6 +1314,7 @@ function buildEdges(cat, stamp, instrumentIds) {
   const checks = new Map(((judgmentChecks() || {}).judgments || []).map((j) => [j.id, j]));
   const judgments = [];
   const refused = [];
+  const edgesRefused = [];
   for (const j of cat.judgments || []) {
     const c = checks.get(j.id);
     if (!c || !c.verified) {
@@ -1193,7 +1344,8 @@ function buildEdges(cat, stamp, instrumentIds) {
       source_url: j.source_url,
       locator: j.locator,
       quote: j.quote,
-      verified_against: `sha256 ${String(c.sha256).slice(0, 16)} of the page as retrieved`,
+      verified_against: `sha256 ${String(c.sha256).slice(0, 16)} of the judgment as retrieved, with the case `
+        + `name and the citation read off the case page at sha256 ${String(c.page_sha256 || '').slice(0, 16)}`,
       confidence: 'high',
       status: 'committed',
       asserts: 'real_world',
@@ -1204,8 +1356,18 @@ function buildEdges(cat, stamp, instrumentIds) {
     });
   }
   const have = new Set(judgments.map((j) => j.id));
+  const quoteChecks = new Map(((edgeChecks() || {}).edges || []).map((r) => [r.id, r]));
   const edges = [];
   for (const e of cat.edges || []) {
+    const q = quoteChecks.get(e.id);
+    if (!q || !q.verified) {
+      edgesRefused.push({
+        edge: e.id,
+        title: e.title,
+        why: q ? q.why : 'its quote was never checked against the document it came from. Run --edges.'
+      });
+      continue;
+    }
     const kept = (e.judgments || []).filter((id) => have.has(id));
     const lost = (e.judgments || []).filter((id) => !have.has(id));
     edges.push({
@@ -1237,7 +1399,7 @@ function buildEdges(cat, stamp, instrumentIds) {
       reviewed_on: e.reviewed ? e.reviewed.on : ''
     });
   }
-  return { edges, judgments, refused };
+  return { edges, judgments, refused, edgesRefused };
 }
 
 const NOT_ADVICE_LINE = 'This is a description of published law, not advice. A person\'s actual '
@@ -1302,6 +1464,7 @@ function packHeader(cat, refused, candidates, dropped, edgeWork) {
     left_out: cat.left_out || [],
     edge_types: cat.edge_types || [],
     edges: (edgeWork && edgeWork.edges) || [],
+    edges_not_verified: (edgeWork && edgeWork.edgesRefused) || [],
     judgments: (edgeWork && edgeWork.judgments) || [],
     judgments_not_verified: (edgeWork && edgeWork.refused) || [],
     judgments_method: {
@@ -1435,6 +1598,11 @@ if (RAN_DIRECTLY) {
       const bad = rows.filter((r) => !r.verified);
       console.log(`${rows.length - bad.length} of ${rows.length} judgments verified against their published source. Written to ${file}.`);
       for (const b of bad) console.log(`  NOT VERIFIED ${b.id}: ${b.why}`);
+    } else if (args.includes('--edges')) {
+      const { file, rows } = verifyEdgeQuotes();
+      const bad = rows.filter((r) => !r.verified);
+      console.log(`${rows.length - bad.length} of ${rows.length} edge quote(s) found in the document they cite. Written to ${file}.`);
+      for (const b of bad) console.log(`  NOT VERIFIED ${b.id}: ${b.why}`);
     } else if (args.includes('--extract')) {
       const batch = argVal(args, '--batch', today());
       const r = extract({ batch });
@@ -1448,6 +1616,10 @@ if (RAN_DIRECTLY) {
         for (const x of r.dropped) console.log(`  ${x.instrument} ${x.ref} (${x.label})`);
       }
       console.log(`\n${r.edges.length} edge record(s) and ${r.judgments.length} judgment(s) go with them.`);
+      if (r.edgesRefused.length) {
+        console.log(`${r.edgesRefused.length} edge(s) were refused because their quote could not be found:`);
+        for (const x of r.edgesRefused) console.log(`  ${x.edge}: ${x.why}`);
+      }
       if (r.judgmentsRefused.length) {
         console.log(`${r.judgmentsRefused.length} judgment(s) were refused and are cited nowhere:`);
         for (const x of r.judgmentsRefused) console.log(`  ${x.citation}: ${x.why}`);

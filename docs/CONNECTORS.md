@@ -665,3 +665,64 @@ everything in this document.
   obvious next connector and it needs no permission from anybody, because the schema is already
   published.
 - Anything at all for the seven organisations above.
+
+## The source ladder, and why weather must not be a two-way switch
+
+Added 14 August 2026, while the weather connector was being written, because the owner said what comes
+next: **their own weather stations, video camera feeds of the beaches, and drone reports.**
+
+That is the island observing itself, and it outranks anything this project can pull off the internet.
+So do not write `live ? openMeteo : model`. Write a **ranked ladder**, resolved per field, per moment,
+with the winner named on screen. Adding a station on the roof of the surf club then becomes a data
+change and not a code change, which is the whole point.
+
+The ladder, best first. Each rung answers for a field, not for the whole of weather:
+
+| Rung | Source | What it is | Beats the one below because |
+| --- | --- | --- | --- |
+| 1 | **Island instrument** | a station, a gauge, a camera at a real place on the island | it is the actual thing, here, now |
+| 2 | **Official observation** | a Bureau station reading via their registered data service | measured, but not on this island |
+| 3 | **Model** | Open-Meteo, CC-BY, model output for this location | real physics, not a reading |
+| 4 | **Synoptic simulation** | `src/systems/environment/weather.js` | the only rung that can answer for a moment that has not happened |
+
+Rules that hold for every rung:
+
+- **Per field, not per source.** An island station may have wind and no swell. Take the wind from rung
+  one and the swell from rung three, and say so for each. A single "source: Open-Meteo" line over a
+  panel where half the numbers came from somewhere else is a lie of omission.
+- **Freshness demotes.** A rung one reading an hour old loses to a rung three reading from ten minutes
+  ago, for rain. For temperature it does not. Freshness thresholds are per field and are a judgement
+  worth writing down rather than a constant.
+- **The rung is visible.** Not a footnote. A resident looking at wind speed should be able to see
+  whether that came off a mast at Point Lookout or out of a model, because they will trust the two
+  differently and they are right to.
+- **Rung four never wins in live mode.** If every real rung has failed, the honest answer is that the
+  twin does not know, not a simulated number wearing a live badge.
+- **Determinism is unaffected.** All of this is ingest. A seeded run with no feeds uses rung four and
+  produces exactly what it always produced.
+
+### The three things coming, and what each needs
+
+**Island weather stations.** The easy one, and the one to design for first because it validates the
+ladder. A station writes the same record shape as the Open-Meteo connector with `rung: 1` and its
+location. Worth noting that the Bureau's own Weather Observations Website accepts citizen station data,
+so a station on the island can be both a source for this twin and a public contribution, which is the
+participation loop closing without anybody building anything new.
+
+**Beach cameras.** The valuable one and the one with the real problem. A camera pointed at a public
+beach records identifiable people, and a public twin republishing that stream is a different act from a
+surf club watching its own water. Before any camera feed is connected, that question gets answered, not
+assumed. Established practice exists and is worth following: low resolution, wide framing that does not
+resolve faces, stills at an interval rather than continuous video, and no recording retained. What the
+twin actually needs from a beach camera is mostly **derived**: is the bank open, how big is the shore
+break, how full is the car park, are there people in the water. A number extracted on the device and
+sent as a number is better than a picture sent to a server, on privacy and on bandwidth, and it is the
+design to aim at. `docs/PARTICIPATION.md` and the `O` and `I` faces in `githublocal/aura-horn-torus`
+already carry the boundary this needs.
+
+**Drone reports.** These are not a weather source, they are capture, and they belong in the chain in
+`githublocal/aura-scan-pipeline/docs/ZERO-POINT-CAPTURE.md` rather than here. A drone is another device
+with a session, a frame and a scale reference, at a better altitude. The one thing it adds that a
+phone cannot is repeat coverage of somewhere nobody walks: the Amity erosion face, the dune blowouts,
+Eighteen Mile Swamp. Coastal change over time is exactly what this twin models and cannot currently see.
+Rules and permissions for flying are a real constraint and go in that document, not this one.

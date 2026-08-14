@@ -235,10 +235,14 @@ const FORM_RULES = [
     //
     // The island already carries four matters of national environmental significance and the civic
     // layer never knew. data/ecology.json has the eastern curlew at Critically Endangered and the
-    // bar-tailed godwit at Endangered under the EPBC Act, shorebirds.js flushes them off the western
-    // flats, the koala has been Endangered nationally since February 2022, and half the island sits
-    // inside the Moreton Bay Ramsar site listed in 1993. So an action likely to have a significant
-    // impact on any of those is referred to the Commonwealth before anybody local gets to decide it.
+    // western Alaskan bar-tailed godwit, Limosa lapponica baueri, at Endangered, which is the
+    // subspecies that pack carries for these flats and not the species as a whole; shorebirds.js
+    // flushes both off the western sand; the koala has been Endangered nationally since February
+    // 2022; and this island is inside the Moreton Bay Ramsar site, listed 22 October 1993. How much
+    // of the island is inside that line is a thing this project does not know, because the boundary
+    // description sits with the Commonwealth and nobody here has read it, so the pack says the
+    // wetland takes in the island and stops. An action likely to have a significant impact on any of
+    // those is referred to the Commonwealth before anybody local gets to decide it.
     //
     // What this models is the referral and the wait, and nothing else. The twenty business days in
     // section 75 is the decision on whether it is a controlled action, so it is short and it is

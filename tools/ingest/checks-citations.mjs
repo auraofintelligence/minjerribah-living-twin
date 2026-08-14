@@ -36,7 +36,7 @@
 // the schema for the same pack, because they are a statement about that pack's shape.
 
 import path from 'node:path';
-import { ROOT, readJSON, exists, walkKeys } from './lib.mjs';
+import { ROOT, readJSON, exists, walkKeys, walkStrings } from './lib.mjs';
 
 const SCHEMAS = 'tools/ingest/schemas.json';
 
@@ -323,6 +323,64 @@ function checkPackReferences(ctx, file, doc, references) {
   return checked;
 }
 
+/**
+ * Every citation field in a pack, counted and nothing more. Used to say out loud how much of the
+ * repository this check does not cover: ten of the fourteen packs cite by pasting a URL or a
+ * sentence and have no registry to resolve against, so their citations are counted and believed. A
+ * line reporting only what was checked reads as coverage, and this check exists because a number
+ * that read as coverage was not one.
+ */
+function countCitationFields(doc) {
+  let n = 0;
+  for (const { key, pointer, value } of walkKeys(doc, '')) {
+    if (!isCitationKey(key)) continue;
+    if (pointer.startsWith('source_registry.')) continue;
+    n += Array.isArray(value) ? value.length : 1;
+  }
+  return n;
+}
+
+/**
+ * A reference map only checks what somebody remembered to write into it, and it lives in a
+ * different file from the pack it describes. That is how `levers[].instruments` ran unchecked: the
+ * Commonwealth pass put the law under a lever, `src/ui/panels/civic.js` resolved each id and
+ * filtered out what it could not find, and no map entry was ever written, so nothing asked. This
+ * reads the pack back and reports any field holding that pack's own ids which the map does not
+ * cover.
+ *
+ * Advisory, on purpose. A string matching an id can be a coincidence, and a check that blocked on a
+ * coincidence would be a check somebody switched off. It runs only over packs that already declare
+ * a map, because a pack with no map has not yet made the claim this is auditing.
+ */
+function checkMapCoverage(ctx, file, doc, references) {
+  const { findings } = ctx;
+  const ids = everyId(doc);
+  if (!ids.size) return 0;
+  const covered = new Set();
+  for (const ref of references) {
+    if (!ref || !ref.from) continue;
+    covered.add(ref.from);
+    covered.add(`${ref.from}[]`);
+  }
+  const unmapped = new Map();
+  for (const { key, value, pointer } of walkStrings(doc, '')) {
+    if (key === 'id' || isCitationKey(key)) continue;
+    if (!ids.has(value)) continue;
+    const flat = pointer.replace(/\[\d+\]/g, '[]');
+    if (covered.has(flat)) continue;
+    if (!unmapped.has(flat)) unmapped.set(flat, new Set());
+    unmapped.get(flat).add(value);
+  }
+  for (const [where, values] of unmapped) {
+    findings.add({
+      check: 'references-resolve', severity: 'advisory', file, locator: where,
+      message: `${file} ${where} holds ${values.size} id(s) of this pack and no reference map entry covers it: ${[...values].slice(0, 4).join(', ')}${values.size > 4 ? ' and more' : ''}.`,
+      hint: 'If that field is a pointer, map it in tools/ingest/schemas.json so a rename breaks the gate rather than the interface.'
+    });
+  }
+  return unmapped.size;
+}
+
 /* ------------------------------------------------------------------ the step */
 
 export function runCitationChecks(ctx) {
@@ -336,8 +394,11 @@ export function runCitationChecks(ctx) {
   let withRegistry = 0;
   let strict = 0;
   let fields = 0;
+  let unresolvable = 0;
+  let noRegistry = 0;
   let refs = 0;
   let mapped = 0;
+  let unmapped = 0;
 
   for (const entry of packs) {
     const file = entry.file || `data/${entry.id}.json`;
@@ -349,16 +410,24 @@ export function runCitationChecks(ctx) {
       const r = checkPackCitations(ctx, file, doc);
       fields += r.fields;
       if (r.mode === 'registry') strict++;
+    } else {
+      noRegistry++;
+      unresolvable += countCitationFields(doc);
     }
     const schema = (schemas.packs || {})[entry.id];
     if (schema && Array.isArray(schema.references) && schema.references.length) {
       mapped++;
       refs += checkPackReferences(ctx, file, doc, schema.references);
+      unmapped += checkMapCoverage(ctx, file, doc, schema.references);
     }
   }
 
-  findings.ran('citations-resolve', `${fields} citation field(s) across ${withRegistry} pack(s) with a source registry, ${strict} of them under the strict registry rule`);
-  findings.ran('references-resolve', `${refs} reference(s) across ${mapped} pack(s) with a reference map in tools/ingest/schemas.json`);
+  // Both notes say what was not looked at as well as what was, because the fault this whole step
+  // was written for is a green line that read as coverage and was not one.
+  findings.ran('citations-resolve', `${fields} citation field(s) resolved across ${withRegistry} pack(s) with a source registry, ${strict} of them under the strict registry rule. `
+    + `${unresolvable} citation field(s) in ${noRegistry} pack(s) with no registry are counted and not resolved: they cite by URL or by sentence and there is nothing to resolve them against`);
+  findings.ran('references-resolve', `${refs} reference(s) across ${mapped} pack(s) with a reference map in tools/ingest/schemas.json`
+    + `${unmapped ? `, plus ${unmapped} field(s) holding pack ids that no map entry covers, reported as advisory` : ', and no unmapped field holds a pack id'}`);
 }
 
 // Kept so a person fixing one pack can run this alone:

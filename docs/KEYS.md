@@ -62,6 +62,7 @@ Each of these opens its board and closes it again. `Escape` closes whatever is o
 
 | Key | Board | Owner |
 | --- | --- | --- |
+| `T` | Today: the noticeboard the island opens as | `src/ui/panels/today.js` |
 | `Y` | How it works: the explainer sheet | `src/ui/panels/howitworks.js` |
 | `G` | The civic board | `src/ui/panels/civic.js` |
 | `E` | The island calendar | `src/ui/panels/events.js` |
@@ -73,6 +74,12 @@ Each of these opens its board and closes it again. `Escape` closes whatever is o
 | `M` | The map: docked, then off; `Shift` + `M` for full screen | `src/ui/panels/map.js` |
 | `N` | Mute and unmute; `Shift` + `N` for the mixer | `src/audio/audio.js` |
 | `?` | The arrival screens again, from the acknowledgement | `src/ui/panels/onboarding.js` |
+
+`T` is the surface the island opens as, so it is the only key in that table a person may never need
+to press: on every visit after the first the noticeboard is already up, and the key is there for
+bringing it back after it has been dismissed. `T`, `X` and `Z` were the three letters left after the
+camera rig, the bar, the boards and the info view alphabet had taken theirs, and `T` for today is the
+only one of the three that means anything.
 
 `Y` is the odd one in that table, because it is the only board that is not a board: it is a sheet
 down the right hand side with the island still on screen beside it, since six of its seven sections
@@ -128,6 +135,10 @@ island, and it empties when you press `Escape`.
 - `5` does nothing. The camera rig has five modes and the HUD has four speeds, and rather than have
   one number key mean a camera mode while its four neighbours mean speeds, the fifth mode is on
   `Tab` with the rest.
+- `X` and `Z` are the two letters still free. Nothing is bound to going live from the keyboard, for
+  the reason given under Time above, and nothing is bound to dismissing the Today surface other than
+  `Escape` and `T` themselves, because a screen that opens on its own should close the same two ways
+  every other surface here does.
 
 ## Where the collisions were
 
