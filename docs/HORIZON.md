@@ -40,12 +40,52 @@ many people, automated screening is the only thing that keeps it honest.
 
 Named honestly so that nobody defends them past their usefulness.
 
-**Offline and deterministic at runtime.** This is correct today and it is load-bearing for a low-tech
-island community with bad connectivity. It cannot survive AAA asset fidelity: you cannot ship the
-island. The resolution is almost certainly tiers rather than abandonment. A small complete offline core
-that works on a phone at Amity with no signal, and a high fidelity layer that streams when there is
-bandwidth. Both true at once, and the offline core is the one that must never regress, because it is
-the one that serves the people who actually live there.
+**Offline and deterministic at runtime.** Correct today, and I had the reason wrong.
+
+The first version of this section said offline-first was load-bearing because the island has bad
+connectivity. The owner's correction, 14 August 2026: **do not assume bad connectivity is a constant.
+It is now and it will not be forever.** He is aiming at a B200 or B300 class NVLink 72 GPU rack at
+9 Ballow Road for the Ready S.E.T. Co-op, and observes that even if that particular rack never
+materialises, the compute arriving in the six years before the Olympics will be extraordinary.
+
+That inverts the design. Offline is not a floor imposed by poverty of infrastructure. It is **one rung
+on a ladder the twin walks down gracefully**, and the base case is heading the other way:
+
+| Rung | Conditions | What the twin is |
+| --- | --- | --- |
+| **Full** | bandwidth and local compute | streamed high fidelity, many people in it at once, real time |
+| **Reduced** | ordinary connection | local cache with deltas, full simulation, one person |
+| **Static** | almost nothing | the map, placeholders, the last known state, honestly dated |
+| **Ping** | everything else is down | **LoRaWAN**, light pings, disaster mode |
+
+The last rung is the one worth designing for now, because it is the one that has to work on the worst
+day rather than the best. LoRaWAN carries a few dozen bytes at a time over tens of kilometres on a
+battery that lasts years, and it keeps working when the cellular network and the power are both gone.
+That is the exact shape of an island in a cyclone, and
+`RCC_20241216_local_disaster_management_plan__control_copy_.pdf` is already in the corpus describing
+what the island does on that day.
+
+What it means concretely: a payload budget measured in **bytes**, not kilobytes. Water level at Amity,
+road open or closed, evacuation centre status, whether the barge ran. A twin that can render that on a
+static map with everything else greyed and dated is more useful in a disaster than one that shows
+nothing because it could not reach its assets. Design the byte format now, while it is cheap, because
+retrofitting a disaster mode onto a streaming architecture is how disaster modes end up untested.
+
+So the thing that must never regress is not "offline" as an ideology. It is **the twin's ability to
+say what it knows, at whatever rung it is on, with the date on it.** That property is already in the
+build: it is the freshness and source-rung work in `src/world/observations.js`, arrived at for the
+weather ladder and general enough to carry the whole degradation ladder.
+
+**Single-player identity.** Bundled into the determinism point below in the first draft, and it
+deserves its own line, because the owner has already named the mechanism: **DIDs and verifiable
+credentials**, per `Web3_Sensorium_for_Science_Debate.md`, carrying massively multiplayer eventually.
+
+That is a better answer than an account system and it is the same boundary this project keeps arriving
+at from different directions: the `O` and `I` faces on the torus, `public_noticeboard.md` against
+`aura.md`, and the visibility levels in `PARTICIPATION.md`. A verifiable credential is how an islander
+proves they are an islander without handing over who they are, which is exactly what
+"de-personalised where appropriate" requires when the twin has many people in it. Four expressions of
+one idea now, which is usually a sign the idea is right.
 
 **Single-seed determinism.** Two people living in the same virtual island at the same time is shared
 state, and shared state is not reproducible from a seed. The likely shape is a deterministic simulation
