@@ -166,6 +166,45 @@ async function main() {
   await step('waking the residents');
   await world.boot();
 
+  // Let the island live before anybody looks at it.
+  //
+  // THE BUG THIS FIXES, and it was the reason the owner had never seen a car, a bus, a ferry or a
+  // person on his own island. At tick zero every one of those counts is zero, because a resident is
+  // not placed until the schedule system decides where they are going and a vehicle does not exist
+  // until somebody sets off. The render layers were correct: they drew nothing because there was
+  // nothing. Measured at tick 0 against tick 300: people on island 0 -> 2,069, outdoors 0 -> 593,
+  // vehicles on the road 0 -> 43, buses 0 -> 3, boats afloat 0 -> 3.
+  //
+  // So a world that opens is a world that has already been somewhere. This matters more since the
+  // default became live: opening at the real Queensland moment means the island is supposed to have
+  // BEEN there, with the four o'clock barge already loaded and the school run already done.
+  //
+  // Two sim-days, run backwards from the opening moment so the moment you land on is the one you
+  // asked for. Costs about a second and a half of boot on this machine and buys an island that is
+  // alive in the first frame instead of the ninetieth.
+  //
+  // Determinism is untouched: this is the same deterministic step() the headless harness runs, from
+  // the same seed. tools/headless.mjs does its own running and never calls this file, so the
+  // fingerprint is unaffected.
+  const WARMUP_TICKS = 216; // a day and a half: enough to populate, about 3 s on a slow machine
+  if (!headless) {
+    await step('living a couple of days');
+    const startMinute = world.clock.minuteOfDay;
+    const startDay = world.clock.dayIndex;
+    world.clock.minuteOfDay = startMinute;
+    world.clock.dayIndex = startDay - 2;  // run in from before the opening moment
+    const t0 = performance.now();
+    // In slices, so the boot bar can paint and a slow machine does not look hung.
+    for (let done = 0; done < WARMUP_TICKS; done += 48) {
+      world.run(Math.min(48, WARMUP_TICKS - done));
+      await new Promise((r) => setTimeout(r, 0));
+    }
+    world.clock.warmupMs = Math.round(performance.now() - t0);
+    console.info(`[boot] warmed ${WARMUP_TICKS} ticks in ${world.clock.warmupMs} ms: `
+      + `${world.read('crowd')?.onIsland ?? '?'} people on the island, `
+      + `${world.read('traffic')?.counts?.onRoad ?? '?'} vehicles moving.`);
+  }
+
   await step('opening the doors');
   if (!headless) mountUI(world);
 
