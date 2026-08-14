@@ -30,6 +30,18 @@
 // thing that needs three governments does not take three times as long but it certainly does not
 // take the same time as one.
 //
+// AND IT DOES NOT GET AN APPETITE, WHICH IS THE OTHER HALF OF SAYING SO.
+// The first Commonwealth pass gave every body on the board a single 0 to 100 appetite, so the
+// federal environment department was drawn with a meter reading 20 out of 100 directly above the
+// line "the environment minister decides against a statutory test, not against how much the island
+// wants it". A meter is a claim: it says wanting it more would help. On a statutory decision maker
+// that is false, and printing it re-imports the exact frame the pack had just disowned. Every
+// institution now carries `decides_by` and `decision_postures` in data/civic.json says what each
+// kind means. Where the posture has no meter this file sets no appetite at all, and `decide()`
+// scores those applications without the public case, without petitions and deputations, and
+// without your standing, because none of those is an input to that decision. What is left is
+// whether the file is complete, which is the part you actually hold.
+//
 // So the verbs here are not "enact". They are:
 //   PREPARE   commission the assessments an application actually needs, and pay for them
 //   LODGE     and then wait, because a lodged application is a clock, not an outcome
@@ -134,6 +146,27 @@ const TIER_FALLBACK = {
   sibelco: 'private', 'private-landowners': 'private',
   'australian-government': 'commonwealth', dcceew: 'commonwealth', community: 'none'
 };
+
+/**
+ * How a body decides, when the pack does not say.
+ *
+ * The pack is the authority: every institution in data/civic.json carries `decides_by` and
+ * `decision_postures` defines the vocabulary. This map exists so a pack written before that field
+ * still resolves, and it deliberately does not default to the meter. An unknown body is scored the
+ * way a body with a budget and a constituency is scored, because that is the common case, but a
+ * body the pack has not placed is reported rather than drawn as though somebody had decided.
+ */
+const POSTURE_FALLBACK = {
+  dcceew: 'statutory_test',
+  'australian-government': 'competitive_round',
+  qyac: 'not_modelled', 'minjerribah-camping': 'not_modelled', 'joint-management': 'not_modelled',
+  sealink: 'commercial', 'stradbroke-flyer': 'commercial', sibelco: 'commercial',
+  'private-landowners': 'commercial', 'transit-systems': 'commercial',
+  community: 'volunteer_capacity'
+};
+
+/** The postures where a score out of a hundred would be a claim about the decision that is untrue. */
+const NO_METER = new Set(['statutory_test', 'competitive_round', 'not_modelled']);
 
 /** The three tiers that are orders of government. The other four are hard in a different way. */
 const GOVERNMENT_TIERS = ['commonwealth', 'state', 'local'];
@@ -325,8 +358,15 @@ export function registerCouncil(world) {
       state.notes.push('data/civic.json is missing. No decision maker can be modelled.');
       return;
     }
+    const postures = (pack.decision_postures && pack.decision_postures.kinds) || {};
     for (const inst of pack.institutions || []) {
       const cad = CADENCE[inst.id] || { days: 90, label: 'an unmodelled cycle' };
+      // How this body decides, read out of the pack. `meter` is the load-bearing bit: where it is
+      // false nothing here computes an appetite, so no screen can print one, and `decide()` scores
+      // without the inputs that posture says are not inputs.
+      const postureId = inst.decides_by || POSTURE_FALLBACK[inst.id] || 'weighs_it_up';
+      const pd = postures[postureId] || null;
+      const meter = pd ? pd.meter !== false : !NO_METER.has(postureId);
       INST.set(inst.id, {
         id: inst.id,
         label: inst.label,
@@ -345,7 +385,14 @@ export function registerCouncil(world) {
         cadenceLabel: cad.label,
         notModelled: !!NOT_MODELLED[inst.id],
         notModelledWhy: NOT_MODELLED[inst.id] || '',
-        appetite: 0.45,
+        posture: postureId,
+        postureLabel: (pd && pd.label) || 'How it decides',
+        postureMeter: meter,
+        postureMoves: (pd && pd.what_moves_it) || '',
+        postureInstead: (pd && pd.instead) || '',
+        postureDeclared: !!inst.decides_by,
+        standingApplies: pd ? pd.standing_applies !== false : meter,
+        appetite: meter ? 0.45 : null,
         standing: 0.5,       // how the player is regarded by this body
         openWithThem: 0,
         lastDecisionDay: -999,
@@ -354,8 +401,12 @@ export function registerCouncil(world) {
       });
     }
     const unplaced = [...INST.values()].filter((i) => i.tier === 'unknown');
+    const undeclared = [...INST.values()].filter((i) => !i.postureDeclared);
+    const noMeter = [...INST.values()].filter((i) => !i.postureMeter);
     state.notes.push(`${INST.size} decision makers across ${new Set([...INST.values()].map((i) => i.tier)).size} tiers. ${[...INST.values()].filter((i) => i.notModelled).length} of them make decisions this twin will not simulate.`);
+    state.notes.push(`${noMeter.length} of them are not scored on appetite, because a meter would say that wanting it more helps and for those bodies it does not: ${noMeter.map((i) => i.label).join(', ')}.`);
     if (unplaced.length) state.notes.push(`${unplaced.length} body without a tier in the pack: ${unplaced.map((i) => i.label).join(', ')}.`);
+    if (undeclared.length) state.notes.push(`${undeclared.length} body whose decision posture the pack does not declare, so this file guessed it: ${undeclared.map((i) => i.label).join(', ')}.`);
     countReach();
     publish();
     state.ready = true;
@@ -694,6 +745,7 @@ export function registerCouncil(world) {
         if (!item.held && item.readyDay != null && day >= item.readyDay) {
           item.held = true;
           note(w, app, `${item.label} received.`);
+          if (item.id === 'epbc-referral') recordSection75(w, app, day);
         }
         if (!item.held && item.satisfiedByConsultation && app.consultationRan) {
           item.held = true;
@@ -798,6 +850,44 @@ export function registerCouncil(world) {
     note(w, app, `Assessment done. Now it waits for ${inst ? inst.cadenceLabel : 'a decision'}.`);
   }
 
+  /* ------------------------------------------------------------------ section 75
+
+  THE SECOND HONEST STOP, AND IT IS NOT THE SAME AS THE FIRST.
+
+  The referral below is the one this project will not model because it is not this project's to
+  guess at: a native title holder's decision. This one is different. The Commonwealth's decision
+  under section 75 of the EPBC Act is public, appealable and made against a written test, and there
+  would be nothing improper about modelling it. The reason it is not modelled is that the pack says
+  so in its own words, in `national_environmental_significance.handling`: whether a specific action
+  is likely to have a significant impact is a judgement for the proponent and then for the minister,
+  and this project does not make it. Generating a controlled-action finding here would put the twin
+  in the position of having made exactly the judgement the pack disclaims three screens away.
+
+  So what this records is what is true: the referral is in, the statutory clock is twenty business
+  days, the fork is real, and what lies down each side of it is a fact rather than a guess. The ten
+  weeks the form item already costs covers the six to prepare and the four for that decision, so
+  nothing here charges the player twice for the same wait. */
+
+  function recordSection75(w, app, day) {
+    const dep = INST.get('dcceew');
+    app.commonwealth = {
+      body: dep ? dep.label : 'the Australian Government',
+      posture: dep ? dep.posture : 'statutory_test',
+      instrument: 'Section 75 of the Environment Protection and Biodiversity Conservation Act 1999',
+      clockDays: dep ? dep.cadenceDays : 28,
+      lodgedDay: day,
+      lodgedDate: w.clock.formatDate(),
+      notModelled: 'Whether this is a controlled action is a judgement on the statutory test. The pack says in the open that this project does not make that judgement, so the twin does not make it either.',
+      forks: [
+        'Not a controlled action: it proceeds, and the Commonwealth is finished with it.',
+        'A controlled action: it goes to an assessment that has no statutory clock at all. The Toondah referral sat with the Commonwealth from 2018 to 2024.'
+      ],
+      whatYouHold: 'Nothing about how much the island wants this is a matter the minister may take into account. Whether the referral was complete when it went in is the part you held, and you have already spent it.'
+    };
+    note(w, app, `Referral lodged with ${app.commonwealth.body}. Twenty business days on the section 75 decision, about four weeks, and no clock at all on what follows if it is a controlled action.`);
+    w.bus.emit('civic:commonwealth-referral', { applicationId: app.id, leverId: app.leverId, body: 'dcceew' });
+  }
+
   /* ------------------------------------------------------------------ the referral
 
   The honest stop. No RNG, no modelled appetite, no simulated position. */
@@ -900,6 +990,17 @@ export function registerCouncil(world) {
 
     for (const inst of INST.values()) {
       if (inst.notModelled) { inst.appetite = null; continue; }
+      // No meter, no number. The constraint sentence is still set, because that is the thing worth
+      // printing where an appetite would have been, and it is the thing that is actually true.
+      if (!inst.postureMeter) {
+        inst.appetite = null;
+        if (inst.tier === 'commonwealth') {
+          inst.constraint = inst.id === 'dcceew'
+            ? 'The environment minister decides against a statutory test, not against how much the island wants it. Twenty business days to say whether it is a controlled action, and no clock at all on what comes after that.'
+            : 'A national program, decided in a competitive round against every other regional place in Australia. Nobody from here is in the room, and most Commonwealth money that does arrive comes through Queensland or the council rather than as a decision about this island.';
+        }
+        continue;
+      }
       let a = 0.45;
       if (inst.fund === 'council-island' || inst.fund === 'redland-water') {
         const head = budget && budget.funds && budget.funds['council-island']
@@ -930,14 +1031,6 @@ export function registerCouncil(world) {
       } else if (inst.id === 'private-landowners') {
         a = 0.3;
         inst.constraint = 'Under the shoreline plan, works in the central reach that protect private property are paid for and maintained by the owners of that property.';
-      } else if (inst.tier === 'commonwealth') {
-        // Not a budget and not a chamber. A competitive national round, or a statutory test.
-        // Either way the island is one small place among a great many asking, and being deserving
-        // is not the variable.
-        a = inst.id === 'dcceew' ? 0.2 : 0.25;
-        inst.constraint = inst.id === 'dcceew'
-          ? 'The environment minister decides against a statutory test, not against how much the island wants it. Twenty business days to say whether it is a controlled action, and no clock at all on what comes after that.'
-          : 'A national program, decided in a competitive round against every other regional place in Australia. Nobody from here is in the room, and most Commonwealth money that does arrive comes through Queensland or the council rather than as a decision about this island.';
       } else if (inst.id === 'community') {
         const vm = mood('volunteers-and-emergency');
         const er = metric('emergency_readiness');
@@ -1032,19 +1125,44 @@ export function registerCouncil(world) {
     //    writing to the room.
     const ownIdea = app.origin === 'agenda' ? 1 : 0.35;
 
-    const score = clamp(
-      inst.appetite * 0.30 +
-      ((publicCase + 1) / 2) * 0.24 +
-      evidence * 0.18 +
-      inst.standing * 0.10 +
-      ownIdea * 0.18 +
-      pressure -
-      costPressure +
-      rng.normal(0, 0.05),
-      0, 1
-    );
+    // THREE WAYS OF ARRIVING AT A DECISION, BECAUSE THERE ARE THREE KINDS OF DECIDER HERE.
+    //
+    // The first is the one this file was written for: a body with money, a constituency and a
+    // choice, which weighs the public case, the evidence, its own appetite, who asked and how hard
+    // they pushed. Everything below the first branch is that, unchanged.
+    //
+    // The other two exist because the pack now carries a tier where that model is simply wrong, and
+    // running the wrong model quietly is worse than not modelling it. A statutory decision maker
+    // applies a test that is in an Act: the public case is not one of the matters it may take into
+    // account, a petition is not evidence, and the fact that the council thinks well of you is not
+    // either. What is left of a player's influence is whether the file is complete, which is real
+    // and is the whole of it. A competitive national round is different again: the thing that
+    // decides it is every other application in Australia that year, which this twin does not model,
+    // so the honest shape is a wide spread that a complete file shifts a little and nothing else
+    // shifts at all.
+    //
+    // `inst.posture` is read from `decides_by` in data/civic.json. It is not read from the tier,
+    // because a future state or council body could be a statutory decision maker too.
+    let score;
+    if (inst.posture === 'statutory_test') {
+      score = clamp(0.18 + evidence * 0.45 + rng.normal(0, 0.06), 0, 1);
+    } else if (inst.posture === 'competitive_round') {
+      score = clamp(0.20 + evidence * 0.30 + rng.normal(0, 0.12), 0, 1);
+    } else {
+      score = clamp(
+        (inst.appetite == null ? 0.45 : inst.appetite) * 0.30 +
+        ((publicCase + 1) / 2) * 0.24 +
+        evidence * 0.18 +
+        inst.standing * 0.10 +
+        ownIdea * 0.18 +
+        pressure -
+        costPressure +
+        rng.normal(0, 0.05),
+        0, 1
+      );
+    }
 
-    const conditions = buildConditions(w, app, lv, publicCase, score);
+    const conditions = buildConditions(w, app, lv, publicCase, score, inst);
 
     if (brokeReason) {
       close(w, app, 'refused', brokeReason);
@@ -1065,7 +1183,7 @@ export function registerCouncil(world) {
       app.stageLabel = 'Deferred';
       app.stageEndsDay = day + Math.round(inst.cadenceDays * 1.5);
       state.stats.deferred++;
-      note(w, app, deferralReason(app, evidence, costPressure, publicCase));
+      note(w, app, deferralReason(app, evidence, costPressure, publicCase, inst));
       w.bus.emit('civic:decision', { applicationId: app.id, leverId: app.leverId, outcome: 'deferred', decider: app.decider, reason: app.history[app.history.length - 1].detail });
       nudgeTrust(w, -0.012, `${app.leverName} deferred`);
     } else {
@@ -1081,7 +1199,18 @@ export function registerCouncil(world) {
     inst.openWithThem = Math.max(0, inst.openWithThem - 1);
   }
 
-  function deferralReason(app, evidence, costPressure, publicCase) {
+  // A reason a body could not have had is worse than no reason. A statutory decision maker does not
+  // defer something because an election is coming, and a national round does not defer anything at
+  // all: it closes, and there is another one next year.
+  function deferralReason(app, evidence, costPressure, publicCase, inst) {
+    if (inst && inst.posture === 'statutory_test') {
+      return evidence < 0.85
+        ? 'The referral went to assessment rather than straight through, and the department has asked for more. The statutory clock covered the first decision. Nothing covers this one.'
+        : 'The referral went to assessment. There is no clock on an assessment and the Toondah one ran from 2018 to 2024.';
+    }
+    if (inst && inst.posture === 'competitive_round') {
+      return 'Held over to the next round. Nothing about the application changed; the round closed.';
+    }
     if (evidence < 0.7) return 'Deferred for further information. The file was thin.';
     if (costPressure > 0.3) return 'Deferred pending the next budget. The money is not there this year.';
     if (publicCase < -0.1) return 'Deferred. The submissions ran against it and nobody wanted to carry it into an election year.';
@@ -1089,16 +1218,19 @@ export function registerCouncil(world) {
   }
 
   function refusalReason(app, evidence, costPressure, publicCase, inst) {
-    if (inst.tier === 'commonwealth') {
-      return inst.id === 'dcceew'
-        ? 'Refused. The Commonwealth was not satisfied on the statutory test, and nothing about how much the island wanted it was part of that question.'
-        : 'Unsuccessful. It went into a national round against every other regional place in Australia and did not come out of it. You can apply again next round.';
+    if (inst.posture === 'statutory_test') {
+      return evidence < 0.6
+        ? 'Refused. The referral was not complete, and completeness is the one part of a statutory test anybody here holds.'
+        : 'Refused. The Commonwealth was not satisfied on the statutory test, and nothing about how much the island wanted it was part of that question.';
+    }
+    if (inst.posture === 'competitive_round') {
+      return 'Unsuccessful. It went into a national round against every other regional place in Australia and did not come out of it. You can apply again next round.';
     }
     if (inst.fund === 'external' && costPressure > 0.2) return `Declined. ${inst.label} is a commercial operator and the numbers did not work.`;
     if (evidence < 0.5) return 'Refused. The application was never complete.';
     if (costPressure > 0.35) return 'Refused. It creates an ongoing cost with no ongoing funding.';
     if (publicCase < -0.2) return 'Refused. The weight of submissions was against it.';
-    if (inst.appetite < 0.3) return `Refused. ${inst.label} has no appetite for it right now.`;
+    if (inst.appetite != null && inst.appetite < 0.3) return `Refused. ${inst.label} has no appetite for it right now.`;
     return 'Refused.';
   }
 
@@ -1106,7 +1238,7 @@ export function registerCouncil(world) {
    * Conditions are derived from the lever's own recorded side effects and its own recorded
    * opponents. A condition always answers something the pack already said would go wrong.
    */
-  function buildConditions(w, app, lv, publicCase, score) {
+  function buildConditions(w, app, lv, publicCase, score, inst) {
     const out = [];
     const side = lv.side_effects || [];
     const has = (metric) => side.some((s) => s.target === metric);
@@ -1166,7 +1298,10 @@ export function registerCouncil(world) {
         because: 'Under the shoreline erosion management plan, works in the central reach that protect private property are paid for and maintained by those owners.'
       });
     }
-    if (publicCase < 0 && score < 0.5) {
+    // A chamber splits. A statutory test does not, and a national round has no chamber to split, so
+    // neither of those may be given a condition whose stated reason is that half the room objected.
+    const inChamber = !inst || (inst.posture !== 'statutory_test' && inst.posture !== 'competitive_round');
+    if (inChamber && publicCase < 0 && score < 0.5) {
       out.push({
         id: 'review-after-two-years',
         label: 'Reviewed after two years',
@@ -1321,6 +1456,14 @@ export function registerCouncil(world) {
         id: i.id, label: i.label, kind: i.kind, tier: i.tier, role: i.role,
         cadence: i.cadenceLabel, notModelled: i.notModelled, why: i.notModelledWhy,
         appetite: i.appetite == null ? null : +i.appetite.toFixed(3),
+        // The posture travels with the body so no screen has to decide for itself whether a meter
+        // belongs on this card. A panel that reads `appetite` alone would print 0 for a null.
+        posture: i.posture,
+        postureLabel: i.postureLabel,
+        postureMeter: i.postureMeter,
+        postureMoves: i.postureMoves,
+        postureInstead: i.postureInstead,
+        standingApplies: i.standingApplies,
         standing: +i.standing.toFixed(3),
         openWithThem: i.openWithThem,
         constraint: i.constraint || '',
@@ -1346,6 +1489,7 @@ export function registerCouncil(world) {
         satisfiedByConsultation: f.satisfiedByConsultation
       })),
       complete: a.form.every((f) => f.held),
+      commonwealth: a.commonwealth || null,
       infoRequests: a.infoRequests,
       escalations: a.escalations.map((e) => e.how),
       referralId: a.referralId,
@@ -1472,6 +1616,10 @@ export function registerCouncil(world) {
           council: rcc && rcc.appetite != null ? +rcc.appetite.toFixed(2) : null,
           state: qld && qld.appetite != null ? +qld.appetite.toFixed(2) : null
         },
+        // Countable proof that the appetite frame has actually been taken off some bodies rather
+        // than relabelled. A critic can read this instead of taking a comment's word for it.
+        postures: [...INST.values()].reduce((acc, i) => { acc[i.posture] = (acc[i.posture] || 0) + 1; return acc; }, {}),
+        withoutAppetite: [...INST.values()].filter((i) => i.appetite == null).map((i) => i.id).sort(),
         standing: rcc ? +rcc.standing.toFixed(2) : null,
         nextMeeting: state.nextCouncilMeetingInDays
       };
@@ -1502,7 +1650,12 @@ export function registerCouncil(world) {
       for (const r of s.referrals || []) referrals.push(r);
       for (const [id, appetite, standing, open, made, lastAgenda] of s.inst || []) {
         const i = INST.get(id);
-        if (i) Object.assign(i, { appetite, standing, openWithThem: open, decisionsMade: made, lastAgendaDay: lastAgenda });
+        if (!i) continue;
+        Object.assign(i, { standing, openWithThem: open, decisionsMade: made, lastAgendaDay: lastAgenda });
+        // A save written before this body lost its meter would put a number back on it. The posture
+        // is read from the pack at boot and the pack is the authority, so the save does not get to
+        // reinstate an appetite the pack says this body does not have.
+        i.appetite = i.postureMeter ? appetite : null;
       }
       Object.assign(state.stats, s.stats || {});
       pending.length = 0;

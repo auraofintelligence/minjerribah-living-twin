@@ -1136,6 +1136,36 @@ function mountHowItWorks(root, world) {
     root.append(who, note('Every body, not the largest few, counted across every lever, so one '
       + 'needing three bodies is under all three.'));
 
+    /* NOT EVERY BODY DECIDES THE SAME WAY, and the board stopped pretending otherwise.
+       Read out of decision_postures in data/civic.json and counted off the institutions' own
+       decides_by, so this paragraph moves when somebody reclassifies a body. It is here rather than
+       only on the civic board because it is the difference between "the Commonwealth is another
+       name on the list" and "the Commonwealth is a different kind of ask", which is the whole point
+       of adding a fourth tier at all. */
+    const postures = (civic && civic.decision_postures && civic.decision_postures.kinds) || null;
+    if (postures) {
+      const byKind = {};
+      for (const i of insts) if (i && i.decides_by) (byKind[i.decides_by] = byKind[i.decides_by] || []).push(i.label);
+      const noMeter = Object.keys(byKind).filter((k) => postures[k] && postures[k].meter === false);
+      const withMeter = Object.keys(byKind).filter((k) => postures[k] && postures[k].meter !== false);
+      const bodies = noMeter.reduce((n, k) => n + byKind[k].length, 0);
+      if (bodies) {
+        root.append(h('And they do not all decide the same way'));
+        root.append(p('The board carries a mood for a body you can persuade. '
+          + withMeter.reduce((n, k) => n + byKind[k].length, 0) + ' of these are like that: a council '
+          + 'with a budget, a program with a tranche left, an operator working out whether it pays. '
+          + bodies + ' are not, and for those the board shows no appetite at all.'));
+        for (const k of noMeter) {
+          root.append(el('div', { class: 'hiw-eg' },
+            el('b', {}, postures[k].label + ': ' + byKind[k].join(', ')),
+            el('span', {}, postures[k].what_moves_it)));
+        }
+        root.append(note('A 0 to 100 appetite on a body that decides against a statutory test would '
+          + 'say that wanting it more helps, and it does not. What you hold with those bodies is '
+          + 'whether the file is complete, and that is the whole of it.'));
+      }
+    }
+
     root.append(
       h('So what do you actually do'),
       p('Commission a study and pay for it. Lodge it anyway and get an information request back '

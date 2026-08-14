@@ -22,6 +22,7 @@ import { runRecordChecks, runSchemaChecks } from './checks-records.mjs';
 import { runEmDashCheck, runSpellingCheck, runRegistryChecks } from './checks-repo.mjs';
 import { runPersonalDataCheck, runContributionCultureCheck } from './checks-screens.mjs';
 import { runCoordinateChecks } from './checks-geo.mjs';
+import { runCitationChecks } from './checks-citations.mjs';
 
 const LEDGER_FILE = 'tools/ingest/ledger.json';
 const VOCAB_FILE = 'tools/ingest/vocabulary.json';
@@ -104,7 +105,14 @@ export function runGate({ only = null, registryPath = 'data/_provenance.json' } 
     ['contribution-culture', runContributionCultureCheck],
     // Positions, re-checked against the map every run rather than once at ingest. A lane's own
     // bounds check is a statement about the afternoon it ran; this is a property of the repository.
-    ['coordinates', runCoordinateChecks]
+    ['coordinates', runCoordinateChecks],
+    // Does the citation on a record name anything? Until this step existed the gate checked that a
+    // source field was present and never that it resolved, so renaming one key in a pack's own
+    // source registry left an Act cited to an id that was not there and the gate said OK. The same
+    // step resolves every other pointer a pack makes, which is the same hole wearing a different
+    // field name: a lever naming a decider no institution defines, a matter naming an ecology
+    // record that does not exist.
+    ['citations', runCitationChecks]
   ];
   // A typo in --only that silently ran nothing would report a green gate over an empty run, which is
   // the worst failure mode a checker has.

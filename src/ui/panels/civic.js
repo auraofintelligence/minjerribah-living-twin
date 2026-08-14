@@ -1270,6 +1270,14 @@ registerPanel({
       const tiersPresent = TIER_ORDER.filter((t) => insts.some((i) => i.tier === t));
 
       const left = el('div', { class: 'cb-pane' });
+      /* The pack's own opening sentence, on screen. It was written to be the first thing anybody
+         read about who governs this island and until now nothing in src/ rendered it, so it went
+         two rounds carrying two claims that no record in the pack supported. A sentence nobody can
+         see is a sentence nobody checks. */
+      const jur = (w.data && w.data.civic && w.data.civic.jurisdiction) || null;
+      if (jur && jur.summary) {
+        left.append(el('div', { class: 'cb-banner' }, el('b', {}, 'The island in one sentence. '), txt(jur.summary)));
+      }
       // Counted, and grouped. A flat list ordered by lever count buried the fourth tier in the
       // middle of it: the Commonwealth would have sat between Minjerribah Camping and TransLink,
       // which tells a reader nothing about what kind of body it is.
@@ -1322,33 +1330,63 @@ registerPanel({
           kv.append(el('dt', {}, 'Purse'), el('dd', {}, fundLabel));
           right.append(kv);
 
-          right.append(el('div', { class: 'cb-h' }, 'Appetite right now'));
-          right.append(el('div', { class: 'cb-track' },
-            bindW(el('i'), () => {
-              const c = w.read('council');
-              const x = c && c.institutions ? c.institutions[i.id] : null;
-              return Math.round((x && x.appetite != null ? x.appetite : 0) * 100) + '%';
-            })));
-          right.append(el('div', { class: 'cb-quiet', style: { marginTop: '5px' } },
-            bind((ww) => {
-              const c = ww.read('council');
-              const x = c && c.institutions ? c.institutions[i.id] : null;
-              if (!x || x.appetite == null) return 'not modelled';
-              return Math.round(x.appetite * 100) + ' out of 100. ' + x.openWithThem + ' of your files are open with them, and asking one body for five things at once costs you.';
-            })));
+          /* HOW THIS BODY DECIDES, WHICH IS NOT ALWAYS A NUMBER.
+             This card used to print one 0 to 100 appetite meter for every body on the board, so the
+             federal environment department was drawn with a meter reading 20 out of 100 directly
+             above the line saying the minister decides against a statutory test and not against how
+             much the island wants it. A meter is a claim, and on that body the claim is false. The
+             pack now carries a posture per institution and the meter only appears where wanting it
+             more actually helps. */
+          if (i.postureMeter) {
+            right.append(el('div', { class: 'cb-h' }, i.postureLabel || 'Appetite right now'));
+            right.append(el('div', { class: 'cb-track' },
+              bindW(el('i'), () => {
+                const c = w.read('council');
+                const x = c && c.institutions ? c.institutions[i.id] : null;
+                return Math.round((x && x.appetite != null ? x.appetite : 0) * 100) + '%';
+              })));
+            right.append(el('div', { class: 'cb-quiet', style: { marginTop: '5px' } },
+              bind((ww) => {
+                const c = ww.read('council');
+                const x = c && c.institutions ? c.institutions[i.id] : null;
+                if (!x || x.appetite == null) return 'not modelled';
+                return Math.round(x.appetite * 100) + ' out of 100. ' + x.openWithThem + ' of your files are open with them, and asking one body for five things at once costs you.';
+              })));
+          } else {
+            right.append(el('div', { class: 'cb-h' }, i.postureLabel || 'What it decides against'));
+            right.append(el('div', { class: 'cb-banner' },
+              el('b', {}, 'No appetite is modelled for this body. '),
+              i.postureMoves || ''));
+            if (i.postureInstead) right.append(el('div', { class: 'cb-p' }, i.postureInstead));
+            right.append(el('div', { class: 'cb-quiet', style: { marginTop: '5px' } },
+              bind((ww) => {
+                const c = ww.read('council');
+                const x = c && c.institutions ? c.institutions[i.id] : null;
+                const open = x ? x.openWithThem : 0;
+                return open === 0
+                  ? 'Nothing of yours is with them right now.'
+                  : open + (open === 1 ? ' file of yours is' : ' files of yours are') + ' with them. That number does not help you here and it does not hurt you either.';
+              })));
+          }
 
-          right.append(el('div', { class: 'cb-h' }, 'How they regard you'));
-          right.append(el('div', { class: 'cb-track' },
-            bindW(el('i'), () => {
-              const c = w.read('council');
-              const x = c && c.institutions ? c.institutions[i.id] : null;
-              return Math.round((x ? x.standing : 0.5) * 100) + '%';
-            })));
-          right.append(el('div', { class: 'cb-quiet', style: { marginTop: '5px' } },
-            i.tier === 'commonwealth'
-              ? 'Standing drifts back toward neutral, and it moves this body least of all: a national '
-                + 'round does not remember you, and a statutory test was never going to be about you.'
-              : 'Standing drifts back toward neutral. A bad year with a council is not a life sentence, and a run of refusals should not feed itself.'));
+          if (i.standingApplies !== false) {
+            right.append(el('div', { class: 'cb-h' }, 'How they regard you'));
+            right.append(el('div', { class: 'cb-track' },
+              bindW(el('i'), () => {
+                const c = w.read('council');
+                const x = c && c.institutions ? c.institutions[i.id] : null;
+                return Math.round((x ? x.standing : 0.5) * 100) + '%';
+              })));
+            right.append(el('div', { class: 'cb-quiet', style: { marginTop: '5px' } },
+              'Standing drifts back toward neutral. A bad year with a council is not a life sentence, and a run of refusals should not feed itself.'));
+          } else {
+            right.append(el('div', { class: 'cb-h' }, 'How they regard you'));
+            right.append(el('div', { class: 'cb-p' },
+              'It does not come into it, so nothing here tracks it. A round does not remember you and '
+              + 'a statutory test was never going to be about you. The board does not score you with '
+              + 'this body, which is a smaller thing to hold than it sounds: what you do hold is '
+              + 'whether the file is complete when it goes in.'));
+          }
 
           if (i.constraint) {
             right.append(el('div', { class: 'cb-h' }, 'The constraint they are under'));
@@ -1587,6 +1625,23 @@ registerPanel({
           }, afford ? 'Commission' : 'No money'));
         }
         right.append(item);
+      }
+
+      /* The section 75 fork. It appears only once the referral has actually gone in, and it says
+         what the twin will not tell you as plainly as what it will: whether this is a controlled
+         action is a judgement on a statutory test, and the pack says in the open that this project
+         does not make that judgement. The player is told the fork and both sides of it, which is
+         more useful than a made-up finding and is the only honest thing available. */
+      if (app.commonwealth) {
+        const cw = app.commonwealth;
+        right.append(el('div', { class: 'cb-h' }, 'With the Commonwealth'));
+        right.append(el('div', { class: 'cb-banner' },
+          el('b', {}, cw.instrument + '. '),
+          'Lodged ' + cw.lodgedDate + ' with ' + cw.body + '. The clock on that decision is '
+          + cw.clockDays + ' days, and it is a statutory one rather than a meeting cycle.'));
+        right.append(el('div', { class: 'cb-p', style: { maxWidth: '86ch' } }, cw.notModelled));
+        for (const f of cw.forks) right.append(el('div', { class: 'cb-item' }, el('div', { class: 'body' }, el('em', {}, f))));
+        right.append(el('div', { class: 'cb-quiet', style: { marginTop: '6px' } }, cw.whatYouHold));
       }
 
       right.append(el('div', { class: 'cb-h' }, 'What you can do'));

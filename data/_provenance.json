@@ -3,7 +3,7 @@
   "schema": "minjerribah-provenance/1",
   "version": 1,
   "generated": "2026-08-10",
-  "fingerprint": "4272fd5fb437",
+  "fingerprint": "43343303bb3c",
   "about": "The pack registry. One entry per data pack, carrying its version, the lane it came through, the documents behind it, when it was ingested, by what extractor, a checksum over the file, and the spread of confidence inside it. src/world/data.js loads what this file lists, so adding a pack means adding it here. docs/INGEST.md is the contract; tools/gate-audit.mjs enforces it.",
   "offline_note": "This is a committed file, not a lookup. The running twin fetches these paths off its own origin and nothing else, ever. Ingestion is an offline step that produces committed, versioned, checksummed data.",
   "confidence_scale": {
@@ -167,7 +167,7 @@
     {
       "id": "civic",
       "file": "data/civic.json",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lane": "research",
       "envelope": "legacy",
       "pack_status": "committed",
@@ -184,9 +184,9 @@
       },
       "checksum": {
         "algorithm": "sha256-lf",
-        "value": "03491aabccfa0337db7b684f0d080fa67b06ff276a7ad613bbb4394fda2d21e9"
+        "value": "d964fe1190e30f5908c56435c86c2c2caf70c62c3af84c49f9c3b9e807329635"
       },
-      "bytes": 209466,
+      "bytes": 217473,
       "records": 215,
       "confidence": {
         "high": 67,

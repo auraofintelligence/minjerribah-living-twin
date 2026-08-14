@@ -14,7 +14,10 @@
 // thing it exists to protect. Every finding names the file, the pointer and the kind, and stops.
 
 import path from 'node:path';
+import { existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import {
+  ROOT as REPO_ROOT,
   readText, readJSON, exists, repoFiles, walkStrings, citesSomething, lineOf
 } from './lib.mjs';
 
@@ -93,7 +96,49 @@ export function stripContactDetails(s) {
 // ------------------------------------------------------------------------------------------------
 
 /** Files that are staged for ingest and have not been through anybody's judgement yet. */
-const STAGING_PREFIXES = ['ingest-inbox/', 'tools/ingest/candidates/'];
+// Only genuinely raw material. `tools/ingest/candidates/` used to be in this list and that was wrong:
+// a candidate is the OUTPUT of a lane that has already stripped contact details, it is tracked on
+// purpose so its diff can be reviewed before promotion, and treating it as unjudged raw import gave
+// it a softer rule than the pack it is about to become. Candidates are now held to the ordinary
+// record rule: cited is advisory, uncited is blocking. `ingest-inbox/` is the only true staging area
+// and it is the only thing that has to stay sealed.
+const STAGING_PREFIXES = ['ingest-inbox/'];
+
+/**
+ * Whether a staging directory is genuinely uncommittable, asked of git rather than assumed.
+ *
+ * This exists because the downgrade below is only safe if it is true. A contact detail found in a
+ * staged file is reported as `review` rather than failing the run, on the reasoning that a raw export
+ * from somebody's own map may legitimately carry their own number and none of it will survive into a
+ * pack. That reasoning collapses the moment the staging directory is committable, and nothing in this
+ * gate used to check. A critic found it on 10 August 2026: today the owner's two mobile numbers are
+ * not committed, and the gate would not have stopped them being committed.
+ *
+ * So: ask git. Ignored and untracked means the downgrade holds. Anything else and every staged
+ * finding becomes blocking, because the file is one `git add -A` from being public, and the
+ * repository is public.
+ */
+function stagingIsSealed() {
+  const unsealed = [];
+  for (const prefix of STAGING_PREFIXES) {
+    const dir = prefix.replace(/\/$/, '');
+    if (!existsSync(path.join(REPO_ROOT, dir))) continue;
+    let ignored = false;
+    try {
+      execFileSync('git', ['check-ignore', '-q', dir], { cwd: REPO_ROOT, stdio: 'ignore' });
+      ignored = true;
+    } catch { ignored = false; }
+    let tracked = [];
+    try {
+      const out = execFileSync('git', ['ls-files', '--', dir], { cwd: REPO_ROOT, encoding: 'utf8' });
+      tracked = out.split('\n').filter(Boolean);
+    } catch { /* not a git repository: treat as unsealed, below */ }
+    if (!ignored || tracked.length) {
+      unsealed.push({ dir, ignored, trackedCount: tracked.length });
+    }
+  }
+  return { sealed: unsealed.length === 0, unsealed };
+}
 const STAGING_EXTS = new Set(['.kml', '.json', '.csv', '.txt', '.md', '.geojson', '.gpx']);
 
 function stagingFiles() {
@@ -239,6 +284,23 @@ export function runPersonalDataCheck(ctx) {
     const [file, severity, pattern] = key.split('|');
     const label = (CONTACT_PATTERNS.find((p) => p.id === pattern) || {}).label || pattern;
     if (severity === 'review') {
+      // Only stays a review if the staging area genuinely cannot be committed. See stagingIsSealed.
+      const seal = stagingIsSealed();
+      if (!seal.sealed) {
+        findings.add({
+          check: 'personal-data', severity: 'blocking', file,
+          message: `${file} is staged for ingest, contains ${t.n} instance(s) of what looks like ${label}, `
+            + `and the staging area is not sealed: `
+            + seal.unsealed.map((u) => `${u.dir} is ${u.ignored ? 'ignored' : 'NOT ignored'}`
+              + `${u.trackedCount ? ` and has ${u.trackedCount} tracked file(s)` : ''}`).join('; ') + '.',
+          hint: 'Staged contact details are normally reported rather than failed, because a raw export '
+            + 'may legitimately carry a number belonging to the person who exported it. That only '
+            + 'holds while the file cannot '
+            + 'be committed. Restore the .gitignore entry, or git rm --cached the tracked files, and '
+            + 'this returns to a review. This repository is public.'
+        });
+        continue;
+      }
       findings.add({
         check: 'personal-data', severity: 'review', file,
         message: `${file} is staged for ingest and contains ${t.n} instance(s) of what looks like ${label}.`,

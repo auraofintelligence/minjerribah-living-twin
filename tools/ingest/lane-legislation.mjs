@@ -272,8 +272,45 @@ export async function resolveCommonwealth(shortTitle) {
     made: h.makingDate ? String(h.makingDate).slice(0, 10) : null,
     year: h.year,
     number: h.number,
-    administering_departments: (h.administeringDepartments || []).map((d) => d.name).sort()
+    administering_departments: (h.administeringDepartments || []).map((d) => d.name).sort(),
+    current_version: await currentVersion(h.id)
   };
+}
+
+/**
+ * The register's own structured account of which version of a title is in force: when it started,
+ * which compilation number it is, and when that entry was registered.
+ *
+ * This exists because a cover page is typeset and metadata is not. The Constitution's cover renders
+ * its three values one row above their labels, and the first pass of this lane published the
+ * registration date as the compilation date at high confidence, which said the text of the
+ * Constitution was current to 2021 when it is current to 1977. `readCover` now reads the columns,
+ * and this is the second opinion that proves it: two independent sources agreeing is worth more
+ * than either of them, and where they disagree `extract` takes the register and says so on the
+ * record rather than choosing quietly.
+ */
+async function currentVersion(titleId) {
+  const filter = encodeURIComponent(`titleId eq '${titleId}' and isCurrent eq true`);
+  const res = await fetch(`${REGISTERS.Commonwealth.api}/versions?%24filter=${filter}`);
+  if (!res.ok) return null;
+  const body = await res.json();
+  const v = (body.value || [])[0];
+  if (!v) return null;
+  return {
+    start: v.start ? String(v.start).slice(0, 10) : null,
+    compilation_number: v.compilationNumber !== undefined && v.compilationNumber !== null ? String(v.compilationNumber) : null,
+    register_id: v.registerId || null,
+    registered_at: v.registeredAt ? String(v.registeredAt).slice(0, 10) : null
+  };
+}
+
+/** "1977-07-29" as "29 July 1977", which is how both registers print a date on a cover. */
+export function longDate(iso) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(iso || ''))) return null;
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+    'September', 'October', 'November', 'December'];
+  const [y, m, d] = iso.split('-').map(Number);
+  return `${d} ${MONTHS[m - 1]} ${y}`;
 }
 
 export function qldIndex() {
@@ -312,6 +349,7 @@ export async function resolveAll() {
         register_year: hit ? hit.year : null,
         register_number: hit ? hit.number : null,
         administering_departments: null,
+        current_version: null,
         note: hit && titleMatches ? '' : hit
           ? `the register says ${e.register_id} is "${tidy(hit.title)}", the catalogue says "${e.short_title}"`
           : byName
@@ -330,6 +368,7 @@ export async function resolveAll() {
       register_year: r.found ? r.year : null,
       register_number: r.found ? r.number : null,
       administering_departments: r.found ? r.administering_departments : null,
+      current_version: r.found ? r.current_version : null,
       collection: r.found ? r.collection : null,
       note: r.found
         ? (r.title_id === e.register_id ? '' : `the register says "${e.short_title}" is ${r.title_id}, the catalogue says ${e.register_id}`)
@@ -492,9 +531,11 @@ export function measureDocument(pages) {
   const lines = pages.slice(start, end + 1).join('\n').split('\n').map((l) => tidy(l));
   const provisions = new Set();
   let entries = 0;
+  let orphanNumbers = 0;
   const headings = { chapters: 0, parts: 0, divisions: 0, subdivisions: 0, schedules: 0 };
   const seenHeading = new Set();
   for (const l of lines) {
+    if (ORPHAN_NUMBER.test(l)) { orphanNumbers++; continue; }
     const m = PROVISION.exec(l);
     if (m) { provisions.add(m[1]); entries++; continue; }
     const h = /^(Chapter|Part|Division|Subdivision|Schedule)\b\s*([0-9A-Za-z.]*)/.exec(l);
@@ -505,27 +546,142 @@ export function measureDocument(pages) {
     const kind = h[1].toLowerCase() + (h[1] === 'Subdivision' ? 's' : h[1] === 'Schedule' ? 's' : 's');
     if (headings[kind] !== undefined) headings[kind]++;
   }
+
+  // The same two column trap as the cover, one page further in. Some reprints set the provision
+  // number in one column and its heading in another, and the two columns are half a row apart, so
+  // every number renders against the heading of the provision below it. Reading that line by line
+  // does not produce a partial answer, it produces a confident wrong one: on the Imperial Acts
+  // Application Act 1984 it gives "2 Short title and citation" when section 1 is the short title
+  // and section 2 binds the Crown. The signal is the orphan: a line holding a provision number and
+  // nothing else. Where that happens this function publishes no provision numbers at all and says
+  // why, and `extract` falls back to the headings printed in the body of the Act itself.
+  const offsetContents = orphanNumbers >= 3 && orphanNumbers >= entries;
+
   return {
     pages: pages.length,
     contents_pages: [start + 1, end + 1],
-    contents_entries: entries,
-    distinct_provision_numbers: provisions.size,
-    provision_numbers: [...provisions],
+    contents_layout: offsetContents ? 'offset-columns' : 'inline',
+    contents_entries: offsetContents ? null : entries,
+    distinct_provision_numbers: offsetContents ? null : provisions.size,
+    provision_numbers: offsetContents ? [] : [...provisions],
+    orphan_numbers: orphanNumbers,
+    body_headings: bodyHeadings(pages, start, end),
     structure: headings
   };
 }
 
-/** The cover page facts: the title as printed, and the line that says how current the print is. */
+/** A contents line holding a provision number and nothing else, which is the two column tell. */
+const ORPHAN_NUMBER = /^[0-9]{1,4}[A-Z]{0,3}$/;
+
+/**
+ * The provision headings printed in the body of the Act, as a second and stronger way to confirm a
+ * section number than its table of contents.
+ *
+ * A contents entry is a number, dot leaders and a page. A body heading is the number and the
+ * heading standing over the provision itself, which is the thing a reader lands on when they follow
+ * the citation. `extract` accepts a catalogue's section number when the contents carries it, or
+ * when a body heading carries it AND the heading text matches the label the catalogue wrote. The
+ * second condition is what makes this safe: a date such as "1 January" would otherwise look like a
+ * heading, and no label will ever match it.
+ */
+function bodyHeadings(pages, contentsStart, contentsEnd) {
+  const out = [];
+  const seen = new Set();
+  for (let p = 0; p < pages.length; p++) {
+    if (p >= contentsStart && p <= contentsEnd) continue;
+    for (const rawLine of pages[p].split('\n')) {
+      const l = tidy(rawLine);
+      if (!l || LEADER.test(l)) continue;
+      const m = /^([0-9]{1,4}[A-Z]{0,3})\s+([A-Z][A-Za-z][^.]{2,88})$/.exec(l);
+      if (!m) continue;
+      const key = `${m[1]}|${m[2].toLowerCase()}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ ref: m[1], heading: m[2].trim() });
+    }
+  }
+  return out;
+}
+
+/**
+ * The cover page facts: the title as printed, and the line that says how current the print is.
+ *
+ * THE TWO COLUMN TRAP, WHICH THIS FUNCTION EXISTS TO SURVIVE. A Federal Register cover sets the
+ * labels in one column and their values in another, and on the older covers the value column sits
+ * half a line higher than the labels, so every value renders on the row of the label above it. The
+ * Constitution's cover comes out of pdftotext like this, and reading it line by line gives
+ * "Compilation date: 18 November 2021" when the register's own metadata says the current version
+ * started on 29 July 1977 and 18 November 2021 is when the entry was registered. The first pass of
+ * this lane published that mis-read as a quote at high confidence, which overstated how current the
+ * text of the Constitution is by forty-four years.
+ *
+ * So a label that renders with nothing after it is the signal, not a fact. When every label on the
+ * cover is empty, the values are collected out of the value column in the order they appear and
+ * paired with the labels in the order they appear. The result is checked a second time against the
+ * register's own version metadata in `extract`, and where the two disagree the register wins and
+ * the record says so.
+ */
 export function readCover(page) {
-  const lines = page.split('\n').map((l) => tidy(l)).filter(Boolean);
+  // A carriage return is a line terminator to a JavaScript regular expression, so an end anchor
+  // never matches on a CRLF file and a column read silently finds nothing. Strip it once, here.
+  const raw = page.split('\n').map((l) => l.replace(/\r+$/, ''));
+  const lines = raw.map((l) => tidy(l)).filter(Boolean);
   const joined = lines.join(' ');
-  const currency = lines.find((l) => /^Current as at /.test(l))
+
+  const LABEL = /^(Compilation date|Includes amendments up to|Includes amendments|Registered|Prepared by|Current as at|Reprinted as in force)\b\s*:?\s*(.*)$/;
+  const labelled = [];
+  for (const l of lines) {
+    const m = LABEL.exec(l);
+    if (m) labelled.push({ label: m[1], value: m[2].trim(), line: l });
+  }
+  // A cover in one column never leaves a label standing empty. Two or more of these labels with at
+  // least one of them empty is the two column layout, and nothing on it may be read line by line.
+  const pairing = labelled.filter((x) => /^(Compilation date|Includes amendments up to|Registered)$/.test(x.label));
+  const offset = pairing.length >= 2 && pairing.some((x) => !x.value);
+
+  let currency = lines.find((l) => /^Current as at /.test(l))
     || lines.find((l) => /^Compilation date:/.test(l))
     || lines.find((l) => /^Reprinted as in force/.test(l))
     || null;
-  const compilation = lines.find((l) => /^Compilation No\./.test(l)) || null;
-  const includes = lines.find((l) => /^Includes amendments/.test(l)) || null;
-  return { lines, joined, currency, compilation, includes };
+  let compilation = lines.find((l) => /^Compilation No\./.test(l)) || null;
+  let includes = lines.find((l) => /^Includes amendments/.test(l)) || null;
+  let registered = lines.find((l) => /^Registered:/.test(l)) || null;
+
+  if (offset) {
+    // The value column starts where the compilation number line carries trailing text. Everything
+    // in that column, from that row down to the end of the block, is a value in document order.
+    const start = raw.findIndex((l) => /^\s*Compilation No\./.test(l));
+    const values = [];
+    let col = -1;
+    if (start >= 0) {
+      const head = /^(\s*Compilation No\.\s+\S+\s{2,})(\S.*)$/.exec(raw[start]);
+      if (head) { col = head[1].length; values.push(tidy(head[2])); compilation = tidy(raw[start].slice(0, head[1].length)); }
+    }
+    if (col > 0) {
+      for (let i = start + 1; i < raw.length; i++) {
+        const l = raw[i].replace(/\s+$/, '');
+        if (/^\s*Prepared by\b/.test(l)) break;
+        if (l.length <= col) continue;
+        const tail = tidy(l.slice(col));
+        if (tail) values.push(tail);
+      }
+      const labels = pairing.map((x) => x.label);
+      // Fewer values than labels means the column was not read cleanly, and a partial pairing is
+      // how the first mis-read happened. Leave the line by line reading alone and say so instead.
+      if (values.length >= labels.length) {
+        const paired = new Map();
+        for (let i = 0; i < labels.length; i++) paired.set(labels[i], values[i]);
+        if (paired.has('Compilation date')) currency = `Compilation date: ${paired.get('Compilation date')}`;
+        if (paired.has('Includes amendments up to')) includes = `Includes amendments up to: ${paired.get('Includes amendments up to')}`;
+        if (paired.has('Registered')) registered = `Registered: ${paired.get('Registered')}`;
+        return { lines, joined, currency, compilation, includes, registered, layout: 'offset-columns' };
+      }
+      return { lines, joined, currency, compilation, includes, registered, layout: 'offset-columns-unread' };
+    }
+    return { lines, joined, currency, compilation, includes, registered, layout: 'offset-columns-unread' };
+  }
+
+  return { lines, joined, currency, compilation, includes, registered, layout: 'inline' };
 }
 
 /**
@@ -548,7 +704,10 @@ export function measureAll() {
     }
     let pages = 0;
     let entries = 0;
+    let countable = true;
+    let contentsLayout = 'inline';
     const allProvisions = new Set();
+    const bodyHeads = [];
     const structure = { chapters: 0, parts: 0, divisions: 0, subdivisions: 0, schedules: 0 };
     let cover = null;
     let titleOk = false;
@@ -562,8 +721,10 @@ export function measureAll() {
       if (!cover) cover = c;
       if (tidy(c.joined).toLowerCase().includes(tidy(e.short_title).toLowerCase())) titleOk = true;
       pages += m.pages;
-      entries += m.contents_entries;
+      if (m.contents_layout !== 'inline') { countable = false; contentsLayout = m.contents_layout; }
+      else entries += m.contents_entries;
       for (const n of m.provision_numbers) allProvisions.add(n);
+      for (const h of m.body_headings) bodyHeads.push(h);
       for (const k of Object.keys(structure)) structure[k] += m.structure[k];
       per.push({ volume: file.volume, pages: m.pages, contents_entries: m.contents_entries, contents_pages: m.contents_pages });
     }
@@ -577,11 +738,22 @@ export function measureAll() {
       });
       continue;
     }
-    if (entries < 5) {
+    // A contents nobody could count is a different thing from a contents nobody could find. The
+    // first is a layout this lane refuses to guess at and says so on the record; the second means
+    // the document is not what it was taken for, and nothing is recorded from it.
+    if (countable && entries < 5) {
       rows.push({
         id: e.id, measured: false,
         why: `only ${entries} contents entries were found, which means the contents was not located `
           + 'in this document and any count taken from it would be wrong.'
+      });
+      continue;
+    }
+    if (!countable && !bodyHeads.length) {
+      rows.push({
+        id: e.id, measured: false,
+        why: 'the contents of this reprint is set in two columns that cannot be paired, and no '
+          + 'provision heading was found in the body either, so there is nothing here to count.'
       });
       continue;
     }
@@ -590,12 +762,21 @@ export function measureAll() {
       measured: true,
       volumes: f.files.length,
       pages,
-      contents_entries: entries,
-      distinct_provision_numbers: distinct,
+      contents_layout: contentsLayout,
+      contents_entries: countable ? entries : null,
+      distinct_provision_numbers: countable ? distinct : null,
+      not_counted_why: countable ? null
+        : "the contents of this reprint sets the provision number and its heading in two columns "
+          + 'half a row apart, so a line by line read pairs every number with the wrong heading. '
+          + 'Rather than publish a count taken from that, this record publishes pages only and the '
+          + "section numbers it names were confirmed against the headings printed in the Act's body.",
+      body_headings: bodyHeads,
       structure,
+      cover_layout: cover.layout,
       currency_line: cover.currency,
       compilation_line: cover.compilation,
       includes_line: cover.includes,
+      registered_line: cover.registered || null,
       bytes: f.files.reduce((a, x) => a + x.bytes, 0),
       sha256: f.files.map((x) => ({ volume: x.volume, sha256: x.sha256 })),
       per_volume: per,
@@ -614,6 +795,105 @@ export function measured() {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Judgments
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * The edges of the corpus need judgments, and a judgment is the easiest thing in this pack to get
+ * wrong from memory.
+ *
+ * A person arriving at this twin holding a form they were told makes a difference has usually been
+ * given a case name as well, and half of those case names are misremembered, misattributed or from
+ * another country. So this lane will not carry a judgment on the strength of anybody's recall,
+ * including its own. Every judgment in the catalogue names a published source, and this step
+ * fetches that page, strips it to text, and refuses the record unless the page carries both the
+ * case name as the catalogue writes it and the quote, character for character. A quote that is not
+ * in the document is not a quote.
+ *
+ * WHERE THE TEXT COMES FROM AND WHY. Queensland judgments are read from Queensland Judgments,
+ * which is published by the Incorporated Council of Law Reporting for the State of Queensland with
+ * the Supreme Court of Queensland Library Committee. The obvious alternative refuses automated
+ * readers in terms, and being refused is an answer: this lane goes elsewhere rather than around.
+ * Nothing is republished. The cached text lands in ingest-inbox, which is not committed, and its
+ * sha256 is recorded so a quote can be shown to have come from a specific retrieval.
+ */
+export async function verifyJudgments({ force = false } = {}) {
+  const cat = loadCatalogue();
+  const list = cat.judgments || [];
+  ensureDir(`${INBOX}/judgments`);
+  const rows = [];
+  for (const j of list) {
+    const dest = `${INBOX}/judgments/${j.id}.judgment`;
+    const full = abs(dest);
+    let text = '';
+    let fetchedNow = false;
+    if (!force && fs.existsSync(full)) {
+      text = fs.readFileSync(full, 'utf8');
+    } else {
+      try {
+        const res = await fetch(j.source_url, { redirect: 'follow', headers: { 'user-agent': UA } });
+        if (!res.ok) { rows.push({ id: j.id, verified: false, why: `the source returned ${res.status}` }); continue; }
+        text = plainText(await res.text());
+        fs.writeFileSync(full, text, 'utf8');
+        fetchedNow = true;
+      } catch (err) {
+        rows.push({ id: j.id, verified: false, why: `the source could not be reached: ${err.message}` });
+        continue;
+      }
+    }
+    const hay = tidy(text);
+    const nameOk = hay.includes(tidy(j.case_name)) || hay.includes(tidy(j.reported_as || '~none~'));
+    const citeOk = hay.includes(tidy(j.citation));
+    const quoteAt = hay.indexOf(tidy(j.quote));
+    rows.push({
+      id: j.id,
+      verified: Boolean(nameOk && citeOk && quoteAt >= 0),
+      case_name_found: nameOk,
+      citation_found: citeOk,
+      quote_found: quoteAt >= 0,
+      quote_at: quoteAt >= 0 ? quoteAt : null,
+      characters: text.length,
+      sha256: crypto.createHash('sha256').update(text).digest('hex'),
+      file: dest,
+      fetched: fetchedNow,
+      why: nameOk && citeOk && quoteAt >= 0 ? '' : [
+        nameOk ? null : `the page does not carry the case name "${j.case_name}"`,
+        citeOk ? null : `the page does not carry the citation "${j.citation}"`,
+        quoteAt >= 0 ? null : 'the page does not carry the quote character for character'
+      ].filter(Boolean).join('; ')
+    });
+  }
+  const file = `${INBOX}/judgments.json`;
+  fs.writeFileSync(abs(file), JSON.stringify({ verified_at: today(), extractor: EXTRACTOR, judgments: rows }, null, 1) + '\n', 'utf8');
+  return { file, rows };
+}
+
+export function judgmentChecks() {
+  const file = `${INBOX}/judgments.json`;
+  if (!exists(file)) return null;
+  return readJSON(file);
+}
+
+const UA = 'minjerribah-living-twin ingest (one page per judgment, offline afterwards)';
+
+/** A served page as the words on it, with the markup and the scripts taken out. */
+function plainText(html) {
+  return String(html)
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#8217;|&rsquo;|&lsquo;|&#146;|&#145;/g, "'")
+    .replace(/&ldquo;|&rdquo;|&#147;|&#148;/g, '"')
+    .replace(/&hellip;/g, '...')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// ---------------------------------------------------------------------------------------------
 // Extraction
 // ---------------------------------------------------------------------------------------------
 
@@ -625,6 +905,60 @@ export function measured() {
  * file, and nothing in this lane can add one. So the reviewed state is a record of somebody
  * reading the Act's contents and writing what it does, and it is auditable line by line in git.
  */
+/**
+ * How current the consolidation is, read twice: off the cover, and out of the register's metadata.
+ *
+ * Both are recorded. Where they agree the record says so, which is worth more than either on its
+ * own. Where they disagree the register is taken, the cover reading is kept beside it, and the
+ * confidence on that record drops to medium, because a reader who follows the citation will see the
+ * cover and has to be told which of the two this pack believes and why.
+ */
+export function readCurrency(m, r) {
+  const cover = m.currency_line || m.compilation_line || null;
+  const coverDate = cover ? (/(\d{1,2} [A-Z][a-z]+ \d{4})/.exec(cover) || [])[1] || null : null;
+  const version = r && r.current_version ? r.current_version : null;
+  const registerDate = version ? longDate(version.start) : null;
+  if (!registerDate) {
+    return { quote: cover, line: cover, from: 'the cover page of the consolidation', agreed: null, note: '', confidence: null };
+  }
+  const agreed = Boolean(coverDate && coverDate === registerDate);
+  if (agreed) {
+    return {
+      quote: cover,
+      line: cover,
+      from: "the cover page of the consolidation, and the register's own version metadata agrees",
+      agreed: true,
+      note: `The Federal Register gives the current version of this title as compilation `
+        + `${version.compilation_number} starting ${registerDate}, which is what the cover says.`,
+      confidence: null
+    };
+  }
+  return {
+    quote: cover,
+    line: `Compilation date: ${registerDate}`,
+    from: "the register's own version metadata, because the cover page disagrees with it",
+    agreed: false,
+    note: `The cover of this consolidation reads "${cover}". The Federal Register's metadata for the `
+      + `same title gives the current version as compilation ${version.compilation_number} starting `
+      + `${registerDate}${version.registered_at ? `, registered ${longDate(version.registered_at)}` : ''}. `
+      + 'This record takes the register and keeps the cover reading here, because the two do not agree '
+      + 'and a reader who opens the document will see the cover.',
+    confidence: 'medium'
+  };
+}
+
+/** Does a heading printed in the Act say the same thing as the label the catalogue wrote? */
+function headingMatches(heading, label) {
+  const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const a = norm(heading);
+  const b = norm(label);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  const shorter = a.length < b.length ? a : b;
+  const longer = a.length < b.length ? b : a;
+  return shorter.length >= 8 && longer.startsWith(shorter);
+}
+
 export function extract({ batch }) {
   const cat = loadCatalogue();
   const res = new Map((resolution().instruments || []).map((r) => [r.id, r]));
@@ -649,7 +983,11 @@ export function extract({ batch }) {
       refused.push({ instrument: e.id, short_title: e.short_title, why: m ? m.why : 'it was never measured' });
       continue;
     }
-    const quote = m.currency_line || m.compilation_line;
+    // How current the print is, from the cover and from the register, and what to do when the two
+    // do not agree. The register wins, because it is structured data rather than a typeset page,
+    // and the disagreement goes on the record instead of being resolved out of sight.
+    const currency = readCurrency(m, r);
+    const quote = currency.quote;
     const administered = e.jurisdiction === 'Commonwealth'
       ? r.administering_departments
       : null;
@@ -658,13 +996,33 @@ export function extract({ batch }) {
     // the set this lane read out of the Act's own contents, and one that is not there is dropped
     // and printed rather than published. A wrong section number in a civic explainer is worse than
     // no section number, because the reader has no way to tell.
+    //
+    // There is a second channel and it is narrower on purpose. Where a reprint sets its contents in
+    // two columns this lane will not read it at all, so a number can still be confirmed against the
+    // heading printed over the provision in the body, but only when the heading text also matches
+    // the label the catalogue wrote. A number alone would let a date in the body stand in for a
+    // section; a number and its own words together will not.
     const known = new Set(m.provision_numbers || []);
+    const heads = m.body_headings || [];
     const keyProvisions = [];
     for (const kp of e.key_provisions || []) {
-      if (known.has(String(kp.ref))) keyProvisions.push({ ref: kp.ref, label: kp.label, kind: kp.kind || 'section' });
-      else dropped.push({
+      const ref = String(kp.ref);
+      if (known.has(ref)) {
+        keyProvisions.push({ ref: kp.ref, label: kp.label, kind: kp.kind || 'section', confirmed_from: "the Act's own table of contents" });
+        continue;
+      }
+      const head = heads.find((h) => h.ref === ref && headingMatches(h.heading, kp.label));
+      if (head) {
+        keyProvisions.push({
+          ref: kp.ref, label: kp.label, kind: kp.kind || 'section',
+          confirmed_from: `the heading printed over the provision in the Act itself, which reads "${head.ref} ${head.heading}"`
+        });
+        continue;
+      }
+      dropped.push({
         instrument: e.id, ref: kp.ref, label: kp.label,
-        why: "the lane could not find this number in the Act's own contents, so it was not published. "
+        why: "the lane could not find this number in the Act's own contents, and no heading in the "
+          + 'body of the Act carries that number with a matching label either, so it was not published. '
           + 'That means unconfirmed rather than wrong: a contents entry whose title wraps can be missed. '
           + 'The check is deliberately conservative, because a section number a reader cannot check is '
           + 'worse than no section number.'
@@ -686,9 +1044,18 @@ export function extract({ batch }) {
         deep_link: reg.deepLink(e.register_id)
       },
       in_force: true,
-      currency: quote,
+      currency: currency.line,
+      currency_from: currency.from,
+      currency_note: currency.note,
       compilation: m.compilation_line || null,
       includes_amendments: m.includes_line || null,
+      registered: m.registered_line || null,
+      cover_layout: m.cover_layout || 'inline',
+      cover_layout_note: m.cover_layout === 'offset-columns'
+        ? 'The cover of this consolidation sets its labels in one column and their values in another, '
+          + 'and the value column sits one row higher than the labels, so a line by line read pairs '
+          + 'every value with the wrong label. The columns were read as columns to produce this record.'
+        : '',
       administered_by: administered,
       administered_by_note: administered
         ? 'Taken from the Federal Register of Legislation, which publishes the administering department for every title.'
@@ -705,17 +1072,23 @@ export function extract({ batch }) {
         divisions: m.structure.divisions,
         schedules: m.structure.schedules,
         measured_from: m.sha256.map((s) => (s.volume ? `volume ${s.volume} ` : '') + `sha256 ${s.sha256.slice(0, 16)}`),
-        method: 'Pages counted from the published consolidation and exact. Entries and headings counted '
-          + "from the consolidation's own table of contents, which lists each provision once, and close "
-          + 'rather than exact. See method.accuracy_note at the top of this pack.'
+        contents_layout: m.contents_layout || 'inline',
+        not_counted_why: m.not_counted_why || null,
+        method: m.contents_entries === null
+          ? 'Pages counted from the published consolidation and exact. Nothing else was counted: see '
+            + 'not_counted_why on this record.'
+          : 'Pages counted from the published consolidation and exact. Entries and headings counted '
+            + "from the consolidation's own table of contents, which lists each provision once, and close "
+            + 'rather than exact. See method.accuracy_note at the top of this pack.'
       },
       what_it_does: e.plain_english,
       parts_that_bear_on_a_person: e.touches || [],
       key_provisions: keyProvisions,
       key_provisions_note: keyProvisions.length
-        ? "Every provision number here was found in the Act's own table of contents in the "
-          + 'consolidation this record was measured from. Any the lane could not find there was dropped '
-          + 'rather than published, and the dropped ones are listed in the pack under provisions_not_confirmed.'
+        ? "Every provision number here was found in the consolidation this record was measured from, "
+          + "either in the Act's own table of contents or in the heading printed over the provision "
+          + 'itself, and each one says which. Any the lane could not find was dropped rather than '
+          + 'published, and the dropped ones are listed in the pack under provisions_not_confirmed.'
         : 'None recorded. This record describes the Act by topic rather than by section number.',
       bearing: e.bearing,
       bearing_reason: e.bearing_reason || '',
@@ -727,7 +1100,7 @@ export function extract({ batch }) {
       source: `${reg.id}:${e.register_id}`,
       locator: `cover page of the current consolidation, ${e.register_id}`,
       quote,
-      confidence: e.confidence || 'high',
+      confidence: currency.confidence || e.confidence || 'high',
       status: 'committed',
       asserts: 'real_world',
       extracted_at: stamp,
@@ -745,6 +1118,8 @@ export function extract({ batch }) {
     candidates.push(record);
   }
 
+  const edgeWork = buildEdges(cat, stamp, new Set(candidates.map((c) => c.id)));
+
   ensureDir(CANDIDATES);
   const out = `${CANDIDATES}/legislation-${batch}.json`;
   fs.writeFileSync(abs(out), JSON.stringify({
@@ -756,14 +1131,120 @@ export function extract({ batch }) {
     extracted_at: stamp,
     note: 'Structure and size measured from the published consolidations. Descriptions written by hand '
       + 'against the same documents. Nothing here is legal advice.',
-    pack_header: packHeader(cat, refused, candidates, dropped),
+    pack_header: packHeader(cat, refused, candidates, dropped, edgeWork),
     candidates
   }, null, 1) + '\n', 'utf8');
-  return { file: out, candidates, refused, dropped };
+  return { file: out, candidates, refused, dropped, edges: edgeWork.edges, judgments: edgeWork.judgments, judgmentsRefused: edgeWork.refused };
 }
 
+/**
+ * The edges of the corpus: the four situations where a thing looks like law here and is not, or is
+ * law here but not in the way it is usually described.
+ *
+ * These are the records this pack exists for as much as the Acts are. A person who arrives holding
+ * a copy of Magna Carta and a United States financing statement is not helped by a list of
+ * sixty-six Queensland and Commonwealth Acts that says nothing about either. Four types, and the
+ * type is the work:
+ *
+ *   partially_in_force     Old imperial law that a Queensland Act keeps alive, named chapter by
+ *                          chapter, with the Act and the schedule that does it.
+ *   foreign_domestic       An instrument of another country's law, with the Australian instrument
+ *                          that does the same job named beside it.
+ *   treaty_unincorporated  A treaty Australia has ratified that is not part of domestic law until
+ *                          a parliament passes something.
+ *   asserted_rejected      A chain of reasoning a person may have been given, and what an
+ *                          Australian court actually held about it, stated flatly and with the
+ *                          judgment cited so the reader can go and read it.
+ *
+ * Every judgment named here has been fetched from its publisher and checked: the page must carry
+ * the case name, the citation and the quote, character for character, or the judgment does not go
+ * in and the edge that leaned on it says which support it lost.
+ */
+function buildEdges(cat, stamp, instrumentIds) {
+  const checks = new Map(((judgmentChecks() || {}).judgments || []).map((j) => [j.id, j]));
+  const judgments = [];
+  const refused = [];
+  for (const j of cat.judgments || []) {
+    const c = checks.get(j.id);
+    if (!c || !c.verified) {
+      refused.push({
+        judgment: j.id,
+        case_name: j.case_name,
+        citation: j.citation,
+        why: c ? c.why : 'it was never checked against its published source. Run --judgments.'
+      });
+      continue;
+    }
+    judgments.push({
+      id: j.id,
+      case_name: j.case_name,
+      citation: j.citation,
+      court: j.court,
+      decided: j.decided,
+      bench: j.bench,
+      what_was_argued: j.what_was_argued,
+      what_was_held: j.what_was_held,
+      why_it_is_here: j.why_it_is_here || '',
+      island_link: j.island_link || '',
+      not_advice: NOT_ADVICE_LINE,
+      neutral_note: 'This record states what a court decided. It does not describe the person who ran '
+        + 'the argument, and nothing here is a view about them.',
+      source: j.source,
+      source_url: j.source_url,
+      locator: j.locator,
+      quote: j.quote,
+      verified_against: `sha256 ${String(c.sha256).slice(0, 16)} of the page as retrieved`,
+      confidence: 'high',
+      status: 'committed',
+      asserts: 'real_world',
+      extracted_at: stamp,
+      extractor: `${EXTRACTOR.id}/${EXTRACTOR.version}`,
+      reviewed_by: j.reviewed ? j.reviewed.by : '',
+      reviewed_on: j.reviewed ? j.reviewed.on : ''
+    });
+  }
+  const have = new Set(judgments.map((j) => j.id));
+  const edges = [];
+  for (const e of cat.edges || []) {
+    const kept = (e.judgments || []).filter((id) => have.has(id));
+    const lost = (e.judgments || []).filter((id) => !have.has(id));
+    edges.push({
+      id: e.id,
+      type: e.type,
+      title: e.title,
+      citation: e.citation || '',
+      jurisdiction: e.jurisdiction || '',
+      what_it_is: e.what_it_is,
+      how_it_stands_here: e.how_it_stands_here,
+      what_people_are_told: e.what_people_are_told || '',
+      what_a_court_held: e.what_a_court_held || '',
+      mechanism: e.mechanism || '',
+      instruments: (e.instruments || []).filter((id) => instrumentIds.has(id)),
+      instruments_not_in_pack: (e.instruments || []).filter((id) => !instrumentIds.has(id)),
+      judgments: kept,
+      judgments_not_verified: lost,
+      what_to_do_with_it: e.what_to_do_with_it || '',
+      not_advice: NOT_ADVICE_LINE,
+      source: e.source,
+      locator: e.locator,
+      quote: e.quote,
+      confidence: e.confidence || 'high',
+      status: 'committed',
+      asserts: 'real_world',
+      extracted_at: stamp,
+      extractor: `${EXTRACTOR.id}/${EXTRACTOR.version}`,
+      reviewed_by: e.reviewed ? e.reviewed.by : '',
+      reviewed_on: e.reviewed ? e.reviewed.on : ''
+    });
+  }
+  return { edges, judgments, refused };
+}
+
+const NOT_ADVICE_LINE = 'This is a description of published law, not advice. A person\'s actual '
+  + 'position depends on facts this twin does not know.';
+
 /** The top-level fields data/legislation.json has to carry, which promotion copies in on creation. */
-function packHeader(cat, refused, candidates, dropped) {
+function packHeader(cat, refused, candidates, dropped, edgeWork) {
   return {
     version: '1.0.0',
     island: 'Minjerribah / North Stradbroke Island, Quandamooka Country, Queensland',
@@ -819,6 +1300,27 @@ function packHeader(cat, refused, candidates, dropped) {
     not_verified: refused,
     provisions_not_confirmed: dropped || [],
     left_out: cat.left_out || [],
+    edge_types: cat.edge_types || [],
+    edges: (edgeWork && edgeWork.edges) || [],
+    judgments: (edgeWork && edgeWork.judgments) || [],
+    judgments_not_verified: (edgeWork && edgeWork.refused) || [],
+    judgments_method: {
+      what_is_checked: 'Every judgment named in this pack was fetched from its publisher and the page '
+        + 'had to carry the case name, the medium neutral citation and the quote, character for '
+        + 'character, before the record was written. One that failed any of those is in '
+        + 'judgments_not_verified with the reason and is not cited anywhere.',
+      where_from: 'Queensland judgments are read from Queensland Judgments, published by the '
+        + 'Incorporated Council of Law Reporting for the State of Queensland with the Supreme Court of '
+        + 'Queensland Library Committee. The larger free database refuses automated readers in terms, '
+        + 'so this lane does not read it.',
+      how_holdings_are_written: 'What was held is written in this pack\'s own words and kept to what '
+        + 'the court decided. Judgments on these arguments sometimes carry sharp words about the person '
+        + 'who ran them; this pack quotes the legal conclusion and not the rebuke, because a reader who '
+        + 'arrives holding one of these arguments is here to find out where they stand, not to be told '
+        + 'what somebody thought of a stranger.',
+      what_is_not_here: 'No judgment text beyond the quoted sentence, and no view about how any of '
+        + 'this applies to a particular person. That is the not_advice line, and it holds here hardest.'
+    },
     read_in_2012: cat.stack_2012
       ? {
         what_it_is: cat.stack_2012.what_it_is,
@@ -826,6 +1328,7 @@ function packHeader(cat, refused, candidates, dropped) {
         files: (cat.stack_2012.entries || []).length,
         instruments_from_it_in_this_pack: [...new Set((cat.stack_2012.entries || [])
           .filter((e) => e.instrument).map((e) => e.instrument))].sort(),
+        status_words: cat.stack_2012.status_words || {},
         by_status: Object.fromEntries([...(cat.stack_2012.entries || [])
           .reduce((m, e) => m.set(e.status, (m.get(e.status) || 0) + 1), new Map())].sort()),
         entries: cat.stack_2012.entries || []
@@ -927,6 +1430,11 @@ if (RAN_DIRECTLY) {
       const bad = rows.filter((r) => !r.measured);
       console.log(`${rows.length - bad.length} of ${rows.length} measured. Written to ${file}.`);
       for (const b of bad) console.log(`  NOT MEASURED ${b.id}: ${b.why}`);
+    } else if (args.includes('--judgments')) {
+      const { file, rows } = await verifyJudgments({ force: args.includes('--force') });
+      const bad = rows.filter((r) => !r.verified);
+      console.log(`${rows.length - bad.length} of ${rows.length} judgments verified against their published source. Written to ${file}.`);
+      for (const b of bad) console.log(`  NOT VERIFIED ${b.id}: ${b.why}`);
     } else if (args.includes('--extract')) {
       const batch = argVal(args, '--batch', today());
       const r = extract({ batch });
@@ -938,6 +1446,11 @@ if (RAN_DIRECTLY) {
       if (r.dropped.length) {
         console.log(`\n${r.dropped.length} named provision(s) were dropped because they are not in the Act's own contents:`);
         for (const x of r.dropped) console.log(`  ${x.instrument} ${x.ref} (${x.label})`);
+      }
+      console.log(`\n${r.edges.length} edge record(s) and ${r.judgments.length} judgment(s) go with them.`);
+      if (r.judgmentsRefused.length) {
+        console.log(`${r.judgmentsRefused.length} judgment(s) were refused and are cited nowhere:`);
+        for (const x of r.judgmentsRefused) console.log(`  ${x.citation}: ${x.why}`);
       }
       const unread = r.candidates.filter((c) => c.needs);
       if (unread.length) console.log(`\n${unread.length} candidate(s) still carry the note a person has to clear. `

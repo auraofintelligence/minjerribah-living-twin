@@ -210,6 +210,8 @@
         "version",
         "confidence_scale",
         "source_registry",
+        "citation_rule",
+        "decision_postures",
         "levers",
         "issues"
       ],
@@ -220,6 +222,8 @@
             "id",
             "label",
             "kind",
+            "tier",
+            "decides_by",
             "role",
             "source",
             "confidence"
@@ -281,7 +285,89 @@
             "levers"
           ]
         }
-      }
+      },
+      "references": [
+        {
+          "from": "levers[].who_decides",
+          "into": "institutions[].id",
+          "why": "who_decides is the most important field in this pack. A decider no institution record defines gets no tier, so the twin cannot say how many governments a lever needs, and it draws the lever anyway."
+        },
+        {
+          "from": "levers[].who_supports",
+          "into": "interest_groups[].id",
+          "why": "A supporter nobody has defined carries no civic weight, so it silently counts for nothing in the decision."
+        },
+        {
+          "from": "levers[].who_opposes",
+          "into": "interest_groups[].id",
+          "why": "An opponent nobody has defined silently counts for nothing in the decision."
+        },
+        {
+          "from": "levers[].effects[].target",
+          "into": "metrics[].id",
+          "why": "An effect on a metric that does not exist is a lever that appears to do something and moves nothing."
+        },
+        {
+          "from": "levers[].side_effects[].target",
+          "into": "metrics[].id",
+          "why": "The side effect is the second-order consequence a player is meant to discover. Pointed at nothing, it never arrives."
+        },
+        {
+          "from": "levers[].issue",
+          "into": "issues[].id",
+          "why": "A lever filed under an issue that does not exist cannot be found from the board."
+        },
+        {
+          "from": "issues[].levers",
+          "into": "levers[].id",
+          "why": "An issue listing a lever that does not exist offers the player a door with nothing behind it."
+        },
+        {
+          "from": "jurisdiction.layers[].body",
+          "into": "institutions[].id",
+          "why": "Each layer of authority names the body that holds it. A layer pointing at no institution is a tier with nobody in it."
+        },
+        {
+          "from": "national_environmental_significance.matters[].instrument",
+          "into": "instruments[].id",
+          "why": "A matter of national environmental significance is only a claim about the law if the instrument it names is in the pack."
+        },
+        {
+          "from": "national_environmental_significance.matters[].ecology_refs",
+          "into": "data/ecology.json#id",
+          "why": "This block is the join between Commonwealth law and the species the twin already simulates. A ref that resolves to nothing joins the civic layer to nothing."
+        },
+        {
+          "from": "national_environmental_significance.matters[].sim_ref",
+          "into": "file",
+          "why": "A matter claiming the twin already models it has to name a file that exists."
+        },
+        {
+          "from": "commonwealth_money.routes[].instrument",
+          "into": "instruments[].id",
+          "why": "Every money route names the program or Act it runs on."
+        },
+        {
+          "from": "interest_groups[].defined_in",
+          "into": "file",
+          "why": "A group that says it is defined in another pack has to name a file that is there."
+        },
+        {
+          "from": "institutions[].tier",
+          "into": "jurisdiction.tiers.order[]",
+          "why": "A body in a tier the pack has not declared is rendered as unknown, which is how a whole order of authority stays invisible."
+        },
+        {
+          "from": "instruments[].tier",
+          "into": "jurisdiction.tiers.order[]",
+          "why": "An instrument in an undeclared tier is filed under no heading and appears on no institution card."
+        },
+        {
+          "from": "institutions[].decides_by",
+          "into": "decision_postures.kinds{}",
+          "why": "A body whose posture the pack has not declared would fall back to being drawn with an appetite meter, which is the exact fault this field was added to fix."
+        }
+      ]
     },
     "residents": {
       "pack": "residents",
