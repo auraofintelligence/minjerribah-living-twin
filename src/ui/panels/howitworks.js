@@ -1009,6 +1009,40 @@ function mountHowItWorks(root, world) {
           + 'invisible, not caveated.')),
       note('One function decides which register a record is in, and the checker that guards the '
         + 'packs runs the same one, so nothing is a proposal in one place and a fact in another.'));
+
+    /* THE FOURTH THING, WHICH IS NOT A FOURTH REGISTER.
+       Real, modelled and proposed above are about a record: does this thing exist. The civic board
+       carries a different three, about a claim: known, modelled, speculative. The speculative one
+       is the only surface in this build that describes an instrument nobody has written, so it is
+       switched off until somebody asks for it, and this screen is where a person finds out it is
+       there. Saying that out loud is not the same as showing it: a councillor who reads this
+       paragraph and never touches the switch sees precisely the island as it is.
+       Everything counted, nothing typed in. */
+    const civic = pack(world, 'civic');
+    const ow = civic && civic.off_world;
+    if (ow) {
+      const spec = Array.isArray(ow.proposals) ? ow.proposals.length : 0;
+      const known = (Array.isArray(ow.instruments) ? ow.instruments.length : 0)
+        + (Array.isArray(ow.precedents) ? ow.precedents.length : 0);
+      root.append(
+        h('And one register you have to switch on'),
+        p('The civic board can hold a claim about the future as carefully as it holds a statute, '
+          + 'and it keeps them apart by keeping the second lot switched off. '
+          + known + ' sourced records of law that already reaches above the nation state, and '
+          + spec + ' instruments that do not exist, each one lifted from a real one and each '
+          + 'naming the test that would settle it.'),
+        el('div', { class: 'hiw-eg' },
+          el('b', {}, 'Off unless you ask'),
+          el('span', {}, ow.default_state === 'off'
+            ? 'Nothing on any screen in this build differs while it is off, and the checker fails '
+              + 'the build if a lever, a metric or a budget line ever names anything inside it. '
+              + 'The switch is at the end of the tab row on the civic board.'
+            : 'The pack says this register defaults to ' + String(ow.default_state) + ', which it '
+              + 'should not; the board still starts it off.')),
+        note('A speculative instrument attributed to a real body would be a false claim about that '
+          + 'body, so the invented offices in there are named as invented, and nothing cultural '
+          + 'goes in at any tier.'));
+    }
     return null;
   };
 

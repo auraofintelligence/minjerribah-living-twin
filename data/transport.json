@@ -1,7 +1,9 @@
 {
   "pack": "transport",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "generated": "2026-08-07",
+  "revised": "2026-08-14",
+  "version_note": "1.1.0 answers a correction from the owner, who lives on the island. It adds an operators block, four structural facts and a network field on every scheduled service, so that the pack now distinguishes a Queensland Government network service run by a contractor from a commercial service the same network merely publishes a timetable for. It records that the island bus operator and the vehicle ferry operator share a parent, and it records the Stradbroke Flyer as the separate family business it is, with its own fleet, its own terminals and a modelled seat count that is deliberately not SeaLink's published one. Nothing about the timetables, the fares or the vessel capacities already in the pack changed.",
   "island": "Minjerribah / North Stradbroke Island, Quandamooka Country, Queensland, Australia",
   "postcode": "4183",
   "crs": "WGS84 decimal degrees",
@@ -18,7 +20,9 @@
     "The Toondah long weekend scenario is a model, not a measurement. Nobody has published vehicle counts, standby numbers or wait times for that terminal. The scenario shows its arithmetic so a local can correct one input and watch the rest move.",
     "Road segment geometry is not repeated here. It lives in data/geography.json, sourced from OpenStreetMap. This pack adds the operating attributes: speed limit, surface behaviour, capacity constraint and failure mode.",
     "Speed limits are the published island maximum plus township defaults. Only the two beach speed limits are individually sourced. Do not treat a per-segment limit in this file as signposted unless its speed_limit_basis says 'published'.",
-    "Nothing cultural is asserted here. Business and place names are recorded as their operators publish them. No name is translated or interpreted. That belongs in data/lore.json and docs/CULTURAL-REVIEW.md, and QYAC is the authority, not this file."
+    "Nothing cultural is asserted here. Business and place names are recorded as their operators publish them. No name is translated or interpreted. That belongs in data/lore.json and docs/CULTURAL-REVIEW.md, and QYAC is the authority, not this file.",
+    "Who runs a service and who sets its fare are two different questions and this pack now answers both separately. The buses are a Queensland Government network service run by a contractor. The boats are commercial services that the same network publishes timetables for and does not price. See operators below and the four structural facts that carry the evidence.",
+    "The brand is styled Translink by its own publisher: the page title on translink.com.au reads 'North Stradbroke Island fares and tickets | Translink' and the site metadata names the author as the Department of Transport and Main Roads Queensland. TransLink with a capital L is the older styling and is still used by operators and in secondary reporting. This pack uses Translink throughout. Nothing turns on it except that a search for one spelling misses the other."
   ],
 
   "confidence_scale": {
@@ -49,11 +53,87 @@
     "repo-residents": "C:/Users/sbt41/githublocal/minjerribah-living-twin/data/residents.json. Visitor baseline and journey to work percentages",
     "repo-geography": "C:/Users/sbt41/githublocal/minjerribah-living-twin/data/geography.json. Road and track geometry from OpenStreetMap, with length_km per segment",
     "sealink-tc": "https://www.allurestradbroke.com.au/wp-content/uploads/2024/05/Sealkink-SEQ-Terms-and-Conditions-2024.pdf (SeaLink SEQ terms and conditions, 2024, read in full)",
-    "translink-fares": "https://translink.com.au/tickets-and-fares/fares-and-zones/northstradbrokeisland",
+    "translink-fares": "https://translink.com.au/tickets-and-fares/fares-and-zones/northstradbrokeisland (Translink, North Stradbroke Island fares and tickets. Publisher shown on the page as State of Queensland (Translink). Read 14 August 2026)",
     "translink-880-881": "https://translink.com.au/sites/default/files/acquiadam-assets/timetables/251201-880-881.pdf (effective 1 December 2025)",
+    "translink-release-932881": "https://translink.com.au/news-and-media/releases/932881 (Translink release, 1 December 2025, the North Stradbroke Island bus service improvements. Names Bay Island Transit Systems as the local operator and calls the changes part of the Queensland Government's commitment to improving capacity and connectivity on the island)",
+    "translink-jp-flyer": "https://jp.translink.com.au/plan-your-journey/timetables/ferry/n/stradbroke-island-one-mile-flyer (Translink journey planner, service Stradbroke Island One Mile Flyer, operator shown as Stradbroke Flyer, fare link reads 'Check Non-TransLink fare information'. Read 14 August 2026)",
+    "translink-jp-sealink": "https://jp.translink.com.au/plan-your-journey/timetables/ferry/n/stradbroke-island-dunwich-sealink (Translink journey planner, service Stradbroke Island Dunwich SeaLink, operator shown as SeaLink (Stradbroke Island), fare link reads 'Check Non-TransLink fare information'. Read 14 August 2026)",
+    "qld-qconnect-stradbroke": "https://www.qld.gov.au/transport/public/transport/timetables/qconnect/stradbroke (Queensland Government, North Stradbroke Island bus services. States that Transit Systems run the bus services and that all information on North Stradbroke Island services can now be found on the Translink website. Read 14 August 2026)",
+    "transit-systems-qld": "https://www.transitsystems.com.au/operations/queensland (Transit Systems, Queensland operations. States it operates bus services across Eastern Ipswich and North Stradbroke Island for Translink; the page footer reads A KELSIAN GROUP COMPANY. Read 14 August 2026)",
+    "transit-systems-dec-2025": "https://www.transitsystems.com.au/news/new-enhanced-bus-services-on-minjerribah-north-stradbroke-island (Transit Systems, the 1 December 2025 service changes)",
+    "stradbroke-bus-operator": "https://www.stradbrokebus.com.au/ (North Stradbroke Island Bus Service, the operator's own site. States Transit Systems QLD is the proud operator of bus services on the island and that Transit Systems is a Kelsian Group company. Read 14 August 2026)",
+    "transit-systems-history": "https://en.wikipedia.org/wiki/Transit_Systems (corporate history, secondary. Records the SeaLink Travel Group purchase of Transit Systems completed January 2020, the renaming of SeaLink Travel Group to Kelsian in November 2021, and the December 2022 acquisition of the North Stradbroke Island Bus Service, renamed Transit Systems QLD in early 2023. The Kelsian ownership itself is corroborated primarily by the operator's own footer at transit-systems-qld and stradbroke-bus-operator)",
+    "flyer-our-team": "https://www.flyer.com.au/our-team (Stradbroke Flyer Gold Cat, the operator's own page about the family that runs the business. Read 14 August 2026)",
+    "flyer-onboard": "https://www.flyer.com.au/onboard-our-boats (Stradbroke Flyer Gold Cat, the operator's own fleet page: the Calypso and the Legacy, and 365 days with limited services on Christmas Day. Read 14 August 2026)",
     "osm": "OpenStreetMap via Nominatim, queried 7 August 2026",
     "visit-straddie": "https://stradbrokeisland.com/ (North Stradbroke Island visitor site)",
     "minjerribah-camping": "https://minjerribahcamping.com.au/4wd-permits/"
+  },
+
+  "operators": {
+    "about": "Who runs each service, who contracts it, and who owns the company. This block exists because the pack could previously be read as saying the island has three unrelated private transport firms, and that is not the shape of it. One of the three is a Queensland Government network service run by a contractor. Two of the three are owned by the same listed parent. One is a family business that has been in one family since 1986 and is owned by nobody else.",
+    "corrected": "2026-08-14",
+    "correction_note": "Recorded after the owner, who lives on the island, said in his own words that SeaLink is also the Queensland Government Translink and Transit Systems buses, and that the Straddie Flyer is separately the family owned passenger ferry to One Mile. Both halves checked against published sources and both hold, with one refinement the owner's sentence did not contain and this pack now carries: the boats themselves are not Translink services, and Translink's own journey planner says so.",
+    "network": {
+      "id": "translink",
+      "label": "Translink",
+      "kind": "Queensland Government public transport brand and network, South East Queensland",
+      "administered_by": "Department of Transport and Main Roads",
+      "what_it_does_here": "Plans, contracts, timetables and prices the island bus network. Routes 880 and 881 are Translink services: the timetable is published by Translink, the fares are Queensland's flat network fares, and the December 2025 service increase was announced by Translink as part of the Queensland Government's commitment to capacity and connectivity on the island.",
+      "moved_here": "From 1 December 2025 the island's bus service information moved from the qconnect brand to Translink. The Queensland Government's own qconnect page for North Stradbroke Island now says all information on North Stradbroke Island services can be found on the Translink website. The operator's own site had not caught up when it was read on 14 August 2026 and still said the buses run on behalf of the Queensland Government's qconnect.",
+      "source": "translink-fares",
+      "second_source": "qld-qconnect-stradbroke",
+      "third_source": "translink-release-932881",
+      "confidence": "high"
+    },
+    "bodies": [
+      {
+        "id": "op-transit-systems-qld",
+        "label": "Transit Systems QLD",
+        "runs": ["svc-bus-880", "svc-bus-881"],
+        "trading_names": ["North Stradbroke Island Bus Service", "Stradbroke Island Buses"],
+        "contracted_by": "translink",
+        "commercial_freedom": "Contracted. It does not set the fare and it does not publish the timetable on its own account. Translink's December 2025 release says the improvements were developed with the local operator, which is a consultation, not a decision.",
+        "owner": "Kelsian Group",
+        "owner_basis": "The operator's own site and the Transit Systems Queensland operations page both carry the line that Transit Systems is a Kelsian Group company.",
+        "acquired": "Transit Systems acquired the North Stradbroke Island Bus Service in December 2022 and renamed it Transit Systems QLD in early 2023.",
+        "acquired_confidence": "medium",
+        "name_conflict": "Translink's own 1 December 2025 release names the local bus operator Bay Island Transit Systems (BITS). The operator's site, the Queensland Government's page and the Transit Systems operations page all say Transit Systems or Transit Systems QLD. The two names have not been reconciled from any public source read here, and Bay Islands Transit Systems is separately recorded in corporate history as a former ferry operation. Both names are carried rather than one being chosen. A local, or one phone call to the depot, settles it.",
+        "source": "stradbroke-bus-operator",
+        "second_source": "transit-systems-qld",
+        "third_source": "transit-systems-history",
+        "confidence": "high"
+      },
+      {
+        "id": "op-sealink-seq",
+        "label": "SeaLink South East Queensland",
+        "legal_entity": "Stradbroke Ferries Pty Ltd, ABN 63 009 725 713",
+        "runs": ["svc-vehicle-ferry", "svc-sealink-passenger-ferry"],
+        "contracted_by": null,
+        "commercial_freedom": "Commercial. It sets its own fares and its own timetable. Translink publishes its departure times in the journey planner and points a passenger at the operator for the fare.",
+        "owner": "Kelsian Group",
+        "owner_basis": "SeaLink Travel Group bought Transit Systems in a sale completed January 2020 and renamed itself Kelsian Group in November 2021. SeaLink and Transit Systems have been the same parent's brands since.",
+        "owner_confidence": "medium",
+        "source": "translink-jp-sealink",
+        "second_source": "transit-systems-history",
+        "confidence": "high"
+      },
+      {
+        "id": "op-stradbroke-flyer",
+        "label": "Stradbroke Flyer Gold Cat",
+        "runs": ["svc-stradbroke-flyer"],
+        "contracted_by": null,
+        "commercial_freedom": "Commercial and independent. It sets its own fares, publishes its own timetable, runs its own terminal at Cleveland and lands at its own jetty at One Mile.",
+        "owner": "One family, since 1986",
+        "owner_basis": "The operator's own page says the business was bought in 1986 as a sea change, that the buyers' two sons joined them in the daily operations, that both sons' partners joined after them, and that the next generation is now in it as weekend juniors, administration and deck hands. The individuals are named on that public page and are deliberately not named here: they are living private people and the twin does not need their names to model a boat.",
+        "not_owned_by": "Not SeaLink, not Transit Systems, not Kelsian, not Translink and not a subsidiary of any of them. No source found in any read links this business to any of them, and it is not on any Kelsian brand list.",
+        "why_this_is_written_down": "A family business folded into a large operator in a public twin of their own island is worse than a data bug. Nothing in this repository may render, group, badge or aggregate this service as a SeaLink service, and nothing may quietly give it a SeaLink number.",
+        "source": "flyer-our-team",
+        "second_source": "translink-jp-flyer",
+        "confidence": "high"
+      }
+    ],
+    "what_this_changes": "Three things a player should be able to see. A bus fare on this island is a Queensland network decision and not the operator's, so asking the bus company for cheaper fares is asking the wrong body. A boat fare is the operator's, so asking the state to change it is asking for a contract that does not exist yet. And the barge company and the bus company answer to the same parent, so a campaign aimed at the operator lands twice on one group, once where that group can say yes commercially and once where it cannot say yes at all."
   },
 
   "structural_facts": [
@@ -115,6 +195,43 @@
       "consequence_for_sim": "Secondary school students are a fixed, non-negotiable weekday passenger block on the first morning and mid-afternoon passenger sailings. They do not respond to price and they cannot be shifted. Model them as inelastic demand that has priority claim on seats.",
       "source": "sealink-tc",
       "confidence": "high"
+    },
+    {
+      "id": "the-island-buses-are-a-state-network-service",
+      "claim": "Routes 880 and 881 are Translink services. Translink is the Queensland Government's public transport brand and network for South East Queensland, administered by the Department of Transport and Main Roads, and it publishes the island's bus fares as the Queensland flat network fares: 50 cents single, A$1 daily, A$5 weekly, with the note that North Stradbroke Island bus services are not part of the go card network and a separate paper ticket is required. Transit Systems QLD runs the buses under that arrangement. From 1 December 2025 the island's bus information moved from the qconnect brand to Translink, and the Queensland Government's own qconnect page now points to the Translink site.",
+      "consequence_for_sim": "A bus fare and a bus timetable on this island are not the operator's to change. Any lever about island bus frequency, fares or connections is a state network decision with an operator consulted, and the twin should send a player to the state and not to the bus company. It also means the bus is effectively free at the point of use, so price is not a lever in the road system while it very much is one on the water.",
+      "source": "translink-fares",
+      "second_source": "qld-qconnect-stradbroke",
+      "third_source": "translink-release-932881",
+      "confidence": "high"
+    },
+    {
+      "id": "the-boats-are-not-translink-services",
+      "claim": "Neither water crossing is a Translink service. Translink's own journey planner carries both, as Stradbroke Island Dunwich SeaLink with the operator shown as SeaLink (Stradbroke Island), and as Stradbroke Island One Mile Flyer with the operator shown as Stradbroke Flyer, and on each the fare link reads 'Check Non-TransLink fare information'. Translink's North Stradbroke Island fares page prices the bus and says nothing about a boat.",
+      "consequence_for_sim": "The 50 cent fare stops at the water. This is the sharpest, most island-specific version of the cost-of-crossing grievance the civic pack already carries: an islander riding the state network on the island pays 50 cents, and the same islander getting to the island pays a commercial fare on a boat the same network prints a timetable for. Model the boundary as a real edge in the network, not as a general complaint about prices, and label it with the operator's name rather than the state's.",
+      "source": "translink-jp-sealink",
+      "second_source": "translink-jp-flyer",
+      "third_source": "translink-fares",
+      "confidence": "high"
+    },
+    {
+      "id": "the-barge-and-the-bus-share-a-parent",
+      "claim": "The vehicle ferry operator and the island bus operator are owned by the same listed parent. Transit Systems states on its own pages that it is a Kelsian Group company. Kelsian Group is the renamed SeaLink Travel Group: it bought Transit Systems in a sale completed in January 2020 and took the Kelsian name in November 2021, and SeaLink South East Queensland runs the Stradbroke ferries. Transit Systems acquired the North Stradbroke Island Bus Service in December 2022.",
+      "consequence_for_sim": "The island's two scheduled land and sea links answer to one company, in two different capacities: commercially on the water, where it sets the price, and under contract on the road, where it does not. A player pressing 'the operator' should discover that it is one operator wearing two hats, and that the hat decides whether the answer is a commercial no or a referral to the state. Do not model the two as independent actors bargaining separately.",
+      "source": "transit-systems-qld",
+      "second_source": "stradbroke-bus-operator",
+      "third_source": "transit-systems-history",
+      "confidence": "medium",
+      "note": "The Kelsian ownership of Transit Systems is stated by Transit Systems itself and is high confidence. The corporate chronology, and therefore the sibling relationship with SeaLink South East Queensland specifically, rests on a secondary source because kelsian.com and sealink.com.au both return HTTP 403 to an automated fetch. Confidence is medium for the pair, not for the parts."
+    },
+    {
+      "id": "the-flyer-is-a-separate-family-business",
+      "claim": "The Stradbroke Flyer Gold Cat is a separate business from SeaLink, in one family since 1986, and it is the passenger-only crossing to One Mile rather than a second SeaLink product. It has its own terminal on Emmett Drive at Cleveland, its own ticket office, its own courtesy bus, its own fleet, and it lands at One Mile Jetty about a kilometre north of the Junner Street terminal where SeaLink lands. Translink names it as its own operator. Its own fleet page names two vessels, the Calypso and the Legacy, and says it runs 365 days with limited services on Christmas Day.",
+      "consequence_for_sim": "Two operators, not one operator with two landings. A cancellation, a fare, a full boat or a closure on one of them does not move the other except through the passengers who switch. Nothing in the world may show this service under SeaLink's name, give it a SeaLink vessel, apply a SeaLink term to it, or fold it into a SeaLink total. The two land in different places and that is the whole reason a walk-on passenger picks one.",
+      "source": "flyer-our-team",
+      "second_source": "flyer-onboard",
+      "third_source": "translink-jp-flyer",
+      "confidence": "high"
     }
   ],
 
@@ -154,6 +271,9 @@
       "id": "terminal-toondah-flyer",
       "name": "Stradbroke Flyer terminal, Cleveland",
       "operator": "Stradbroke Flyer Gold Cat",
+      "operator_ref": "op-stradbroke-flyer",
+      "not_the_sealink_terminal": "The Flyer's own terminal, with its own ticket office and its own car park. It stands on Emmett Drive inside the Toondah Harbour precinct, a few hundred metres from SeaLink's terminals on the same street, and it is not part of them. Translink names it Stradbroke Flyer Terminal, Cleveland, while it names SeaLink's Toondah Harbour, Cleveland. The precinct name is the ground it sits on, not the operator it belongs to.",
+      "not_the_sealink_terminal_source": "translink-jp-flyer",
       "side": "mainland",
       "address": "13-21 Emmett Drive, Cleveland QLD 4163 (corner of Middle Street and Emmett Drive)",
       "lat": null,
@@ -225,8 +345,12 @@
       "also_known_as": ["the barge", "the vehicle ferry", "Stradbroke Ferries"],
       "type": "vehicle-ferry",
       "operator": "SeaLink South East Queensland",
+      "operator_ref": "op-sealink-seq",
       "legal_entity": "Stradbroke Ferries Pty Ltd, ABN 63 009 725 713",
       "operator_source": "sealink-tc",
+      "network": null,
+      "network_note": "Commercial, not a Translink service. Translink publishes this crossing's timetable in its journey planner and links the fare out as non-Translink. See structural_facts.the-boats-are-not-translink-services.",
+      "network_source": "translink-jp-sealink",
       "status": "operating",
       "waypoints": [
         { "ref": "terminal-toondah-vehicle", "name": "Cleveland (Toondah Harbour)" },
@@ -369,7 +493,11 @@
       "name": "SeaLink passenger ferry (walk-on water taxi)",
       "type": "passenger-ferry",
       "operator": "SeaLink South East Queensland",
+      "operator_ref": "op-sealink-seq",
       "legal_entity": "Stradbroke Ferries Pty Ltd, ABN 63 009 725 713",
+      "network": null,
+      "network_note": "Commercial, not a Translink service. Translink carries it as Stradbroke Island Dunwich SeaLink with a non-Translink fare link.",
+      "network_source": "translink-jp-sealink",
       "status": "operating",
       "waypoints": [
         { "ref": "terminal-toondah-passenger", "name": "Cleveland (Toondah Harbour)" },
@@ -422,17 +550,41 @@
     {
       "id": "svc-stradbroke-flyer",
       "name": "Stradbroke Flyer Gold Cat",
-      "also_known_as": ["the Flyer", "Gold Cats", "the water taxi"],
+      "also_known_as": ["the Flyer", "Gold Cats", "the Straddie Flyer"],
+      "also_known_as_note": "Locals call both walk-on crossings the water taxi, so that phrase is not carried here as a name for this one. It is the common noun for the service type and it belongs to both operators.",
       "type": "water-taxi",
       "operator": "Stradbroke Flyer Gold Cat",
-      "status": "operating",
+      "operator_ref": "op-stradbroke-flyer",
+      "independent": true,
+      "ownership": "Family owned and operated. The operator's own page says the business was bought in 1986, that the buyers' two sons joined them in the daily operations, that both sons' partners joined after them, and that their children are now in it as weekend juniors, in administration and as deck hands on the boats. Three generations, one family, forty years. The individuals are named on that public page and are deliberately not named in this repository.",
+      "ownership_source": "flyer-our-team",
+      "ownership_confidence": "high",
+      "not_sealink": "This is not a SeaLink service and it is not a SeaLink product under another name. Separate company, separate terminal at Cleveland, separate jetty at Dunwich, separate fleet, separate fares, separate ticketing. Translink lists it as its own operator. No system, panel, aggregate or label in this repository may present it as SeaLink's, give it a SeaLink vessel or apply a SeaLink term to it.",
+      "not_sealink_source": "translink-jp-flyer",
+      "network": null,
+      "network_note": "Commercial, not a Translink service. Translink carries it as Stradbroke Island One Mile Flyer with a non-Translink fare link.",
+      "network_source": "translink-jp-flyer",
+      "operating_days": "365 days a year, with limited services on Christmas Day, per the operator's own fleet page.",
+      "operating_days_source": "flyer-onboard",
       "waypoints": [
-        { "ref": "terminal-toondah-flyer", "name": "Stradbroke Flyer terminal, Toondah Harbour, Cleveland" },
+        { "ref": "terminal-toondah-flyer", "name": "Stradbroke Flyer terminal, Emmett Drive, Cleveland" },
         { "ref": "terminal-one-mile", "name": "One Mile Jetty, Yabby Street, Dunwich" }
       ],
       "route_note": "Lands at One Mile, not at the Junner Street terminal. Different side of Dunwich, different bus stop, roughly a kilometre apart. This distinction matters for wayfinding and is the most common visitor mistake.",
       "travel_time_min": { "value": 25, "range": [25, 30], "basis": "published", "source": "https://www.flyer.com.au/ states about 25 minutes; https://stradbrokeisland.com/getting-here/by-boat/ says about 30 minutes; the Translink One Mile Flyer page shows a 30 minute gap between One Mile departure and Cleveland arrival", "confidence": "high" },
-      "capacity": { "cars": 0, "passengers": null, "confidence": "low", "note": "Passenger capacity per vessel is not published on the operator's site in a form that could be read. Left null rather than guessed. Ask the office on (07) 3821 3821." },
+      "capacity": {
+        "cars": 0,
+        "passengers": null,
+        "vessels": [
+          { "id": "calypso", "name": "Calypso", "cars": 0, "passengers": null, "features": ["licensed bar", "en route coffee, cold drinks and snacks", "four rest rooms", "three levels of seating: front lounge, viewing deck, inside tables"], "source": "flyer-onboard", "confidence": "high" },
+          { "id": "legacy", "name": "Legacy", "cars": 0, "passengers": null, "features": ["en route coffee, cold drinks and snacks", "two rest rooms accessible for wheelchairs", "two levels of seating: main salon and upstairs viewing deck"], "source": "flyer-onboard", "confidence": "high" }
+        ],
+        "vessels_note": "The operator's own fleet page names the Calypso as the deluxe water taxi and the Legacy as the smaller passenger ferry, and says which one runs depends on requirements, so neither is tied to a particular departure. Both are described as accessible for wheelchairs and small mobility scooters. Older secondary listings name Alley Kat and Top Kat; those are not on the operator's current page and are not carried.",
+        "modelled_passengers_per_sailing": 120,
+        "modelled_passengers_basis": "MODELLED. The operator publishes no per-sailing passenger capacity for either vessel, and one secondary listing gives a charter figure for the Calypso that is not a scheduled-service capacity and is not used. This number is deliberately NOT set equal to the 198 that SeaLink publishes for Yalingbila: giving one operator's boat another operator's published capacity is a fabrication wearing a figure's clothes, and it is exactly the error this pack was corrected to stop. Every system that needs a Flyer seat count reads this one field so there is one number to correct, not two.",
+        "confidence": "low",
+        "note": "Passenger capacity per vessel is not published on the operator's site in a form that could be read. Left null rather than guessed. Ask the office on (07) 3821 3821."
+      },
       "schedule": {
         "basis": "published",
         "snapshot_rechecked": "2026-08-07",
@@ -467,7 +619,13 @@
       "id": "svc-bus-880",
       "name": "Route 880, Dunwich to Point Lookout",
       "type": "bus",
-      "operator": "Transit Systems (Stradbroke Island), trading as North Stradbroke Island Bus Service, under contract to Translink",
+      "operator": "Transit Systems QLD, trading as the North Stradbroke Island Bus Service",
+      "operator_ref": "op-transit-systems-qld",
+      "operator_source": "stradbroke-bus-operator",
+      "network": "translink",
+      "network_note": "A Translink service. The route number, the timetable and the fare are the Queensland Government's network, administered by the Department of Transport and Main Roads; the operator runs it. Translink's 1 December 2025 release names the local operator as Bay Island Transit Systems and describes the improvements as developed with it, which is a consultation and not a decision. See operators and structural_facts.the-island-buses-are-a-state-network-service.",
+      "network_source": "translink-release-932881",
+      "second_source": "qld-qconnect-stradbroke",
       "status": "operating",
       "waypoints": [
         { "name": "Junner Street Ferry Terminal", "ref": "terminal-junner-street" },
@@ -535,7 +693,7 @@
           { "id": "dec-2025-uplift", "description": "The 1 December 2025 Translink change added daily 880 services timed to meet earlier ferry arrivals and later ferry departures, and extended route 881 to Dunwich.", "source": "https://www.transitsystems.com.au/news/new-enhanced-bus-services-on-minjerribah-north-stradbroke-island and https://translink.com.au/news-and-media/releases/932881", "confidence": "high" }
         ]
       },
-      "fare_aud": { "single": 0.50, "daily": 1.00, "weekly": 5.00, "single_note": "One way, includes two hour transfer time", "daily_note": "Unlimited travel until the last service on the day of issue", "weekly_note": "Unlimited travel for seven days from the issue date", "go_card": false, "go_card_note": "North Stradbroke Island bus services are not part of the go card network. A separate paper ticket is required, bought onboard with cash or EFTPOS.", "source": "translink-fares", "confidence": "high", "note": "Child and concession prices are not separately published on the Translink page. These are the Queensland flat fares, so the bus is effectively free at the point of use and price is not a lever in this system." },
+      "fare_aud": { "single": 0.50, "daily": 1.00, "weekly": 5.00, "set_by": "translink", "set_by_note": "A Queensland Government network fare, not an operator's price. The Queensland Government's own page says all fares across Queensland are now a 50 cent flat rate. Nobody on this island, and not the bus company either, can change it.", "set_by_source": "qld-qconnect-stradbroke", "single_note": "One way, includes two hour transfer time", "daily_note": "Unlimited travel until the last service on the day of issue", "weekly_note": "Unlimited travel for seven days from the issue date", "go_card": false, "go_card_note": "North Stradbroke Island bus services are not part of the go card network. A separate paper ticket is required, bought onboard with cash or EFTPOS.", "source": "translink-fares", "confidence": "high", "note": "Child and concession prices are not separately published on the Translink page. These are the Queensland flat fares, so the bus is effectively free at the point of use and price is not a lever in this system." },
       "reliability": [
         { "factor": "ferry connection", "mechanism": "The timetable is written to meet the boats. Every westbound run is anchored to a ferry arrival.", "modelled_effect": "A late ferry pushes the connecting bus or makes it leave without the load. Model both behaviours and let the operator's choice be a visible policy lever.", "basis": "derived from the timetable", "confidence": "high" },
         { "factor": "capacity", "mechanism": "A single vehicle per run on a route with no overtaking option.", "modelled_effect": "A full bus at One Mile leaves the surplus for the next run, 60 to 75 minutes later.", "basis": "modelled", "confidence": "medium" },
@@ -548,9 +706,16 @@
 
     {
       "id": "svc-bus-881",
-      "name": "Route 881, Dunwich to Amity Point",
+      "name": "Route 881, One Mile and Dunwich to Amity Point",
+      "name_note": "Named Dunwich to Amity Point until the 1 December 2025 change extended it from One Mile through Dunwich to Amity Point as a one seat journey. The waypoints and the timetable in this record already carried the extension; the name had not caught up.",
       "type": "bus",
-      "operator": "Transit Systems (Stradbroke Island), trading as North Stradbroke Island Bus Service, under contract to Translink",
+      "operator": "Transit Systems QLD, trading as the North Stradbroke Island Bus Service",
+      "operator_ref": "op-transit-systems-qld",
+      "operator_source": "stradbroke-bus-operator",
+      "network": "translink",
+      "network_note": "A Translink service, on the same footing as route 880. See operators and structural_facts.the-island-buses-are-a-state-network-service.",
+      "network_source": "translink-release-932881",
+      "second_source": "qld-qconnect-stradbroke",
       "status": "operating",
       "waypoints": [
         { "name": "One Mile Ferry Terminal", "ref": "terminal-one-mile" },
@@ -590,7 +755,7 @@
         ],
         "asymmetry_note": "Seven runs out, nine runs back. The morning has two early Amity to Dunwich runs with no matching outbound service, because the first job of the day is getting Amity Point residents to the boat, not getting visitors to Amity Point. This is a real shape in the published timetable and it says something true about who the route is for."
       },
-      "fare_aud": { "single": 0.50, "daily": 1.00, "weekly": 5.00, "go_card": false, "source": "translink-fares", "confidence": "high" },
+      "fare_aud": { "single": 0.50, "daily": 1.00, "weekly": 5.00, "go_card": false, "set_by": "translink", "set_by_source": "qld-qconnect-stradbroke", "source": "translink-fares", "confidence": "high" },
       "reliability": [
         { "factor": "ferry connection", "mechanism": "Same as 880: written to meet the boats.", "modelled_effect": "Same as 880.", "basis": "derived", "confidence": "high" },
         { "factor": "thin service", "mechanism": "Seven outbound runs a day for a township of a few hundred people.", "modelled_effect": "Missing a bus at Amity Point costs 60 to 165 minutes depending on the gap. The 14:15 to 16:45 gap eastbound is the widest and it is where the taxi and StradEasy demand comes from.", "basis": "derived from the timetable", "confidence": "high" }
@@ -1261,6 +1426,7 @@
     "parking_records": 3,
     "scenarios": 1,
     "projects": 2,
-    "structural_facts": 8
+    "structural_facts": 12,
+    "operator_bodies": 3
   }
 }

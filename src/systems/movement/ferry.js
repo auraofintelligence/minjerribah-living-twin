@@ -22,8 +22,28 @@
 //   "the single number in this pack most likely to be wrong" and which drives all the spillover.
 //   The peak day's extra sailings, taken verbatim from the pack's own worked scenario rather than
 //   invented here. The wind thresholds, because no published wind cut-off for this route was found.
-//   The Stradbroke Flyer's passenger capacity, which is not published at all and is left visible as
-//   a modelled number with the operator's phone number attached rather than quietly filled in.
+//   The Stradbroke Flyer's passenger capacity, which is not published at all and is read from
+//   data/transport.json as one declared modelled number rather than being guessed twice.
+//   The share of a crossing each walk-on operator takes when both leave at the same minute.
+//
+// THREE OPERATORS, NOT TWO, AND THEY ARE NOT INTERCHANGEABLE
+//   Corrected 14 August 2026 after the owner, who lives there, said the Straddie Flyer is the family
+//   owned passenger ferry to One Mile and must not be folded into SeaLink. Three things in this file
+//   had folded it in and each was a real defect rather than a wording problem.
+//
+//   1. Walk-on freight rode any walk-on sailing, the Flyer included. The rule it was implementing is
+//      SeaLink's own term and condition, about SeaLink's own passenger service: on this route walk-on
+//      freight is permitted on the passenger ferry service only. Nothing published says the Flyer
+//      carries unaccompanied freight, so applying a competitor's term to it was inventing a service.
+//   2. The Flyer's sailings carried the literal string 'flyer' where every other sailing carries a
+//      vessel name, and src/ui/panels/events.js prints that field, so a player read "flyer" as the
+//      name of a boat. The operator publishes a fleet, the Calypso and the Legacy, and does not
+//      publish which one runs a given departure, so this file names the service and not a vessel.
+//   3. Both walk-on boats drew a full independent load at the same minute, so the island imported
+//      one crossing's worth of people twice. data/transport.json has always said what to do instead:
+//      split walk-on demand between the two by destination preference, not by time. It does that now,
+//      and the two afternoon departures where the Flyer runs alone are worth what the pack says they
+//      are worth, because on those it takes the whole slot.
 //
 // WHAT IS DELIBERATELY NOT MODELLED
 //   Swell on the crossing. The pack is explicit: Minjerribah and Moorgumpin shelter the whole route
@@ -85,6 +105,30 @@ const QUEUE = {
   spillStreet: 'Middle Street'
 };
 
+/**
+ * Which walk-on operator a crossing's passengers pick when both boats leave at the same minute.
+ * data/transport.json states the behaviour and this file supplies the number: "They compete head to
+ * head on the same departures to two different Dunwich landings, so the choice a walk-on passenger
+ * makes is mostly about which side of Dunwich they want to arrive at, not about time."
+ *
+ * The share is MODELLED and nobody has counted it. The reasoning, so it can be argued with: Junner
+ * Street is the barge apron, the ticket office, the bus interchange and the shops end of the
+ * township, and One Mile is a jetty about a kilometre north at the anchorage, so the larger share
+ * goes to the landing with more reasons to be at it. Both are timing points on both bus routes, so
+ * this is not a bus-connection advantage, which is why the split is close to even.
+ *
+ * It only applies where two services leave in the same minute in the same direction. Where one runs
+ * alone it takes the whole crossing, which is exactly the pack's point about the Flyer's 16:45 and
+ * 18:00 westbound being the one place where the time genuinely differs.
+ */
+const WALK_ON_SHARE = {
+  'svc-sealink-passenger-ferry': 0.55,
+  'svc-stradbroke-flyer': 0.45,
+  basis: 'MODELLED. No count of how walk-on passengers split between the two operators exists. '
+    + 'Weighted toward the Junner Street landing because the terminal, the ticket office, the barge '
+    + 'apron and the township centre are there. A local settles this in one sentence.'
+};
+
 /** Wind. No published threshold for this route was found, so both figures are modelled and say so. */
 const WIND = {
   vehicleSlowKt: 25,
@@ -111,6 +155,14 @@ export function registerFerry(world) {
     importCeiling: { carsEachWay: 0, walkOnSeatsEachWay: 0, basis: '', rule: '' },
     sailings: [],
     next: { toIsland: null, toMainland: null, walkOnToIsland: null, walkOnToMainland: null },
+    // Everything still to come today on each of the four lines, in order, so a screen can say "then
+    // 17:30, 18:45, 19:45" instead of only the next one. `next.X` is simply `remaining.X[0]` and is
+    // kept because half a dozen readers already take it.
+    remaining: { toIsland: [], toMainland: [], walkOnToIsland: [], walkOnToMainland: [] },
+    // The first published departure on each line tomorrow, so a line with nothing left today has
+    // somewhere to send a person instead of stopping at "nothing more today". Straight off the
+    // committed timetable for tomorrow's day of the week: no modelled peak extras are in it.
+    tomorrowFirst: { toIsland: null, toMainland: null, walkOnToIsland: null, walkOnToMainland: null },
     vessels: [],
     toondah: {
       presentedToday: 0, inYard: 0, yardCapacity: QUEUE.yardCapacity, yardBasis: QUEUE.yardBasis,
@@ -118,7 +170,10 @@ export function registerFerry(world) {
       standbyWaiting: 0, standbyServedToday: 0, notCarriedToday: 0, rolledToTomorrow: 0,
       waitMedianMin: 0, waitP90Min: 0, longestWaitMin: 0
     },
-    stranded: { atToondah: 0, atDunwich: 0, atOneMile: 0, story: null },
+    // Four places, because there are four landings and not three. The Flyer runs its own terminal on
+    // Emmett Drive at Cleveland, a few hundred metres from SeaLink's, and its own jetty at One Mile a
+    // kilometre north of Junner Street. Somebody left standing is left standing somewhere specific.
+    stranded: { atToondah: 0, atFlyerTerminal: 0, atDunwich: 0, atOneMile: 0, story: null },
     cancellations: { today: 0, reason: null, rolling30: 0, lastCancelled: null },
     reliability: { windKt: 0, condition: 'good', slowKt: WIND.vehicleSlowKt, cancelKt: WIND.vehicleCancelKt, basis: WIND.basis, delayMinNow: 0 },
     freight: { waitingItems: 0, spoiledToday: 0, note: 'On this route walk-on freight rides the passenger ferry, not the barge.' },
@@ -132,6 +187,10 @@ export function registerFerry(world) {
   // Vehicle vessel ids that appear in today's sailing list. See mechanical().
   const rosteredToday = new Set();
   let flyerSeats = 0;
+  /** How a sailing is labelled when its operator does not publish which vessel runs it. */
+  const serviceLabel = new Map();
+  /** Which walk-on services this pack actually carries, so the share is never assumed. */
+  const walkOnServices = new Set();
 
   /** Today's sailings, rebuilt at midnight. */
   let sailings = [];
@@ -175,11 +234,32 @@ export function registerFerry(world) {
         sailingsToday: 0, carsToday: 0
       });
     }
-    // The Flyer publishes no passenger capacity anywhere a fetch could read it.
-    flyerSeats = 120;
+    // A service whose operator does not publish which vessel runs a given departure is labelled by
+    // its own short name, never by its slug. The Stradbroke Flyer publishes a fleet, the Calypso and
+    // the Legacy, and says which one runs depends on requirements, so inventing a roster here would
+    // put a boat name on a screen that nobody published. Before this, its sailings carried the
+    // string 'flyer' and the events panel printed it as a vessel name.
+    for (const s of [svc.vehicle, svc.passenger, svc.flyer]) {
+      if (!s) continue;
+      serviceLabel.set(s.id, (Array.isArray(s.also_known_as) && s.also_known_as[0]) || s.name || s.id);
+    }
+    if (svc.passenger) walkOnServices.add(svc.passenger.id);
+    if (svc.flyer) walkOnServices.add(svc.flyer.id);
+
+    // The Flyer publishes no passenger capacity anywhere a fetch could read it. The pack now carries
+    // the modelled figure once, with its basis, so this file and src/systems/agents/visitors.js read
+    // the same number instead of guessing separately. It is deliberately not SeaLink's published 198.
+    const fc = svc.flyer && svc.flyer.capacity;
+    flyerSeats = (fc && Number(fc.modelled_passengers_per_sailing)) || 120;
     state.notes.push('Stradbroke Flyer passenger capacity is MODELLED at ' + flyerSeats
-      + ' per sailing. The operator does not publish it. data/transport.json says to ask the office '
-      + 'on (07) 3821 3821 rather than guess, so this number is on show and is not treated as fact.');
+      + ' per sailing, read from data/transport.json capacity.modelled_passengers_per_sailing. The '
+      + 'operator does not publish it and the pack says to ask the office on (07) 3821 3821 rather '
+      + 'than guess, so this number is on show and is not treated as fact. It is not set equal to '
+      + 'the 198 SeaLink publishes for Yalingbila: that is a different company\'s boat.');
+    state.notes.push('Walk-on demand at a shared departure minute is split '
+      + Math.round(WALK_ON_SHARE['svc-sealink-passenger-ferry'] * 100) + '/'
+      + Math.round(WALK_ON_SHARE['svc-stradbroke-flyer'] * 100)
+      + ' between the Junner Street and One Mile landings. ' + WALK_ON_SHARE.basis);
 
     const dc = svc.vehicle.schedule && svc.vehicle.schedule.variants
       && svc.vehicle.schedule.variants[0]
@@ -218,10 +298,12 @@ export function registerFerry(world) {
         time: timeStr,
         timeMin: t,
         vessel: vesselId,
-        vesselName: ves ? ves.name : vesselId,
+        vesselName: ves ? ves.name : (serviceLabel.get(service) || vesselId),
+        vesselPublished: !!ves,
         kind,                             // 'vehicle' | 'walk-on'
         capacityCars: ves ? ves.cars : 0,
         capacityPax: kind === 'walk-on' && !ves ? flyerSeats : (ves ? ves.passengers : 0),
+        demandShare: 1,                   // set below, once both walk-on lists are in
         extra: !!extra,
         booked: 0, standbyTaken: 0, emergencyTaken: 0,
         carsCarried: 0, paxCarried: 0, paxTurnedAway: 0,
@@ -264,6 +346,29 @@ export function registerFerry(world) {
     }
 
     out.sort((a, b) => a.timeMin - b.timeMin || (a.id < b.id ? -1 : 1));
+
+    // One crossing, two operators. Where both walk-on services leave in the same minute in the same
+    // direction they are competing for the same people, so the slot's demand is split between them
+    // rather than each drawing a full independent load. Where one runs alone it takes the slot.
+    // data/transport.json: "the choice a walk-on passenger makes is mostly about which side of
+    // Dunwich they want to arrive at, not about time."
+    const slot = new Map();
+    for (const s of out) {
+      if (s.kind !== 'walk-on') continue;
+      const key = s.dir + '@' + s.timeMin;
+      if (!slot.has(key)) slot.set(key, []);
+      slot.get(key).push(s);
+    }
+    for (const group of slot.values()) {
+      if (group.length < 2) { group[0].demandShare = 1; continue; }
+      let total = 0;
+      for (const s of group) total += (WALK_ON_SHARE[s.service] || 0);
+      for (const s of group) {
+        // Normalised, so a pack that adds a third walk-on operator does not silently lose passengers.
+        s.demandShare = total > 0 ? (WALK_ON_SHARE[s.service] || 0) / total : 1 / group.length;
+      }
+    }
+
     sailings = out;
 
     for (const ves of vessels.values()) { ves.sailingsToday = 0; ves.carsToday = 0; }
@@ -343,6 +448,9 @@ export function registerFerry(world) {
         ? `${westbound.length} westbound sailings today, ${slots} car slots, about ${presenting} vehicles expected.`
         : `${westbound.length} westbound sailings today, ${slots} car slots.`
     });
+
+    // The board, before anything ticks. See publishBoard for why this line matters more than it looks.
+    publishBoard(w.clock.minuteOfDay);
   }
 
   /* ---------------------------------------------------------------- the arrival profile
@@ -522,7 +630,13 @@ export function registerFerry(world) {
 
   /* ---------------------------------------------------------------- walk-on passengers */
 
-  function runWalkOn(w, s, minute) {
+  /**
+   * How many people want this particular boat. Split out so a cancelled sailing strands the load it
+   * would have carried rather than a number drawn out of the air, and so the two operators split one
+   * crossing rather than each importing a full one. Draws from the ferry stream exactly once, which
+   * is what it did before, so a cancelled sailing and a sailed one cost the same in rng draws.
+   */
+  function walkOnDemand(w, s) {
     const vis = w.read('visitors') || {};
     const sched = w.read('schedule') || {};
     // Demand for a walk-on sailing: the school and commuter block on the early boats, the day
@@ -562,6 +676,12 @@ export function registerFerry(world) {
     }
     void sched;
 
+    // The two walk-on operators at the same minute are one crossing, not two.
+    return Math.max(0, Math.round(want * (s.demandShare == null ? 1 : s.demandShare)));
+  }
+
+  function runWalkOn(w, s, minute) {
+    const want = walkOnDemand(w, s);
     const cap = s.capacityPax || flyerSeats;
     const carried = Math.min(cap, want);
     s.paxCarried = carried;
@@ -575,13 +695,22 @@ export function registerFerry(world) {
     if (s.paxTurnedAway > 0) {
       w.bus.emit('ferry:overflow', {
         service: s.service, sailing: s.time, people: s.paxTurnedAway,
+        operator: s.vesselName,
+        landing: s.dir === 'to-island'
+          ? (s.service === 'svc-stradbroke-flyer' ? 'One Mile Jetty' : 'Junner Street')
+          : 'Cleveland',
         waitMin: 75,
-        text: `${s.paxTurnedAway} people did not fit on the ${s.time} water taxi. The next one is `
-          + 'about seventy five minutes away.'
+        text: `${s.paxTurnedAway} people did not fit on the ${s.time} ${s.vesselName}. The next one `
+          + 'is about seventy five minutes away.'
       });
     }
-    // Walk-on freight rides the passenger boat on this route, not the barge.
-    if (freightWaiting > 0 && s.dir === 'to-island') {
+    // Walk-on freight rides the passenger boat on this route, not the barge. Note whose passenger
+    // boat: the rule is SeaLink's own term and condition about SeaLink's own service, that on this
+    // route walk-on freight is permitted on the passenger ferry service only, may travel
+    // unaccompanied and is charged per item. The Stradbroke Flyer is a different company and
+    // publishes no unaccompanied freight service, so applying SeaLink's term to its boats would be
+    // inventing a service for a business that has not offered one. Until this line it did.
+    if (freightWaiting > 0 && s.dir === 'to-island' && s.service === 'svc-sealink-passenger-ferry') {
       const room = Math.max(0, Math.round((cap - carried) / 4));
       const moved = Math.min(freightWaiting, room);
       freightWaiting -= moved;
@@ -735,15 +864,11 @@ export function registerFerry(world) {
     state.toondah.standbyWaiting = yard.reduce((s2, c) => s2 + c.standby, 0);
     state.toondah.waitMedianMin = weightedPercentile(dayStats.waits, dayStats.waitWeights, 0.5);
     state.toondah.waitP90Min = weightedPercentile(dayStats.waits, dayStats.waitWeights, 0.9);
-    state.sailings = sailings.map(sailingCard);
     state.vessels = Array.from(vessels.values()).map((v) => ({
       id: v.id, name: v.name, cars: v.cars, passengers: v.passengers,
       status: v.status, reason: v.reason, sailingsToday: v.sailingsToday, carsToday: v.carsToday
     }));
-    state.next.toIsland = nextOf('to-island', 'vehicle', minute);
-    state.next.toMainland = nextOf('to-mainland', 'vehicle', minute);
-    state.next.walkOnToIsland = nextOf('to-island', 'walk-on', minute);
-    state.next.walkOnToMainland = nextOf('to-mainland', 'walk-on', minute);
+    publishBoard(minute);
     state.freight.waitingItems = freightWaiting;
   }
 
@@ -755,19 +880,100 @@ export function registerFerry(world) {
     };
   }
 
-  function nextOf(dir, kind, minute) {
-    let best = null;
+  /**
+   * The board, published whole.
+   *
+   * WHY THIS IS ITS OWN FUNCTION AND WHY buildDay CALLS IT.
+   * This used to live inline at the bottom of `step`, which meant `state.next`, `state.remaining`
+   * and `state.sailings` did not exist until the first tick had run. In simulated time the first
+   * tick is a fraction of a second away and nobody noticed. In live time a tick is ten real minutes
+   * (see `pump` in src/kernel/clock.js), so an island opened live at twenty past four published four
+   * empty legs and every screen reading them said there was nothing more today, while the pack
+   * underneath held a 16:30 barge and four more passenger sailings. A person reads that and does not
+   * drive to the jetty. There is no version of this project where that is acceptable, so the board is
+   * built with the day now, and rebuilt on every tick after it.
+   */
+  function publishBoard(minute) {
+    state.sailings = sailings.map(sailingCard);
+    for (const [key, dir, kind] of BOARD_LINES) {
+      const rows = remainingOf(dir, kind, minute);
+      state.remaining[key] = rows;
+      state.next[key] = rows.length ? rows[0] : null;
+      state.tomorrowFirst[key] = firstTomorrow(dir, kind);
+    }
+  }
+
+  /** The four lines a person actually asks about, in the order they are asked. */
+  const BOARD_LINES = [
+    ['toMainland', 'to-mainland', 'vehicle'],
+    ['walkOnToMainland', 'to-mainland', 'walk-on'],
+    ['toIsland', 'to-island', 'vehicle'],
+    ['walkOnToIsland', 'to-island', 'walk-on']
+  ];
+
+  /** Every sailing still to come on one line today, soonest first. Cancelled ones are not offered. */
+  function remainingOf(dir, kind, minute) {
+    const rows = [];
     for (const s of sailings) {
       if (s.dir !== dir || s.kind !== kind) continue;
       if (s.status === 'cancelled' || s.timeMin < minute) continue;
-      if (!best || s.timeMin < best.timeMin) best = s;
+      rows.push({
+        time: s.time, inMin: s.timeMin - minute, vessel: s.vesselName,
+        service: s.service, extra: s.extra, status: s.status,
+        spaceCars: s.kind === 'vehicle' ? s.capacityCars : 0
+      });
     }
-    if (!best) return null;
-    return {
-      time: best.time, inMin: best.timeMin - minute, vessel: best.vesselName,
-      service: best.service, extra: best.extra,
-      spaceCars: best.kind === 'vehicle' ? best.capacityCars : 0
+    rows.sort((a, b) => a.inMin - b.inMin || (a.vessel < b.vessel ? -1 : 1));
+    return rows;
+  }
+
+  function nextOf(dir, kind, minute) {
+    return remainingOf(dir, kind, minute)[0] || null;
+  }
+
+  /**
+   * The first published departure on one line tomorrow.
+   *
+   * Read straight off the committed timetable for tomorrow's day of the week rather than out of the
+   * simulation, because tomorrow has not been built and building it early would move the random
+   * stream. The modelled peak extras are deliberately not in it: this is what the operator publishes,
+   * which is the only thing worth telling somebody who has just missed the last boat.
+   */
+  function firstTomorrow(dir, kind) {
+    const dow = DOW[(world.clock.dayOfWeek + 1) % 7];
+    const runs = (e) => !e || !e.days || e.days.includes(dow);
+    let best = null;
+    const take = (timeStr, label, service) => {
+      const t = mins(timeStr);
+      if (t == null) return;
+      if (!best || t < best.timeMin) best = { time: timeStr, timeMin: t, vessel: label, service };
     };
+    if (kind === 'vehicle') {
+      const v = svc.vehicle && svc.vehicle.schedule && svc.vehicle.schedule.variants[0];
+      const list = (v && (dir === 'to-island' ? v.cleveland_to_dunwich : v.dunwich_to_cleveland)) || [];
+      for (const e of list) {
+        if (!runs(e)) continue;
+        const ves = vessels.get(e.vessel);
+        take(e.time, ves ? ves.name : (serviceLabel.get('svc-vehicle-ferry') || 'the barge'), 'svc-vehicle-ferry');
+      }
+      return best;
+    }
+    if (svc.passenger) {
+      const pv = svc.passenger.schedule.variants[0];
+      const list = (dir === 'to-island' ? pv.cleveland_to_dunwich : pv.dunwich_to_cleveland) || [];
+      const label = (vessels.get('yalingbila') || {}).name || serviceLabel.get(svc.passenger.id);
+      for (const t of list) take(t, label, svc.passenger.id);
+      const late = pv.late_service;
+      if (late && runs(late)) {
+        take(dir === 'to-island' ? late.cleveland_to_dunwich : late.dunwich_to_cleveland, label, svc.passenger.id);
+      }
+    }
+    if (svc.flyer) {
+      const fv = svc.flyer.schedule.variants[0];
+      const list = (dir === 'to-island' ? fv.cleveland_to_one_mile : fv.one_mile_to_cleveland) || [];
+      for (const t of list) take(t, serviceLabel.get(svc.flyer.id) || 'the Flyer', svc.flyer.id);
+    }
+    return best;
   }
 
   /**
@@ -775,16 +981,44 @@ export function registerFerry(world) {
    * freight, and on the last boat of the day it takes somebody's night away.
    */
   function onCancelled(w, s, minute) {
-    const lastOfDay = !sailings.some((x) => x.dir === s.dir && x.kind === s.kind && x.timeMin > s.timeMin && x.status !== 'cancelled');
+    // Last of the day for this operator, which is the question a person standing at a jetty is
+    // actually asking. Whether the other operator has a later boat is a separate question, and on
+    // this crossing it has a different answer at each end: at Cleveland the two terminals are a few
+    // hundred metres apart on the same street, and at Dunwich they are a kilometre and a bus apart.
+    const lastOfDay = !sailings.some((x) => x.dir === s.dir && x.kind === s.kind
+      && x.service === s.service && x.timeMin > s.timeMin && x.status !== 'cancelled');
+    const otherOperatorLater = s.kind === 'walk-on' && sailings.some((x) => x.dir === s.dir
+      && x.kind === 'walk-on' && x.service !== s.service && x.timeMin > s.timeMin
+      && x.status !== 'cancelled');
     if (s.kind === 'walk-on') {
-      const people = Math.round(40 + rng.range(0, 60));
-      const where = s.dir === 'to-island' ? 'atToondah' : (s.service === 'svc-stradbroke-flyer' ? 'atOneMile' : 'atDunwich');
+      // The people stranded are the people that boat would have carried, not a number pulled out of
+      // the air. A 05:15 out of One Mile and a Sunday afternoon into Dunwich strand different loads,
+      // and the two operators land in different townships, so the boat that failed decides both how
+      // many are standing there and where they are standing.
+      const wanted = walkOnDemand(w, s);
+      const people = Math.min(wanted, s.capacityPax || flyerSeats);
+      const isFlyer = s.service === 'svc-stradbroke-flyer';
+      const where = s.dir === 'to-island'
+        ? (isFlyer ? 'atFlyerTerminal' : 'atToondah')
+        : (isFlyer ? 'atOneMile' : 'atDunwich');
+      const place = s.dir === 'to-island'
+        ? (isFlyer ? 'the Flyer terminal at Cleveland' : 'Toondah Harbour')
+        : (isFlyer ? 'One Mile Jetty' : 'the Junner Street pontoon');
       state.stranded[where] += people;
+      const otherWay = s.dir === 'to-island'
+        ? 'the other operator has a later one from the same street'
+        : 'the other operator has a later one from the other side of Dunwich';
       w.bus.emit('ferry:stranded', {
-        people, where, sailing: s.time, why: s.why, lastOfDay,
+        people, where, place, operator: s.vesselName, service: s.service,
+        sailing: s.time, why: s.why, lastOfDay, otherOperatorLater,
         text: lastOfDay
-          ? `The last water taxi is cancelled: ${s.why}. ${people} people are not getting home tonight.`
-          : `The ${s.time} water taxi is cancelled: ${s.why}. ${people} people are waiting on the next one.`
+          ? (otherOperatorLater
+            ? `The last ${s.vesselName} is cancelled: ${s.why}. ${people} people at ${place} have to `
+              + `find out that ${otherWay}.`
+            : `The last ${s.vesselName} is cancelled: ${s.why}. ${people} people at ${place} are not `
+              + 'getting home tonight.')
+          : `The ${s.time} ${s.vesselName} is cancelled: ${s.why}. ${people} people at ${place} are `
+            + 'waiting on the next one.'
       });
     } else {
       const rolled = Math.min(yardCount(), s.capacityCars);
@@ -829,6 +1063,7 @@ export function registerFerry(world) {
     while (rolling.carried30.length > 30) rolling.carried30.shift();
     state.cancellations.rolling30 = rolling.cancel30.reduce((a, b) => a + b, 0);
     state.stranded.atToondah = Math.round(state.stranded.atToondah * 0.2);
+    state.stranded.atFlyerTerminal = Math.round(state.stranded.atFlyerTerminal * 0.2);
     state.stranded.atDunwich = Math.round(state.stranded.atDunwich * 0.2);
     state.stranded.atOneMile = Math.round(state.stranded.atOneMile * 0.2);
 
@@ -946,7 +1181,8 @@ export function registerFerry(world) {
         vesselsDown: state.vessels.filter((v) => v.status !== 'in service').map((v) => v.name).join(',') || null,
         peak: !!(state.today && state.today.peakTimetable),
         next: nx ? `${nx.time} ${nx.vessel}` : null,
-        stranded: state.stranded.atToondah + state.stranded.atDunwich + state.stranded.atOneMile,
+        stranded: state.stranded.atToondah + state.stranded.atFlyerTerminal
+          + state.stranded.atDunwich + state.stranded.atOneMile,
         freightWaiting: state.freight.waitingItems,
         freightSpoiled: state.freight.spoiledToday
       };

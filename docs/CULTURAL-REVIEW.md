@@ -878,3 +878,23 @@ a person's actual position depends on facts this twin does not know. That line i
 the pack schema, so a record without it fails the gate. It matters here more than anywhere: a person
 reading about the cultural heritage duty of care and treating this pack as their answer would be
 badly served, and so would everybody else.
+
+### L4. Why the legislation staging file trips the culture screen, and what was done about it (14 August 2026)
+`node tools/gate-audit.mjs` reports four holds against `ingest-inbox/legislation/measured.json` and
+the Queensland in-force index beside it: the words "initiation", "restricted area", "sacred" and
+"burial". They are not contributed cultural material and nothing has been promoted from them. They
+are provision headings, read out of the published consolidations so that a section number this pack
+names can be confirmed against the words printed over it. In full: "Initiation of judicial
+proceedings" and three like it, "Existing temporary restricted areas" and two more from a fisheries
+or marine parks context, "Ownership and custody of secret or sacred object" from the Aboriginal
+Cultural Heritage Act 2003, and one entry in the register's own index of Queensland Acts in force.
+
+Two things follow and both are already true. The staging file is gitignored, which is what keeps the
+hold advisory rather than blocking, and no heading from it reaches `data/legislation.json`: the pack
+carries the short title, the citation, the size, a plain-English description written by hand, and the
+provision numbers, and it does not carry the headings the lane read to confirm them. The one heading
+that touches cultural material is the Act's own words about a matter this project has no view on.
+
+The hold is recorded here rather than cleared, because the screen is doing exactly what it was built
+to do and the answer is not to narrow it. Anybody reading a gate log should be able to find out in
+one place why those four words are in a file in this repository.

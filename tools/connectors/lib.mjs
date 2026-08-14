@@ -5,11 +5,24 @@
 //
 // Three rules hold this whole directory together, and every file here obeys them:
 //
-//   1. A SYNC IS AN OFFLINE STEP. Nothing in tools/connectors ever opens a socket. A connector
-//      reads files on this machine: a checkout of the owner's own repository, or a folder somebody
-//      dropped an export into. The one thing that could look like a network call, reading the git
-//      commit of a source checkout, is a local read of .git and is done through git itself.
-//      Pulling that checkout is a person's job and the connector says so when the checkout is old.
+//   1. A SYNC IS AN OFFLINE STEP, WHICH IS NOT THE SAME AS NEVER OPENING A SOCKET, AND THIS FILE
+//      USED TO SAY IT WAS. The rule that matters is about the running twin: it loads committed
+//      files off its own origin at boot and touches nothing else, ever, and any fetch in a render
+//      or simulation loop is a fail. A sync is the other side of that line. It happens when a
+//      person or a scheduled job runs it, and it ends in a committed, stamped file.
+//
+//      Three connectors read files on this machine: a checkout of the owner's own repository, or a
+//      folder somebody dropped an export into. The one thing there that could look like a network
+//      call, reading the git commit of a source checkout, is a local read of .git through git
+//      itself. Pulling that checkout is a person's job and the connector says so when it is old.
+//
+//      ONE CONNECTOR FETCHES, and it is declared here rather than left for somebody to discover.
+//      `tools/connectors/weather.mjs` calls two named Open-Meteo hosts, because nobody keeps the
+//      weather in a git repository and there is no local checkout of it to read. It is the same
+//      shape `tools/ingest/lane-legislation.mjs --fetch` already has for the two legislation
+//      registers: a person runs it, it writes a file, and everything downstream works on the file.
+//      Give it `--inbox` and it fetches nothing at all. `fetch` appears in exactly one file in this
+//      directory, with the reasoning on it, so a grep for it lands somewhere useful.
 //
 //   2. FRESHNESS IS A FIELD, NOT A FEELING. Every record carries when it was synced, from what, at
 //      what commit, and what the source itself said about its own currency. A twin that says the
@@ -37,7 +50,12 @@ import { fileURLToPath } from 'node:url';
 // copy would be enforcing a rule the interface had never heard of, which is exactly what the first
 // round of this slice did: docs/CONNECTORS.md claimed the twin called this function and nothing
 // under src/ had ever imported it.
-export { freshnessAt, daysBetween, FRESHNESS_STATES, STALE_AFTER_DAYS } from '../../src/world/freshness.js';
+export { freshnessAt, daysBetween, minutesBetween, observedAt, agoText, FRESHNESS_STATES, STALE_AFTER_DAYS, OBSERVATION_STALE_AFTER_MINUTES } from '../../src/world/freshness.js';
+
+// The source ladder crosses the same line for the same reason. A connector stamps a rung onto every
+// record it writes and the twin ranks records by it, so the two have to be reading one table. See
+// docs/CONNECTORS.md, "The source ladder, and why weather must not be a two-way switch".
+export { SOURCE_RUNGS, rungOf, resolveObservations, SIMULATION_RUNG } from '../../src/world/observations.js';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const FEED_DIR = path.join(ROOT, 'data', 'feeds');
@@ -572,6 +590,10 @@ export function writeFeed(feed) {
     file: `data/feeds/_${feed.feed}.json`,
     title: feed.title,
     organisation: feed.organisation,
+    // Carried up from the feed so the index alone answers the question the browser's loader asks at
+    // boot: which of these does the running twin read. Absent means no, which is the right default
+    // and is what every feed written before this said.
+    runtime_read: feed.runtime_read === true,
     synced_at: feed.sync.synced_at,
     source: {
       kind: feed.sync.source.kind,

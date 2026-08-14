@@ -45,7 +45,8 @@
 // away and all of them are the wrong kind of true for this screen.
 //
 // WHAT IT READS RATHER THAN RECOMPUTES. The tide comes out of `world.read('tide')`, the sun and
-// moon out of `daylight`, the crossing out of `ferry.next`, what is open out of the businesses
+// moon out of `daylight`, the crossing out of `ferry.remaining` and `ferry.tomorrowFirst`, which are
+// the running ferry system's own board and not a second reading of the pack, what is open out of the businesses
 // system's own `hours(id)` accessor, and the calendar out of the same pure helper the simulation
 // resolves its event days with (`src/systems/agents/calendar.js`), so what a person reads here and
 // what the island runs cannot drift apart. The one piece of arithmetic this file does is
@@ -434,11 +435,19 @@ registerPanel({
     /* ---- blocks --------------------------------------------------------- */
 
     /** A section with a heading, a register word and a body. `register` is real or modelled. */
+    // `register` is 'modelled', 'real', or an object { label, tone } for the case the two words do
+    // not cover. Conditions needed the third: while the clock is live, the air and the wind may be
+    // coming off a weather model of the actual sky, which is neither this twin's own simulation nor
+    // a reading anybody took. Calling that "Real" overstates it and calling it "A simulation"
+    // understates it, so it gets its own word. See the source ladder in docs/CONNECTORS.md.
     function block(cls, title, register, ...kids) {
-      const chip = register === 'modelled'
-        ? el('span', { class: 'td-chip modelled' }, 'A simulation')
-        : el('span', { class: 'td-chip real' }, 'Real');
-      return el('section', { class: 'td-block ' + cls + (register === 'modelled' ? ' is-modelled' : '') },
+      const spec = typeof register === 'object' && register
+        ? register
+        : register === 'modelled'
+          ? { label: 'A simulation', tone: 'modelled' }
+          : { label: 'Real', tone: 'real' };
+      const chip = el('span', { class: 'td-chip ' + spec.tone }, spec.label);
+      return el('section', { class: 'td-block ' + cls + (spec.tone === 'modelled' ? ' is-modelled' : '') },
         el('div', { class: 'td-block-head' }, el('h3', {}, title), chip),
         ...kids);
     }
@@ -553,25 +562,109 @@ registerPanel({
 
     function conditionsBlock() {
       const wx = world.read('weather');
-      const wrap = block('td-cond', 'Conditions', 'modelled');
       if (!wx) {
+        const wrap = block('td-cond', 'Conditions', 'modelled');
         wrap.append(noneLine('The weather system is not running.'));
         return wrap;
       }
-      wrap.append(el('div', { class: 'td-cond-line' }, wx.label || '–'));
+      // Which register this block is in is now a question rather than a constant, because the
+      // answer changes with the clock. The chip follows the worst rung any number here is resting
+      // on, which is the honest headline: one measured field among four modelled ones does not make
+      // the block measured.
+      const rung = wx.sourceRung || 4;
+      const knows = typeof wx.knows === 'function' ? wx.knows : () => true;
+      const chip = rung >= 4 ? { label: 'A simulation', tone: 'modelled' }
+        : rung === 3 ? { label: 'A weather model', tone: 'real' }
+          : { label: 'Measured', tone: 'real' };
+      const wrap = block('td-cond', 'Conditions', chip);
+
+      // A pattern name is the simulation's own vocabulary and it has no meaning when the numbers
+      // came off a model of the real sky, so it only appears when the island is running its own.
+      if (rung >= 4) wrap.append(el('div', { class: 'td-cond-line' }, wx.label || '–'));
+
+      // WHEN IT WAS TAKEN, beside the number and not in a footnote.
+      // The businesses block one region below prints "checked 4 days ago" on every row, and this
+      // block used to print no time at all while the pack it was reading carried an observation
+      // stamp to the minute. An hour-old rain figure and an hour-old temperature are not the same
+      // claim, so the age rides on each field rather than on the block: src/world/freshness.js sets
+      // the shelf life per field and the ladder has already worked out which of them are still in.
+      const stampOf = (field) => {
+        const s = wx.fieldSource && wx.fieldSource[field];
+        if (!s || !s.observedAt || !isNum(s.ageMin)) return null;
+        const hm = /T(\d{2}):(\d{2})/.exec(String(s.observedAt));
+        return {
+          at: hm ? hhmm(Number(hm[1]) * 60 + Number(hm[2])) : null,
+          ago: s.ago || gapText(s.ageMin) + ' ago',
+          standing: s.freshness === 'fresh' ? 'fresh' : s.freshness === 'ageing' ? 'ageing' : 'stale'
+        };
+      };
+      const pair = (k, v, field) => {
+        const node = el('div', { class: 'td-pair' },
+          el('span', { class: 'k' }, k), el('span', { class: 'v' }, v));
+        const st = knows(field) ? stampOf(field) : null;
+        if (st) {
+          node.append(el('span', { class: 'td-age ' + st.standing },
+            st.at ? st.at + ', ' + st.ago : st.ago));
+        }
+        return node;
+      };
       wrap.append(el('div', { class: 'td-pair-row' },
-        el('div', { class: 'td-pair' }, el('span', { class: 'k' }, 'Air'), el('span', { class: 'v' }, num(wx.tempC, 1) + '°')),
-        el('div', { class: 'td-pair' }, el('span', { class: 'k' }, 'Wind'), el('span', { class: 'v' }, num(wx.windKt, 0) + ' kt'))));
-      wrap.append(el('p', { class: 'td-warn' },
-        'This is a simulation, not a forecast. The twin makes its own weather with a synoptic state '
-        + 'machine and has never read the Bureau of Meteorology. Do not plan a day on it, and do not '
-        + 'read it as what the sky is doing outside.'));
+        pair('Air', knows('tempC') ? num(wx.tempC, 1) + '°' : 'not known', 'tempC'),
+        pair('Wind', knows('windKt') ? num(wx.windKt, 0) + ' kt' : 'not known', 'windKt')));
+
+      if (rung >= 4) {
+        wrap.append(el('p', { class: 'td-warn' },
+          wx.notKnown && wx.notKnown.length
+            ? 'The clock is live and no current reading is in hand, so the twin does not know what the '
+              + 'sky is doing. It carries on running weather of its own so the island keeps living, and '
+              + 'it will not show you that as though it were today. Do not plan a day on this screen.'
+            : 'This is a simulation, not a forecast. The twin makes its own weather with a synoptic '
+              + 'state machine, which is the only thing that can answer for a moment that has not '
+              + 'happened. Do not plan a day on it, and do not read it as what the sky is doing outside.'));
+      } else {
+        // The oldest field still in use, because a block is only as current as its stalest number.
+        let oldest = null;
+        for (const f of Object.keys(wx.fieldSource || {})) {
+          const s = wx.fieldSource[f];
+          if (!s || !isNum(s.ageMin) || !s.observedAt || s.rung >= 4) continue;
+          if (!oldest || s.ageMin > oldest.ageMin) oldest = s;
+        }
+        const st = oldest ? stampOf(Object.keys(wx.fieldSource).find((f) => wx.fieldSource[f] === oldest)) : null;
+        wrap.append(el('p', { class: 'td-warn' },
+          (st && st.at ? 'Taken at ' + st.at + ', ' + st.ago + ' at the oldest. ' : '')
+          + 'Model output for a grid cell near the island, not a reading anybody took here, and not a '
+          + 'forecast. It is what a weather model has for this coast at the moment stamped on it. The '
+          + 'operator, the Bureau and your own eyes all outrank it.'));
+      }
+      wrap.append(srcLine(wx.sourceNote
+        + (wx.attributions && wx.attributions.length
+          ? ' ' + wx.attributions.map((a) => a.attribution).join('. ') + '.'
+          : '')));
       return wrap;
     }
 
     /* ---- the crossing ---------------------------------------------------
        Leads with getting off the island, because that is the question an islander is actually
-       asking and the one the five second test is written around. */
+       asking and the one the five second test is written around.
+
+       THE CORRECTION THIS BLOCK WAS REBUILT AROUND, from the owner, who lives there:
+
+         "You can always get on and off the island on a passenger ferry during normal operating
+          schedules, but there are peak times when the vehicle ferries get booked out."
+
+       So "can I get off the island" is nearly always yes and is nearly never the useful question.
+       "Can I get my VEHICLE across" is the one that fails, and at peak it fails on bookings rather
+       than on weather. The block is therefore two groups and not four equal lines, the vehicle group
+       goes first because it is the one that can say no, and the passenger group carries every
+       remaining sailing rather than only the next one, because the whole point of it is that there
+       are usually several more.
+
+       AND IT NEVER STOPS AT "NOTHING MORE TODAY". It used to, on all four lines, at twenty past four
+       on a Friday with two barges and nine passenger sailings still to run: the ferry system did not
+       publish its board until the first tick, and a live tick is ten real minutes apart. That is
+       fixed in src/systems/movement/ferry.js. What is fixed here is the other half of it: a line with
+       genuinely nothing left today now says when the first one tomorrow is, off the published
+       timetable, instead of leaving a person holding a dead end. */
 
     function crossingBlock() {
       const f = world.read('ferry');
@@ -581,24 +674,92 @@ registerPanel({
           + 'the next boat is.'));
         return wrap;
       }
-      const n = f.next || {};
-      const leg = (label, sailing, where) => {
-        if (!sailing) {
-          return el('div', { class: 'td-leg empty' },
-            el('span', { class: 'k' }, label),
-            el('span', { class: 'none' }, 'nothing more today ' + where));
-        }
-        return el('div', { class: 'td-leg' },
-          el('span', { class: 'k' }, label),
-          el('span', { class: 'v' }, packTime(sailing.time) || sailing.time),
-          el('span', { class: 'in' }, isNum(sailing.inMin) ? 'in ' + gapText(sailing.inMin) : ''));
+      const remaining = f.remaining || {};
+      const tomorrow = f.tomorrowFirst || {};
+      // A peak day runs modelled extra sailings, and a modelled sailing time has no business on a
+      // board a stranger reads as today. They are counted at the bottom and named as modelled.
+      let extrasHeld = 0;
+      const realRows = (key) => {
+        const rows = Array.isArray(remaining[key]) ? remaining[key] : [];
+        const kept = rows.filter((r) => r && !r.extra);
+        extrasHeld += rows.length - kept.length;
+        return kept;
       };
 
+      const leg = (label, key, mode) => {
+        const rows = realRows(key);
+        const first = rows[0];
+        const rest = rows.slice(1, 6);
+        const line = el('div', { class: 'td-leg' + (first ? '' : ' empty') },
+          el('span', { class: 'k' }, label));
+        if (first) {
+          line.append(
+            el('span', { class: 'v' }, packTime(first.time) || first.time),
+            el('span', { class: 'in' }, isNum(first.inMin) ? 'in ' + gapText(first.inMin) : ''));
+        } else {
+          line.append(el('span', { class: 'none' }, 'no more today'));
+        }
+        // What comes after it, which is the whole difference between the two groups: the barge runs
+        // out early and the passenger boats keep going.
+        if (rest.length) {
+          line.append(el('span', { class: 'then' },
+            'then ' + rest.map((r) => packTime(r.time) || r.time).join(', ')
+            + (rows.length > rest.length + 1 ? ', and more' : '')));
+        } else if (first) {
+          line.append(el('span', { class: 'then last' },
+            mode === 'vehicle' ? 'the last barge on this line today' : 'the last passenger sailing on this line today'));
+        }
+        const tm = tomorrow[key];
+        if (!first || !rest.length) {
+          line.append(el('span', { class: 'then' }, tm && tm.time
+            ? 'first tomorrow ' + (packTime(tm.time) || tm.time) + (tm.vessel ? ', ' + tm.vessel : '')
+            : 'nothing published for tomorrow on this line'));
+        }
+        return line;
+      };
+
+      wrap.append(el('p', { class: 'td-lede' },
+        'Two questions, and only one of them fails. Getting yourself across is nearly always yes: '
+        + 'the passenger ferries run their normal schedule and you walk on. Getting your vehicle '
+        + 'across is the one that books out.'));
+
+      wrap.append(el('h4', { class: 'td-sub' }, 'Your vehicle, on the barge'));
       wrap.append(el('div', { class: 'td-legs' },
-        leg('Barge to the mainland', n.toMainland, 'to the mainland'),
-        leg('Passenger ferry across', n.walkOnToMainland, 'to the mainland'),
-        leg('Barge over to the island', n.toIsland, 'to the island'),
-        leg('Passenger ferry over', n.walkOnToIsland, 'to the island')));
+        leg('To the mainland', 'toMainland', 'vehicle'),
+        leg('Over to the island', 'toIsland', 'vehicle')));
+
+      // The published ceiling, which is real, and a plain statement that whether a slot is actually
+      // free is a booking-system fact this screen does not hold. The twin's own running count of the
+      // deck is a modelled number and it stays on the bar, where modelled numbers are labelled.
+      const each = (f.importCeiling && f.importCeiling.carsEachWay) || null;
+      const t = f.today || {};
+      const peakWords = t.isLongWeekend
+        ? 'Today is inside a long weekend on the published calendar, which is one of the times the operator names as busiest.'
+        : t.isSchoolHoliday
+          ? 'Today is in the Queensland school holidays, which is one of the times the operator names as busiest.'
+          : 'Public holidays, school holidays, Fridays and Sundays are the ones the operator names as busiest.';
+      wrap.append(el('p', { class: 'td-note' },
+        (isNum(each) ? each + ' vehicle slots each way on the published day. ' : '')
+        + 'Whether one is still free is the operator\'s booking system, and this screen cannot see '
+        + 'it: at peak they go days ahead. ' + peakWords + ' Book with SeaLink, do not read it here.'));
+
+      wrap.append(el('h4', { class: 'td-sub' }, 'On foot, on the passenger ferries'));
+      wrap.append(el('div', { class: 'td-legs' },
+        leg('To the mainland', 'walkOnToMainland', 'walk-on'),
+        leg('Over to the island', 'walkOnToIsland', 'walk-on')));
+      wrap.append(el('p', { class: 'td-note' },
+        'Two operators, two landings a kilometre apart at this end. SeaLink runs to the Junner '
+        + 'Street pontoon at Dunwich and the Stradbroke Flyer runs to One Mile Jetty, so the choice '
+        + 'is mostly which side of Dunwich you want to arrive at.'));
+
+      if (extrasHeld > 0) {
+        wrap.append(el('p', { class: 'td-warn' },
+          'The twin is also running ' + extrasHeld + (extrasHeld === 1 ? ' extra sailing' : ' extra sailings')
+          + ' today because the calendar says this is a peak day. They are not in the times above, '
+          + 'because SeaLink publishes its peak timetable per period and this pack does not hold it: '
+          + 'those extras are the simulation\'s own and they do not belong on a screen you would plan '
+          + 'a day from.'));
+      }
 
       const cancelled = (f.cancellations && f.cancellations.today) || 0;
       if (cancelled > 0) {
@@ -608,8 +769,9 @@ registerPanel({
           + 'skip them. That is this simulation and not a real cancellation. Ring the operator.'));
       }
       wrap.append(srcLine('Sailing times from the published SeaLink and Stradbroke Flyer timetables '
-        + 'committed in data/transport.json. Timetables change and this pack is a snapshot: the '
-        + 'operator is the authority, not this screen.'));
+        + 'committed in data/transport.json, read out of the running ferry system so this screen and '
+        + 'the island cannot disagree. Timetables change and this pack is a snapshot: the operator is '
+        + 'the authority, not this screen.'));
       return wrap;
     }
 
@@ -953,6 +1115,11 @@ const STYLE = `
 .td-pair .v { font-family: var(--f-num); font-size: clamp(20px, 2.6vw, 30px); font-weight: 300; color: var(--t-hi);
   font-variant-numeric: tabular-nums; }
 .td-cond-line { font-size: clamp(14px, 1.7vw, 19px); color: var(--t-hi); font-weight: 300; }
+/* How old the number under it is. Same three standings the businesses block uses for opening hours,
+   same three colours, because a reader should not have to learn the idea twice on one screen. */
+.td-age { font-size: clamp(9px, 1vw, 11px); color: var(--t-faint); margin-top: 2px; }
+.td-age.ageing { color: var(--sun); }
+.td-age.stale { color: var(--coral); }
 
 /* ---- the crossing ------------------------------------------------------ */
 .td-legs { display: grid; grid-template-columns: 1fr; gap: var(--sp-2); }
@@ -963,8 +1130,14 @@ const STYLE = `
 .td-leg .v { font-family: var(--f-num); font-size: clamp(26px, 4vw, 44px); font-weight: 300; color: var(--t-hi);
   line-height: 1.05; font-variant-numeric: tabular-nums; }
 .td-leg .in { font-size: clamp(11px, 1.25vw, 15px); color: var(--sea); }
-.td-leg .none { font-size: clamp(13px, 1.5vw, 18px); color: var(--t-faint); font-style: italic; }
-.td-leg.empty { opacity: .78; }
+.td-leg .none { font-size: clamp(17px, 2.4vw, 26px); color: var(--t-faint); font-weight: 300; line-height: 1.15; }
+/* What comes after the next one. The reason the passenger group reads as "and there are plenty
+   more" and the vehicle group reads as "that is nearly it", which is the whole distinction. */
+.td-leg .then { font-size: clamp(10px, 1.15vw, 13px); color: var(--t-dim); line-height: 1.45; }
+.td-leg .then.last { color: var(--sun); }
+.td-leg.empty { opacity: .9; }
+.td-lede { font-size: clamp(12px, 1.4vw, 16px); line-height: 1.5; color: var(--t); margin-bottom: var(--sp-2); }
+.td-cross .td-sub:first-of-type { margin-top: var(--sp-2); }
 
 /* ---- what is on -------------------------------------------------------- */
 .td-sub { font-size: clamp(10px, 1.05vw, 12px); letter-spacing: .16em; text-transform: uppercase;

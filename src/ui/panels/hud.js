@@ -518,10 +518,18 @@ function mountHud(root, world) {
 
   const cUv = cell('UV');
   const cFire = cell('Fire danger');
+  // TWO CELLS, NOT ONE, AND THE SPLIT IS THE POINT.
+  // One merged "Crossing" cell answered two different questions with one word, and the owner, who
+  // lives there, put the difference plainly: you can nearly always get yourself on and off the
+  // island on a passenger ferry during normal operating hours, and there are peak times when the
+  // vehicle ferries book out. So the question that is nearly always yes and the question that
+  // actually fails are separate readouts. Crossing is the water and the walk-on boat. Your vehicle
+  // is the barge and the deck, and it is the one allowed to say no.
   const cCross = cell('Crossing');
+  const cVeh = cell('Your vehicle');
 
   const conditions = el('div', { class: 'hud-conditions' },
-    cTemp, cWind, cSwell, cTide, cUv, cFire, cCross);
+    cTemp, cWind, cSwell, cTide, cUv, cFire, cCross, cVeh);
 
   // Which of these can answer for a moment the island has not lived through, and which cannot.
   // The tide is a harmonic sum evaluated at an hour, so it is exact at whatever moment you scrub
@@ -529,22 +537,59 @@ function mountHud(root, world) {
   // there is no arithmetic that produces next Tuesday's southerly or next Tuesday's ferry queue,
   // so they stay at the island's present and the bar tags them HELD rather than letting a number
   // sit under a date it does not belong to.
-  for (const c of [cTemp, cWind, cSwell, cUv, cFire, cCross]) c.classList.add('hud-held');
+  for (const c of [cTemp, cWind, cSwell, cUv, cFire, cCross, cVeh]) c.classList.add('hud-held');
+
+  /* ---- where a weather number came from --------------------------------
+     docs/CONNECTORS.md is explicit that the rung is visible and not a footnote: a resident looking
+     at wind speed should be able to see whether that came off a mast at Point Lookout or out of a
+     model, because they will trust the two differently and they are right to. So every weather
+     number in these tooltips carries its own rung, per field, and a field the twin does not
+     currently know says so instead of showing a figure. */
+
+  /** The rung and age for one field, as the short phrase that goes after the number. */
+  function fieldFrom(wx, field) {
+    const s = wx.fieldSource && wx.fieldSource[field];
+    if (!s) return '';
+    if (s.rung >= 4) return '';
+    return ' (' + s.rungLabel + (s.provider ? ', ' + s.provider : '') + (s.ago ? ', ' + s.ago : '') + ')';
+  }
+  /** One weather value, or the words "not known" when no real source is current and the clock is live. */
+  function wxVal(wx, field, render) {
+    const knows = typeof wx.knows === 'function' ? wx.knows(field) : true;
+    if (!knows) return 'not known';
+    return render() + fieldFrom(wx, field);
+  }
+  /** The source sentence and, where a licence requires it, the attribution. Never only in a file. */
+  function wxWhy(wx, fallback) {
+    const bits = [];
+    if (wx.sourceNote) bits.push(wx.sourceNote);
+    for (const a of wx.attributions || []) bits.push(a.attribution);
+    return bits.length ? bits.join(' ') : (fallback || 'weather');
+  }
 
   tip(cTemp, () => {
     const wx = world.read('weather') || {};
     return {
       title: 'Air temperature',
       lines: [
-        ['Now', num(wx.tempC, 1, ' °C')],
-        ['Feels like', num(wx.apparentC, 1, ' °C')],
-        ['Humidity', isNum(wx.humidity) ? Math.round(wx.humidity * 100) + '%' : '–'],
-        ['Rain', isNum(wx.rainMmHr) ? num(wx.rainMmHr, 1, ' mm/h, ') + num(wx.rainToday, 0, ' mm today') : '–'],
+        ['Now', wxVal(wx, 'tempC', () => num(wx.tempC, 1, ' °C'))],
+        ['Feels like', wxVal(wx, 'apparentC', () => num(wx.apparentC, 1, ' °C'))],
+        ['Humidity', wxVal(wx, 'humidity', () => (isNum(wx.humidity) ? Math.round(wx.humidity * 100) + '%' : '–'))],
+        // Two different claims, so two lines. The rate can come off a real source; the daily total
+        // is this twin's own accumulation over the day and never carries anybody else's name.
+        ['Rain now', wxVal(wx, 'rainMmHr', () => (isNum(wx.rainMmHr) ? num(wx.rainMmHr, 1, ' mm/h') : '–'))],
+        ['Rain today', isNum(wx.rainToday) ? num(wx.rainToday, 0, ' mm, added up by the twin') : '–'],
         'Koalas stop moving in the daytime once the apparent temperature climbs past about 27 degrees, '
         + 'and start coming down out of the trees past 33. Power and water demand both follow the heat, '
-        + 'and so does what residents choose to do with their day.'
+        + 'and so does what residents choose to do with their day.',
+        wx.notKnown && wx.notKnown.length
+          ? 'A reading has to be current to be worth anything, and how current depends on what it is: '
+            + 'rain goes off in twenty five minutes and temperature holds for three hours. Anything above '
+            + 'reading "not known" has no reading inside its own limit. The island keeps running weather '
+            + 'of its own underneath so that life here carries on, and it will not show you that as today.'
+          : null
       ],
-      why: wx.label || 'weather'
+      why: wxWhy(wx, wx.label || 'weather')
     };
   });
 
@@ -553,15 +598,15 @@ function mountHud(root, world) {
     return {
       title: 'Wind',
       lines: [
-        ['Speed', num(wx.windKt, 0, ' kt')],
-        ['Gusts', num(wx.gustKt, 0, ' kt')],
-        ['From', compass(wx.windDirDeg) + ', ' + num(wx.windDirDeg, 0, '°')],
+        ['Speed', wxVal(wx, 'windKt', () => num(wx.windKt, 0, ' kt'))],
+        ['Gusts', wxVal(wx, 'gustKt', () => num(wx.gustKt, 0, ' kt'))],
+        ['From', wxVal(wx, 'windDirDeg', () => compass(wx.windDirDeg) + ', ' + num(wx.windDirDeg, 0, '°'))],
         'The arrow points the way it is blowing, not the way it is coming from.',
         'The crossing feels it first: past 15 knots the bay is choppy, past 22 it is rough, past 30 the '
         + 'barges stop. Wind also moves sand up the dunes, dries the fuel on the heath, and the burn crew '
         + 'will not light up above 22 knots.'
       ],
-      why: 'weather, and read by the ferry, the dunes, the vegetation and the phone sites'
+      why: wxWhy(wx, 'weather, and read by the ferry, the dunes, the vegetation and the phone sites')
     };
   });
 
@@ -572,18 +617,28 @@ function mountHud(root, world) {
     return {
       title: 'Swell',
       lines: [
-        ['Height', num(wx.swellM, 1, ' m')],
-        ['Period', num(wx.swellPeriodS, 1, ' s')],
-        ['From', compass(wx.swellDirDeg)],
+        ['Height', wxVal(wx, 'swellM', () => num(wx.swellM, 1, ' m'))],
+        ['Period', wxVal(wx, 'swellPeriodS', () => num(wx.swellPeriodS, 1, ' s'))],
+        ['From', wxVal(wx, 'swellDirDeg', () => compass(wx.swellDirDeg))],
+        // The long-period component, when a real source answers for it. This twin's own model
+        // produces no ground swell at all, so in simulated time the line is simply absent rather
+        // than filled with a number nothing stands behind.
+        isNum(wx.groundSwellM)
+          ? ['Ground swell', num(wx.groundSwellM, 1, ' m') + ' at ' + num(wx.groundSwellPeriodS, 1, ' s')
+            + ' from ' + compass(wx.groundSwellDirDeg) + fieldFrom(wx, 'groundSwellM')]
+          : null,
         ['Sea state', wx.seaState || '–'],
         ['Beach', wx.beachCondition || '–'],
         extra !== null ? ['Beach window lost to swell', extra + ' min at each end'] : null,
+        'Height here is the whole sea on the ocean side, wind chop and ground swell together, because '
+        + 'that is what shuts a beach. The ground swell line, when there is one, is the long-period '
+        + 'part underneath it, which is what makes the Gorge worth the walk.',
         'A big swell cuts sand off the ocean dunes and shortens the drivable window on Main Beach and '
         + 'Flinders Beach: every metre over 1.5 m takes another 40 minutes off each end. It also stirs '
         + 'the water over the seagrass and pushes the whales further off the headland.',
         nav.beachRule ? nav.beachRule.rule : null
       ],
-      why: 'weather, read by dunes, navigation, marine and whales'
+      why: wxWhy(wx, 'weather, read by dunes, navigation, marine and whales')
     };
   });
 
@@ -647,6 +702,43 @@ function mountHud(root, world) {
     };
   });
 
+  /** Every sailing still to come on one line today, as "16:15, 17:30, 18:45" or a plain no. */
+  function restOfDay(f, key) {
+    const rows = (f.remaining && f.remaining[key]) || [];
+    if (!rows.length) {
+      const tm = (f.tomorrowFirst && f.tomorrowFirst[key]) || null;
+      return tm && tm.time ? 'none left today, first tomorrow ' + tm.time : 'none left today';
+    }
+    const shown = rows.slice(0, 6).map((r) => r.time + (r.extra ? '*' : ''));
+    return shown.join(', ') + (rows.length > shown.length ? ', and more' : '');
+  }
+
+  tip(cVeh, () => {
+    const f = world.read('ferry') || {};
+    const deck = f.deck || {};
+    const ceiling = f.importCeiling || {};
+    const today = f.today || {};
+    return {
+      title: 'Getting your vehicle across',
+      lines: [
+        ['Barge to the mainland', restOfDay(f, 'toMainland')],
+        ['Barge over to the island', restOfDay(f, 'toIsland')],
+        isNum(ceiling.carsEachWay) ? ['Published capacity', ceiling.carsEachWay + ' cars each way'] : null,
+        isNum(deck.slotsLeftToday) ? ['Left on the deck, modelled', deck.slotsLeftToday + ' of ' + (deck.slotsToday || '–')] : null,
+        today.peakTimetable ? ['Today', 'a peak day on the published calendar'] : null,
+        'This is the question that fails. Getting yourself across is nearly always yes, because the '
+        + 'passenger ferries keep running to their normal schedule and you walk on. Getting your '
+        + 'vehicle across is the one that books out, and at peak it books out days ahead, on demand '
+        + 'rather than on weather.',
+        'The published capacity is real. The number left on the deck is this simulation\'s own count '
+        + 'of what its modelled day has carried, not a look inside anybody\'s booking system. Book '
+        + 'with the operator.',
+        deck.basis ? 'Deck capacity: ' + deck.basis + '.' : null
+      ],
+      why: 'ferry, from the published timetable in data/transport.json'
+    };
+  });
+
   tip(cCross, () => {
     const wx = world.read('weather') || {};
     const f = world.read('ferry') || {};
@@ -657,19 +749,36 @@ function mountHud(root, world) {
     return {
       title: 'The crossing',
       lines: [
-        ['Condition', wx.crossingCondition || rel.condition || '–'],
-        ['Wind', num(rel.windKt !== undefined ? rel.windKt : wx.windKt, 0, ' kt')],
+        ['Water', wx.crossingCondition || rel.condition || '–'],
+        ['Walk on, to the mainland', restOfDay(f, 'walkOnToMainland')],
+        ['Walk on, over to the island', restOfDay(f, 'walkOnToIsland')],
+        // The wind on the bay, off the weather system, with the provenance that actually belongs to
+        // it. It used to prefer the ferry's own `rel.windKt`, which is that system's record of the
+        // wind it made a decision on and is not the same number at the same moment: it was reading
+        // 0 kt beside a sub-line saying 9 kt on the bay. Stamping "model, Open-Meteo" onto the
+        // ferry's figure would have been worse than the disagreement, so this shows the weather's
+        // own and the ferry's is left to the ferry's own panel.
+        ['Wind', wxVal(wx, 'windKt', () => num(wx.windKt, 0, ' kt'))],
         next ? ['Next barge in', next.time + ', ' + (isNum(next.inMin) ? next.inMin + ' min' : '–')
           + (isNum(next.spaceCars) ? ', ' + next.spaceCars + ' car spaces' : '')] : null,
         walk ? ['Next passenger boat', walk.time + ', ' + (isNum(walk.inMin) ? walk.inMin + ' min' : '–')] : null,
         isNum(deck.slotsLeftToday) ? ['Car slots left today', deck.slotsLeftToday + ' of ' + (deck.slotsToday || '–')] : null,
+        // The distinction the whole crossing turns on, and the one a visitor gets wrong. Getting
+        // yourself across and getting your vehicle across are two different questions with two
+        // different answers, and only the second one fails at peak.
+        'Two questions, not one. Can you get across is almost always yes: the passenger ferries run to '
+        + 'their normal schedule and you walk on. Can your VEHICLE get across is the question that '
+        + 'fails, and at peak it fails on bookings rather than on weather, because the vehicle ferries '
+        + 'book out. The line above is about the water, from wind and tide. The car slots are about '
+        + 'demand. Neither answers the other.',
         'Everything that is not already on the island comes across this water: groceries, freight, '
         + 'tradies, day visitors, and anyone who has to be at work on the mainland. A rough crossing '
         + 'slows the boats. A cancelled one rolls the vehicle queue into tomorrow, and the chilled '
         + 'freight does not keep.'
       ],
       why: rel.basis
-        ? 'The wind thresholds are modelled. No published wind limit for this crossing was found.'
+        ? 'The wind thresholds are modelled. No published wind limit for this crossing was found. '
+          + 'Ocean swell is not in it: this crossing is entirely inside the bay.'
         : 'ferry and weather'
     };
   });
@@ -1401,13 +1510,20 @@ function mountHud(root, world) {
     // Sub lines are kept short enough that they never need an ellipsis. Whatever will not fit in
     // a word or two belongs in the tooltip, where there is room to say what it actually does.
     const wx = w.read('weather') || {};
-    setText(cTemp.vEl, num(wx.tempC, 1) + '°');
-    setText(cTemp.sEl, isNum(wx.rainMmHr) && wx.rainMmHr > 0.05
-      ? num(wx.rainMmHr, 1) + ' mm/h'
-      : (isNum(wx.apparentC) ? 'feels ' + num(wx.apparentC, 0) + '°' : (wx.label || '–')));
+    // Rung four never wins in live mode. If no real reading is inside its own limit, the cell says
+    // so in a word rather than showing a simulated figure under a live badge. The island is still
+    // running that figure underneath, because the dunes and the ferry and the koalas all need a
+    // wind speed, and it is simply not offered as an answer about the island outside. The tooltips
+    // carry the whole of why. docs/CONNECTORS.md, "The source ladder".
+    const wxKnows = typeof wx.knows === 'function' ? wx.knows : () => true;
+    setText(cTemp.vEl, wxKnows('tempC') ? num(wx.tempC, 1) + '°' : '–');
+    setText(cTemp.sEl, !wxKnows('tempC') ? 'not known'
+      : isNum(wx.rainMmHr) && wx.rainMmHr > 0.05 && wxKnows('rainMmHr')
+        ? num(wx.rainMmHr, 1) + ' mm/h'
+        : (isNum(wx.apparentC) && wxKnows('apparentC') ? 'feels ' + num(wx.apparentC, 0) + '°' : (wx.label || '–')));
 
-    setText(windVal, num(wx.windKt, 0) + ' kt');
-    if (isNum(wx.windDirDeg)) {
+    setText(windVal, wxKnows('windKt') ? num(wx.windKt, 0) + ' kt' : '–');
+    if (isNum(wx.windDirDeg) && wxKnows('windDirDeg')) {
       // Meteorological direction is where the wind comes from. The arrow shows where it is going.
       const rot = (wx.windDirDeg + 180) % 360;
       if (windArrow.__rot !== Math.round(rot)) {
@@ -1418,10 +1534,24 @@ function mountHud(root, world) {
     } else {
       windArrow.style.opacity = '0.25';
     }
-    setText(cWind.sEl, compass(wx.windDirDeg) + (isNum(wx.gustKt) ? ', gust ' + num(wx.gustKt, 0) : ''));
+    setText(cWind.sEl, !wxKnows('windKt') ? 'not known'
+      : compass(wx.windDirDeg) + (isNum(wx.gustKt) && wxKnows('gustKt') ? ', gust ' + num(wx.gustKt, 0) : ''));
 
-    setText(cSwell.vEl, num(wx.swellM, 1) + ' m');
-    setText(cSwell.sEl, num(wx.swellPeriodS, 0, ' s') + ', ' + (wx.seaState || '–'));
+    setText(cSwell.vEl, wxKnows('swellM') ? num(wx.swellM, 1) + ' m' : '–');
+    setText(cSwell.sEl, !wxKnows('swellM') ? 'not known'
+      : num(wx.swellPeriodS, 0, ' s') + ', ' + (wx.seaState || '–'));
+
+    // Per cell, on that cell's own field, because per field rather than per source is the rule and
+    // it applies to the dimming as much as to the number. A rain reading ageing out after
+    // twenty five minutes must not grey the air temperature beside it, which is good for three
+    // hours: that would be the same lie of omission in the other direction.
+    //
+    // Toggled rather than assigned, because these cells already carry `hud-held` and `has-tip` that
+    // other code put there, and writing the whole class string over the top silently took the
+    // tooltip affordance off all three.
+    cTemp.classList.toggle('hud-unknown', !wxKnows('tempC'));
+    cWind.classList.toggle('hud-unknown', !wxKnows('windKt'));
+    cSwell.classList.toggle('hud-unknown', !wxKnows('swellM'));
 
     const t = w.read('tide') || {};
     setText(tideVal, num(t.height, 2) + ' m');
@@ -1472,12 +1602,37 @@ function mountHud(root, world) {
 
     const ferry = w.read('ferry') || {};
     const cross = wx.crossingCondition || (ferry.reliability && ferry.reliability.condition);
+
+    // CROSSING: the water, and the boat you can walk onto. The question that is nearly always yes.
+    // Both directions, because a person standing on the island and a person standing at Cleveland
+    // are asking the same question with different answers, and one number could only serve one.
+    const rem = ferry.remaining || {};
+    const walkOff = (rem.walkOnToMainland || [])[0];
+    const walkOn = (rem.walkOnToIsland || [])[0];
     setText(cCross.vEl, cross ? cross[0].toUpperCase() + cross.slice(1) : '–');
-    const nextBarge = ferry.next && ferry.next.toIsland;
-    setText(cCross.sEl, nextBarge && nextBarge.time
-      ? 'barge ' + nextBarge.time
+    setText(cCross.sEl, walkOff || walkOn
+      ? 'walk on ' + (walkOff ? walkOff.time + ' off' : '') + (walkOff && walkOn ? ', ' : '')
+        + (walkOn ? walkOn.time + ' over' : '')
       : (isNum(wx.windKt) ? num(wx.windKt, 0) + ' kt on the bay' : '–'));
     setTone(cCross, crossTone(cross));
+
+    // YOUR VEHICLE: the barge and the deck. The question that actually fails, and the only one of
+    // the two that a peak weekend closes. The number beside it is the twin's own running count of
+    // the day's deck, which is why the cell is tagged HELD and the tooltip says whose count it is.
+    const bargeOff = (rem.toMainland || [])[0];
+    const bargeOn = (rem.toIsland || [])[0];
+    const deckNow = ferry.deck || {};
+    const soldOut = isNum(deckNow.slotsLeftToday) && deckNow.slotsLeftToday <= 0;
+    setText(cVeh.vEl, bargeOff || bargeOn
+      ? (bargeOff ? bargeOff.time + ' off' : 'none off') + (bargeOn ? ', ' + bargeOn.time + ' over' : '')
+      : 'none left today');
+    setText(cVeh.sEl, isNum(deckNow.slotsLeftToday)
+      ? (soldOut ? 'deck full in the model' : deckNow.slotsLeftToday + ' of ' + (deckNow.slotsToday || '–') + ' slots over')
+      : 'barge, both ways');
+    setTone(cVeh, !bargeOff && !bargeOn ? 'tone-bad'
+      : soldOut ? 'tone-bad'
+        : (isNum(deckNow.slotsLeftToday) && isNum(deckNow.slotsToday) && deckNow.slotsToday > 0
+          && deckNow.slotsLeftToday / deckNow.slotsToday < 0.15) ? 'tone-warn' : 'tone-good');
 
     /* headline figures */
     const absHour = c.dayIndex * 24 + Math.floor(c.minuteOfDay / 60);
@@ -1832,6 +1987,15 @@ function injectStyle() {
 .hud-bar.is-scrubbed .hud-held .fig-arrow,
 .hud-bar.is-scrubbed .hud-held .hud-arrow{opacity:.22}
 .hud-bar.is-scrubbed .hud-held .k::after{content:' HELD';color:var(--sun);font-weight:700;letter-spacing:.1em}
+
+/* ---- not known: live, and no real reading is inside its own limit ----
+   The word does the work and the colour only supports it, because docs/CONNECTORS.md requires a
+   stale record to say so in words and not in a colour alone. The sub-line already reads "not known";
+   this dims the dash so the eye does not read it as a measurement of nought. Never applied while
+   scrubbed, where HELD is the correct and different thing to say. */
+.hud-cell.hud-unknown .v{color:var(--t-faint)}
+.hud-cell.hud-unknown .s{color:rgba(109,118,124,.72);font-style:italic}
+.hud-bar.is-scrubbed .hud-cell.hud-unknown .s{font-style:normal}
 
 /* ---- dividers ---- */
 .hud-div{flex:0 0 1px;width:1px;align-self:center;height:40px;background:var(--edge);margin:0 12px}

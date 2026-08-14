@@ -231,6 +231,43 @@ const STYLE = `
 .cb-reach .b { height: 5px; background: var(--s-sunk); border-radius: var(--r-pill); overflow: hidden;
   grid-column: 1 / -1; }
 .cb-reach .b > i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--sea); }
+
+/* The three registers, and the reason the speculative one is drawn the way it is.
+   Colour alone would not do it: a person who cannot separate purple from green would be reading
+   an invented instrument as a statute. So the signal is the border itself. Known is a solid rule,
+   modelled is a solid rule in a different colour, and speculative is DASHED, on every card, in the
+   detail pane, and behind the record while it is selected. A dashed edge reads as "not settled"
+   before anything is read, it survives a screenshot, and it survives a colour-blind reader. */
+.cb-reg { border-left-width: 3px; border-left-style: solid; }
+.cb-reg.known { border-left-color: var(--leaf); }
+.cb-reg.modelled { border-left-color: var(--sea); }
+.cb-reg.speculative { border-left-style: dashed; border-left-color: var(--heath);
+  background: repeating-linear-gradient(135deg, rgba(180,138,196,.055) 0 8px, transparent 8px 16px); }
+.cb-reg.speculative.on { border-color: var(--heath); background:
+  repeating-linear-gradient(135deg, rgba(180,138,196,.14) 0 8px, rgba(180,138,196,.05) 8px 16px); }
+.cb-ow-mark { font-size: var(--fs-micro); letter-spacing: .14em; text-transform: uppercase;
+  font-weight: 600; }
+.cb-ow-mark.known { color: var(--leaf); } .cb-ow-mark.modelled { color: var(--sea); }
+.cb-ow-mark.speculative { color: var(--heath); }
+/* The switch, which must not read as an eighth tab. The tabs rule above would give it a tab's shape
+   and, worse, a sea underline while it is on, so it is drawn as a pill and wears the speculative
+   colour rather than the board's accent. The tab it reveals wears the same colour, so the two read
+   as one thing. No back ticks in this block: it is inside a template literal. */
+.cb-ow-switch { margin-left: auto; display: flex; align-items: center; gap: var(--sp-2);
+  padding-right: var(--sp-2); }
+.cb-ow-switch .lbl { font-size: var(--fs-micro); color: var(--t-faint); letter-spacing: .1em;
+  text-transform: uppercase; }
+.tabs .cb-ow-switch button { border: 1px solid var(--edge); border-radius: var(--r-pill);
+  background: var(--s-sunk); color: var(--t-faint); padding: 3px 11px;
+  font: 600 var(--fs-micro)/1.5 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; }
+.tabs .cb-ow-switch button:hover { color: var(--t); border-color: var(--edge-strong); }
+.tabs .cb-ow-switch button.on { color: var(--heath); border-color: var(--heath);
+  background: rgba(180,138,196,.14); }
+.tabs button.cb-ow-tab { color: var(--heath); opacity: .8; }
+.tabs button.cb-ow-tab.on { color: var(--heath); border-bottom-color: var(--heath); opacity: 1; }
+.cb-ow-hide { display: none; }
+.cb-ow-quote { border-left: 2px solid var(--edge-strong); padding-left: var(--sp-3);
+  font-size: var(--fs-sm); color: var(--t); line-height: 1.6; margin: var(--sp-2) 0; }
 `;
 
 /* ------------------------------------------------------------------ small helpers */
@@ -445,22 +482,77 @@ registerPanel({
       ['intray', 'In tray'],
       ['groups', 'Groups'],
       ['consult', 'Consultation'],
-      ['budget', 'Budget']
+      ['budget', 'Budget'],
+      // The eighth tab exists only while the third register is switched on. See the switch below.
+      ['offworld', 'Off world']
     ];
     const view = {
       tab: 'levers', leverId: null, issueId: null, instId: null, groupId: null, appId: null,
       query: '', roleFilter: 'all', traceId: null,
+      owGroup: 'known', owId: null,
       consult: { method: 'public-meeting', venue: '', slot: 'weekday-evening', notice: 21 }
     };
+
+    /* --- the third register's switch --------------------------------
+       docs/DIRECTION.md item 6: the three registers stay visually distinct everywhere, and
+       speculative material never blends into the default island state. The strongest form of that
+       last clause is not a colour, it is absence: while this is off there is no eighth tab, no
+       record, no marker and no number anywhere on this board that differs, and a person can work
+       through every lever without learning the register exists.
+
+       It is a choice a person makes, so it is remembered, in localStorage rather than in the world.
+       Nothing here touches simulation state: the pack's own `off_world` block is read-only content
+       and no system reads it. If localStorage is unavailable, off is the answer, because the
+       failure mode of a broken switch has to be the quiet one. */
+    const OW_KEY = 'twin.civic.speculative';
+    let owOn = false;
+    try { owOn = localStorage.getItem(OW_KEY) === 'on'; } catch (e) { owOn = false; }
+    function owPack(w) {
+      const c = w.data && w.data.civic;
+      const b = c && c.off_world;
+      return (b && typeof b === 'object') ? b : null;
+    }
+    // Note what this deliberately does not do: it does not read `off_world.default_state` and act on
+    // it. The pack carries that field and the gate fails if it says anything but off, but a panel
+    // that took its starting state from a data file would be one pack edit away from switching
+    // itself on under a councillor. Off is written here, in code, and the only thing that can change
+    // it is a person clicking the switch.
+    function setOw(on) {
+      owOn = !!on;
+      try { localStorage.setItem(OW_KEY, owOn ? 'on' : 'off'); } catch (e) { /* the switch still works for this session */ }
+      if (!owOn && view.tab === 'offworld') view.tab = 'levers';
+      paintOwSwitch();
+      refresh(true);
+    }
+
     const tabBar = el('nav', { class: 'tabs' });
     const tabBtns = {};
     for (const [id, label] of TABS) {
       const b = el('button', { type: 'button', onclick: () => { view.tab = id; refresh(true); } }, label);
+      if (id === 'offworld') b.classList.add('cb-ow-tab');
       tabBtns[id] = b;
       tabBar.append(b);
     }
+    const owSwitchBtn = el('button', {
+      class: 'btn ghost', type: 'button',
+      onclick: () => setOw(!owOn)
+    }, 'off');
+    const owSwitch = el('div', { class: 'cb-ow-switch' },
+      el('span', { class: 'lbl' }, 'Speculative register'), owSwitchBtn);
+    function paintOwSwitch() {
+      const has = !!owPack(world);
+      owSwitch.classList.toggle('cb-ow-hide', !has);
+      owSwitchBtn.textContent = owOn ? 'on' : 'off';
+      owSwitchBtn.classList.toggle('on', owOn);
+      owSwitchBtn.title = owOn
+        ? 'On. The off-world register is showing. It changes no number on this island; switch it off and the board is exactly as it was.'
+        : 'Off. This board is the island as it is. Switching this on adds one tab holding the off-world register: real space law that binds Australia, and, marked as such, instruments that do not exist.';
+      tabBtns.offworld.classList.toggle('cb-ow-hide', !owOn);
+    }
+    tabBar.append(owSwitch);
     const main = el('div', { class: 'cb-main' });
     board.append(head, tabBar, main);
+    paintOwSwitch();
 
     /* --- binding: values that move every tick without a rebuild ----
        Two lists. `chrome` holds the header readouts, which are built once and must survive every
@@ -567,7 +659,7 @@ registerPanel({
       const cn = w.read('consultation') || {};
       return [
         view.tab, view.leverId, view.issueId, view.instId, view.groupId, view.appId, view.traceId,
-        view.query, view.roleFilter,
+        view.query, view.roleFilter, owOn, view.owGroup, view.owId,
         view.consult.method, view.consult.venue, view.consult.slot, view.consult.notice,
         w.clock.dayIndex,
         (c.applications || []).map((a) => a.id + a.stage + (a.form || []).filter((f) => f.held).length).join(','),
@@ -599,6 +691,10 @@ registerPanel({
       if (!force && s === sig) { live(); return; }
       sig = s;
       try { paintSeat(world); } catch (e) { /* the board must still draw */ }
+      // The packs load before the UI mounts today, but a board that hid its own switch forever
+      // because one fetch was slow would be a bad way to find that out.
+      try { paintOwSwitch(); } catch (e) { /* the board must still draw */ }
+      if (view.tab === 'offworld' && !owOn) view.tab = 'levers';
       binds = [];
       for (const [id] of TABS) tabBtns[id].classList.toggle('on', view.tab === id);
       main.textContent = '';
@@ -939,6 +1035,70 @@ registerPanel({
           + 'proponent and then for the minister. This board does not make it, and nothing here says '
           + 'this lever needs a referral. It says the Act reaches this ground.'));
         wrap.append(box);
+      }
+
+      /* THE LAYER ABOVE THE BOARD.
+         Everything else on this card is something somebody decides. This is the part nobody on
+         this island decides, and it is drawn last on purpose, under the deciders and the money and
+         the clock, so a player reads the whole negotiation first and then finds out what is sitting
+         over it whichever way the negotiation goes. src/systems/civic/policy.js works out which
+         obligations reach this lever from the metrics its effects touch, so nothing here is a list
+         somebody curated. The force word is the point: read it before the prose. */
+      const treatyPolicy = w.read('policy');
+      const obs = treatyPolicy && typeof treatyPolicy.obligationsFor === 'function' ? treatyPolicy.obligationsFor(id) : [];
+      if (obs.length) {
+        const layer = (w.data && w.data.civic && w.data.civic.treaty_layer) || {};
+        const FORCE_WORD = {
+          prohibits: 'Forbids it outright',
+          requires_approval: 'Cannot be done without an approval',
+          requires_report: 'Has to be reported',
+          requires_effort: 'Obliges a government to try',
+          shapes: 'No legal force at all'
+        };
+        const tbox = el('div', { class: 'cb-banner' },
+          el('b', {}, 'Above this lever. '),
+          obs.length + (obs.length === 1 ? ' obligation sits' : ' obligations sit')
+          + ' over this decision and none of them is on this board. Nobody here voted for any of '
+          + 'them, nobody here can repeal one, and they do not change when a council does.');
+        for (const o of obs) {
+          const forceText = FORCE_WORD[o.force] || o.force;
+          const head = el('div', {},
+            el('b', {}, o.instrumentLabel),
+            txt((o.article ? ', ' + o.article : '') + '. '),
+            el('em', {}, forceText + '.'));
+          const body = el('div', { class: 'body' }, head,
+            el('div', { class: 'cb-p' }, txt(o.obliges)),
+            el('div', { class: 'cb-quiet', style: { marginTop: '5px' } },
+              el('b', {}, 'Who it binds. '), txt(o.binds + (o.bindsHere ? ' ' + o.bindsHere : ''))),
+            el('div', { class: 'cb-quiet', style: { marginTop: '5px' } },
+              el('b', {}, 'What it does not do. '), txt(o.doesNotDo || 'Not recorded in the pack.')));
+          const item = el('div', { class: 'cb-item' }, body);
+          if (o.domesticRoute) {
+            body.append(el('div', { class: 'cb-quiet', style: { marginTop: '5px' } },
+              el('b', {}, 'How it reaches this island. '), txt(o.domesticRoute)));
+          }
+          // The live half. Everything above is the pack; this is the world right now.
+          body.append(bind((ww) => {
+            const p2 = ww.read('policy');
+            const now = p2 && Array.isArray(p2.obligations) ? p2.obligations.find((x) => x.id === o.id) : null;
+            if (!now) return '';
+            if (!now.connected) return 'Not being watched: ' + now.why;
+            if (now.atIssue) {
+              return 'AT ISSUE for ' + now.daysAtIssue + (now.daysAtIssue === 1 ? ' day' : ' days')
+                + '. ' + now.atIssueWhy
+                + (now.reading ? ' Reading ' + now.reading.value + ' against a band of ' + now.reading.threshold + '.' : '');
+            }
+            if (now.engaged) return 'Engaged right now. ' + now.why;
+            return 'Not engaged right now. ' + now.why;
+          }, 'cb-quiet'));
+          if (o.modellingNote) {
+            body.append(el('div', { class: 'cb-quiet', style: { marginTop: '5px' } }, txt(o.modellingNote)));
+          }
+          body.append(el('div', { class: 'cb-src' }, 'Source: ' + sourceText(w, o.source)));
+          tbox.append(item);
+        }
+        if (layer.not_a_veto) tbox.append(el('div', { class: 'cb-quiet', style: { marginTop: '6px' } }, txt(layer.not_a_veto)));
+        wrap.append(tbox);
       }
 
       if (notMod) {
@@ -2043,6 +2203,287 @@ registerPanel({
 
       main.append(el('div', { class: 'cb-cols', style: { gridTemplateColumns: '1fr minmax(320px, 38%)' } }, left, right));
     });
+
+    /* ============================================================== VIEW: OFF WORLD
+
+       The third register. Reached only while the switch above says on, and drawn so that a person
+       who arrived here by accident could still not mistake one register for another.
+
+       THE THING THIS VIEW HAS TO GET RIGHT is not the layout, it is that the speculative material
+       never borrows the authority of the material beside it. Three defences, and they are
+       independent of each other on purpose:
+
+         the marker    Every record carries its register in words, on the card and in the detail,
+                       not only in the heading of the column it came from.
+         the edge      Known and modelled are solid rules; speculative is dashed and hatched. That
+                       survives a screenshot, a colour-blind reader, and a person skimming.
+         the language  A speculative record is drawn under headings that are all conditional: what
+                       it would be, what it would oblige, who would hold it. The pack writes them
+                       that way and this panel does not flatten them.
+
+       And one more, which is the one that actually matters: nothing here writes anything. No
+       intent leaves on the bus from this view, no system reads `off_world`, and the check in
+       tools/ingest/checks-offworld.mjs fails the gate if any lever, metric, issue or institution
+       ever names a record in it. */
+
+    // No colour in this table: the register class carries the colour and the edge, in one place, so
+    // a card, its detail pane and any future surface cannot drift apart on what purple means.
+    const OW_GROUPS = [
+      ['known', 'Known', 'What already binds'],
+      ['modelled', 'Modelled', 'This pack’s own reading'],
+      ['speculative', 'Speculative', 'Instruments that do not exist'],
+      ['refused', 'What it refuses', 'The lines it will not cross']
+    ];
+
+    /** Every record in one group, out of the pack. Known spans two arrays: the law and the events. */
+    function owRecords(b, group) {
+      if (!b) return [];
+      if (group === 'known') return [...(b.instruments || []), ...(b.precedents || [])];
+      if (group === 'modelled') return b.readings || [];
+      if (group === 'speculative') return b.proposals || [];
+      return b.not_here || [];
+    }
+
+    /** The register marker a record wears everywhere it is drawn. Read off the record, never typed. */
+    function owMark(r) {
+      const reg = r && typeof r.register === 'string' ? r.register : null;
+      if (!reg) return el('span', { class: 'cb-ow-mark' }, 'no register declared');
+      return el('span', { class: 'cb-ow-mark ' + reg }, reg);
+    }
+
+    /** A labelled paragraph, skipped entirely when the pack does not carry the field. */
+    function owField(label, value) {
+      if (typeof value !== 'string' || !value.trim()) return null;
+      return el('div', {}, el('div', { class: 'cb-h' }, label), el('div', { class: 'cb-p' }, txt(value)));
+    }
+
+    /**
+     * Append, skipping nothing.
+     *
+     * `el()` drops a null child; a raw `node.append(null)` writes the word "null" onto the screen.
+     * Every field in this view is optional, because the pack carries different fields on a treaty,
+     * an event, a reading and a proposal, so almost every append here can be nothing.
+     */
+    function put(parent, node) { if (node) parent.append(node); }
+
+    /**
+     * A source line for the footer, clipped.
+     *
+     * Most entries in the pack's source registry are a URL and read fine. Some are a sentence,
+     * because that is the honest entry for a treaty text or an annual status table with no single
+     * stable page, and a three-line sentence in a footer buries the confidence rating sitting next
+     * to it. So the first clause is shown and the whole thing is on the element's title. Nothing is
+     * hidden: `sourceText` still resolves it, and the full text is one hover away.
+     */
+    function owSource(w, key) {
+      const full = sourceText(w, key);
+      if (full.length <= 96) return full;
+      const cut = full.slice(0, 96);
+      const stop = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf(', '), cut.lastIndexOf(' '));
+      return (stop > 40 ? cut.slice(0, stop) : cut).replace(/[,.]$/, '') + '…';
+    }
+
+    VIEWS_DEF('offworld', (w) => {
+      const b = owPack(w);
+      if (!b) return notBuilt('The civic pack carries no off-world register.');
+      const group = OW_GROUPS.some(([id]) => id === view.owGroup) ? view.owGroup : 'known';
+
+      /* left: the question, then the registers */
+      const left = el('div', { class: 'cb-pane' });
+      if (b.the_question) {
+        left.append(el('div', { class: 'cb-banner' }, el('b', {}, 'The question. '), txt(b.the_question)));
+      }
+      for (const [id, label, sub] of OW_GROUPS) {
+        const n = owRecords(b, id).length;
+        const c = el('div', {
+          class: 'cb-card pick cb-reg ' + (id === 'refused' ? '' : id) + (group === id ? ' on' : ''),
+          onclick: () => { view.owGroup = id; view.owId = null; refresh(true); }
+        },
+        el('h4', {}, label),
+        el('div', { class: 'cb-quiet' }, sub + ' · ' + n + (n === 1 ? ' record' : ' records')));
+        if (id !== 'refused' && b.registers && b.registers[id]) c.title = b.registers[id];
+        left.append(c);
+      }
+      left.append(el('div', { class: 'cb-quiet', style: { marginTop: 'var(--sp-3)' } },
+        txt(b.why_off_by_default || '')));
+
+      /* middle: the records */
+      const mid = el('div', { class: 'cb-pane' });
+      if (group === 'speculative') {
+        mid.append(el('div', { class: 'cb-banner stop' },
+          el('b', {}, 'Nothing on this list exists. '),
+          'Every one is an instrument somebody could write and nobody has. Each is lifted from a real '
+          + 'instrument named on its card, held by an office named as invented, and carries the test that '
+          + 'would settle it. None of it changes a number on this island.'));
+      }
+      const list = owRecords(b, group);
+      for (const r of list) {
+        const reg = group === 'refused' ? null : r.register;
+        const card = el('div', {
+          class: 'cb-card pick' + (reg ? ' cb-reg ' + reg : '') + (view.owId === r.id ? ' on' : ''),
+          onclick: () => { view.owId = r.id; refresh(true); }
+        },
+        el('h4', {}, r.label || r.refused || r.id),
+        el('div', { class: 'cb-chips' },
+          reg ? owMark(r) : chip('coral', 'refused'),
+          r.kind ? chip('iron', r.kind) : null,
+          r.date ? chip('sea', String(r.date)) : null,
+          // The runtime's own classifier, not a badge typed in here, so a speculative record is
+          // marked Proposed by the same function that marks a shopfront.
+          owStatusChip(w, r)));
+        mid.append(card);
+      }
+      if (!list.length) mid.append(el('div', { class: 'cb-p' }, 'Nothing in this part of the register.'));
+
+      /* right: the detail */
+      const right = el('div', { class: 'cb-pane pad' });
+      right.append(owDetail(w, b, group, view.owId));
+
+      main.append(el('div', { class: 'cb-cols', style: { gridTemplateColumns: 'minmax(230px, 21%) minmax(280px, 1fr) minmax(320px, 36%)' } }, left, mid, right));
+    });
+
+    /** The Proposed marker, from src/world/data.js, so nothing here decides what a status means. */
+    function owStatusChip(w, r) {
+      const d = w.data;
+      const lab = (d && typeof d.labelFor === 'function') ? d.labelFor(r) : null;
+      return lab ? chip('sun', lab.marker, lab.why) : null;
+    }
+
+    function owDetail(w, b, group, id) {
+      const wrap = el('div', {});
+      const rec = owRecords(b, group).find((x) => x && x.id === id);
+      if (!rec) {
+        wrap.append(el('h3', { style: { color: 'var(--t-hi)', fontSize: 'var(--fs-lg)' } }, 'The off-world register'));
+        wrap.append(el('div', { class: 'cb-p', style: { marginTop: '6px' } }, txt(b.about || '')));
+        if (b.why_it_is_here) wrap.append(el('div', { class: 'cb-p' }, txt(b.why_it_is_here)));
+        if (Array.isArray(b.rules) && b.rules.length) {
+          wrap.append(el('div', { class: 'cb-h' }, 'The rules it runs under'));
+          for (const r of b.rules) wrap.append(el('div', { class: 'cb-item' }, el('div', { class: 'body' }, txt(r))));
+        }
+        if (b.cultural_gate) {
+          wrap.append(el('div', { class: 'cb-banner stop' }, el('b', {}, 'The cultural gate holds here too. '), txt(b.cultural_gate)));
+        }
+        if (Array.isArray(b.gaps) && b.gaps.length) {
+          wrap.append(el('div', { class: 'cb-h' }, 'What this register does not know'));
+          for (const g of b.gaps) wrap.append(el('div', { class: 'cb-item' }, el('div', { class: 'body' }, txt(g))));
+        }
+        wrap.append(el('div', { class: 'cb-src' }, 'Pick a record on the left. ' + txt(b.not_advice || '')));
+        return wrap;
+      }
+
+      wrap.append(el('h3', { style: { color: 'var(--t-hi)', fontSize: 'var(--fs-lg)' } }, rec.label || rec.refused || rec.id));
+      wrap.append(el('div', { class: 'cb-chips', style: { marginTop: '6px' } },
+        group === 'refused' ? chip('coral', 'refused') : owMark(rec),
+        rec.kind ? chip('iron', rec.kind) : null,
+        rec.reach ? chip('sea', rec.reach) : null,
+        owStatusChip(w, rec)));
+
+      if (rec.full_title && rec.full_title !== rec.label) {
+        wrap.append(el('div', { class: 'cb-quiet', style: { marginTop: '6px' } }, txt(rec.full_title)));
+      }
+
+      // Known: the law, and the events.
+      put(wrap, owField('What it does', rec.what_it_does));
+      put(wrap, owField('What happened', rec.what_happened));
+      put(wrap, owField('The part that bites', rec.the_part_that_bites));
+      if (rec.quote) {
+        wrap.append(el('div', { class: 'cb-h' }, 'In its own words'));
+        wrap.append(el('div', { class: 'cb-ow-quote' }, txt(rec.quote)));
+      }
+      put(wrap, owField('Australia', rec.australia));
+      put(wrap, owField('Why it matters here', rec.why_it_matters));
+      put(wrap, owField('What it shows', rec.what_it_shows));
+
+      // Modelled: a reading, and the test that would move it.
+      put(wrap, owField('The reading', rec.reading));
+      if (Array.isArray(rec.rests_on) && rec.rests_on.length) {
+        wrap.append(el('div', { class: 'cb-h' }, 'What it rests on'));
+        for (const rid of rec.rests_on) {
+          const src = owRecords(b, 'known').find((x) => x && x.id === rid);
+          wrap.append(el('div', { class: 'cb-item' },
+            el('div', { class: 'body' }, (src && src.label) || rid),
+            src ? el('button', {
+              class: 'btn ghost', type: 'button',
+              onclick: () => { view.owGroup = 'known'; view.owId = rid; refresh(true); }
+            }, 'Open') : null));
+        }
+      }
+      put(wrap, owField('Why it belongs here', rec.why_it_belongs_here));
+
+      // Speculative: everything conditional, and the anchor it was lifted from.
+      put(wrap, owField('What it would be', rec.what_it_would_be));
+      if (rec.holder) {
+        const h = (b.holders || []).find((x) => x && x.id === rec.holder);
+        wrap.append(el('div', { class: 'cb-h' }, 'Who would hold it'));
+        wrap.append(el('div', { class: 'cb-who ' + (h && h.invented ? 'observes' : 'advocates') },
+          el('b', {}, h && h.invented ? 'Invented' : 'Real body'),
+          el('span', {}, ((h && h.label) || rec.holder)
+            + '. ' + txt((h && (h.what_it_would_hold || h.what_it_holds)) || ''))));
+        if (h && h.why_this_shape) wrap.append(el('div', { class: 'cb-quiet' }, txt(h.why_this_shape)));
+      }
+      put(wrap, owField('What it would oblige', rec.what_it_would_oblige));
+      if (rec.modelled_on) {
+        const m = owRecords(b, 'known').find((x) => x && x.id === rec.modelled_on);
+        wrap.append(el('div', { class: 'cb-h' }, 'Lifted from'));
+        wrap.append(el('div', { class: 'cb-item' },
+          el('div', { class: 'body' },
+            el('div', {}, (m && m.label) || rec.modelled_on),
+            el('em', {}, 'This is the real instrument the proposal is a variation on. Without it the proposal would be a wish.')),
+          m ? el('button', {
+            class: 'btn ghost', type: 'button',
+            onclick: () => { view.owGroup = 'known'; view.owId = rec.modelled_on; refresh(true); }
+          }, 'Open') : null));
+      }
+      put(wrap, owField('Why this one', rec.why_this_one));
+      if (Array.isArray(rec.lands_on) && rec.lands_on.length) {
+        const levers = packLevers(w);
+        wrap.append(el('div', { class: 'cb-h' }, 'Where it would land on this board'));
+        for (const lid of rec.lands_on) {
+          const lv = levers.find((x) => x && x.id === lid);
+          wrap.append(el('div', { class: 'cb-item' },
+            el('div', { class: 'body' },
+              el('div', {}, (lv && lv.name) || lid),
+              el('em', {}, 'Pointed at, and not touched. This lever’s cost, lead time, deciders and '
+                + 'outcome are exactly what they are with this register switched off.')),
+            lv ? el('button', {
+              class: 'btn ghost', type: 'button',
+              onclick: () => { view.tab = 'levers'; view.leverId = lid; view.issueId = null; refresh(true); }
+            }, 'Open the lever') : null));
+        }
+      }
+      put(wrap, owField('What is already true here', rec.already_true_here));
+      put(wrap, owField('The half with nowhere to land', rec.the_half_with_nowhere_to_land));
+      if (rec.the_line_it_does_not_cross) {
+        wrap.append(el('div', { class: 'cb-banner stop' },
+          el('b', {}, 'The line it does not cross. '), txt(rec.the_line_it_does_not_cross)));
+      }
+      put(wrap, owField('The test that would settle it', rec.settling_test));
+      if (rec.proposed_not_offered) {
+        wrap.append(el('div', { class: 'cb-banner' }, el('b', {}, 'Proposed, not offered. '), txt(rec.proposed_not_offered)));
+      }
+
+      // Refusals.
+      put(wrap, owField('Why', rec.why));
+
+      put(wrap, owField('What is missing', rec.gap));
+
+      /* The footer, and the one line that stops this whole register being sleight of hand: the
+         confidence on a speculative record is not a rating of the proposal. There is nothing to
+         rate. It rates the real instrument the proposal was lifted from, and the pack says so on
+         the record rather than leaving a reader to assume the friendlier reading. */
+      const foot = [];
+      if (rec.confidence) foot.push('Confidence ' + rec.confidence);
+      if (rec.source) foot.push('Source: ' + owSource(w, rec.source));
+      if (rec.second_source) foot.push('and ' + owSource(w, rec.second_source));
+      if (foot.length) {
+        wrap.append(el('div', { class: 'cb-src', title: [rec.source, rec.second_source].filter(Boolean).map((k) => sourceText(w, k)).join('\n\n') }, foot.join(' · ')));
+      }
+      if (rec.confidence_is_about) {
+        wrap.append(el('div', { class: 'cb-quiet', style: { marginTop: '6px' } },
+          'That confidence is about ' + txt(rec.confidence_is_about)));
+      }
+      return wrap;
+    }
 
     /* ------------------------------------------------------------------ plumbing */
 

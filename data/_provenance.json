@@ -2,8 +2,8 @@
   "pack": "_provenance",
   "schema": "minjerribah-provenance/1",
   "version": 1,
-  "generated": "2026-08-10",
-  "fingerprint": "43343303bb3c",
+  "generated": "2026-08-14",
+  "fingerprint": "0a9145aa1576",
   "about": "The pack registry. One entry per data pack, carrying its version, the lane it came through, the documents behind it, when it was ingested, by what extractor, a checksum over the file, and the spread of confidence inside it. src/world/data.js loads what this file lists, so adding a pack means adding it here. docs/INGEST.md is the contract; tools/gate-audit.mjs enforces it.",
   "offline_note": "This is a committed file, not a lookup. The running twin fetches these paths off its own origin and nothing else, ever. Ingestion is an offline step that produces committed, versioned, checksummed data.",
   "confidence_scale": {
@@ -112,6 +112,19 @@
       "fetch_note": "Download KMZ from MyMaps returns a NetworkLink stub of about two kilobytes with no map data in it. The KML came from following that link once and saving the result. Export to KML/KMZ with \"Export as KML instead of KMZ\" ticked avoids the stub. Fetching is an offline step and the running twin never touches any of it.",
       "data_status": "UNDER CONSTRUCTION. I don't know what information on this map is up to date or accurate so just use this as a starting point to do your own research.",
       "licence_note": "The contributor's own map, supplied to this project by him. The staged copy is not committed: it carries contact details, and ingest-inbox is ignored by git for that reason. What is committed is what survived the screens."
+    },
+    "rcc-chas-strategy": {
+      "id": "rcc-chas-strategy",
+      "title": "Redland City Council Coastal Hazard Adaptation Strategy",
+      "publisher": "Redland City Council",
+      "published": "",
+      "kind": "pdf",
+      "local_path": "C:/Users/sbt41/OneDrive/Documents/Sorting_Files/RCC/RCC_coastal_hazard_adaptation_strategy.pdf",
+      "in_repo": false,
+      "pages": 48,
+      "sha256": "197d6cf06ea1132567fff47cf5dd18abc15f97477be28cc97595c9b74a2da1bf",
+      "read_on": "2026-08-14",
+      "licence_note": "A public document held by its publisher. This repository records where the copy that was read lives and what it says, and does not republish it."
     }
   },
   "packs": [
@@ -234,14 +247,18 @@
         "institutions",
         "instruments",
         "interest_groups",
-        "metrics"
+        "metrics",
+        "off_world.instruments",
+        "off_world.precedents",
+        "off_world.readings",
+        "off_world.proposals"
       ],
       "accepted_debt": {
         "missing_source": 23,
         "missing_confidence": 29,
         "low_in_player_collection": 52
       },
-      "note": "Council, agencies, instruments, 62 researched levers and 23 live issues. The levers carry who_decides, which is the part the civic board is built on."
+      "note": "Council, agencies, instruments, 62 researched levers and 23 live issues. The levers carry who_decides, which is the part the civic board is built on. 1.3.0 adds off_world, the third register: sourced space law that already binds Australia, this pack's own readings of it, and instruments that do not exist, each lifted from a real one. It is off in the interface until a person switches it on and it changes no number in the island's default state; tools/ingest/checks-offworld.mjs holds that one-way rule. Its four record arrays are listed as player-facing because a player can see them once the switch is on, which means nothing in them may sit at low confidence."
     },
     {
       "id": "ecology",
@@ -451,39 +468,50 @@
       "sources": [
         "frl-legislation-gov-au",
         "oqpc-legislation-qld-gov-au",
+        "queensland-judgments",
         "owner-law-stack-2012"
       ],
-      "ingested_at": "2026-08-10",
+      "ingested_at": "2026-08-14",
       "extractor": {
         "id": "lane-legislation",
         "version": "1.0"
       },
       "player_facing_collections": [
-        "instruments"
+        "instruments",
+        "edges",
+        "judgments"
       ],
       "accepted_debt": {
         "missing_source": 0,
         "missing_confidence": 0,
         "low_in_player_collection": 0
       },
-      "note": "Sixty-four Acts an ordinary person on this island is subject to, twenty-nine Commonwealth and thirty-five Queensland. For each: the citation, the register identifier and a deep link, the administering department where the register publishes one, the size in pages and provisions counted from the current consolidation, a plain-English description of what it does, the parts that bear on an ordinary person, whether it mostly asks or mostly gives, and which life events bring it into a person's life. It answers a question the owner has carried since he read his own filing cabinet's worth of Acts in 2012: how much of this weight is crippling and how much is uplifting. The measured answer for these sixty-four is 38,520 pages and 34,954 numbered provisions. No Act text is committed. Nothing in the pack is legal advice and every record carries a line saying so, which the schema makes a required field.",
+      "note": "Sixty-six Acts an ordinary person on this island is subject to, thirty Commonwealth and thirty-six Queensland, and five records for the edges of that corpus. For each Act: the citation, the register identifier and a deep link, the administering department where the register publishes one, the size in pages and provisions counted from the current consolidation, a plain-English description, the parts that bear on an ordinary person, whether it mostly asks or mostly gives, and which life events bring it into a life. The edges are the four situations where a thing looks like law here and is not, or is law here but not in the way it is usually described: an imperial enactment a Queensland Act keeps alive chapter by chapter, another country instrument with the Australian one that does the same job named beside it, a treaty that needs an Act before a court here applies it, and an argument a court has already decided, with the judgment cited. Four Queensland judgments carry those last ones and each was checked against its publisher before it was written down. It answers a question the owner has carried since he read his own filing cabinet worth of Acts in 2012: how much of this weight is crippling and how much is uplifting. The measured answer for these sixty-six is 38,711 pages and 35,075 numbered provisions. No Act text and no judgment text is committed beyond the quoted sentence. Nothing in the pack is legal advice and every record carries a line saying so, which the schema makes a required field.",
       "version": "1.0.0",
       "checksum": {
         "algorithm": "sha256-lf",
-        "value": "3154d03f58987f7a317ed737a59e5822b373e28e5ba7d48b84c8c59fda3193ad"
+        "value": "3e8d6b7451aeb76a546ba6c28fb4cf94a568a8dc797f4e37ca8ef856adcfe5e9"
       },
-      "bytes": 308033,
-      "records": 64,
+      "bytes": 375935,
+      "records": 75,
       "confidence": {
-        "high": 64,
+        "high": 75,
         "medium": 0,
         "low": 0,
         "unrated": 0
       },
       "collections": [
         {
+          "path": "edges",
+          "records": 5
+        },
+        {
           "path": "instruments",
-          "records": 64
+          "records": 66
+        },
+        {
+          "path": "judgments",
+          "records": 4
         }
       ]
     },

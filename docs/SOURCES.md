@@ -348,3 +348,40 @@ by boat, that cluster is directly load-bearing and it is already researched.
 
 And `QLD - Transport Operations (Translink Transit Authority) Act 2008` is in there, which is the
 statutory basis for the TransLink correction he made on 10 August 2026. He had the source in 2012.
+
+### A third publisher, added for the edges: Queensland Judgments
+
+The edges of the corpus need judgments, and a judgment is the easiest thing in this project to get
+wrong from memory. Half the case names a person is handed with one of these arguments are
+misremembered, misattributed or from another country, and the pack will not carry one on anybody's
+recall, including its own.
+
+**Where.** `queenslandjudgments.com.au`, published by the Incorporated Council of Law Reporting for
+the State of Queensland with the Supreme Court of Queensland Library Committee. It serves the case
+page at `/caselaw/<court>/<year>/<number>` and the authorised PDF at that path plus `/pdf`. The
+larger free database refuses automated readers in its terms, so this project goes elsewhere rather
+than around it, and reads one page per judgment, offline afterwards.
+
+**What is checked.** The case page has to carry the case name and the medium neutral citation. The
+PDF has to carry the quote character for character and every party name in the case name. Both
+retrievals are sha256'd into `ingest-inbox/legislation/judgments/`, which is gitignored, and the
+hashes go on the record. Nothing is republished beyond the quoted sentence.
+
+**What is in the pack.** Four Queensland judgments, all on chains a person may arrive holding:
+Carnes v Essenberg [1999] QCA 339 on Magna Carta and the Bill of Rights, Kosteska v Magistrate
+Manthey & Anor [2013] QCA 105 on the claim that the courts and the statutes are not validly
+established, R v Sweet [2021] QDC 216 on the two legal persons argument and on documents drawing on
+the United States Uniform Commercial Code, and Wells v Queensland Police Service [2024] QDC 38 on the
+claim that a person who has not consented is not bound by the traffic law.
+
+**How they are written.** In the pack's own words, kept to what the court decided. Judgments on these
+arguments sometimes carry sharp words about the person who ran them. The pack quotes the legal
+conclusion and not the rebuke, because a reader who arrives holding one of these is there to find out
+where they stand, not to be told what somebody thought of a stranger.
+
+**And the Act that answers the question the 2012 stack ended on.** Imperial Acts Application Act 1984
+(Qld), on the Queensland register at `act-1984-070`. Section 7 terminates the application in
+Queensland of the imperial enactments in force in England when the Australian Courts Act 1828 was
+passed; section 5 preserves the sixteen listed in schedule 1, with the same force and effect they
+had. Entry 1 in that schedule is `(1297) 25 Edward 1 ch 29 Magna Carta` and entry 9 is the Bill of
+Rights. Anybody researching this corpus should start there rather than with the charter.

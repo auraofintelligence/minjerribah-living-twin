@@ -205,7 +205,7 @@ export function registerVisitors(world) {
     const pack = w.data.transport;
     if (!pack || !pack.services) { state.notes.push('data/transport.json is missing: no capacity ceiling.'); return; }
     let seats = 0, slots = 0;
-    let flyerSailings = 0;
+    let flyerSailings = 0, flyerSeatsPerSailing = 120;
     for (const svc of pack.services) {
       const cap = svc.capacity;
       const sch = svc.schedule;
@@ -230,21 +230,28 @@ export function registerVisitors(world) {
         seats += Math.round(sailings * pax);
       } else if (svc.type === 'water-taxi') {
         flyerSailings += sailings;
+        const m = cap && Number(cap.modelled_passengers_per_sailing);
+        if (m > 0) flyerSeatsPerSailing = m;
       }
     }
-    // The Flyer publishes no passenger capacity. The pack says so and leaves it null rather than
-    // guessing, so this build models it at the same per-sailing figure as the vessel that does
-    // publish one, and says here that it is modelled.
-    const modelledFlyer = flyerSailings * 198;
+    // The Flyer publishes no passenger capacity. It used to be modelled here at 198, which is the
+    // figure SeaLink publishes for Yalingbila, so a family-owned operator's boats were being given a
+    // different company's published vessel capacity. Corrected 14 August 2026: the modelled number
+    // lives once in data/transport.json with its basis on it, and both this system and
+    // src/systems/movement/ferry.js read that one field, so there is one number to correct and it is
+    // nobody else's.
+    const modelledFlyer = flyerSailings * flyerSeatsPerSailing;
     seats += modelledFlyer;
     walkOnSeats = seats;
     vehicleSlots = slots;
     state.capacity = {
       walkOnSeatsPerDay: seats,
       vehicleSlotsPerDay: slots,
+      flyerModelledSeatsPerSailing: flyerSeatsPerSailing,
       basis: 'vessel capacities and sailing counts from data/transport.json. The Stradbroke Flyer '
-        + 'publishes no passenger capacity, so its share of the walk-on seats is modelled at the '
-        + 'same figure as the vessel that does.'
+        + 'publishes no passenger capacity, so its share of the walk-on seats is MODELLED at '
+        + flyerSeatsPerSailing + ' a sailing, read from the pack, and deliberately not set equal to '
+        + 'the capacity SeaLink publishes for its own vessel.'
     };
   }
 

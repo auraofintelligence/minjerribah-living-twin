@@ -119,6 +119,39 @@ const FATTENING = {
 /** Recommended drone exclusion around a waterbird flock, from the pack. */
 const DRONE_EXCLUSION_M = 475;
 
+/* THE INDICATOR THE TREATY LAYER WATCHES, and what it is not.
+ *
+ * data/civic.json treaty_layer carries Australia's obligation under Article 3.2 of the Ramsar
+ * Convention: to be informed at the earliest possible time if the ecological character of a listed
+ * wetland is changing through human interference, and to notify. Moreton Bay is that wetland, this
+ * island is inside it, and the mechanic in this file is human interference in exactly the sense the
+ * Article uses: dogs, drones, vehicles and people.
+ *
+ * So this system publishes `characterIndex`, and the civic layer decides what to do about it. Two
+ * things must stay true of it or it becomes a lie:
+ *
+ *   1. IT IS NOT AN ECOLOGICAL CHARACTER ASSESSMENT. A real one is made against the site's own
+ *      ecological character description, on evidence, by Australian governments together. Nobody
+ *      here has read that description. This is the twin's own number about the twin's own island,
+ *      and every screen that shows it says so.
+ *   2. IT IS SEASON-PROOF. The migrants leave in March and the flats are empty by May, and an
+ *      indicator that fell every winter would fire the obligation every year for a reason that is
+ *      not human interference at all. So it is built from two things that do not swing with the
+ *      season: the highest count seen in the last 365 days, and the weight the birds actually left
+ *      at, which is the whole point of the disturbance mechanic anyway.
+ *
+ * Until a first departure season has finished there is no weight to read, so the index runs on
+ * abundance alone and `characterBasis` says which of the two it is standing on.
+ */
+const CHARACTER = {
+  abundanceWeight: 0.45,
+  conditionWeight: 0.55,
+  note: 'This simulation\'s own indicator, not an ecological character assessment. Half of it is the '
+    + 'highest count on the island in the last 365 days against the count the run started from, and '
+    + 'half is the weight the migrants left at as a share of the weight they needed. Both are things '
+    + 'roost disturbance moves and neither swings with the season.'
+};
+
 /** External flyway decline, which no lever on this island can touch. */
 const FLYWAY = {
   annualDecline: 0.035,
@@ -154,6 +187,14 @@ export function registerShorebirds(world) {
     droneExclusionM: DRONE_EXCLUSION_M,
     droneRule: 0,
     flyway: FLYWAY,
+    // What the birds on these flats are listed under, read out of data/ecology.json at init so the
+    // words stay in the pack. The civic layer reads this too rather than restating it.
+    protection: null,
+    // The Article 3.2 indicator. 1.0 is the island the run started on. See CHARACTER above.
+    characterIndex: 1,
+    characterBasis: '',
+    characterParts: { abundance: 1, condition: null, peak365: 0, baselinePeak: 0, lastSeasonReadiness: null },
+    flushSources365: { 'somebody walking through': 0, 'a dog off the lead': 0, 'a vehicle on the sand': 0, 'a drone': 0 },
     civicMetrics: {},
     events: [],
     levers: {},
@@ -179,6 +220,19 @@ export function registerShorebirds(world) {
   const lostTo = { dog: 0, vehicle: 0, fox: 0, tide: 0, people: 0 };
   const departLog = [];
   const arriveLog = [];
+
+  /* The Article 3.2 indicator's working state. A ring of daily migrant counts, because the number
+     that matters is the highest one in a year rather than today's; a baseline taken once at init;
+     and the readiness of the last completed departure season, banked when the season closes so a
+     part-finished March does not read as a collapse. */
+  const peakRing = new Float64Array(365);
+  let peakCursor = 0, peakFilled = 0;
+  let baselinePeak = 0;
+  let seasonReadySum = 0, seasonReadyN = 0;
+  let lastSeasonReadiness = null;
+  let lastSeasonBankedDay = -1;
+  const FLUSH_SOURCES = ['somebody walking through', 'a dog off the lead', 'a vehicle on the sand', 'a drone'];
+  const flushSourceRings = new Map(FLUSH_SOURCES.map((k) => [k, new DailyRing(365)]));
 
   world.bus.on('ui:intent', (p) => {
     if (p && p.kind === 'shorebirds:drone-rule') droneRule = clamp(Number(p.level) || 0, 0, 1);
@@ -331,6 +385,10 @@ export function registerShorebirds(world) {
         r.flushSource = P.drone > 0.01 && rng.float() < 0.25 ? 'a drone'
           : P.dog * 2.4 > P.people ? 'a dog off the lead'
             : P.vehicle * 1.4 > P.people ? 'a vehicle on the sand' : 'somebody walking through';
+        // Every one of these four is a person. Article 3.2 notification is only for human-induced
+        // change, so the split matters to the civic layer and not only to the ecology one.
+        const ring = flushSourceRings.get(r.flushSource);
+        if (ring) ring.add(1);
         // The roost going up is the only visible sign of what disturbance costs, and the read
         // model is only republished once a day, so the lift goes on the bus as it happens. About
         // four of these a day across the island: cheap to emit, and the renderer needs it to put
@@ -432,6 +490,8 @@ export function registerShorebirds(world) {
     state.season = month >= 8 || month <= 1 ? 'the flocks are here'
       : month === 2 || month === 3 ? 'fattening and leaving' : 'gone north, a few immatures over-wintering';
 
+    stepCharacter(w, month);
+
     // The monthly count. Real shorebird numbers come from volunteer counts on a spring high tide,
     // not from a live readout, so the published survey lags the truth. Both are carried, because
     // the gap between them is a true thing about how anybody knows any of this.
@@ -448,6 +508,67 @@ export function registerShorebirds(world) {
     }
   }
 
+  /**
+   * The Article 3.2 indicator, once a day. Cheap: one ring write, one pass over 365 floats.
+   *
+   * The departure season closes in May, which is after the late-departure cutoff in `stepMigrant`,
+   * so every flock that was going to leave has left. That is when the season's mean readiness is
+   * banked and the accumulator resets. Banking it earlier would read a March half through as a
+   * catastrophe every single year. The guard is a day count rather than a calendar year so nothing
+   * here has to touch a Date.
+   */
+  function stepCharacter(w, month) {
+    let migrants = 0;
+    for (const f of flocks) if (f.sp.migrant) migrants += f.count;
+    peakRing[peakCursor] = migrants;
+    peakCursor = (peakCursor + 1) % 365;
+    if (peakFilled < 365) peakFilled++;
+
+    let peak = 0;
+    for (let i = 0; i < peakFilled; i++) if (peakRing[i] > peak) peak = peakRing[i];
+    if (!baselinePeak && peak > 0) baselinePeak = peak;
+
+    const today = absDay(w.clock);
+    if (month === 4 && seasonReadyN > 0 && today - lastSeasonBankedDay > 300) {
+      lastSeasonBankedDay = today;
+      lastSeasonReadiness = clamp(seasonReadySum / seasonReadyN, 0, 1);
+      seasonReadySum = 0; seasonReadyN = 0;
+    }
+    publishCharacter(peak);
+  }
+
+  /** The read model half, split out because a load must rebuild it without advancing the ring. */
+  function publishCharacter(peakIn) {
+    let peak = peakIn;
+    if (peak == null) {
+      peak = 0;
+      for (let i = 0; i < peakFilled; i++) if (peakRing[i] > peak) peak = peakRing[i];
+    }
+    const abundance = baselinePeak > 0 ? clamp(peak / baselinePeak, 0, 1) : 1;
+    const condition = lastSeasonReadiness;
+    const index = condition == null
+      ? abundance
+      : CHARACTER.abundanceWeight * abundance + CHARACTER.conditionWeight * condition;
+
+    state.characterIndex = +clamp(index, 0, 1).toFixed(3);
+    state.characterParts = {
+      abundance: +abundance.toFixed(3),
+      condition: condition == null ? null : +condition.toFixed(3),
+      peak365: Math.round(peak),
+      baselinePeak: Math.round(baselinePeak),
+      lastSeasonReadiness: condition == null ? null : +condition.toFixed(3)
+    };
+    state.characterBasis = condition == null
+      ? 'Abundance only. No departure season has finished yet, so there is no weight to read and the '
+        + 'index is the highest count in the last ' + peakFilled + ' days against the count this run started from.'
+      : 'The highest count in the last 365 days against the count this run started from, at '
+        + Math.round(CHARACTER.abundanceWeight * 100) + ' per cent, and the weight the migrants left '
+        + 'at last season as a share of the weight they needed, at ' + Math.round(CHARACTER.conditionWeight * 100) + ' per cent.';
+    const sources = {};
+    for (const [k, ring] of flushSourceRings) sources[k] = Math.round(ring.total);
+    state.flushSources365 = sources;
+  }
+
   function stepMigrant(w, f, month) {
     const sp = f.sp;
     // Departure. From about March the birds leave, and they leave when they are ready rather than
@@ -459,6 +580,10 @@ export function registerShorebirds(world) {
         f.departed = true;
         f.departFat = f.fat;
         const r = clamp(f.fat / sp.departFatNeeded, 0, 1);
+        // Bank the weight this flock left at. The season's mean is the condition half of the
+        // Article 3.2 indicator, and it is the only honest read of what a summer of dogs cost.
+        seasonReadySum += r * Math.max(1, f.count);
+        seasonReadyN += Math.max(1, f.count);
         // Two things follow from the weight a bird leaves at: whether it survives the flight and
         // the staging grounds, and whether it breeds when it gets there. The island can move both.
         // What it cannot move is the flyway itself, and that decline sits under both of them.
@@ -601,6 +726,16 @@ export function registerShorebirds(world) {
     init(w) {
       if (!build(w)) return;
       state.ready = true;
+      // The instruments these birds are listed under live in data/ecology.json, on the process
+      // record, so the words stay in the pack. Read defensively: an older pack has no such block
+      // and the system runs exactly as it did before.
+      const proc = ((w.data && w.data.ecology && w.data.ecology.processes) || [])
+        .find((p) => p && p.id === 'proc-shorebird-disturbance');
+      state.protection = (proc && proc.the_instruments_over_it) || null;
+      if (!state.protection) {
+        notes.push('data/ecology.json proc-shorebird-disturbance carries no the_instruments_over_it block, '
+          + 'so this system publishes no protection record and the civic treaty layer will say so.');
+      }
       // The player arrives in September, when the birds are coming back. Set the flocks to what
       // the season says rather than to zero, so the first day is the island as it would be.
       for (const f of flocks) {
@@ -619,6 +754,7 @@ export function registerShorebirds(world) {
         + 'established and that a per-flush figure was not located, and to calibrate it against the '
         + 'departure weight requirement, which is what is done here.');
       notes.push(FLYWAY.basis);
+      notes.push(CHARACTER.note);
       w.bus.emit('shorebirds:ready', { roosts: roosts.length, flocks: flocks.length });
     },
 
@@ -630,6 +766,7 @@ export function registerShorebirds(world) {
       lastDay = day;
       state.disturbanceToday = 0;
       disturbRing.roll(); roostFlushRing.roll(); fuelLostRing.roll(); hatchRing.roll(); nestLostRing.roll();
+      for (const ring of flushSourceRings.values()) ring.roll();
       dailyPass(w);
       publish(w);
     },
@@ -651,7 +788,11 @@ export function registerShorebirds(world) {
         nests: state.nests.active,
         hatched365: state.nests.hatched365,
         nestsLost365: state.nests.lost365,
-        lastDeparture: departLog.length ? departLog[departLog.length - 1] : null
+        lastDeparture: departLog.length ? departLog[departLog.length - 1] : null,
+        // The Article 3.2 indicator, so a headless run can be read for it without a browser.
+        character: state.characterIndex,
+        characterAbundance: state.characterParts.abundance,
+        characterCondition: state.characterParts.condition
       };
     },
 
@@ -664,7 +805,15 @@ export function registerShorebirds(world) {
         roosts: roosts.map((r) => ({ id: r.id, flushes365: r.flushes365 })),
         disturb: disturbRing.save(), roostFlush: roostFlushRing.save(), fuel: fuelLostRing.save(),
         hatch: hatchRing.save(), nestLost: nestLostRing.save(),
-        log: log.save(), departLog: departLog.slice(-20), arriveLog: arriveLog.slice(-20)
+        log: log.save(), departLog: departLog.slice(-20), arriveLog: arriveLog.slice(-20),
+        // The character indicator's working state. Without the baseline a loaded game would take
+        // its own degraded peak as the island it started from, and the indicator would read 1.0
+        // over a collapse, which is the exact failure this whole layer exists to catch.
+        character: {
+          peak: Array.from(peakRing), peakCursor, peakFilled, baselinePeak,
+          seasonReadySum, seasonReadyN, lastSeasonReadiness, lastSeasonBankedDay,
+          sources: FLUSH_SOURCES.map((k) => [k, flushSourceRings.get(k).save()])
+        }
       };
     },
     load(w, s) {
@@ -683,6 +832,22 @@ export function registerShorebirds(world) {
       disturbRing.load(s.disturb); roostFlushRing.load(s.roostFlush); fuelLostRing.load(s.fuel);
       hatchRing.load(s.hatch); nestLostRing.load(s.nestLost);
       log.load(s.log);
+      const c = s.character;
+      if (c) {
+        if (Array.isArray(c.peak)) peakRing.set(c.peak.slice(0, 365));
+        peakCursor = c.peakCursor || 0;
+        peakFilled = c.peakFilled || 0;
+        baselinePeak = c.baselinePeak || 0;
+        seasonReadySum = c.seasonReadySum || 0;
+        seasonReadyN = c.seasonReadyN || 0;
+        lastSeasonReadiness = c.lastSeasonReadiness != null ? c.lastSeasonReadiness : null;
+        lastSeasonBankedDay = c.lastSeasonBankedDay != null ? c.lastSeasonBankedDay : -1;
+        for (const [k, saved] of c.sources || []) {
+          const ring = flushSourceRings.get(k);
+          if (ring) ring.load(saved);
+        }
+      }
+      publishCharacter(null);
       publish(w);
     }
   });

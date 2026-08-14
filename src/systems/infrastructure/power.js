@@ -193,7 +193,15 @@ export function registerPower(world) {
       + 'published anywhere. Island daily demand and rooftop potential are from '
       + 'data/subterranean.json island_context, which labels both as working estimates.',
 
+    // What the island actually uses. Excludes the proposed works below the sand, which are not built,
+    // funded, sited or consented. This is the number a panel labels "demand" and a person reads as fact.
     demandKw: 0,
+    // What the grid has to carry in the scenario being run, which is the same number until somebody
+    // builds something below the sand, and is what the balance and the blackout run against.
+    demandKwWithProposed: 0,
+    // The proposed load on its own, so it can be shown as its own separately labelled figure and can
+    // never be mistaken for part of the island's real consumption.
+    proposedDemandKw: 0,
     demandByCategory: {},
     peakTodayKw: 0,
     peakYesterdayKw: 0,
@@ -381,9 +389,25 @@ export function registerPower(world) {
       'irrigation-and-pools': irrigation,
       subterranean: subKw
     };
+    // Two totals, and the difference between them is the whole honesty question in this file.
+    //
+    // `total` is what the grid actually has to carry in the scenario being run, and it INCLUDES the
+    // subterranean load, because it must. data/subterranean.json power_reality_check says a player
+    // who rushes the carbon furnace hall should black out the island and that it "should be enforced,
+    // not softened". Take the load out of the balance and that lesson goes with it.
+    //
+    // `realTotal` is the island as it exists: households, businesses, water, telecoms, streetlights.
+    // Nothing below the sand is built, funded, sited or consented, and all four consent gates read
+    // not sought. So the figure a person reads as "what Minjerribah uses" must not carry it.
+    //
+    // A governance critic on 14 August 2026 found the proposed load feeding the real demand figure
+    // and proposed gating it to zero while consent is unsought. That would have been the wrong fix:
+    // it removes the owner's own designed mechanic to satisfy an honesty rule, when splitting the
+    // figure satisfies both. The blackout still happens. The island's real demand stays real.
     let total = 0;
     for (const k in byCategory) total += byCategory[k];
-    return { total, byCategory, pop };
+    const realTotal = total - byCategory.subterranean;
+    return { total, realTotal, proposedKw: byCategory.subterranean, byCategory, pop };
   }
 
   /* -------------------------------------------------------------- solar */
@@ -870,7 +894,9 @@ export function registerPower(world) {
   /* -------------------------------------------------------------- read model */
 
   function publish(w, d, b, blocks, shedding) {
-    state.demandKw = d.total;
+    state.demandKw = d.realTotal;
+    state.demandKwWithProposed = d.total;
+    state.proposedDemandKw = d.proposedKw;
     state.demandByCategory = d.byCategory;
     state.peakTodayKw = peakToday;
 

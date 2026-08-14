@@ -23,6 +23,7 @@ import { runEmDashCheck, runSpellingCheck, runRegistryChecks } from './checks-re
 import { runPersonalDataCheck, runContributionCultureCheck } from './checks-screens.mjs';
 import { runCoordinateChecks } from './checks-geo.mjs';
 import { runCitationChecks } from './checks-citations.mjs';
+import { runOffWorldChecks } from './checks-offworld.mjs';
 
 const LEDGER_FILE = 'tools/ingest/ledger.json';
 const VOCAB_FILE = 'tools/ingest/vocabulary.json';
@@ -112,7 +113,13 @@ export function runGate({ only = null, registryPath = 'data/_provenance.json' } 
     // step resolves every other pointer a pack makes, which is the same hole wearing a different
     // field name: a lever naming a decider no institution defines, a matter naming an ecology
     // record that does not exist.
-    ['citations', runCitationChecks]
+    ['citations', runCitationChecks],
+    // The third register. data/civic.json now carries speculative material, which is safe only
+    // while five rules hold, and a rule that is not a runnable check is not a rule. The one that
+    // matters most is the one-way rule: the register may name a lever, and nothing in the default
+    // island state may name the register, which is the only version of "turning it on changes no
+    // number" that a machine can keep.
+    ['off-world', runOffWorldChecks]
   ];
   // A typo in --only that silently ran nothing would report a green gate over an empty run, which is
   // the worst failure mode a checker has.

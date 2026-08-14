@@ -17,9 +17,18 @@ Both hold, and this is exactly how:
 **1. A sync is an offline ingest step, never a runtime fetch.** A connector is run deliberately, by a
 person or a scheduled job on somebody's machine. It reads a real source, screens what it finds, and
 writes a versioned, stamped, committed feed. The running twin never touches the network: it loads
-committed packs off its own origin at boot and nothing else, ever. Nothing in `tools/connectors/`
-opens a socket, and any design that puts fetch, XHR or a websocket in the simulation or render loop
-is wrong.
+committed files off its own origin at boot and nothing else, ever, and any design that puts fetch,
+XHR or a websocket in the simulation or render loop is wrong.
+
+This used to be stated as "nothing in `tools/connectors/` opens a socket", which was true when every
+source was a checkout of somebody's repository on this machine, and is not true now. Nobody keeps the
+weather in a git repository. `tools/connectors/weather.mjs` calls two named Open-Meteo hosts and
+nothing else, when a person or a scheduled job runs it, and writes the same kind of stamped file
+everything else here writes. That is the same shape `tools/ingest/lane-legislation.mjs --fetch`
+already had for the two legislation registers, and the rule that matters is untouched: what an
+offline step means is that the fetching happens when a person runs it and ends in a committed file,
+not that no socket is ever opened anywhere in the repository. `--inbox` reads two saved responses off
+disk instead, for a machine with no network. `fetch` appears in exactly one file in that directory.
 
 **2. The clock has two declared modes.** Simulated and live, and the mode is part of the record, so a
 live session still replays. That work belongs to `src/kernel/clock.js` and `docs/KEYS.md`, not here.
@@ -144,8 +153,14 @@ node tools/connectors/sync.mjs --all               run everything
 node tools/connectors/sync.mjs --due               only what is past its cadence
 node tools/connectors/sync.mjs --id wildlife-rescue --inbox C:/path/to/exports
 node tools/connectors/sync.mjs --id noticeboard --dry-run
+node tools/connectors/sync.mjs --id weather        fetches the two Open-Meteo endpoints
+node tools/connectors/sync.mjs --id weather --inbox C:/path/to/saved   reads them off disk instead
 node tools/connectors/verify.mjs                   the feed gate. Run before committing.
 ```
+
+The weather one is the only command here that needs a network, and it is the one to put on a
+schedule: it is the only feed the running twin reads directly, and everything it carries goes off
+within hours.
 
 Emissions:
 
@@ -414,11 +429,148 @@ dates to confirm, which recur and which are past.
 twin's own estimates in `data/events.json` and are labelled there as estimates; anything about the
 content of a cultural event; whether an organiser wants their event modelled.
 
-## The two refusals
+### Weather
 
-Both are built, both re-read their source every run, and neither lifts its own refusal. A refusal
-held in a document is a memory; a refusal that re-reads its source is a check. `tools/ingest/lane-era.mjs`
-set this pattern.
+**Source** Open-Meteo, two endpoints, over the network.
+**Cadence** hourly while anybody is looking at a live island, and before any session that opens in live.
+**Freshness** per field, in minutes, from 25 for rain to 720 for ground swell. See below.
+**Organisation** Open-Meteo. **Licence** CC BY 4.0, and the attribution is a condition rather than a courtesy.
+**Rung** 3 of the ladder at the end of this document.
+
+The correction that produced this connector was one sentence: **it is not much of a twin if the
+weather is not real.** That is right, and the earlier answer, which was to keep the synoptic
+simulation and put a label on it, was the correct answer to a question nobody had asked. Labelling is
+what you do for a moment that has not happened. For a real island opened at the real moment, invented
+weather is a demonstration wearing a twin's clothes.
+
+**This is the only connector here that opens a socket, and it is still an offline step.** There is no
+local checkout of the weather, so it fetches, from two named hosts and nothing else, when a person or
+a scheduled job runs it, and writes the same stamped file every other connector writes. The rule that
+does not bend is about the running twin, and it is untouched: the twin loads that file off its own
+origin at boot and never touches a network. `tools/ingest/lane-legislation.mjs --fetch` already had
+this exact shape for the two legislation registers. Run it with `--inbox <folder>` and it fetches
+nothing at all, reading `open-meteo-forecast.json` and `open-meteo-marine.json` off disk instead, so a
+machine with no network still syncs. The header of `tools/connectors/lib.mjs` used to say that nothing
+in that directory ever opens a socket; that sentence has been corrected rather than quietly falsified,
+because a claim a repository makes about itself and does not keep is the fault this project keeps
+finding.
+
+**The marine endpoint is the find.** Wave height, period and direction for the ocean side is the
+number that decides whether the Gorge is spectacular or shut, and no other free source hands it over
+without a key. It also splits the sea into a total and a long-period swell partition, and this twin
+keeps both apart rather than averaging them away: `swellM` is the total, because the total is what
+shuts a beach and shortens the drivable window, and `groundSwellM` is the long-period component
+underneath it, which is what makes the walk worth it. This twin's own model produces no ground swell
+at all, so that field is null in simulated time rather than filled with a number nothing stands behind.
+
+**Say model, never observed.** Open-Meteo is model output for a grid cell. It is not a reading from
+an instrument at Point Lookout, and the difference is not pedantry: the response names its own
+coordinates and they are not the ones in the request. At the sync recorded in the feed the land cell
+came back **11.2 km** from Point Lookout, at 43 m elevation, and the marine cell **3.6 km** off it.
+The connector measures that distance every run and writes it onto the record as
+`location_precision_m` with a sentence saying what it means. A twin that hid it would be claiming a
+precision it has not got.
+
+**Freshness is per field and the day is the wrong unit.** An hour-old temperature is fine, because
+air follows the sun and takes hours to move. An hour-old rain reading is worth nothing, because rain
+here arrives in cells that cross a township in twenty minutes. So the shelf life sits on the field,
+in `OBSERVATION_STALE_AFTER_MINUTES` in `src/world/freshness.js`, which the connector and the twin
+both read so there is one table and not two. Each entry carries its reason:
+
+| Field | Minutes | Why |
+| --- | --- | --- |
+| rain | 25 | Rain arrives in cells. Half an hour is a wet road or a dry one. |
+| gusts | 45 | The peak over its interval, and the number a barge master reads. |
+| wind speed and direction | 90 | The nor'easter builds and drops over about two hours. |
+| cloud | 90 | Makes and clears in an hour on a storm day. |
+| temperature, apparent, humidity | 180 | All follow the sun, slowly. |
+| pressure, wave height, period, direction | 360 | Synoptic and sea-state scale. |
+| ground swell height, period, direction | 720 | Generated a long way offshore, and slow to change character. |
+
+Those numbers are the demotion mechanism, not a second rule beside it. A rung one reading an hour old
+is already outside its twenty-five minutes for rain and loses to a fresher model figure, and is
+comfortably inside its three hours for temperature and still wins. The example in the ladder section
+below falls out of the table rather than needing code of its own, and
+`tools/connectors/weather.mjs` and `src/systems/environment/weather.js` share it.
+
+**What it can know**: what a named weather model has for the two grid cells nearest this island, at a
+stamped moment; wave height, period and direction on the ocean side, and the swell partition
+separately; how far the cell it answered for sits from the place asked about.
+
+**What it cannot know**: anything observed, because nothing here is a reading; the difference between
+one end of a 27 km island and the other, because two cells answer for all of it; the weather at any
+moment the island has not lived through, which is why simulated and scrubbed time get the synoptic
+model and say so; and whether it rained, exactly. The source returns a precipitation total and stamps
+it with an interval, and this connector reads it as the sum over the preceding hour because that is
+how the current-weather aggregation is documented. The interval is carried on the record so the
+reading can be checked rather than assumed, and the conservative direction was chosen deliberately:
+reading an hourly sum as a quarter-hourly rate would overstate rainfall fourfold.
+
+**What Open-Meteo is asked**: nothing beyond what the licence already grants.
+**What it is promised**: the attribution it requires appears on screen beside the numbers and not
+only in a file; every figure carries the moment it was modelled for as well as the moment it was
+fetched; and a reading past its own shelf life stops being used rather than sitting there looking
+current.
+
+## The three refusals
+
+All three are built and none lifts its own refusal. Two of them re-read their source every run,
+because a refusal held in a document is a memory and a refusal that re-reads its source is a check.
+`tools/ingest/lane-era.mjs` set that pattern. The third cannot, and the reason it cannot is the
+reason it refuses.
+
+### The Bureau of Meteorology's internal weather interface: refused
+
+**Recorded here so that nobody rediscovers it and assumes nobody looked.** `api.weather.bom.gov.au`
+works. Point Lookout has its own geohash on it, `r7j5vwr`. It would give this twin better weather
+than anything else free. It was tested on 14 August 2026 and it is refused, on two grounds, and the
+second one is the durable one.
+
+The first: every response carries a notice from the Bureau stating that it owns the interface and
+that **you must not use, copy or share it.** That is the owner of the data saying no, inside the
+payload, to the person reading it. This repository is public.
+
+The second would still stand if that notice were withdrawn tomorrow. It is an undocumented internal
+interface, and a public repository cannot cite one. Every rule this project holds about weather comes
+back to the same place: a figure a player sees has to be able to say where it came from, and a figure
+whose source is an internal endpoint that nobody has published a contract for cannot. A twin that
+could not cite its own weather would be worse than a twin with no weather.
+
+**This is the one refusal in the layer that cannot re-read its own evidence**, and
+`checkBomWeatherApi()` in `tools/connectors/refusals.mjs` says so rather than pretending otherwise.
+The evidence sits inside a response, and fetching the response is the act being refused. So that
+check fetches nothing, states what a person found and when, and names the second ground, which needs
+no fetch to hold.
+
+**The upgrade path, which is the owner's decision and not an agent's.** The Bureau's registered data
+services are the sanctioned route to actual station observations, and they are what rung 2 of the
+ladder below is waiting for. Written down so the decision can be made rather than rediscovered:
+
+*What registering would get.* Measured readings from actual instruments, rather than model output for
+a grid cell some kilometres away. On the ladder that is a move from rung 3 to rung 2 for every field
+a station carries, and it is the difference between "a model has this for the coast" and "an
+instrument recorded this". For wind on the crossing, which is the one number where being wrong is a
+safety answer, that difference is the whole thing.
+
+*What it would cost.* Not established here, and deliberately not guessed. The Bureau operates
+registered and licensed data services whose terms and fees depend on which products are wanted and
+what they are used for, and they are agreed rather than published as a price list, so the honest
+entry is that somebody has to ask. Two things are worth knowing before anybody does. The Bureau also
+runs a public FTP service carrying a range of observation and forecast products, which may cover what
+this twin needs at no cost at all and should be checked first. And registering means identifying this
+project and agreeing to terms on its behalf, which is exactly why it is the owner's call.
+
+*What is not established and would be part of the work.* Which station or stations actually serve this
+island, and how far each is from the places the twin draws. No station identifier is written down
+here, because guessing one produces a confident citation of the wrong instrument, which is the
+failure mode `tools/ingest/lane-legislation.mjs` exists to prevent for Act numbers and the same
+discipline applies here.
+
+*And the direction nobody has to wait for.* The Bureau's Weather Observations Website accepts data
+from citizen stations. A station on this island could be a rung 1 source for this twin and a public
+contribution at the same time, which closes the participation loop without anybody building anything
+new. That is rung 1 arriving from the island rather than rung 2 arriving from a registration, and it
+is the cheaper of the two.
 
 ### Straddie News: refused
 
@@ -563,11 +715,18 @@ the emitter over it and it lists what is still missing.
 | `dunwich-state-school` | each term | 90 days | A school calendar is set a term at a time. |
 | `little-ship-club` | monthly | 45 days | Club calendars move monthly. |
 | `sandy-sports-club` | weekly in season | 14 days | A fixture list is a weekly rhythm. |
+| `weather` | hourly while anybody is looking at a live island | per field, 25 min to 720 min | The day is the wrong unit for weather and one number is the wrong shape. See the table in the weather section above. |
 
 `node tools/connectors/sync.mjs` with no arguments prints what is due. `freshnessAt()` turns a sync
 stamp into `fresh`, `ageing` or `stale`: fresh to a third of the limit, ageing to the limit, stale
 past it. There is a fourth word, `unknown`, for a record with no stamp and for a moment earlier than
 the stamp, and no fifth word anywhere.
+
+`observedAt()` is the same four words and the same thirds rule counted in minutes, for a reading
+rather than a record. It exists because weather forced the question and it is not weather's alone:
+anything measured rather than researched will want it. A connector on an hourly cadence is always
+due, which is why `cadenceDays()` answers nought for one, and that is the honest answer rather than
+a fraction rounded to something.
 
 ## What the twin does with this, on screen
 
@@ -650,11 +809,27 @@ everything in this document.
 
 - Any scheduled runner. A cadence is a sentence in a registry and a line in a terminal. Nobody has
   wired a scheduled task, and doing so is a decision about somebody's machine.
-- Any feed drawn in the running twin. The freshness vocabulary is now shared with the interface and
-  the inspector uses it against the clock, but what it dates is `data/businesses.json`, a committed
-  pack, not a feed. No feed record has been promoted, so there is nothing from a feed on screen to
-  date. When there is, the fields are already there: `freshness.synced_at`, `stale_after_days`,
-  `source_commit`, and the six rules above.
+- ~~Any feed drawn in the running twin.~~ **This changed with the weather connector, and it is the
+  one exception, declared rather than granted quietly.** `data/feeds/_weather.json` declares
+  `runtime_read: true`, the feed index carries that flag up, and `src/world/data.js` loads the index
+  and whatever declares it at boot, off the page's own origin, exactly as it loads packs. Two fetches
+  deep and no further, and nothing at runtime.
+
+  What that exception buys is narrow, and the boundary is the point. A weather feed is **never
+  promoted into a pack** and never becomes a fact about the island. The promotion queue is the right
+  gate for a claim that will sit in a pack for years and the wrong one for a measurement with a shelf
+  life of twenty-five minutes: by the time a person had read a rain figure it would be worthless. So
+  an observation takes a different road with a lower ceiling. It is drawn only with the moment it is
+  for and the rung it came off beside it, it is used only while it is inside its own shelf life, and
+  it vanishes from the interface the moment it is not, which is a stricter treatment than any pack
+  record gets.
+
+  The flag lives in the index rather than in a list inside the loader so that a weather station on
+  the surf club roof is a data change, per the ladder at the end of this document. Every feed written
+  before this carries no flag and is therefore not loaded, which is the right default.
+- The other three feeds on screen. `wildlife-rescue`, `noticeboard` and `events-engine` are still
+  staging and still go through a person and `tools/ingest/promote.mjs`. Nothing from any of them has
+  been promoted, so there is still nothing from those on screen to date.
 - The rest of the interface. Only the business card calls `checkedPhrase()`. The chronicle, the
   events panel and the how-it-works panel all show dates somebody checked and none of them says what
   it counted against yet.
@@ -676,14 +851,26 @@ So do not write `live ? openMeteo : model`. Write a **ranked ladder**, resolved 
 with the winner named on screen. Adding a station on the roof of the surf club then becomes a data
 change and not a code change, which is the whole point.
 
+**It is built.** The ladder is implemented once, in `src/world/observations.js`, which node loads out
+of `tools/connectors/lib.mjs` and the browser loads out of `src/systems/environment/weather.js`, for
+the same reason `src/world/freshness.js` crosses that line: two copies of a ladder is two ladders.
+A connector stamps a rung onto every record it writes and the twin ranks by it.
+
 The ladder, best first. Each rung answers for a field, not for the whole of weather:
 
-| Rung | Source | What it is | Beats the one below because |
-| --- | --- | --- | --- |
-| 1 | **Island instrument** | a station, a gauge, a camera at a real place on the island | it is the actual thing, here, now |
-| 2 | **Official observation** | a Bureau station reading via their registered data service | measured, but not on this island |
-| 3 | **Model** | Open-Meteo, CC-BY, model output for this location | real physics, not a reading |
-| 4 | **Synoptic simulation** | `src/systems/environment/weather.js` | the only rung that can answer for a moment that has not happened |
+| Rung | Source | What it is | Beats the one below because | Built |
+| --- | --- | --- | --- | --- |
+| 1 | **Island instrument** | a station, a gauge, a camera at a real place on the island | it is the actual thing, here, now | no source yet. The ladder reads one the day one exists |
+| 2 | **Official observation** | a Bureau station reading via their registered data service | measured, but not on this island | no. Registering is the owner's decision, written up under the refusals above |
+| 3 | **Model** | Open-Meteo, CC BY 4.0, model output for this location | real physics, not a reading | **yes**, `tools/connectors/weather.mjs` |
+| 4 | **Synoptic simulation** | `src/systems/environment/weather.js` | the only rung that can answer for a moment that has not happened | yes, and unchanged |
+
+Adding rung 1 is genuinely a data change and this is the whole of it: write a feed whose records
+carry `rung: 1`, a `readings` array of `{ field, value, unit, stale_after_minutes }`, an
+`observed_at`, and `runtime_read: true`. Nothing under `src/` is edited. A check of that is in the
+repository rather than in this sentence: a test station carrying wind and rain, both an hour old,
+takes wind off the model and loses rain to it, because ninety minutes and twenty-five minutes are
+what the shelf lives say.
 
 Rules that hold for every rung:
 
@@ -696,10 +883,28 @@ Rules that hold for every rung:
 - **The rung is visible.** Not a footnote. A resident looking at wind speed should be able to see
   whether that came off a mast at Point Lookout or out of a model, because they will trust the two
   differently and they are right to.
+- **The rung is visible**, and here is where. Every weather figure in the bar's tooltips carries its
+  own rung, provider and age, per field: "9 kt (model, Open-Meteo, 5 min ago)". The attribution
+  CC BY 4.0 requires sits on the same tooltips, because the licence is a condition and a file is not
+  the interface. The Today screen's conditions block changes its own chip with the rung, reading
+  **A weather model** at rung 3, **Measured** at rungs 1 and 2, and **A simulation** at rung 4.
 - **Rung four never wins in live mode.** If every real rung has failed, the honest answer is that the
-  twin does not know, not a simulated number wearing a live badge.
-- **Determinism is unaffected.** All of this is ingest. A seeded run with no feeds uses rung four and
-  produces exactly what it always produced.
+  twin does not know, not a simulated number wearing a live badge. On screen that field reads **not
+  known**, in the word and not in a colour alone, and the tooltip says which reading went off and
+  after how long.
+
+  **And the honest wrinkle, because it took a decision.** The island cannot stop living when a feed
+  goes stale. The dunes, the fire index, the ferry, the koalas and the residents all need a wind
+  speed on every tick, and pausing the simulation because a rain figure aged out would be a worse
+  falsehood than the one being avoided. So rung four keeps producing numbers underneath and the twin
+  simply stops offering them as answers about the real island: `notKnown` lists those fields,
+  `knows(field)` is how a panel asks, and every surface that draws one of them has to ask. Rung four
+  never wins the question. It only keeps the world turning while nobody can answer it.
+- **Determinism is unaffected**, and this is checkable rather than asserted. Every ladder branch is
+  gated on the clock declaring live, so a seeded run resolves nothing, allocates nothing and consumes
+  the random stream in exactly the order it always did. `describe()` gains its `source` key only when
+  a real reading is actually in force, so the fingerprint `node tools/headless.mjs --determinism`
+  prints is the same one it printed before the ladder existed.
 
 ### The three things coming, and what each needs
 

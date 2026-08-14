@@ -66,6 +66,7 @@ export const MANIFEST = [
   () => import('./civic/sentiment.js'),
   () => import('./civic/budget.js'),
   () => import('./civic/consultation.js'),
+  () => import('./civic/legislation.js'),   // which Acts bind which person, and why
 
   // --- narrative
   () => import('./narrative/director.js'),
@@ -105,6 +106,7 @@ export const MANIFEST = [
   () => import('../ui/panels/events.js'),
   () => import('../ui/panels/subterranean.js'),
   () => import('../ui/panels/chronicle.js'),
+  () => import('../ui/panels/legislation.js'),
   () => import('../ui/panels/map.js'),
   () => import('../ui/panels/onboarding.js'),
   () => import('../ui/panels/howitworks.js'),

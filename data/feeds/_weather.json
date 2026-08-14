@@ -1,0 +1,335 @@
+{
+  "feed": "weather",
+  "schema": "minjerribah-connector-feed/1",
+  "version": "1.0.0",
+  "title": "Weather and sea state for the island, as model output",
+  "organisation": "Open-Meteo",
+  "runtime_read": true,
+  "runtime_note": "Read by the running twin off its own origin at boot, never fetched at runtime, and never promoted into a data pack. A pack is a durable claim; this is a moment with a shelf life.",
+  "about": "What a weather model has for the grid cells nearest this island, fetched as an offline step and committed as a file. It is model output and never an observation, it carries the moment it was modelled for as well as the moment it was fetched, and each reading carries its own shelf life in minutes because an hour-old temperature is fine and an hour-old rain figure is not. The running twin reads this only while its clock is live.",
+  "sync": {
+    "synced_at": "2026-08-14T15:40:51+10:00",
+    "connector": {
+      "id": "weather",
+      "version": "1.0"
+    },
+    "source": {
+      "kind": "http-endpoint",
+      "id": "open-meteo",
+      "path": "https://open-meteo.com/",
+      "present": true,
+      "commit": null,
+      "commit_date": null,
+      "working_tree": "not applicable to an endpoint",
+      "files": [
+        "https://api.open-meteo.com/v1/forecast?latitude=-27.43&longitude=153.54&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,surface_pressure&timezone=Australia%2FBrisbane",
+        "https://marine-api.open-meteo.com/v1/marine?latitude=-27.43&longitude=153.56&current=wave_height,wave_period,wave_direction,swell_wave_height,swell_wave_period,swell_wave_direction&timezone=Australia%2FBrisbane"
+      ]
+    },
+    "source_statement": {
+      "quote": "Weather data by Open-Meteo.com",
+      "locator": "the attribution Open-Meteo asks for under CC BY 4.0"
+    },
+    "retrieval": "fetched from the two endpoints above",
+    "licence": "CC BY 4.0",
+    "attribution": "Weather data by Open-Meteo.com, CC BY 4.0",
+    "modelled_for": {
+      "land": "2026-08-14T15:30",
+      "marine": "2026-08-14T15:30"
+    },
+    "basis": "model",
+    "basis_note": "Model output for a grid cell. Not a reading from an instrument at Point Lookout. The word observed is not used anywhere in this feed and must not be used anywhere it surfaces.",
+    "refused_alternative": "api.weather.bom.gov.au was considered and refused: it is an undocumented internal interface and every response states that the Bureau owns it and that you must not use, copy or share it. See tools/connectors/refusals.mjs and docs/CONNECTORS.md.",
+    "cadence": {
+      "every": "hourly while anybody is looking at a live island, and before any session that opens in live",
+      "run_by": "a scheduled job on the machine that publishes the build, or a person before a demonstration",
+      "reason": "The source updates roughly every fifteen minutes and the shortest shelf life on any field here is twenty-five minutes, for rain. An hourly sync keeps the slow fields inside their limits and lets the fast ones fall out of them honestly, which is the behaviour to want: a rain figure that goes quiet after half an hour is better than one that keeps talking."
+    },
+    "stale_after_days": 1,
+    "per_field_freshness": "The day is the wrong unit here. The limits that matter are in minutes and they sit on the field: src/world/freshness.js OBSERVATION_STALE_AFTER_MINUTES, which the twin and this connector both read, so there is one table and not two.",
+    "counts": {
+      "readings": 15,
+      "kept": 2,
+      "held": 0,
+      "endpoints": 2
+    }
+  },
+  "confidence_scale": {
+    "high": "Not reachable from this source. High would mean a measured reading from an instrument on this island, and nothing here is one.",
+    "medium": "A named weather model returned this figure for a named grid cell at a stamped moment, and the record quotes the response.",
+    "low": "Not used. A figure that cannot name its model, its cell and its moment is not carried."
+  },
+  "freshness_rule": "Two clocks and they are not the same clock. `modelled_for` is the moment the figure is about; `synced_at` is the moment somebody fetched it. A reading is used only while it is inside its own shelf life, counted from the first of those against whatever moment the island's clock is declaring, and a reading past its limit stops being used and says so in words.",
+  "cultural_flags": [],
+  "records": [
+    {
+      "id": "openmeteo-land",
+      "source": "feed:weather@2026-08-14T15:40:51+10:00",
+      "locator": "api.open-meteo.com current, modelled for 2026-08-14T15:30 GMT+10",
+      "confidence": "medium",
+      "extracted_at": "2026-08-14",
+      "extractor": "connector-weather/1.0",
+      "status": "committed",
+      "quote": "{\"time\":\"2026-08-14T15:30\",\"interval\":900,\"temperature_2m\":19.4,\"apparent_temperature\":16.9,\"relative_humidity_2m\":55,\"precipitation\":0,\"wind_speed_10m\":17.5,\"wind_direction_10m\":150,\"wind_gusts_10m\":41,\"cloud_cover\":0,\"surface_pressure\":1018.4}",
+      "asserts": "real_world",
+      "kind": "weather-model-output",
+      "name": "Open-Meteo land model output near Point Lookout",
+      "rung": 3,
+      "rung_id": "model",
+      "rung_label": "model",
+      "rung_note": "Rung 3 of 4: model output for the grid cell nearest this island. It beats the rung below because it is real physics run over real inputs, which is more than a seeded pattern is, and it loses to an island instrument or an official station reading the moment either of those exists for this field.",
+      "basis": "model",
+      "provider": "Open-Meteo",
+      "licence": "CC BY 4.0",
+      "attribution": "Weather data by Open-Meteo.com, CC BY 4.0",
+      "provider_url": "https://open-meteo.com/",
+      "endpoint": "https://api.open-meteo.com/v1/forecast?latitude=-27.43&longitude=153.54&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,surface_pressure&timezone=Australia%2FBrisbane",
+      "retrieved_by": "fetched from the endpoint above",
+      "modelled_for": "2026-08-14T15:30",
+      "modelled_for_timezone": "Australia/Brisbane",
+      "interval_seconds": 900,
+      "lat": -27.522,
+      "lng": 153.4939,
+      "location_precision_m": 11194,
+      "asked_for": {
+        "lat": -27.43,
+        "lng": 153.54,
+        "about": "Point Lookout"
+      },
+      "elevation_m": 43,
+      "place_note": "The source answered for a grid cell about 11.2 km from Point Lookout. That is the resolution of the model, not a mistake, and it is why this record says model rather than observed.",
+      "readings": [
+        {
+          "field": "tempC",
+          "from": "temperature_2m",
+          "value": 19.4,
+          "unit": "°C",
+          "source_value": 19.4,
+          "source_unit": "°C",
+          "stale_after_minutes": 180,
+          "stale_after_reason": "Air temperature follows the sun and takes hours to move a useful amount."
+        },
+        {
+          "field": "apparentC",
+          "from": "apparent_temperature",
+          "value": 16.9,
+          "unit": "°C",
+          "source_value": 16.9,
+          "source_unit": "°C",
+          "stale_after_minutes": 180,
+          "stale_after_reason": "It is built from temperature, humidity and wind, so it moves no faster than the slowest of them."
+        },
+        {
+          "field": "humidity",
+          "from": "relative_humidity_2m",
+          "value": 0.55,
+          "unit": "fraction 0 to 1",
+          "source_value": 55,
+          "source_unit": "%",
+          "stale_after_minutes": 180,
+          "stale_after_reason": "Humidity swings with the sea breeze and the dew point, both of which are hours-scale here."
+        },
+        {
+          "field": "rainMmHr",
+          "from": "precipitation",
+          "value": 0,
+          "unit": "mm/h",
+          "source_value": 0,
+          "source_unit": "mm",
+          "stale_after_minutes": 25,
+          "stale_after_reason": "Rain here arrives in cells. Half an hour is the difference between a wet road and a dry one."
+        },
+        {
+          "field": "windKt",
+          "from": "wind_speed_10m",
+          "value": 9.449,
+          "unit": "kt",
+          "source_value": 17.5,
+          "source_unit": "km/h",
+          "stale_after_minutes": 90,
+          "stale_after_reason": "The nor'easter builds and drops over about two hours, so ninety minutes is roughly half a turn of it."
+        },
+        {
+          "field": "windDirDeg",
+          "from": "wind_direction_10m",
+          "value": 150,
+          "unit": "°",
+          "source_value": 150,
+          "source_unit": "°",
+          "stale_after_minutes": 90,
+          "stale_after_reason": "The direction turns with the sea breeze on the same clock as the speed."
+        },
+        {
+          "field": "gustKt",
+          "from": "wind_gusts_10m",
+          "value": 22.138,
+          "unit": "kt",
+          "source_value": 41,
+          "source_unit": "km/h",
+          "stale_after_minutes": 45,
+          "stale_after_reason": "A gust figure is the peak over the interval it was measured in, and it is the number that decides whether a barge master sails."
+        },
+        {
+          "field": "cloud",
+          "from": "cloud_cover",
+          "value": 0,
+          "unit": "fraction 0 to 1",
+          "source_value": 0,
+          "source_unit": "%",
+          "stale_after_minutes": 90,
+          "stale_after_reason": "Cloud makes and clears in an hour on a storm day, and holds all afternoon on a ridge day."
+        },
+        {
+          "field": "pressure",
+          "from": "surface_pressure",
+          "value": 1018.4,
+          "unit": "hPa",
+          "source_value": 1018.4,
+          "source_unit": "hPa",
+          "stale_after_minutes": 360,
+          "stale_after_reason": "Surface pressure is a synoptic-scale number. Six hours of it is one small step on a chart."
+        }
+      ],
+      "handling": "Model output for a grid cell, not a reading from an instrument on this island. It may be shown with the moment it was modelled for beside it and the word model on it. It may not be called an observation, and it may not be shown for any moment the island has not lived through. Each reading carries its own shelf life in minutes: a rain figure is worth nothing at an hour old and a pressure figure is still worth having at six.",
+      "upstream_sources": [
+        "https://open-meteo.com/",
+        "https://api.open-meteo.com/v1/forecast?latitude=-27.43&longitude=153.54&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,surface_pressure&timezone=Australia%2FBrisbane"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-14T15:40:51+10:00",
+        "stale_after_days": 1,
+        "source_commit": null,
+        "observed_at": "2026-08-14T15:30",
+        "interval_seconds": 900
+      }
+    },
+    {
+      "id": "openmeteo-marine",
+      "source": "feed:weather@2026-08-14T15:40:51+10:00",
+      "locator": "marine-api.open-meteo.com current, modelled for 2026-08-14T15:30 GMT+10",
+      "confidence": "medium",
+      "extracted_at": "2026-08-14",
+      "extractor": "connector-weather/1.0",
+      "status": "committed",
+      "quote": "{\"time\":\"2026-08-14T15:30\",\"interval\":900,\"wave_height\":1.1,\"wave_period\":6.8,\"wave_direction\":146,\"swell_wave_height\":1,\"swell_wave_period\":5.6,\"swell_wave_direction\":149}",
+      "asserts": "real_world",
+      "kind": "marine-model-output",
+      "name": "Open-Meteo marine model output off Point Lookout",
+      "rung": 3,
+      "rung_id": "model",
+      "rung_label": "model",
+      "rung_note": "Rung 3 of 4: model output for the grid cell nearest this island. It beats the rung below because it is real physics run over real inputs, which is more than a seeded pattern is, and it loses to an island instrument or an official station reading the moment either of those exists for this field.",
+      "basis": "model",
+      "provider": "Open-Meteo",
+      "licence": "CC BY 4.0",
+      "attribution": "Weather data by Open-Meteo.com, CC BY 4.0",
+      "provider_url": "https://open-meteo.com/",
+      "endpoint": "https://marine-api.open-meteo.com/v1/marine?latitude=-27.43&longitude=153.56&current=wave_height,wave_period,wave_direction,swell_wave_height,swell_wave_period,swell_wave_direction&timezone=Australia%2FBrisbane",
+      "retrieved_by": "fetched from the endpoint above",
+      "modelled_for": "2026-08-14T15:30",
+      "modelled_for_timezone": "Australia/Brisbane",
+      "interval_seconds": 900,
+      "lat": -27.4583,
+      "lng": 153.5417,
+      "location_precision_m": 3633,
+      "asked_for": {
+        "lat": -27.43,
+        "lng": 153.56,
+        "about": "the water off Point Lookout and the North Gorge"
+      },
+      "elevation_m": 0,
+      "place_note": "The source answered for a grid cell about 3.6 km from the water off Point Lookout and the North Gorge. That is the resolution of the model, not a mistake, and it is why this record says model rather than observed.",
+      "readings": [
+        {
+          "field": "swellM",
+          "from": "wave_height",
+          "value": 1.1,
+          "unit": "m",
+          "source_value": 1.1,
+          "source_unit": "m",
+          "stale_after_minutes": 360,
+          "stale_after_reason": "Total sea height builds and decays over hours as the local wind works on it."
+        },
+        {
+          "field": "swellPeriodS",
+          "from": "wave_period",
+          "value": 6.8,
+          "unit": "s",
+          "source_value": 6.8,
+          "source_unit": "s",
+          "stale_after_minutes": 360,
+          "stale_after_reason": "Period follows the same sea that produced the height."
+        },
+        {
+          "field": "swellDirDeg",
+          "from": "wave_direction",
+          "value": 146,
+          "unit": "°",
+          "source_value": 146,
+          "source_unit": "°",
+          "stale_after_minutes": 360,
+          "stale_after_reason": "Direction follows the same sea again."
+        },
+        {
+          "field": "groundSwellM",
+          "from": "swell_wave_height",
+          "value": 1,
+          "unit": "m",
+          "source_value": 1,
+          "source_unit": "m",
+          "stale_after_minutes": 720,
+          "stale_after_reason": "Ground swell is generated a long way offshore and takes the better part of a day to change character."
+        },
+        {
+          "field": "groundSwellPeriodS",
+          "from": "swell_wave_period",
+          "value": 5.6,
+          "unit": "s",
+          "source_value": 5.6,
+          "source_unit": "s",
+          "stale_after_minutes": 720,
+          "stale_after_reason": "The long period is the slowest-moving number in the whole set."
+        },
+        {
+          "field": "groundSwellDirDeg",
+          "from": "swell_wave_direction",
+          "value": 149,
+          "unit": "°",
+          "source_value": 149,
+          "source_unit": "°",
+          "stale_after_minutes": 720,
+          "stale_after_reason": "Swell direction turns as slowly as the system that made it."
+        }
+      ],
+      "handling": "Model output for a grid cell, not a reading from an instrument on this island. It may be shown with the moment it was modelled for beside it and the word model on it. It may not be called an observation, and it may not be shown for any moment the island has not lived through. Each reading carries its own shelf life in minutes: a rain figure is worth nothing at an hour old and a pressure figure is still worth having at six.",
+      "upstream_sources": [
+        "https://open-meteo.com/",
+        "https://marine-api.open-meteo.com/v1/marine?latitude=-27.43&longitude=153.56&current=wave_height,wave_period,wave_direction,swell_wave_height,swell_wave_period,swell_wave_direction&timezone=Australia%2FBrisbane"
+      ],
+      "freshness": {
+        "synced_at": "2026-08-14T15:40:51+10:00",
+        "stale_after_days": 1,
+        "source_commit": null,
+        "observed_at": "2026-08-14T15:30",
+        "interval_seconds": 900
+      }
+    }
+  ],
+  "held": [],
+  "wanted": [
+    {
+      "id": "wx-want-station-observations",
+      "what": "Actual station observations for this island, rather than model output for a grid cell.",
+      "why_it_matters": "Everything in this feed is a model's answer for a cell some kilometres from the place it is being shown for. It is honest and it is the right thing to run on today, and it is not the same as a reading from an instrument. The Bureau of Meteorology's registered data services are the sanctioned route to real observations.",
+      "who_would_have_to_agree": "The Bureau of Meteorology, through registration, which is a decision for the owner of this project rather than for an agent.",
+      "how_small_it_could_start": "One station, one hourly observation, one field: wind. That alone would let the crossing read a measured number instead of a modelled one."
+    },
+    {
+      "id": "wx-want-local-sea-state",
+      "what": "A sea-state number for the ocean beaches that somebody on the island vouches for.",
+      "why_it_matters": "The marine cell sits a few kilometres off the Gorge and answers for open water. What the beach is doing at Main Beach and Cylinder is a local matter and the twin currently infers it from one offshore number.",
+      "who_would_have_to_agree": "Whoever holds a public sea-state or beach-condition source for this coast. Nobody has been asked.",
+      "how_small_it_could_start": "A daily line from anybody who looks at the water every morning would beat a model cell three kilometres offshore."
+    }
+  ]
+}

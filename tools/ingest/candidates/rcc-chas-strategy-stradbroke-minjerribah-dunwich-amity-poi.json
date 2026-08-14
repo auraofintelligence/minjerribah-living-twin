@@ -1,0 +1,852 @@
+{
+  "kind": "ingest-candidates",
+  "lane": "document",
+  "schema": "minjerribah-candidates/1",
+  "document": {
+    "id": "rcc-chas-strategy",
+    "title": "Redland City Council Coastal Hazard Adaptation Strategy",
+    "publisher": "Redland City Council",
+    "sha256": "197d6cf06ea1132567fff47cf5dd18abc15f97477be28cc97595c9b74a2da1bf",
+    "pages": 48
+  },
+  "extractor": {
+    "id": "lane-document",
+    "version": "1.0"
+  },
+  "extracted_at": "2026-08-14",
+  "note": "Candidates, not records. Nothing here has been read by a person. Delete what is wrong, rate what is left, then promote with tools/ingest/promote.mjs, which runs the gate first.",
+  "candidates": [
+    {
+      "id": "rcc-chas-strategy-p2-l3",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 2, line 3",
+      "quote": "Redlands Coast is blessed with Gorge Walk, North Stradbroke Island",
+      "quote_note": "",
+      "context": [
+        "approximately 335 kilometres of (Minjerrabah)"
+      ],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p3-l31",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 3, line 31",
+      "quote": "3.2 Storm tide inundation...................................11 Dunwich............................................................. 42",
+      "quote_note": "",
+      "context": [
+        "3.1 Hazards.........................................................11 Russell Island.....................................................40",
+        "3.3 Coastal erosion.............................................11 Amity Point........................................................ 44"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p3-l32",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 3, line 32",
+      "quote": "3.3 Coastal erosion.............................................11 Amity Point........................................................ 44",
+      "quote_note": "",
+      "context": [
+        "3.2 Storm tide inundation...................................11 Dunwich............................................................. 42",
+        "Point Lookout..................................................... 45"
+      ],
+      "matched_term": "Amity",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p3-l33",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 3, line 33",
+      "quote": "Point Lookout..................................................... 45",
+      "quote_note": "",
+      "context": [
+        "3.3 Coastal erosion.............................................11 Amity Point........................................................ 44",
+        "Short-term erosion........................................11"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p3-l36",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 3, line 36",
+      "quote": "3.4 Tidal inundation due to sea level rise............11 References......................................... 47",
+      "quote_note": "",
+      "context": [
+        "Long-term erosion.........................................11 7. Implementation...............................46",
+        "3.5 Current and future exposure..........................12"
+      ],
+      "matched_term": "sea level rise",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p4-l1",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 4, line 1",
+      "quote": "North Stradbroke Island (Minjerribah)",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p5-l11",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 5, line 11",
+      "quote": "Southern Moreton Bay Islands and North Stradbroke Island plan for managing coastal hazard impacts, from present-day",
+      "quote_note": "",
+      "context": [
+        "south to the mouth of the Logan River and across the launched to help Queensland coastal councils proactively",
+        "(Minjerribah). North Stradbroke Island forms a barrier to the years 2070 and 2100."
+      ],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p5-l12",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 5, line 12",
+      "quote": "(Minjerribah). North Stradbroke Island forms a barrier to the years 2070 and 2100.",
+      "quote_note": "",
+      "context": [
+        "Southern Moreton Bay Islands and North Stradbroke Island plan for managing coastal hazard impacts, from present-day",
+        "between the Coral Sea and Moreton Bay (Quandamooka)."
+      ],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p8-l1",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 8, line 1",
+      "quote": "Flinders Beach, North Stradbroke Island (Minjerribah)",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p9-l8",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 9, line 8",
+      "quote": "of Minjerribah",
+      "quote_note": "",
+      "context": [
+        "Values and coastal plains, and sandy beach systems",
+        "Redlands Coast is a key part of the traditional homeland of"
+      ],
+      "matched_term": "Minjerribah",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p9-l33",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 9, line 33",
+      "quote": "North Stradbroke Island (Minjerribah). economy was $158.2 million in 2018/192. Employment in the",
+      "quote_note": "",
+      "context": [
+        "and international visitors per year, and the added value to the",
+        "tourism industry is estimated at 1,382 full-time equivalent"
+      ],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p11-l49",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 11, line 49",
+      "quote": "gradually rebuild (Figure 4). 3.4 Tidal inundation due to sea level rise",
+      "quote_note": "",
+      "context": [
+        "activity (termed storm bite), and the beach will then"
+      ],
+      "matched_term": "sea level rise",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p11-l54",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 11, line 54",
+      "quote": "erosion does not result in a long-term landward movement increased extent of tidal inundation with sea level rise.",
+      "quote_note": "",
+      "context": [
+        "timeframes of months to years). In this case, periodic beach Tide. Areas of low-lying coastal land will be prone to an",
+        "of the shoreline. A 0.8m sea level rise by 2100 is currently planned for by the"
+      ],
+      "matched_term": "sea level rise",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p11-l55",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 11, line 55",
+      "quote": "of the shoreline. A 0.8m sea level rise by 2100 is currently planned for by the",
+      "quote_note": "",
+      "context": [
+        "erosion does not result in a long-term landward movement increased extent of tidal inundation with sea level rise.",
+        "Queensland Government."
+      ],
+      "matched_term": "sea level rise",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p12-l10",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 12, line 10",
+      "quote": "Storm tide mapping was produced in 2011 for Redland City Projected sea level rise and an increase in cyclone intensity",
+      "quote_note": "",
+      "context": [
+        "Council, including planning horizons for 2016 and 2100 for the Queensland coastline is anticipated to increase the"
+      ],
+      "matched_term": "sea level rise",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p12-l28",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 12, line 28",
+      "quote": "�Tidal zones: The combined area inundated by the �Sea level rise will increase the apparent severity and",
+      "quote_note": "",
+      "context": [
+        "Highest Astronomical Tide plus a defined horizontal frequency of storm tide inundation and will cause"
+      ],
+      "matched_term": "sea level rise",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p12-l38",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 12, line 38",
+      "quote": "As required by the Queensland Government, a sea level rise Hazard exposure",
+      "quote_note": "",
+      "context": [
+        "of 0.8m by 2100 has been adopted for the Coastal Hazard"
+      ],
+      "matched_term": "sea level rise",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p15-l59",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 15, line 59",
+      "quote": "annually byBu2ild1i0ng0s a.nTdhfaecilpitirees dicteAdssoicniacterdeianfsraestiruncttuirde (aClouznocinl oewsned) Sandboarding at North Stradbroke Island (Minjerribah)",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p15-l77",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 15, line 77",
+      "quote": "Stradbroke Islandha(zMardinimjpearcrtsi(bwaithh). by 2100",
+      "quote_note": "",
+      "context": [
+        "time due to coastal"
+      ],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p19-l13",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 19, line 13",
+      "quote": "North Stradbroke Island (Minjerribah), typically in response The priority actions were informed by initial screening of",
+      "quote_note": "",
+      "context": [
+        "including on the Southern Moreton Bay Islands and",
+        "to shoreline erosion. options, as well as a detailed cost-benefit analysis (CBA) for"
+      ],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p19-l64",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 19, line 64",
+      "quote": "Dunwich Monitor, maintain, and Mitigate",
+      "quote_note": "",
+      "context": [
+        "prepare"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p19-l67",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 19, line 67",
+      "quote": "Amity Point Mitigate",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Amity",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p19-l69",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 19, line 69",
+      "quote": "Point Lookout Monitor, maintain, and prepare",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p20-l3",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 20, line 3",
+      "quote": "The Coastal Hazard Adaptation Strategy priority actions South Gorge Beach, North Stradbroke Island (Minjerribah)",
+      "quote_note": "",
+      "context": [
+        "across the region include actions relevant to the four"
+      ],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p21-l48",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 21, line 48",
+      "quote": "4.2Additional shoreline 4.2.1Implement Shoreline Erosion Management Plan (SEMP) for Amity Point and",
+      "quote_note": "",
+      "context": [
+        "erosion mitigation Coochiemudlo Island"
+      ],
+      "matched_term": "Amity",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p25-l1",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 25, line 1",
+      "quote": "Amity Point, North Stradbroke Island (Minjerribah)",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p42-l1",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 42, line 1",
+      "quote": "Dunwich Figure 20. Dunwich",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p42-l3",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 42, line 3",
+      "quote": "Dunwich is a small suburb located on the west side of North",
+      "quote_note": "",
+      "context": [
+        "Stradbroke Island (Minjerribah), where the island's main"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p42-l4",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 42, line 4",
+      "quote": "Stradbroke Island (Minjerribah), where the island's main",
+      "quote_note": "",
+      "context": [
+        "Dunwich is a small suburb located on the west side of North",
+        "ferry terminal is located (Figure 20)."
+      ],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p42-l17",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 42, line 17",
+      "quote": "The present-day adaptation response for Dunwich is",
+      "quote_note": "",
+      "context": [
+        "to continue to monitor coastal hazard risk and begin"
+      ],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p42-l30",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 42, line 30",
+      "quote": "DUNWICH Monitor, maintain, and prepare Mitigate",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p42-l55",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 42, line 55",
+      "quote": "Table 21. Dunwich adaptation pathway",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Dunwich",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p43-l1",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 43, line 1",
+      "quote": "Dunwich, North Stradbroke Island (Minjerribah)",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p44-l1",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 44, line 1",
+      "quote": "Amity Point Figure 21. Amity Point",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Amity",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p44-l3",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 44, line 3",
+      "quote": "Amity Point is a small suburb on the northwest tip of",
+      "quote_note": "",
+      "context": [
+        "North Stradbroke Island (Minjerribah), facing the South"
+      ],
+      "matched_term": "Amity",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p44-l4",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 44, line 4",
+      "quote": "North Stradbroke Island (Minjerribah), facing the South",
+      "quote_note": "",
+      "context": [
+        "Amity Point is a small suburb on the northwest tip of",
+        "Passage, a very dynamic channel separating Moreton Island"
+      ],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p44-l6",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 44, line 6",
+      "quote": "(Mulgumpin) and North Stradbroke Island (Minjerribah)",
+      "quote_note": "",
+      "context": [
+        "Passage, a very dynamic channel separating Moreton Island",
+        "(Figure 21)."
+      ],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p44-l19",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 44, line 19",
+      "quote": "The present-day adaptation response for Amity Point is",
+      "quote_note": "",
+      "context": [
+        "to continue to mitigate coastal hazard risk, and begin"
+      ],
+      "matched_term": "Amity",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p44-l33",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 44, line 33",
+      "quote": "AMITY POINT Mitigate",
+      "quote_note": "",
+      "context": [
+        "Enhance"
+      ],
+      "matched_term": "Amity",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p44-l57",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 44, line 57",
+      "quote": "Table 22. Amity Point adaptation pathway",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Amity",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p45-l1",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 45, line 1",
+      "quote": "Point Lookout",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p45-l3",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 45, line 3",
+      "quote": "Point Lookout, the eastern-most suburb of North Stradbroke",
+      "quote_note": "",
+      "context": [
+        "Island (Minjerribah) and Redland City, is located on an"
+      ],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p45-l4",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 45, line 4",
+      "quote": "Island (Minjerribah) and Redland City, is located on an",
+      "quote_note": "",
+      "context": [
+        "Point Lookout, the eastern-most suburb of North Stradbroke",
+        "elevated rocky outcrop facing the Pacific Ocean (Figure 22)."
+      ],
+      "matched_term": "Minjerribah",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p45-l15",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 45, line 15",
+      "quote": "The present-day adaptation response for Point Lookout is",
+      "quote_note": "",
+      "context": [
+        "to continue to monitor coastal hazard risk into the future"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p45-l19",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 45, line 19",
+      "quote": "Figure 22. Point Lookout",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p45-l23",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 45, line 23",
+      "quote": "POINT LOOKOUT Monitor, maintain, prepare",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p45-l26",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 45, line 26",
+      "quote": "adaptive �Establish at Point Lookout as a focus site for action 1.2.5 - enhance signage on coastal hazards and the role of dunes",
+      "quote_note": "",
+      "context": [
+        "Enhance As per city-wide actions, include specific actions of:",
+        "capacity"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p45-l29",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 45, line 29",
+      "quote": "Planning �Establish Point Lookout surf club as a key site for action 1.3.1 - a photo monitoring station (CoastSnap to similar) to",
+      "quote_note": "",
+      "context": [
+        "and vegetation"
+      ],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p45-l42",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 45, line 42",
+      "quote": "Table 23. Point Lookout adaptation pathway",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Point Lookout",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    },
+    {
+      "id": "rcc-chas-strategy-p46-l32",
+      "source": "rcc-chas-strategy",
+      "locator": "p. 46, line 32",
+      "quote": "Cylinder Beach, North Stradbroke Island (Minjerribah)",
+      "quote_note": "",
+      "context": [],
+      "matched_term": "Stradbroke",
+      "confidence": "medium",
+      "status": "committed",
+      "asserts": "real_world",
+      "extracted_at": "2026-08-14",
+      "extractor": "lane-document/1.0",
+      "needs": "A person decides what this line means, whether it applies to this island, and what record it becomes. Delete it if it is a header, a legend, or a sentence about somewhere else."
+    }
+  ]
+}

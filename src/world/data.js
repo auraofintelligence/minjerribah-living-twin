@@ -37,6 +37,29 @@ const FALLBACK_PACKS = [
 
 export const REGISTRY_FILE = 'data/_provenance.json';
 
+/**
+ * The feed index, which is not the pack registry and must not be confused with it.
+ *
+ * `data/_provenance.json` registers packs: durable claims about the island that a person read and
+ * vouched for. `data/feeds/_feeds.json` indexes feeds: what a source said at a moment, staged. Until
+ * this pass the twin loaded packs and nothing else, and docs/CONNECTORS.md said so plainly under
+ * "what is not built": no feed was drawn in the running twin.
+ *
+ * Weather is what changed that, and the reason is worth writing down rather than treating as an
+ * exception granted quietly. A twin of a real island, opened live, showing invented weather is a
+ * demonstration wearing a twin's clothes. The promotion queue is the right gate for a claim that
+ * will sit in a pack for years and the wrong one for a measurement with a shelf life of minutes: by
+ * the time a person had read a rain figure it would be worthless. So a feed may declare
+ * `runtime_read` and be loaded here, and what that buys it is narrow. It is never promoted, it never
+ * becomes a fact about the island, and nothing drawn from it appears without the moment it is for
+ * and the rung it came off.
+ *
+ * The flag lives in the index rather than in a list in this file on purpose. A weather station on
+ * the surf club roof should arrive as a feed with a flag on it, not as a line somebody has to add
+ * to a loader. See docs/CONNECTORS.md, "The source ladder".
+ */
+export const FEED_INDEX_FILE = 'data/feeds/_feeds.json';
+
 /** The one confidence scale. Each pack defines these three words in its own terms; nothing may add a fourth. */
 export const CONFIDENCE = ['high', 'medium', 'low'];
 const CONFIDENCE_RANK = { high: 3, medium: 2, low: 1 };
@@ -214,6 +237,54 @@ export async function loadDataPacks() {
   for (const { id, pack } of loaded) out[id] = pack;
 
   attachProvenance(out, registry, loaded.filter((l) => !l.ok).map((l) => l.id));
+  await attachFeeds(out);
+  return out;
+}
+
+/**
+ * Load the feeds that declare themselves readable by the running twin, in the index's own order.
+ *
+ * Two fetches deep and no further: the index, then whatever it flags. Both come off the page's own
+ * origin at boot, exactly as the packs do, and nothing here is ever called again. A missing index is
+ * the normal case on a checkout where nobody has synced, and it degrades to no feeds rather than to
+ * an error, because an island with no weather reading still runs its own weather.
+ *
+ * Attached as a non-enumerable function so nothing walking the packs trips over it, which is the
+ * same reason the provenance API is attached that way.
+ */
+async function attachFeeds(out) {
+  const feeds = {};
+  const notes = { index: false, loaded: [], missing: [] };
+  let index = null;
+  try {
+    index = await fetchJSON(FEED_INDEX_FILE);
+    notes.index = true;
+  } catch {
+    // No feed index on this checkout. Not a fault: nobody has run a connector here.
+  }
+  const wanted = index && Array.isArray(index.feeds)
+    ? index.feeds.filter((f) => f && f.id && f.runtime_read === true)
+    : [];
+  const got = await Promise.all(wanted.map(async (entry) => {
+    const file = entry.file || `data/feeds/_${entry.id}.json`;
+    try { return { id: entry.id, feed: await fetchJSON(file), ok: true }; } catch (e) {
+      console.warn(`[data] runtime feed "${entry.id}" (${file}) missing or invalid`, e.message);
+      return { id: entry.id, feed: null, ok: false };
+    }
+  }));
+  for (const { id, feed, ok } of got) {
+    if (ok) { feeds[id] = feed; notes.loaded.push(id); } else notes.missing.push(id);
+  }
+
+  const api = {
+    /** One feed by id, or null. Null is a normal answer and every caller has to handle it. */
+    feed(id) { return feeds[id] || null; },
+    /** Which runtime feeds loaded, which did not, and whether there was an index at all. */
+    feedStatus() { return { index: notes.index, loaded: notes.loaded.slice(), missing: notes.missing.slice() }; }
+  };
+  for (const [k, v] of Object.entries(api)) {
+    Object.defineProperty(out, k, { value: v, enumerable: false, writable: false, configurable: true });
+  }
   return out;
 }
 

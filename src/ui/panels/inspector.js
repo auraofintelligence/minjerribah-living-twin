@@ -345,7 +345,7 @@ function mount(root, world) {
   /* ---------------------------------------------------------------- resident */
 
   VIEWS.resident = {
-    tabs: ['Now', 'Needs', 'People', 'Story'],
+    tabs: ['Now', 'Needs', 'People', 'Story', 'Law'],
     header(id) {
       const p = world.residents && world.residents.peopleById.get(id);
       if (!p) return null;
@@ -370,6 +370,7 @@ function mount(root, world) {
       if (tab === 'Needs') return residentNeeds(p, card);
       if (tab === 'People') return residentPeople(p, card);
       if (tab === 'Story') return residentStory(p, card);
+      if (tab === 'Law') return residentLaw(p);
       return residentNow(p, card);
     }
   };
@@ -650,6 +651,69 @@ function mount(root, world) {
   }
   const TIE_TONE = { partner: 'heath', family: 'heath', housemate: 'sea', colleague: 'iron', neighbour: 'leaf', friend: 'leaf', acquaintance: 'iron' };
   const tieTone = (k) => TIE_TONE[k] || 'iron';
+
+  /**
+   * What binds this person, and why.
+   *
+   * src/systems/civic/legislation.js does the join: it reads the life events data/legislation.json
+   * says each Act touches and works out which of them this resident is actually living, from their
+   * age, their tenure, their work and what they own. This tab shows the answer where it belongs,
+   * on the person, and hands the rest to the fine print board.
+   *
+   * The pack's not_advice line is a required field on every record in it and it must show on every
+   * screen that names an instrument. This is one of those screens, so it shows here, at the top,
+   * before the list rather than under it.
+   */
+  function residentLaw(p) {
+    const L = world.read('legislation');
+    if (!L || !L.ready || !L.forPerson) {
+      return [el('div', { class: 'insp-empty' }, el('p', {}, 'The legislation pack has not loaded.'))];
+    }
+    const b = L.forPerson(p.id);
+    if (!b) return [el('div', { class: 'insp-empty' }, el('p', {}, 'Nothing is bound to this person.'))];
+    const out = [];
+
+    out.push(whyBox('', el('b', {}, 'Not advice: '), L.notAdvice));
+
+    out.push(sec('What reaches them', kv([
+      ['Acts', `${b.count} of ${L.totals.instruments}`],
+      ['Pages', `${b.pages.toLocaleString('en-AU')}, counted from the published consolidations`],
+      ['Mostly gives', String(b.bearing.mostly_protects)],
+      ['Mostly asks', String(b.bearing.mostly_requires)],
+      ['Against the island', L.people ? `the median adult carries ${L.people.medianPages.toLocaleString('en-AU')} pages` : null]
+    ])));
+
+    out.push(sec('Because of', el('div', { class: 'rows' }, b.events.map((e) => el('div', { class: 'row' },
+      el('div', { class: 'lead' },
+        el('div', { class: 'name' }, e.label),
+        el('div', { class: 'sub' }, e.why)),
+      chip(`${e.instruments}`, 'sea'))))));
+
+    const top = b.instruments.slice(0, 8);
+    out.push(sec('The heaviest of them', el('div', { class: 'rows' }, top.map((i) => el('div', { class: 'row' },
+      el('div', { class: 'lead' },
+        el('div', { class: 'name' }, i.short_title),
+        el('div', { class: 'sub' }, `${i.citation}. ${i.pages.toLocaleString('en-AU')} pages.`)),
+      chip(i.jurisdiction === 'Commonwealth' ? 'Cth' : 'Qld', 'iron'))))));
+
+    out.push(sec('', el('div', {
+      class: 'row pick', tabindex: '0', role: 'button',
+      onclick: () => world.bus.emit('ui:open', { id: 'legislation', tab: 'person', personId: p.id }),
+      onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); world.bus.emit('ui:open', { id: 'legislation', tab: 'person', personId: p.id }); } }
+    },
+    el('div', { class: 'lead' },
+      el('div', { class: 'name' }, 'Open the fine print'),
+      el('div', { class: 'sub' }, 'all of them, the reasons, and this person against another')))));
+
+    out.push(basis(
+      'The Acts are real and measured from the published consolidation of each. The person is '
+      + 'generated, so this is a worked example of how the law falls on a life, not a statement '
+      + 'about anybody.',
+      'Four life events in the pack are not modelled here at all: ' + b.unknowable.map((u) => u.key.replace(/-/g, ' ')).join(', ')
+      + '. Nothing is attached for them.'));
+
+    return out;
+  }
 
   function residentStory(p, card) {
     const out = [];

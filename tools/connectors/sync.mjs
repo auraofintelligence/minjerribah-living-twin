@@ -6,11 +6,16 @@
 //   node tools/connectors/sync.mjs --list         every connector, built or not, and why
 //   node tools/connectors/sync.mjs --dry-run      read and report, write nothing
 //
-// A sync is an offline step. Nothing here opens a socket. It reads local checkouts of the owner's
-// own repositories and any folder somebody dropped an export into, screens every record against the
-// cultural prohibitions in data/lore.json and the privacy floor in docs/PARTICIPATION.md, and
-// writes a committed, checksummed feed. The running twin never touches any of it: it loads packs,
-// and a feed only becomes a pack when a person promotes it.
+// A sync is an offline step. It reads local checkouts of the owner's own repositories and any
+// folder somebody dropped an export into, screens every record against the cultural prohibitions in
+// data/lore.json and the privacy floor in docs/PARTICIPATION.md, and writes a committed,
+// checksummed feed. The running twin never touches any of it.
+//
+// One connector reaches a network and only one: `weather`, which has no local checkout to read
+// because nobody keeps the weather in a git repository. It calls two named Open-Meteo hosts, when a
+// person or a scheduled job runs this command, and writes the same kind of stamped file everything
+// else here writes. Run it with --inbox and it reads two saved responses off disk instead. See the
+// header of tools/connectors/lib.mjs, which states the rule and its one exception together.
 
 import fs from 'node:fs';
 import { CONNECTORS, connector as declared } from './registry.mjs';
@@ -20,12 +25,16 @@ import { runRefusal } from './refusals.mjs';
 const MODULES = {
   'wildlife-rescue': () => import('./wildlife-rescue.mjs'),
   noticeboard: () => import('./noticeboard.mjs'),
-  'events-engine': () => import('./events-engine.mjs')
+  'events-engine': () => import('./events-engine.mjs'),
+  weather: () => import('./weather.mjs')
 };
 
 /** Roughly how many days a cadence means, for working out what is due. */
 function cadenceDays(cadence) {
   const text = String((cadence && cadence.every) || '').toLowerCase();
+  // Nought, not a fraction: a feed synced faster than once a day is due whenever anybody asks,
+  // which is the honest answer for weather and the reason this line exists.
+  if (text.includes('hourly')) return 0;
   if (text.includes('daily')) return 1;
   if (text.includes('weekly')) return 7;
   if (text.includes('monthly')) return 30;
@@ -100,11 +109,23 @@ async function runOne(id, { inbox = null, dryRun = false } = {}) {
   }
 
   const mod = await MODULES[id]();
-  const feed = mod.sync({ inbox });
+  // `await` on a plain object is the object, so the three connectors that read a checkout
+  // synchronously are unaffected. The weather connector fetches, so it returns a promise.
+  const feed = await mod.sync({ inbox });
 
   console.log(`\n${id}: ${feed.title}`);
   const src = feed.sync.source;
-  console.log(`  read ${src.id} at ${src.commit ? src.commit.slice(0, 9) : 'no commit'} (${src.commit_date || 'undated'}, working tree ${src.working_tree})`);
+  if (src.kind === 'http-endpoint') {
+    console.log(`  ${feed.sync.retrieval || 'read'} ${src.id}`);
+    if (feed.sync.modelled_for) {
+      console.log('  modelled for ' + Object.entries(feed.sync.modelled_for)
+        .map(([k, v]) => `${k} ${v || 'unstamped'}`).join(', ')
+        + ', which is not the moment it was fetched');
+    }
+    if (feed.sync.attribution) console.log(`  attribution: ${feed.sync.attribution}`);
+  } else {
+    console.log(`  read ${src.id} at ${src.commit ? src.commit.slice(0, 9) : 'no commit'} (${src.commit_date || 'undated'}, working tree ${src.working_tree})`);
+  }
   if (src.files && src.files.length) console.log(`  files: ${src.files.join(', ')}`);
   if (feed.sync.checkout_is_behind_cadence) {
     console.log('  WARNING: this checkout is older than the cadence for this source. Pull it and run again.');
@@ -129,7 +150,9 @@ async function runOne(id, { inbox = null, dryRun = false } = {}) {
     const asks = feed.wanted.filter((w) => !w.organisation);
     const orgs = feed.wanted.length - asks.length;
     console.log(`  WANTED ${feed.wanted.length}${orgs ? `, of which ${orgs} are organisations nobody has asked anything` : ''}:`);
-    for (const w of asks) console.log(`    ${w.what.split('. ')[0]}.`);
+    // First sentence, and only one full stop on the end of it. Every connector's `what` already
+    // ends in one, so appending another gave every line in this list a double stop.
+    for (const w of asks) console.log(`    ${w.what.split('. ')[0].replace(/\.$/, '')}.`);
   }
 
   if (dryRun) {

@@ -311,6 +311,8 @@ node tools/ingest/lane-legislation.mjs --index      # the two official indexes
 node tools/ingest/lane-legislation.mjs --resolve    # every catalogue id checked against them
 node tools/ingest/lane-legislation.mjs --fetch      # the current consolidations, into the inbox
 node tools/ingest/lane-legislation.mjs --measure    # pages and structure, out of those files
+node tools/ingest/lane-legislation.mjs --judgments  # every cited judgment, against its publisher
+node tools/ingest/lane-legislation.mjs --edges      # every edge quote, against the document it cites
 node tools/ingest/lane-legislation.mjs --extract --batch 2026-08
 node tools/ingest/lane-legislation.mjs --report
 ```
@@ -338,6 +340,27 @@ Act the catalogue asked for. Fail either and nothing is recorded.
 `--extract` checks it against the set of provision numbers read out of that Act's own table of contents,
 and drops and prints any that is not there. A wrong section number in a civic explainer is worse than no
 section number, because the reader has no way to tell.
+
+**The edges of the corpus are records too, and they are the ones people arrive holding.** A list of
+sixty-six Australian Acts does not help somebody who turns up with a copy of Magna Carta and a United
+States financing statement, so the pack carries five edge records under four types: `partially_in_force`
+for imperial law a Queensland Act keeps alive chapter by chapter, `foreign_domestic` for another
+country's instrument with the Australian one that does the same job beside it, `treaty_unincorporated`
+for a treaty that needs an Act before a court here applies it, and `asserted_rejected` for a chain of
+reasoning an Australian court has already decided. Every edge quotes the document it rests on and
+`--edges` will not pass a quote it cannot find in that document, character for character.
+
+**A judgment is checked against its publisher, in two places.** `--judgments` fetches the case page for
+the case name and the medium neutral citation, fetches the authorised PDF for the reasons, and requires
+the quote to be in the PDF character for character and every party name in the case name to appear in
+it. An older transcript carries neither the reported case name nor the medium neutral citation, so
+checking the quote against the case page would pass everything and prove nothing. Queensland judgments
+are read from Queensland Judgments, published by the Incorporated Council of Law Reporting for the State
+of Queensland with the Supreme Court of Queensland Library Committee. The larger free database refuses
+automated readers in terms, so this lane goes elsewhere rather than around. Nothing is republished
+beyond the quoted sentence, and holdings are written in the pack's own words and kept to what the court
+decided: judgments on these arguments sometimes carry sharp words about the person who ran them, and a
+reader who arrives holding one is there to find out where they stand.
 
 **No full text is committed and that is deliberate.** The consolidations run to tens of thousands of
 pages, they belong to their publishers, and the licence position differs between the two registers. The

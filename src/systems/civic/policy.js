@@ -84,16 +84,21 @@ export function registerPolicy(world) {
     nudges: [],
     qyacSqueeze: { on: false, count: 0, levers: [], rule: '' },
     couplings: [],
+    obligations: [],
+    obligationSummary: { total: 0, engaged: 0, atIssue: 0, daysAtIssue: 0, byForce: {}, note: '' },
     notes: [],
     explain: () => [],
     leverCard: () => null,
-    metricCard: () => null
+    metricCard: () => null,
+    obligationsFor: () => []
   });
 
   /** id -> metric runtime */
   const M = new Map();
   /** id -> lever runtime */
   const L = new Map();
+  /** id -> obligation runtime. See buildObligations(). */
+  const O = new Map();
   /** every live contribution, in a flat list so the daily pass is one loop */
   const contributions = [];
   /** named nudges from council, consultation and budget */
@@ -183,6 +188,8 @@ export function registerPolicy(world) {
         progress: 0,
         deliveryDays: Math.max(1, Math.round((lv.lead_time_months || 1) * DAYS_PER_MONTH)),
         conditions: [],
+        // The obligations that sit over this lever, filled by buildObligations() out of the pack.
+        obligations: [],
         restsOnPlayerAssumption: false,
         squeezed: false,
         squeezeDays: 0,
@@ -226,6 +233,8 @@ export function registerPolicy(world) {
         heat: 0
       });
     }
+
+    buildObligations(w);
 
     state.qyacSqueeze.rule = (pack.sim_defaults && pack.sim_defaults.qyac_capacity_rule) || '';
     state.notes.push(`${L.size} levers, ${M.size} metrics, ${state.issues.length} issues from data/civic.json.`);
@@ -504,6 +513,12 @@ export function registerPolicy(world) {
     // 3. Live couplings: what the rest of the island is doing to these numbers.
     runCouplings(w);
 
+    // 3b. The layer above. Deliberately after the couplings and before the metrics settle, because
+    // it reads the world and writes nothing back: no obligation may ever appear in m.policy,
+    // m.nudge or m.live. If a future pass wants an obligation to move a number, that is a design
+    // decision and it needs an argument, not an extra line here.
+    stepObligations(w, advanceTime);
+
     // 4. Settle. Metrics lag their target; memory lags the value.
     const k = 1 - halfLifeDecay(1, METRIC_HALF_LIFE_DAYS);
     const kr = 1 - halfLifeDecay(1, REMEMBERED_HALF_LIFE_DAYS);
@@ -743,6 +758,219 @@ export function registerPolicy(world) {
     }
   }
 
+  /* ------------------------------------------------------------------ the treaty layer
+
+  A LAYER, NOT A LEVER, AND THE DIFFERENCE IS THE WHOLE POINT.
+
+  Everything else in this file is a decision: somebody enacts a thing, it takes months, it lands
+  smaller or larger than promised, and it can be cut. `data/civic.json treaty_layer` is the other
+  kind of constraint. Nine obligations, out of the Ramsar Convention, the Bonn Convention, the three
+  bilateral migratory bird agreements, the flyway partnership, the EPBC Act and one state planning
+  requirement. Not one of them is enactable, ceasable, fundable or persuadable, none of them has a
+  magnitude, and nothing in this block ever writes to a metric. There is deliberately no path from
+  here into `contributions`, so a future pass cannot quietly turn an obligation into a lever with a
+  cost.
+
+  What they do instead is three things:
+
+    1. THEY SIT OVER LEVERS. `leversUnder` is computed from the pack: any lever whose effects or
+       side effects touch a metric the obligation names. It is exact rather than curated, so a lever
+       added later lands under the right obligations without anybody remembering to wire it.
+    2. THEY READ THE WORLD, NOT THE BOARD. `engaged_when` and `at_issue_when` name a published read
+       model and a field on it. The eastern curlew obligation is engaged when curlews are on the
+       island and not otherwise; the Article 3.2 one goes to issue when the shorebird system's own
+       character indicator falls below the band. Nothing a player does to the civic board can switch
+       either of them off.
+    3. THEY REMEMBER. `daysAtIssue` counts up and never decays, never resets and is not in anybody's
+       budget. Cutting the program that caused it does not clear it, a new council does not clear
+       it, and it is the only number on this board with that property. That is what an obligation is.
+
+  AND THEY DECIDE NOTHING. No obligation here says a lever needs a referral, an approval or a
+  notification. `national_environmental_significance.handling` in the pack, and `recordSection75` in
+  council.js, both stop at the same place for the same reason: whether an action is likely to have a
+  significant impact is a judgement for a proponent and then for a minister, and this project does
+  not make it. This block does not make it either. It says which instrument reaches the ground. */
+
+  const TRIGGER_TESTS = { above: (v, x) => v > x, below: (v, x) => v < x };
+
+  /** Read one trigger. Defensive in the same way the live couplings are: an unbuilt system is not
+   *  an engaged obligation, it is a disconnected one, and the read model says which. */
+  function evalTrigger(w, t) {
+    if (!t) return { on: false, connected: true, why: '' };
+    if (t.always) return { on: true, connected: true, why: t.says || '' };
+    if (t.never) return { on: false, connected: true, why: t.says || '' };
+    const read = w.read(t.reads);
+    if (!read) {
+      return { on: false, connected: false, why: `${t.reads} is not built in this world, so nothing is watching this one.` };
+    }
+    const v = read[t.field];
+    if (typeof v !== 'number' || !Number.isFinite(v)) {
+      return { on: false, connected: false, why: `${t.reads} publishes no number at ${t.field} yet.` };
+    }
+    const test = TRIGGER_TESTS[t.test] || TRIGGER_TESTS.above;
+    return { on: test(v, t.value), connected: true, value: v, threshold: t.value, why: t.says || '' };
+  }
+
+  function buildObligations(w) {
+    const layer = pack.treaty_layer;
+    if (!layer || !Array.isArray(layer.obligations)) {
+      state.notes.push('data/civic.json carries no treaty_layer, so no international obligation is modelled. '
+        + 'That is a gap in the pack rather than a decision by this file.');
+      return;
+    }
+    const instruments = pack.instruments || [];
+    for (const ob of layer.obligations) {
+      if (!ob || !ob.id) continue;
+      const named = [ob.instrument, ...(ob.also_instruments || [])].filter(Boolean);
+      const resolved = named.map((id) => instruments.find((x) => x && x.id === id)).filter(Boolean);
+      const metrics = (ob.metrics || []).filter((m) => M.has(m));
+      // Which levers sit under this obligation. Read out of the pack rather than listed by hand, so
+      // a lever added next month lands here without anybody remembering to.
+      const under = [];
+      for (const lv of pack.levers || []) {
+        if (!L.has(lv.id)) continue;
+        const touches = [...(lv.effects || []), ...(lv.side_effects || [])]
+          .some((e) => e && metrics.includes(e.target));
+        if (touches) under.push(lv.id);
+      }
+      under.sort();
+      O.set(ob.id, {
+        id: ob.id,
+        pack: ob,
+        instrumentLabel: resolved.length ? resolved[0].label : ob.instrument,
+        instrumentLabels: resolved.map((x) => x.label),
+        metrics,
+        leversUnder: under,
+        engaged: false,
+        atIssue: false,
+        engagedSinceDay: null,
+        atIssueSinceDay: null,
+        daysAtIssue: 0,
+        connected: true,
+        why: '',
+        atIssueWhy: '',
+        reading: null
+      });
+      for (const id of under) {
+        const rt = L.get(id);
+        if (rt && !rt.obligations.includes(ob.id)) rt.obligations.push(ob.id);
+      }
+    }
+    state.notes.push(`${O.size} international and statutory obligations from data/civic.json treaty_layer, `
+      + 'sitting over the levers rather than beside them. None of them is enactable and none of them '
+      + 'moves a metric.');
+    stepObligations(w, false);
+  }
+
+  /**
+   * Once a day. Cheap: nine records, one read model lookup each.
+   * @param advanceTime false on a load or a rebuild, where daysAtIssue must not tick and no
+   *        transition event may fire, because the transition already happened in the saved game.
+   */
+  function stepObligations(w, advanceTime = true) {
+    if (!O.size) return;
+    const day = dayOf(w);
+    let engaged = 0, atIssue = 0, daysTotal = 0;
+    const byForce = {};
+
+    for (const o of O.values()) {
+      const ob = o.pack;
+      const e = evalTrigger(w, ob.engaged_when);
+      const wasEngaged = o.engaged;
+      o.engaged = e.on;
+      o.connected = e.connected;
+      o.why = e.why;
+      o.reading = e.value != null ? { value: +e.value.toFixed(3), threshold: e.threshold ?? null } : null;
+      if (o.engaged && !wasEngaged) o.engagedSinceDay = day;
+      if (!o.engaged) o.engagedSinceDay = null;
+
+      // At issue is only meaningful while engaged. An obligation nobody is under cannot be strained.
+      const i = ob.at_issue_when ? evalTrigger(w, ob.at_issue_when) : { on: false, connected: true, why: '' };
+      const wasAtIssue = o.atIssue;
+      o.atIssue = !!(o.engaged && i.on);
+      o.atIssueWhy = i.why;
+      if (i.value != null) o.reading = { value: +i.value.toFixed(3), threshold: i.threshold ?? null };
+
+      if (o.atIssue) {
+        if (!wasAtIssue) {
+          o.atIssueSinceDay = day;
+          if (advanceTime) {
+            w.bus.emit('civic:obligation', {
+              obligationId: o.id, state: 'at-issue', instrument: o.instrumentLabel,
+              article: ob.article || '', force: ob.force,
+              binds: ob.binds || '', text: i.why || '',
+              levers: o.leversUnder.slice(),
+              date: w.clock.formatDate()
+            });
+          }
+        }
+        if (advanceTime) o.daysAtIssue++;
+      } else if (wasAtIssue) {
+        o.atIssueSinceDay = null;
+        if (advanceTime) {
+          w.bus.emit('civic:obligation', {
+            obligationId: o.id, state: 'eased', instrument: o.instrumentLabel,
+            article: ob.article || '', force: ob.force,
+            binds: ob.binds || '',
+            text: 'The indicator is back inside its band. The days it spent outside it are still on the record.',
+            daysAtIssue: o.daysAtIssue,
+            levers: o.leversUnder.slice(),
+            date: w.clock.formatDate()
+          });
+        }
+      }
+
+      if (o.engaged) engaged++;
+      if (o.atIssue) atIssue++;
+      daysTotal += o.daysAtIssue;
+      byForce[ob.force] = (byForce[ob.force] || 0) + 1;
+    }
+
+    publishObligations();
+    state.obligationSummary = {
+      total: O.size,
+      engaged,
+      atIssue,
+      daysAtIssue: daysTotal,
+      byForce,
+      note: (pack.treaty_layer && pack.treaty_layer.not_a_veto) || ''
+    };
+  }
+
+  function publishObligations() {
+    state.obligations = [...O.values()].map((o) => {
+      const ob = o.pack;
+      return {
+        id: o.id,
+        instrument: ob.instrument,
+        instrumentLabel: o.instrumentLabel,
+        alsoInstruments: o.instrumentLabels.slice(1),
+        article: ob.article || '',
+        obliges: ob.obliges || '',
+        force: ob.force,
+        binds: ob.binds || '',
+        bindsHere: ob.binds_here || '',
+        domesticRoute: ob.domestic_route || '',
+        doesNotDo: ob.what_it_does_not_do || '',
+        derivesFrom: (ob.derives_from || []).slice(),
+        modellingNote: ob.modelling_note || '',
+        handling: ob.handling || '',
+        source: ob.source,
+        confidence: ob.confidence,
+        engaged: o.engaged,
+        atIssue: o.atIssue,
+        connected: o.connected,
+        why: o.why,
+        atIssueWhy: o.atIssueWhy,
+        reading: o.reading,
+        daysAtIssue: o.daysAtIssue,
+        daysEngaged: o.engagedSinceDay == null ? 0 : Math.max(0, state.day - o.engagedSinceDay),
+        levers: o.leversUnder.slice(),
+        sim: ob.sim_ref || null
+      };
+    });
+  }
+
   /* ------------------------------------------------------------------ read models */
 
   function publishMetrics() {
@@ -805,6 +1033,7 @@ export function registerPolicy(world) {
         stalled: !!rt.stalled,
         conditions: rt.conditions.map((c) => c.label),
         restsOnPlayerAssumption: rt.restsOnPlayerAssumption,
+        obligations: rt.obligations.slice(),
         note: rt.note
       };
     }
@@ -875,6 +1104,13 @@ export function registerPolicy(world) {
         }));
       };
       state.metricCard = (id) => state.metrics[id] || null;
+      // The layer above, for one lever. Panels call this on a click, never in a tick.
+      state.obligationsFor = (leverId) => {
+        const rt = L.get(leverId);
+        if (!rt || !rt.obligations.length) return [];
+        const set = new Set(rt.obligations);
+        return state.obligations.filter((o) => set.has(o.id));
+      };
       state.leverCard = (id) => {
         const rt = L.get(id);
         const lv = packLever(id);
@@ -965,7 +1201,17 @@ export function registerPolicy(world) {
         connected: state.couplings.filter((c) => c.connected).length + '/' + state.couplings.length,
         trust: trust ? +trust.value.toFixed(3) : null,
         amenity: amenity ? +amenity.value.toFixed(3) : null,
-        moved
+        moved,
+        obligations: {
+          total: state.obligationSummary.total,
+          engaged: state.obligationSummary.engaged,
+          atIssue: state.obligationSummary.atIssue,
+          daysAtIssue: state.obligationSummary.daysAtIssue,
+          // The one number here that never comes back down. Named so a headless year shows it.
+          worst: [...O.values()].filter((o) => o.daysAtIssue > 0)
+            .sort((a, b) => b.daysAtIssue - a.daysAtIssue)
+            .slice(0, 2).map((o) => `${o.id}:${o.daysAtIssue}`)
+        }
       };
     },
 
@@ -989,6 +1235,9 @@ export function registerPolicy(world) {
         contributions: contributions.map((c) => [c.cid, c.leverId, c.kind, c.target, c.stated, c.realised, c.startDay, c.delayDays, c.rampDays, c.confidence, c.description, c.discovered ? 1 : 0, c.unwinding ? 1 : 0, c.unwindFrom, c.unwindDay, c.unwindHalfLife || 0, c.stallDays || 0, c.restsOnPlayerAssumption ? 1 : 0]),
         nudges: nudges.map((n) => [n.metric, n.delta, n.reason, n.source, n.halfLifeDays, n.day]),
         discoveries: state.discoveries.slice(0, 20),
+        // daysAtIssue is the one counter on this board that does not decay and does not reset, so
+        // it is the one a save has to carry or the whole property is a lie.
+        obligations: [...O.values()].map((o) => [o.id, o.daysAtIssue, o.engagedSinceDay, o.atIssueSinceDay]),
         seq
       };
     },
@@ -1023,6 +1272,14 @@ export function registerPolicy(world) {
       nudges.length = 0;
       for (const n of s.nudges || []) nudges.push({ metric: n[0], delta: n[1], reason: n[2], source: n[3], halfLifeDays: n[4], day: n[5] });
       state.discoveries = (s.discoveries || []).slice();
+      for (const [id, days, engagedSince, atIssueSince] of s.obligations || []) {
+        const o = O.get(id);
+        if (!o) continue;
+        o.daysAtIssue = days || 0;
+        o.engagedSinceDay = engagedSince != null ? engagedSince : null;
+        o.atIssueSinceDay = atIssueSince != null ? atIssueSince : null;
+        o.atIssue = atIssueSince != null;
+      }
       inbox.length = 0;
       for (const m of s.inbox || []) inbox.push(m);
       if (s.arrivals) arrivals.set(s.arrivals);

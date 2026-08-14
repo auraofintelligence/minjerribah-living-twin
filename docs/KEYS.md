@@ -73,6 +73,7 @@ Each of these opens its board and closes it again. `Escape` closes whatever is o
 | `I` | The island log | `src/ui/panels/notifications.js` |
 | `M` | The map: docked, then off; `Shift` + `M` for full screen | `src/ui/panels/map.js` |
 | `N` | Mute and unmute; `Shift` + `N` for the mixer | `src/audio/audio.js` |
+| `X` | The fine print: the Acts, and which of them bind one islander | `src/ui/panels/legislation.js` |
 | `?` | The arrival screens again, from the acknowledgement | `src/ui/panels/onboarding.js` |
 
 `T` is the surface the island opens as, so it is the only key in that table a person may never need
@@ -80,6 +81,12 @@ to press: on every visit after the first the noticeboard is already up, and the 
 bringing it back after it has been dismissed. `T`, `X` and `Z` were the three letters left after the
 camera rig, the bar, the boards and the info view alphabet had taken theirs, and `T` for today is the
 only one of the three that means anything.
+
+`X` took the second of those three and it means nothing either, which is worth writing down rather
+than dressing up. Every letter with a mnemonic was gone before that board existed: `L` is labels,
+`F` is the camera zooming out, `R` is it zooming in, and `A` is an info view. So the fine print
+board carries its meaning in its name and on the rail, and the key is just the next free letter. If
+a letter ever comes back, this is the board that should take it.
 
 `Y` is the odd one in that table, because it is the only board that is not a board: it is a sheet
 down the right hand side with the island still on screen beside it, since six of its seven sections

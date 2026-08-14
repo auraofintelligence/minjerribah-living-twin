@@ -284,6 +284,78 @@
             "one_line",
             "levers"
           ]
+        },
+        "off_world.instruments": {
+          "min_records": 12,
+          "record_required": [
+            "id",
+            "label",
+            "register",
+            "kind",
+            "what_it_does",
+            "source",
+            "confidence"
+          ]
+        },
+        "off_world.precedents": {
+          "min_records": 2,
+          "record_required": [
+            "id",
+            "label",
+            "register",
+            "what_happened",
+            "what_it_shows",
+            "source",
+            "confidence"
+          ]
+        },
+        "off_world.readings": {
+          "min_records": 3,
+          "record_required": [
+            "id",
+            "label",
+            "register",
+            "reading",
+            "rests_on",
+            "settling_test",
+            "source",
+            "confidence"
+          ]
+        },
+        "off_world.holders": {
+          "min_records": 6,
+          "record_required": [
+            "id",
+            "label",
+            "invented",
+            "kind",
+            "source",
+            "confidence"
+          ]
+        },
+        "off_world.proposals": {
+          "min_records": 4,
+          "record_required": [
+            "id",
+            "label",
+            "register",
+            "status",
+            "what_it_would_be",
+            "holder",
+            "what_it_would_oblige",
+            "modelled_on",
+            "settling_test",
+            "source",
+            "confidence"
+          ]
+        },
+        "off_world.not_here": {
+          "min_records": 4,
+          "record_required": [
+            "id",
+            "refused",
+            "why"
+          ]
         }
       },
       "references": [
@@ -368,9 +440,64 @@
           "why": "An instrument in an undeclared tier is filed under no heading and appears on no institution card."
         },
         {
+          "from": "off_world.readings[].rests_on",
+          "into": "data/civic.json#id",
+          "why": "A reading in the modelled register names the known records it rests on. Those span two arrays in this block, instruments and precedents, so this resolves against every id in the pack rather than against one array. A reading resting on nothing is an assertion wearing a label."
+        },
+        {
+          "from": "off_world.proposals[].modelled_on",
+          "into": "off_world.instruments[].id",
+          "why": "Every speculative instrument is lifted from a named real one, and that is what stops it being a wish. A modelled_on that resolves to nothing means the proposal has no anchor and the register has become decoration."
+        },
+        {
+          "from": "off_world.proposals[].holder",
+          "into": "off_world.holders[].id",
+          "why": "Who would hold a speculative instrument is the second of the three questions this register exists to answer, and the holder record is where the invented flag lives. A holder that resolves to nothing is an instrument attributed to nobody, which is how one quietly gets attributed to somebody real."
+        },
+        {
+          "from": "off_world.proposals[].lands_on",
+          "into": "levers[].id",
+          "why": "The one-way rule. This block may name a lever so that a proposal is concrete rather than abstract; no lever may name anything in this block. checks-offworld.mjs enforces the direction, and this entry makes sure the levers named are real ones."
+        },
+        {
+          "from": "off_world.never_attributed.bodies",
+          "into": "off_world.holders[].id",
+          "why": "The list of real bodies that may never hold anything speculative. A body named there with no holder record is a rule pointing at nobody."
+        },
+        {
           "from": "institutions[].decides_by",
           "into": "decision_postures.kinds{}",
           "why": "A body whose posture the pack has not declared would fall back to being drawn with an appetite meter, which is the exact fault this field was added to fix."
+        },
+        {
+          "from": "treaty_layer.obligations[].instrument",
+          "into": "instruments[].id",
+          "why": "An obligation names the instrument it comes out of. Pointed at nothing, the interface renders an obligation with no law behind it, which is the exact shape of an invented one."
+        },
+        {
+          "from": "treaty_layer.obligations[].also_instruments",
+          "into": "instruments[].id",
+          "why": "Three of the obligations rest on more than one instrument. The extras resolve or they are not there."
+        },
+        {
+          "from": "treaty_layer.obligations[].metrics",
+          "into": "metrics[].id",
+          "why": "This is how src/systems/civic/policy.js works out which levers sit under an obligation: any lever whose effects touch one of these metrics. A metric that does not exist silently empties that list, and the obligation reads as touching nothing."
+        },
+        {
+          "from": "treaty_layer.obligations[].derives_from",
+          "into": "treaty_layer.obligations[].id",
+          "why": "The chain from a treaty to the Australian statute that carries it is the point of the block. A broken link in it draws as a statute with no treaty behind it."
+        },
+        {
+          "from": "treaty_layer.obligations[].ecology_refs",
+          "into": "data/ecology.json#id",
+          "why": "The join between an international instrument and a bird the twin actually simulates. A ref that resolves to nothing joins the treaty layer to nothing."
+        },
+        {
+          "from": "treaty_layer.obligations[].sim_ref",
+          "into": "file",
+          "why": "An obligation claiming the twin already models what it is about has to name a file that exists."
         }
       ]
     },
@@ -809,7 +936,11 @@
         "bearing_scale",
         "life_events",
         "coverage",
-        "instruments"
+        "instruments",
+        "edge_types",
+        "edges",
+        "judgments",
+        "judgments_method"
       ],
       "collections": {
         "instruments": {
@@ -837,6 +968,51 @@
             "extractor",
             "reviewed_by",
             "reviewed_on"
+          ]
+        },
+        "edges": {
+          "min_records": 4,
+          "record_required": [
+            "id",
+            "type",
+            "title",
+            "what_it_is",
+            "how_it_stands_here",
+            "instruments",
+            "judgments",
+            "not_advice",
+            "source",
+            "locator",
+            "quote",
+            "confidence",
+            "status",
+            "asserts",
+            "extracted_at",
+            "extractor"
+          ]
+        },
+        "judgments": {
+          "min_records": 3,
+          "record_required": [
+            "id",
+            "case_name",
+            "citation",
+            "court",
+            "decided",
+            "what_was_argued",
+            "what_was_held",
+            "not_advice",
+            "neutral_note",
+            "source",
+            "source_url",
+            "locator",
+            "quote",
+            "verified_against",
+            "confidence",
+            "status",
+            "asserts",
+            "extracted_at",
+            "extractor"
           ]
         }
       }

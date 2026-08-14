@@ -568,19 +568,24 @@ export function measureDocument(pages) {
   // treaty this pack cites. A schedule announces itself on the page where it starts, so that is
   // where this counts them: a short line beginning with the word and its number, taken as a set so
   // a running header repeated on ninety pages counts once.
+  // Two forms, and they are trusted differently. "Schedule 2--International Covenant on Civil and"
+  // is a heading and nothing else looks like it, so one occurrence is enough. A bare "Schedule 2F"
+  // on its own line is usually a heading and sometimes a cross reference to another Act that
+  // happened to wrap, so it counts only when the document says it more than once, which a real
+  // schedule does because its number is printed again over its pages.
   const scheduleIds = new Set();
+  const bare = new Map();
   for (const p of pages) {
     for (const rawLine of p.split('\n')) {
       const l = tidy(rawLine);
       if (!l || l.length > 80) continue;
-      // The number has to end the line or be followed by the dash that opens a heading. Without
-      // that, "Schedule 1 to that Act" in a cross reference and a row of an endnote table both
-      // count, and the Income Tax Assessment Act 1997 comes back with fourteen schedules it does
-      // not have. A heading stands alone; a mention sits inside a sentence.
-      const m = /^Schedules?\s+([0-9]{1,3}[A-Z]{0,2})(?:--|\s*$)/.exec(l);
-      if (m) scheduleIds.add(m[1]);
+      const heading = /^Schedules?\s+([0-9]{1,3}[A-Z]{0,2})--/.exec(l);
+      if (heading) { scheduleIds.add(heading[1]); continue; }
+      const alone = /^Schedules?\s+([0-9]{1,3}[A-Z]{0,2})\s*$/.exec(l);
+      if (alone) bare.set(alone[1], (bare.get(alone[1]) || 0) + 1);
     }
   }
+  for (const [id, n] of bare) if (n >= 2) scheduleIds.add(id);
 
   return {
     pages: pages.length,
@@ -756,13 +761,15 @@ export function measureAll() {
       for (const s of m.schedule_ids || []) allSchedules.add(s);
       per.push({ volume: file.volume, pages: m.pages, contents_entries: m.contents_entries, contents_pages: m.contents_pages });
     }
-    // Schedules are the one part of the structure that is counted as a set rather than a sum,
-    // because a compilation split into twelve volumes prints "Schedule 1" in every volume that
-    // touches it, and adding those up says an Act has twenty-seven schedules when it has one.
-    // Where an Act numbers its schedules the set answers it; where it has a single unnumbered
-    // Schedule, as the Sex Discrimination Act 1984 does, the set is empty and the contents count
-    // stands.
-    if (allSchedules.size) structure.schedules = allSchedules.size;
+    // Schedules are counted twice over and the larger answer is taken, because each way of
+    // counting misses a different thing and neither can invent one. The contents misses a schedule
+    // whose entry wrapped onto a second line and fell outside the contents region, which is how the
+    // Australian Human Rights Commission Act 1986 came back with no schedules while carrying five,
+    // one of them the treaty this pack cites. The headings miss a schedule the Act does not number,
+    // as the Sex Discrimination Act 1984 does not. The set is unioned across volumes rather than
+    // summed, because a compilation in twelve volumes prints the same schedule number in several of
+    // them.
+    structure.schedules = Math.max(structure.schedules, allSchedules.size);
     const distinct = allProvisions.size;
     if (!per.length) continue;
     if (!titleOk) {
@@ -1436,7 +1443,11 @@ function packHeader(cat, refused, candidates, dropped, edgeWork) {
         + 'contents entry whose title wraps onto a second line can be missed, and an Act that numbers '
         + 'items inside a schedule has those counted too. On the Constitution the method finds 132 of '
         + 'the 137 provisions it lists, which is the size of the error to expect. Nothing here should '
-        + 'be quoted as the number of sections in an Act; it is a measure of how much there is to read.',
+        + 'be quoted as the number of sections in an Act; it is a measure of how much there is to read. '
+        + 'Schedules are counted twice over, once from the contents and once from the headings that open '
+        + 'them, and the larger answer is taken, because a wrapped contents entry hides a schedule and an '
+        + 'Act that does not number its schedule has no heading to find. Where a reprint sets its contents '
+        + 'in two columns nothing is counted from it at all and the record says so.',
       registers: Object.fromEntries(Object.entries(REGISTERS).map(([k, v]) => [k, {
         label: v.label, publisher: v.publisher, licence_note: v.licence_note
       }]))

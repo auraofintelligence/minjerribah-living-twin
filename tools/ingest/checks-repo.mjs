@@ -181,7 +181,14 @@ export function runSpellingCheck(ctx) {
         if (/^(id|url|source|href|file|path|checksum|slug)$/.test(key)) continue;
         // A verbatim quote is the source's prose, not this project's. Correcting a council's
         // spelling inside quotation marks would be worse than carrying it.
-        if (/^(quote|excerpt|verbatim|context)$/.test(key)) continue;
+        //
+        // `heading` is on this list for the same reason and it earned its place: the legislation
+        // lane records the heading printed over a provision, character for character, so that a
+        // section number can be confirmed against the words above it. The Australian Human Rights
+        // Commission Act 1986 schedules the text of a United Nations covenant, whose headings are
+        // spelled the way that body spells them, and a check that fails on that is asking this
+        // project to correct the spelling of a treaty inside a Commonwealth Act.
+        if (/^(quote|excerpt|verbatim|context|heading)$/.test(key)) continue;
         if (!/\s/.test(value)) continue;
         for (const [rx, want] of AMERICAN) {
           rx.lastIndex = 0;

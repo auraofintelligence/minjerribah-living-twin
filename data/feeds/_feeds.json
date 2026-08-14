@@ -1,7 +1,7 @@
 {
   "pack": "_feeds",
   "schema": "minjerribah-connector-feed-index/1",
-  "generated": "2026-08-10",
+  "generated": "2026-08-14",
   "about": "One entry per feed a connector has written. The checksum is over the feed file as it stands, so a hand edit shows up as a mismatch when tools/connectors/verify.mjs runs. Feeds are not data packs: data/_provenance.json is the registry for those.",
   "feeds": [
     {
@@ -80,6 +80,37 @@
         "value": "283bed87d30e78c1e48b8145553ff1c1ca4129211cdee89311045fd867d20656"
       },
       "bytes": 78299
+    },
+    {
+      "id": "weather",
+      "file": "data/feeds/_weather.json",
+      "title": "Weather and sea state for the island, as model output",
+      "organisation": "Open-Meteo",
+      "runtime_read": true,
+      "synced_at": "2026-08-14T15:40:51+10:00",
+      "source": {
+        "kind": "http-endpoint",
+        "id": "open-meteo",
+        "commit": null,
+        "commit_date": null
+      },
+      "cadence": {
+        "every": "hourly while anybody is looking at a live island, and before any session that opens in live",
+        "run_by": "a scheduled job on the machine that publishes the build, or a person before a demonstration",
+        "reason": "The source updates roughly every fifteen minutes and the shortest shelf life on any field here is twenty-five minutes, for rain. An hourly sync keeps the slow fields inside their limits and lets the fast ones fall out of them honestly, which is the behaviour to want: a rain figure that goes quiet after half an hour is better than one that keeps talking."
+      },
+      "stale_after_days": 1,
+      "counts": {
+        "readings": 15,
+        "kept": 2,
+        "held": 0,
+        "endpoints": 2
+      },
+      "checksum": {
+        "algorithm": "sha256-lf",
+        "value": "02107e2cfd88c079b9c0d9bdbd6cd9e16eabc11b9fa92b7b3286cd9e538a9d48"
+      },
+      "bytes": 17798
     },
     {
       "id": "wildlife-rescue",

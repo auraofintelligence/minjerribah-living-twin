@@ -140,6 +140,70 @@ work should follow, when the owner calls a wave.
    systems, not backdrops. A high fire-danger day closes tracks, and that closure policy is itself
    testable. Historical weather arrives as committed packs; generated weather is seeded.
 
+## The third register, built: the off-world one
+
+Item 6 said claims wear labels and named three registers. Until 14 August 2026 nothing in the
+repository was in the third one, so the rule had never been tested by anything. It is now, in
+`data/civic.json` under `off_world`, and this section records what was decided so that a later wave
+extends it rather than rediscovering it.
+
+**The subject is real and the question is a real one.** The treaty layer in the civic pack answers a
+question for a bird: an obligation made above the Australian state reaches down to a mudflat on the
+western flats and binds what may be done to it. The off-world register asks the same question one
+tier up. If this island ever had to answer to an authority above the nation state, what would the
+instrument be, who would hold it, and what would it oblige. Two working answers already exist over
+places on this planet, the Antarctic Treaty System and the seabed authority under Part XI, and
+Australia is a party to both. Australia is also one of a very small number of states party to the
+Moon Agreement, whose common heritage rule pulls against the Artemis Accords it was a founding
+signatory of. None of that is invented, all of it is cited, and it is what makes the speculative half
+worth having instead of whimsy.
+
+**Five rules, and the fifth is the one that makes the rest safe.**
+
+1. Off by default. A person turns it on and can turn it off. While it is off there is no eighth tab,
+   no marker, no record and no number anywhere in the build that differs.
+2. It changes nothing in the default island state.
+3. It is visually distinct from the first pixel: known and modelled are solid rules, speculative is
+   dashed and hatched, and the marker rides on every card rather than on the column heading. Colour
+   alone would not do it, because a reader who cannot separate purple from green would be reading an
+   invented instrument as a statute.
+4. No speculative instrument is ever attributed to a real body. Invented offices are named as
+   invented and hold nothing. A speculative power handed to a real regulator is a false claim about
+   that regulator, and it is the specific way a register like this goes bad: the invented part
+   borrows a real name's credibility.
+5. **The one-way rule, and it is executable.** The register may name a lever, so a proposal is
+   concrete rather than abstract. Nothing in the default island state may name the register.
+   `tools/ingest/checks-offworld.mjs` fails the gate on any string outside the block that resolves to
+   an id inside it, and on a proposal whose holder is a real body, on a speculative record with no
+   settling test, and on a pack that sets `default_state` to anything but off. That direction is the
+   only version of "turning it on changes no number" a machine can keep, and rule 2 rests on it
+   rather than on anybody's good intentions.
+
+**What it refuses, by name, because a register set above the nation state is where these arrive
+first.** An instrument that freezes claims over this island on the Antarctic model: refused, because
+native title here was determined by the Federal Court in 2011 and is not a hypothetical for a
+simulation to reason with. Anything cultural at any tier: refused, and the `data/lore.json`
+prohibitions run over this block exactly as over every other. Defence, security and anything with an
+enemy in it: refused, on the standing constraint at the end of this document, and the owner's own
+defence-adjacent space work is deliberately not imported. Dates, probabilities and anything reading
+as a forecast: refused. A launch site, spaceport or ground station on the island: refused, because
+nobody has proposed one and inventing a proposal to model its consequences is how a plan becomes a
+fact by being modelled.
+
+**One design decision worth keeping.** A speculative record still carries a confidence rating,
+because every record in every pack does, and the rating had to be honest without being useless. It
+rates the real instrument the proposal was lifted from, never the proposal, and each record says so
+in `confidence_is_about` and the panel prints that line under the footer. The alternative was to rate
+speculative records low, which would have been true in one sense and would have collided with the
+rule that low confidence is never shown to a player, and would have taught a reader that speculative
+and unverified are the same thing. They are not: unverified means nobody checked, and speculative
+means it verifiably does not exist.
+
+**For a later wave.** Extending the register means adding an instrument that does not exist, lifted
+from a named one that does, held by an invented office, with the test that would settle it. It does
+not mean giving any of it an effect. The moment a speculative instrument moves a number, the register
+has stopped being a register, and the check will say so before a critic does.
+
 ## The economic layer
 
 The twin already carries the shape that matters, in `src/systems/economy/chour.js`: a ledger that is
