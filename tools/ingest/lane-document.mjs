@@ -194,8 +194,15 @@ if (RAN_DIRECTLY) {
     const docs = Object.values(reg.documents || {});
     if (!docs.length) console.log('No documents registered.');
     for (const d of docs) {
-      console.log(`${d.id}\n  ${d.title}\n  ${d.publisher}${d.published ? ', ' + d.published : ''}, ${d.pages} pages`);
-      console.log(`  ${d.local_path}\n  sha256 ${d.sha256.slice(0, 16)} read ${d.read_on}`);
+      // The register is shared: the map lane also writes here, and its entries carry placemarks
+      // rather than pages and no sha256, because the staged KML is not committed. List what an
+      // entry actually has rather than crashing on what it does not.
+      const size = d.pages != null ? `${d.pages} pages`
+        : d.placemarks != null ? `${d.placemarks} placemarks`
+          : 'size not recorded';
+      console.log(`${d.id}\n  ${d.title}\n  ${d.publisher}${d.published ? ', ' + d.published : ''}, ${size}`);
+      const hash = d.sha256 ? `sha256 ${d.sha256.slice(0, 16)}` : 'no sha256 recorded';
+      console.log(`  ${d.local_path}\n  ${hash} read ${d.read_on}`);
     }
     process.exit(0);
   }

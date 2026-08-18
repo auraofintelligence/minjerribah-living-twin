@@ -6,7 +6,7 @@
   "organisation": "Quandamooka Country Events Engine, and through it the listing sources it names",
   "about": "Publicly listed island events, read from a local checkout of the events engine. The source publishes its own last search date and its own draft flag, and both are carried through rather than replaced with a judgement of ours. Cultural events are carried as date, place and listing source only, and are flagged for a human.",
   "sync": {
-    "synced_at": "2026-08-10T05:28:27+10:00",
+    "synced_at": "2026-08-18T12:18:45+10:00",
     "connector": {
       "id": "events-engine",
       "version": "1.0"
@@ -33,8 +33,8 @@
     },
     "source_last_public_search": "3 July 2026",
     "source_search_anchor": "2026-07-03",
-    "source_search_age_days": 38,
-    "checkout_age_days": 38,
+    "source_search_age_days": 46,
+    "checkout_age_days": 46,
     "checkout_is_behind_cadence": true,
     "publication_boundary": "quandamooka-country-events-engine/docs/PUBLIC_BOUNDARY.md is treated as blocking by this connector. Its keep-private list includes sensitive cultural material, protected places, unapproved images or names, and incident details that identify people. None of that enters through here, whatever the data file happens to contain.",
     "cadence": {
@@ -99,10 +99,10 @@
   "records": [
     {
       "id": "qcee-paula-boo-coil-workshop-winter-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[0], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Coil Workshop, 30 June and 7 July 2026, Paula Boo Studios. Listed by Visit Redlands Coast.",
@@ -137,17 +137,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-paula-boo-twist-weave-workshop-winter-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[1], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Twist Weave Workshop, 1 and 8 July 2026, Paula Boo Studios. Listed by Visit Redlands Coast.",
@@ -182,17 +182,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-paula-boo-alternate-weave-workshop-winter-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[2], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Alternate Weave Workshop, 2 and 9 July 2026, Paula Boo Studios. Listed by Visit Redlands Coast.",
@@ -227,17 +227,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-tones-and-tides-point-lookout-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[3], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Tones and Tides: Point Lookout, 4 July 2026, Point Lookout Community Hall. Listed by Redlands Coast.",
@@ -272,17 +272,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-redlands-coast-naidoc-cultural-celebration-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[4], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Redlands Coast NAIDOC Cultural Celebration 2026, 5 July 2026, Raby Bay Harbour Park. Listed by Visit Redlands Coast and Redland City Council.",
@@ -311,17 +311,17 @@
       "cultural_handling": "Carried as civic load only: the date, the place, and who listed it, exactly as advertised. No programme, no description, no protocol, no meaning. This record is flagged for a human to read before it is promoted into any pack, and nothing about it may be inferred.",
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-stradbroke-chamber-music-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[5], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Stradbroke Chamber Music Festival, 17-19 July 2026, Point Lookout Community Hall. Listed by SeaLink and festival program.",
@@ -355,17 +355,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-stradbroke-island-hostplus-cup-game-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[6], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Stradbroke Island Hostplus Cup Game, 18 July 2026, Ron Stark Oval. Listed by Visit Brisbane and tourism listings.",
@@ -400,17 +400,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-queensland-young-people-quandamooka-country-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[7], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Queensland Young people: Join us on Quandamooka Country!, 18-19 July 2026, Minjerribah Camping Ground. Listed by Humanitix.",
@@ -439,17 +439,17 @@
       "cultural_handling": "Carried as civic load only: the date, the place, and who listed it, exactly as advertised. No programme, no description, no protocol, no meaning. This record is flagged for a human to read before it is promoted into any pack, and nothing about it may be inferred.",
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-travla-hoedown-party-cruise-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[8], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Party Cruise - Journey to the travla Hoedown at The Straddie Hotel, 25 July 2026, SeaLink Ferry to The Straddie Hotel. Listed by SeaLink North Stradbroke Island.",
@@ -484,17 +484,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-goompi-naidoc-community-film-celebration-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[9], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Goompi NAIDOC 2026 - Community Film Celebration, 31 July 2026, Dunwich State School Oval. Listed by Redlands Coast and MMEIC.",
@@ -523,17 +523,17 @@
       "cultural_handling": "Carried as civic load only: the date, the place, and who listed it, exactly as advertised. No programme, no description, no protocol, no meaning. This record is flagged for a human to read before it is promoted into any pack, and nothing about it may be inferred.",
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-nature-art-retreat-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[10], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Nature Art Retreat, 13-15 August 2026, Soul Lodge, Amity. Listed by Humanitix.",
@@ -567,17 +567,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-straddie-arts-trail-next",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[11], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Straddie Arts Trail, 13-16 August 2026, Across the whole island. Listed by Visit Redlands Coast and iam Straddie.",
@@ -612,17 +612,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-quandamooka-festival-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[12], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Quandamooka Festival, 29-30 August 2026, QUAMPI Arts and Culture Centre. Listed by SeaLink and official visitor listing.",
@@ -651,17 +651,17 @@
       "cultural_handling": "Carried as civic load only: the date, the place, and who listed it, exactly as advertised. No programme, no description, no protocol, no meaning. This record is flagged for a human to read before it is promoted into any pack, and nothing about it may be inferred.",
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-straddie-invitational-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[13], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Straddie Invitational, 16-18 October 2026, Main Beach, Point Lookout. Listed by SeaLink event listing.",
@@ -696,17 +696,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-island-vibe-pattern",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[14], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "proposed",
       "quote": "Island Vibe Festival, Annual last weekend of October; 2026 date to confirm, Point Lookout Oval / Home Beach precinct. Listed by Island Vibe official site.",
@@ -741,17 +741,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-straddie-oyster-festival-next",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[15], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "proposed",
       "quote": "Straddie Oyster Festival, 2026 date to confirm, Ron Stark Oval, Dunwich. Listed by SeaLink event page and Straddie Sharks link.",
@@ -786,17 +786,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-point-lookout-markets-pattern",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[16], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Point Lookout Markets, Every second Sunday, about 8am-midday, Point Lookout Bowls Club. Listed by SeaLink and Point Lookout Bowls Club.",
@@ -831,17 +831,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-bowlsie-wednesday-trivia-pattern",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[17], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Wednesday Nights @ The Bowlsie, Every Wednesday, with trivia from 7pm, Point Lookout Bowls Club. Listed by Point Lookout Bowls Club.",
@@ -876,17 +876,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-stitching-stories-pattern",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[18], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Stitching Stories, Every second Saturday of the month, 10am-1pm, North Stradbroke Island Museum on Minjerribah verandah. Listed by North Stradbroke Island Museum on Minjerribah.",
@@ -915,17 +915,17 @@
       "cultural_handling": "Carried as civic load only: the date, the place, and who listed it, exactly as advertised. No programme, no description, no protocol, no meaning. This record is flagged for a human to read before it is promoted into any pack, and nothing about it may be inferred.",
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-open-studio-days-pattern",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[19], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Open Studio Days, Dates to confirm / by appointment pattern, Paula Boo Studios, Point Lookout. Listed by Official North Stradbroke Island visitor listing.",
@@ -959,17 +959,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-grass-roots-live-music-pattern",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[20], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Grass Roots Live Music, First Sunday of every month, 2pm-5pm, Straddie Brewing Co rooftop deck. Listed by Stradbroke Island visitor listing and Straddie Brewing Co.",
@@ -1004,17 +1004,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-straddievarious-philip-farley-exhibition-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[21], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Straddievarious Gallery: Philip Farley Earth, Sea and Sky Exhibition, 16 May-28 June 2026, Straddievarious Gallery. Listed by Visit Redlands Coast.",
@@ -1049,17 +1049,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-tones-and-tides-dunwich-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[22], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Tones and Tides: Dunwich, 28 June 2026, Dunwich Community Hall. Listed by Redlands Coast.",
@@ -1094,17 +1094,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-pig-day-out-stradbroke-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[23], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Pig Day Out Stradbroke Island, 27 June 2026, Little Ship Club. Listed by Visit Redlands Coast and Little Ship Club.",
@@ -1139,17 +1139,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-north-stradbroke-emergencyredi-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[24], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "North Stradbroke Island Australian Red Cross EmergencyRedi Workshop, 17 June 2026, Dunwich Community Hall. Listed by Eventbrite and Australian Red Cross.",
@@ -1184,17 +1184,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-amity-community-day-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[25], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Amity Point Community Day, 13 June 2026, Amity Point Community Club. Listed by Amity Point Community Club.",
@@ -1229,17 +1229,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-many-hands-making-reflection-zone-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[26], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Many Hands, Making and Reflection Zone, 28 April-9 June 2026, Redland Art Gallery. Listed by Visit Redlands Coast.",
@@ -1274,17 +1274,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-reef-and-beef-open-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[27], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Reef & Beef 2026 Open Competition, 6-7 June 2026, Point Lookout Bowls Club. Listed by Point Lookout Bowls Club.",
@@ -1319,17 +1319,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-australian-eagles-live-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[28], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "The Australian Eagles Show, 6 June 2026, Little Ship Club. Listed by Little Ship Club social calendar.",
@@ -1364,17 +1364,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-gallery-museum-hop-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[29], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Redlands Coast Gallery and Museum Hop, 23-24 May 2026, Island and mainland venues, including NSI Museum, Salt Water Murris and QUAMPI. Listed by Visit Redlands Coast.",
@@ -1408,17 +1408,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-straddie-stories-workshops-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[30], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Straddie Stories: Collage Workshop, Series through 22 May 2026, Paula Boo Studios, Point Lookout. Listed by Humanitix and Visit Redlands Coast.",
@@ -1453,17 +1453,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-straddie-salute-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[31], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Straddie Salute Triathlon Festival, 15-17 May 2026, Point Lookout and island course areas. Listed by Straddie Salute, AusTriathlon and Visit Redlands Coast.",
@@ -1498,17 +1498,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-caxton-classic-golf-tournament-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[32], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Caxton Classic Golf Tournament, 16 May 2026, North Stradbroke Island Golf Course and Straddie Brewing Co. Listed by Stradbroke Island visitor listing and Straddie Brewing Co.",
@@ -1543,17 +1543,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-goompi-heritage-walk-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[33], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Goompi / Dunwich Heritage Walk, 15 May 2026, North Stradbroke Island Museum on Minjerribah. Listed by Visit Redlands Coast and Stradbroke Island visitor listing.",
@@ -1582,17 +1582,17 @@
       "cultural_handling": "Carried as civic load only: the date, the place, and who listed it, exactly as advertised. No programme, no description, no protocol, no meaning. This record is flagged for a human to read before it is promoted into any pack, and nothing about it may be inferred.",
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-straddie-sharks-easter-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[34], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Straddie Sharks Easter Carnival, 4 April 2026, Ron Stark Oval, Dunwich. Listed by Straddie Sharks and Visit Redlands Coast.",
@@ -1627,17 +1627,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-little-ship-game-classic-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[35], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Little Ship Club Garmin Game Classic & Reef Rumble, 27-29 March 2026, Little Ship Club and Moreton Bay offshore grounds. Listed by Little Ship Club Game Fishing Club.",
@@ -1672,17 +1672,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-art-teacher-camp-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[36], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Art Teacher Camp, 6-8 March 2026, Point Lookout Community Hall and QUAMPI visit. Listed by Humanitix.",
@@ -1717,17 +1717,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-clean-up-straddie-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[37], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Clean Up Straddie, 1 March 2026, Island-wide registration points in Point Lookout, Amity and Dunwich. Listed by Straddie Brewing Co.",
@@ -1762,17 +1762,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-arthur-mobsby-seafood-spectacular-2026",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js events[38], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "quote": "Arthur Mobsby Seafood Spectacular, 17 January 2026, Little Ship Club. Listed by Stradbroke Island visitor listing and Little Ship Club.",
@@ -1807,17 +1807,17 @@
       "cultural_handling": null,
       "handling": "A listing, not a confirmation. The source itself says to confirm dates, permissions and contacts with the responsible body before use, and that sentence is on this feed.",
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-0",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[0], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -1828,17 +1828,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-1",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[1], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -1849,17 +1849,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-2",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[2], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -1870,17 +1870,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-3",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[3], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -1891,17 +1891,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-4",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[4], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -1912,17 +1912,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-5",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[5], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -1933,17 +1933,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-6",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[6], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -1954,17 +1954,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-7",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[7], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -1975,17 +1975,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-8",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[8], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -1996,17 +1996,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-9",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[9], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2017,17 +2017,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-10",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[10], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2038,17 +2038,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-11",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[11], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2059,17 +2059,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-12",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[12], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2080,17 +2080,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-13",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[13], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2101,17 +2101,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-14",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[14], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2122,17 +2122,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-15",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[15], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2143,17 +2143,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-16",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[16], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2164,17 +2164,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-17",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[17], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2185,17 +2185,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-18",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[18], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2206,17 +2206,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-19",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[19], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2227,17 +2227,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-20",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[20], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2248,17 +2248,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-21",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[21], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2269,17 +2269,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-22",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[22], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2290,17 +2290,17 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
     },
     {
       "id": "qcee-place-23",
-      "source": "feed:events-engine@2026-08-10T05:28:27+10:00",
+      "source": "feed:events-engine@2026-08-18T12:18:45+10:00",
       "locator": "quandamooka-country-events-engine/assets/site-data.js places[23], commit 3bb21b632",
       "confidence": "medium",
-      "extracted_at": "2026-08-10",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-events-engine/1.0",
       "status": "committed",
       "kind": "event-place",
@@ -2311,7 +2311,7 @@
         "https://auraofintelligence.github.io/quandamooka-country-events-engine/"
       ],
       "freshness": {
-        "synced_at": "2026-08-10T05:28:27+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 21,
         "source_commit": "3bb21b632de85bc6fb2b9004aa9f9c13f843fd32"
       }
@@ -2322,7 +2322,7 @@
     {
       "id": "qcee-want-pull",
       "what": "A pull of the source repository before every sync.",
-      "why_it_matters": "The checkout read here is 38 day(s) old. That repository refreshes its public event sources roughly weekly, so a stale checkout produces a stale calendar that looks current.",
+      "why_it_matters": "The checkout read here is 46 day(s) old. That repository refreshes its public event sources roughly weekly, so a stale checkout produces a stale calendar that looks current.",
       "who_would_have_to_agree": "Nobody. It is one git pull, and this connector reports the age every run.",
       "how_small_it_could_start": "It already does. This entry exists so the number is on the feed and not only in a terminal."
     },

@@ -139,6 +139,15 @@ node tools/headless.mjs --system koala
 If it fails it names the system that diverged. That is almost always `Math.random`, `Date.now`,
 or iterating a `Set` whose insertion order depends on something unstable.
 
+## The board
+
+`docs/board/` is the agents' noticeboard, and `node tools/board.mjs list` is the first command of
+any session and the last. One note per file so parallel agents never clobber each other;
+`docs/board/README.md` is the protocol. The rule it enforces: **a finding that lives only in a
+transcript is treated as never made.** If you found something you cannot fix in your slice, post it.
+If you are starting work, read what is open first: the board is where the last agent left you their
+unfinished sentences.
+
 ## The debug handle
 
 `window.TWIN` on the running page:

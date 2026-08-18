@@ -116,6 +116,12 @@ When in doubt, fail it and name the gap.
 
 ## Reporting
 
+Before your verdict, run `node tools/board.mjs list` and check whether anything open bears on your
+slice; a critic who fails a build for a defect the board already carries as taken is wasting a round.
+After your verdict, post to the board every finding that will not be fixed inside this wave, because
+your full report otherwise dies in a transcript, and that has already cost this project a diagnosed
+bug shipping and the owner hitting it himself.
+
 Return the structured verdict you were given a schema for. In `biggestGap`, write the instruction you
 would give the builder, in the imperative, one sentence. In `evidence`, quote the actual probe values or
 describe the actual screenshot. Never write "appears to" or "should". You either saw it or you did not.

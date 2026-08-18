@@ -8,7 +8,7 @@
   "runtime_note": "Read by the running twin off its own origin at boot, never fetched at runtime, and never promoted into a data pack. A pack is a durable claim; this is a moment with a shelf life.",
   "about": "What a weather model has for the grid cells nearest this island, fetched as an offline step and committed as a file. It is model output and never an observation, it carries the moment it was modelled for as well as the moment it was fetched, and each reading carries its own shelf life in minutes because an hour-old temperature is fine and an hour-old rain figure is not. The running twin reads this only while its clock is live.",
   "sync": {
-    "synced_at": "2026-08-14T15:40:51+10:00",
+    "synced_at": "2026-08-18T12:18:45+10:00",
     "connector": {
       "id": "weather",
       "version": "1.0"
@@ -34,8 +34,8 @@
     "licence": "CC BY 4.0",
     "attribution": "Weather data by Open-Meteo.com, CC BY 4.0",
     "modelled_for": {
-      "land": "2026-08-14T15:30",
-      "marine": "2026-08-14T15:30"
+      "land": "2026-08-18T12:15",
+      "marine": "2026-08-18T12:15"
     },
     "basis": "model",
     "basis_note": "Model output for a grid cell. Not a reading from an instrument at Point Lookout. The word observed is not used anywhere in this feed and must not be used anywhere it surfaces.",
@@ -64,13 +64,13 @@
   "records": [
     {
       "id": "openmeteo-land",
-      "source": "feed:weather@2026-08-14T15:40:51+10:00",
-      "locator": "api.open-meteo.com current, modelled for 2026-08-14T15:30 GMT+10",
+      "source": "feed:weather@2026-08-18T12:18:45+10:00",
+      "locator": "api.open-meteo.com current, modelled for 2026-08-18T12:15 GMT+10",
       "confidence": "medium",
-      "extracted_at": "2026-08-14",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-weather/1.0",
       "status": "committed",
-      "quote": "{\"time\":\"2026-08-14T15:30\",\"interval\":900,\"temperature_2m\":19.4,\"apparent_temperature\":16.9,\"relative_humidity_2m\":55,\"precipitation\":0,\"wind_speed_10m\":17.5,\"wind_direction_10m\":150,\"wind_gusts_10m\":41,\"cloud_cover\":0,\"surface_pressure\":1018.4}",
+      "quote": "{\"time\":\"2026-08-18T12:15\",\"interval\":900,\"temperature_2m\":19.7,\"apparent_temperature\":16.4,\"relative_humidity_2m\":55,\"precipitation\":0.1,\"wind_speed_10m\":24.3,\"wind_direction_10m\":134,\"wind_gusts_10m\":53.6,\"cloud_cover\":22,\"surface_pressure\":1025.8}",
       "asserts": "real_world",
       "kind": "weather-model-output",
       "name": "Open-Meteo land model output near Point Lookout",
@@ -85,7 +85,7 @@
       "provider_url": "https://open-meteo.com/",
       "endpoint": "https://api.open-meteo.com/v1/forecast?latitude=-27.43&longitude=153.54&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,surface_pressure&timezone=Australia%2FBrisbane",
       "retrieved_by": "fetched from the endpoint above",
-      "modelled_for": "2026-08-14T15:30",
+      "modelled_for": "2026-08-18T12:15",
       "modelled_for_timezone": "Australia/Brisbane",
       "interval_seconds": 900,
       "lat": -27.522,
@@ -102,9 +102,9 @@
         {
           "field": "tempC",
           "from": "temperature_2m",
-          "value": 19.4,
+          "value": 19.7,
           "unit": "°C",
-          "source_value": 19.4,
+          "source_value": 19.7,
           "source_unit": "°C",
           "stale_after_minutes": 180,
           "stale_after_reason": "Air temperature follows the sun and takes hours to move a useful amount."
@@ -112,9 +112,9 @@
         {
           "field": "apparentC",
           "from": "apparent_temperature",
-          "value": 16.9,
+          "value": 16.4,
           "unit": "°C",
-          "source_value": 16.9,
+          "source_value": 16.4,
           "source_unit": "°C",
           "stale_after_minutes": 180,
           "stale_after_reason": "It is built from temperature, humidity and wind, so it moves no faster than the slowest of them."
@@ -132,9 +132,9 @@
         {
           "field": "rainMmHr",
           "from": "precipitation",
-          "value": 0,
+          "value": 0.1,
           "unit": "mm/h",
-          "source_value": 0,
+          "source_value": 0.1,
           "source_unit": "mm",
           "stale_after_minutes": 25,
           "stale_after_reason": "Rain here arrives in cells. Half an hour is the difference between a wet road and a dry one."
@@ -142,9 +142,9 @@
         {
           "field": "windKt",
           "from": "wind_speed_10m",
-          "value": 9.449,
+          "value": 13.121,
           "unit": "kt",
-          "source_value": 17.5,
+          "source_value": 24.3,
           "source_unit": "km/h",
           "stale_after_minutes": 90,
           "stale_after_reason": "The nor'easter builds and drops over about two hours, so ninety minutes is roughly half a turn of it."
@@ -152,9 +152,9 @@
         {
           "field": "windDirDeg",
           "from": "wind_direction_10m",
-          "value": 150,
+          "value": 134,
           "unit": "°",
-          "source_value": 150,
+          "source_value": 134,
           "source_unit": "°",
           "stale_after_minutes": 90,
           "stale_after_reason": "The direction turns with the sea breeze on the same clock as the speed."
@@ -162,9 +162,9 @@
         {
           "field": "gustKt",
           "from": "wind_gusts_10m",
-          "value": 22.138,
+          "value": 28.942,
           "unit": "kt",
-          "source_value": 41,
+          "source_value": 53.6,
           "source_unit": "km/h",
           "stale_after_minutes": 45,
           "stale_after_reason": "A gust figure is the peak over the interval it was measured in, and it is the number that decides whether a barge master sails."
@@ -172,9 +172,9 @@
         {
           "field": "cloud",
           "from": "cloud_cover",
-          "value": 0,
+          "value": 0.22,
           "unit": "fraction 0 to 1",
-          "source_value": 0,
+          "source_value": 22,
           "source_unit": "%",
           "stale_after_minutes": 90,
           "stale_after_reason": "Cloud makes and clears in an hour on a storm day, and holds all afternoon on a ridge day."
@@ -182,9 +182,9 @@
         {
           "field": "pressure",
           "from": "surface_pressure",
-          "value": 1018.4,
+          "value": 1025.8,
           "unit": "hPa",
-          "source_value": 1018.4,
+          "source_value": 1025.8,
           "source_unit": "hPa",
           "stale_after_minutes": 360,
           "stale_after_reason": "Surface pressure is a synoptic-scale number. Six hours of it is one small step on a chart."
@@ -196,22 +196,22 @@
         "https://api.open-meteo.com/v1/forecast?latitude=-27.43&longitude=153.54&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,surface_pressure&timezone=Australia%2FBrisbane"
       ],
       "freshness": {
-        "synced_at": "2026-08-14T15:40:51+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 1,
         "source_commit": null,
-        "observed_at": "2026-08-14T15:30",
+        "observed_at": "2026-08-18T12:15",
         "interval_seconds": 900
       }
     },
     {
       "id": "openmeteo-marine",
-      "source": "feed:weather@2026-08-14T15:40:51+10:00",
-      "locator": "marine-api.open-meteo.com current, modelled for 2026-08-14T15:30 GMT+10",
+      "source": "feed:weather@2026-08-18T12:18:45+10:00",
+      "locator": "marine-api.open-meteo.com current, modelled for 2026-08-18T12:15 GMT+10",
       "confidence": "medium",
-      "extracted_at": "2026-08-14",
+      "extracted_at": "2026-08-18",
       "extractor": "connector-weather/1.0",
       "status": "committed",
-      "quote": "{\"time\":\"2026-08-14T15:30\",\"interval\":900,\"wave_height\":1.1,\"wave_period\":6.8,\"wave_direction\":146,\"swell_wave_height\":1,\"swell_wave_period\":5.6,\"swell_wave_direction\":149}",
+      "quote": "{\"time\":\"2026-08-18T12:15\",\"interval\":900,\"wave_height\":1.74,\"wave_period\":7.4,\"wave_direction\":121,\"swell_wave_height\":1.06,\"swell_wave_period\":7.45,\"swell_wave_direction\":134}",
       "asserts": "real_world",
       "kind": "marine-model-output",
       "name": "Open-Meteo marine model output off Point Lookout",
@@ -226,7 +226,7 @@
       "provider_url": "https://open-meteo.com/",
       "endpoint": "https://marine-api.open-meteo.com/v1/marine?latitude=-27.43&longitude=153.56&current=wave_height,wave_period,wave_direction,swell_wave_height,swell_wave_period,swell_wave_direction&timezone=Australia%2FBrisbane",
       "retrieved_by": "fetched from the endpoint above",
-      "modelled_for": "2026-08-14T15:30",
+      "modelled_for": "2026-08-18T12:15",
       "modelled_for_timezone": "Australia/Brisbane",
       "interval_seconds": 900,
       "lat": -27.4583,
@@ -243,9 +243,9 @@
         {
           "field": "swellM",
           "from": "wave_height",
-          "value": 1.1,
+          "value": 1.74,
           "unit": "m",
-          "source_value": 1.1,
+          "source_value": 1.74,
           "source_unit": "m",
           "stale_after_minutes": 360,
           "stale_after_reason": "Total sea height builds and decays over hours as the local wind works on it."
@@ -253,9 +253,9 @@
         {
           "field": "swellPeriodS",
           "from": "wave_period",
-          "value": 6.8,
+          "value": 7.4,
           "unit": "s",
-          "source_value": 6.8,
+          "source_value": 7.4,
           "source_unit": "s",
           "stale_after_minutes": 360,
           "stale_after_reason": "Period follows the same sea that produced the height."
@@ -263,9 +263,9 @@
         {
           "field": "swellDirDeg",
           "from": "wave_direction",
-          "value": 146,
+          "value": 121,
           "unit": "°",
-          "source_value": 146,
+          "source_value": 121,
           "source_unit": "°",
           "stale_after_minutes": 360,
           "stale_after_reason": "Direction follows the same sea again."
@@ -273,9 +273,9 @@
         {
           "field": "groundSwellM",
           "from": "swell_wave_height",
-          "value": 1,
+          "value": 1.06,
           "unit": "m",
-          "source_value": 1,
+          "source_value": 1.06,
           "source_unit": "m",
           "stale_after_minutes": 720,
           "stale_after_reason": "Ground swell is generated a long way offshore and takes the better part of a day to change character."
@@ -283,9 +283,9 @@
         {
           "field": "groundSwellPeriodS",
           "from": "swell_wave_period",
-          "value": 5.6,
+          "value": 7.45,
           "unit": "s",
-          "source_value": 5.6,
+          "source_value": 7.45,
           "source_unit": "s",
           "stale_after_minutes": 720,
           "stale_after_reason": "The long period is the slowest-moving number in the whole set."
@@ -293,9 +293,9 @@
         {
           "field": "groundSwellDirDeg",
           "from": "swell_wave_direction",
-          "value": 149,
+          "value": 134,
           "unit": "°",
-          "source_value": 149,
+          "source_value": 134,
           "source_unit": "°",
           "stale_after_minutes": 720,
           "stale_after_reason": "Swell direction turns as slowly as the system that made it."
@@ -307,10 +307,10 @@
         "https://marine-api.open-meteo.com/v1/marine?latitude=-27.43&longitude=153.56&current=wave_height,wave_period,wave_direction,swell_wave_height,swell_wave_period,swell_wave_direction&timezone=Australia%2FBrisbane"
       ],
       "freshness": {
-        "synced_at": "2026-08-14T15:40:51+10:00",
+        "synced_at": "2026-08-18T12:18:45+10:00",
         "stale_after_days": 1,
         "source_commit": null,
-        "observed_at": "2026-08-14T15:30",
+        "observed_at": "2026-08-18T12:15",
         "interval_seconds": 900
       }
     }

@@ -1,7 +1,7 @@
 {
   "pack": "_feeds",
   "schema": "minjerribah-connector-feed-index/1",
-  "generated": "2026-08-14",
+  "generated": "2026-08-18",
   "about": "One entry per feed a connector has written. The checksum is over the feed file as it stands, so a hand edit shows up as a mismatch when tools/connectors/verify.mjs runs. Feeds are not data packs: data/_provenance.json is the registry for those.",
   "feeds": [
     {
@@ -9,7 +9,8 @@
       "file": "data/feeds/_events-engine.json",
       "title": "The public event atlas: what is on, where, and who listed it",
       "organisation": "Quandamooka Country Events Engine, and through it the listing sources it names",
-      "synced_at": "2026-08-10T05:28:27+10:00",
+      "runtime_read": false,
+      "synced_at": "2026-08-18T12:18:45+10:00",
       "source": {
         "kind": "repository",
         "id": "quandamooka-country-events-engine",
@@ -32,7 +33,7 @@
       },
       "checksum": {
         "algorithm": "sha256-lf",
-        "value": "58822c55c2bc00030d19aa465494e73ea4274f9e3b5cb0dcddaed1acc7e4b9e7"
+        "value": "3bac6bc4d63c87ed245cb23c1da1f456a668f421fb93c287db4ed4e44bdce0a4"
       },
       "bytes": 110599
     },
@@ -87,7 +88,7 @@
       "title": "Weather and sea state for the island, as model output",
       "organisation": "Open-Meteo",
       "runtime_read": true,
-      "synced_at": "2026-08-14T15:40:51+10:00",
+      "synced_at": "2026-08-18T12:18:45+10:00",
       "source": {
         "kind": "http-endpoint",
         "id": "open-meteo",
@@ -108,16 +109,17 @@
       },
       "checksum": {
         "algorithm": "sha256-lf",
-        "value": "02107e2cfd88c079b9c0d9bdbd6cd9e16eabc11b9fa92b7b3286cd9e538a9d48"
+        "value": "6b1b9892f09a6632a9d2e30ca68eac35804c110abab90281ad798254910d2d8e"
       },
-      "bytes": 17798
+      "bytes": 17829
     },
     {
       "id": "wildlife-rescue",
       "file": "data/feeds/_wildlife-rescue.json",
       "title": "Wildlife rescue reports, contacts and lookouts",
       "organisation": "Wildlife Rescue Minjerribah",
-      "synced_at": "2026-08-10T05:28:27+10:00",
+      "runtime_read": false,
+      "synced_at": "2026-08-18T12:18:45+10:00",
       "source": {
         "kind": "repository",
         "id": "minjerribah-wildlife-rescue",
@@ -144,7 +146,7 @@
       },
       "checksum": {
         "algorithm": "sha256-lf",
-        "value": "3007ff10c072514493cee4cddc01016160af7c380d1a5867c104d186646005b6"
+        "value": "c7968d6e4ff583f2239f512a504f9fb9ca63c8b24f307fed5706d12e6202d8b1"
       },
       "bytes": 33999
     }

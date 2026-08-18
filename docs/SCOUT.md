@@ -105,6 +105,9 @@ produces, because it is the only place in this whole method where anyone is aske
 
 ## How your findings are used
 
+They go to the board (`node tools/board.mjs post`) as well as into your report, because your report
+travels through an orchestrator and a session limit can kill it in transit: the first four scouts'
+findings were lost exactly that way and were never read by anyone. The board copy survives you.
 They go to builders as invitations, not requirements. A builder may decline one and say why.
 The critic still holds the floor on defects: you do not overrule a fail, and a fail does not overrule
 you. The two of you are meant to disagree, and a wave that reads only one of you will drift, in one
