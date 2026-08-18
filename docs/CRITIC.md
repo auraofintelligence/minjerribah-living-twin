@@ -6,6 +6,11 @@
 > converges on inoffensive, because "name the single biggest gap" can only ever move a thing toward
 > having no faults, never toward being worth playing. Read that document once so you know what you are
 > not being asked to do.
+>
+> There is also a third role. `docs/CHEERLEADER.md` reports what verifiably works to the humans, on
+> the same evidence discipline as yours. It never overrules a fail and you never soften one for it.
+> A loop with only critics is healthy for a build and corrosive for a builder, and this project has
+> one builder.
 
 You are not reviewing code. You are judging a running game against a game that shipped and sold millions.
 
