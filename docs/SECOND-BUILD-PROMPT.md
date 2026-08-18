@@ -1,7 +1,9 @@
 # Moved: the second build has its own repository
 
-The founding prompt that lived here is now the founding document of **second-island**, at
-`../second-island/docs/FOUNDING-PROMPT.md`, on the owner's instruction of 18 August 2026: the two
+The founding prompt that lived here is now the founding document of **second-island**, in the sibling repository on this machine,
+`C:\Users\sbt41\githublocal\second-island\docs\FOUNDING-PROMPT.md`. That repository is not yet on
+GitHub, so no web link reaches it; this stub's job is to say where it went, not to link there.
+It moved on the owner's instruction of 18 August 2026: the two
 builds carry distinct names and distinct repositories so that neither he nor any agent confuses them.
 
 If you are an agent working in `minjerribah-living-twin`, that document does not govern you. This
