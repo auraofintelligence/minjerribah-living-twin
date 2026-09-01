@@ -46,6 +46,42 @@ found a live violation in a shipped data pack: five deleted season names were st
 keys in `data/narrative.json`. They have been removed and the whole episode is written up in
 `docs/CULTURAL-REVIEW.md` section D1. A rule that nothing executes is not a rule.
 
+<!-- github-organisation:start -->
+
+## Project links and history
+
+- First substantive build: 9 August 2026.
+- GitHub repository: [minjerribah-living-twin](https://github.com/auraofintelligence/minjerribah-living-twin).
+- Public site: [visit the public site](https://auraofintelligence.github.io/minjerribah-living-twin/).
+
+## Related public projects
+
+Each link below reflects an evidenced family, lineage or direct connection. This project has 10 relevant public connections.
+
+### Cultural and community data interfaces
+
+- [quandamooka-country-events-engine](https://github.com/auraofintelligence/quandamooka-country-events-engine) - [public page](https://auraofintelligence.github.io/quandamooka-country-events-engine/) - explicit cross-reference, shared community programme.
+- [songline_interface](https://github.com/auraofintelligence/songline_interface) - [public page](https://auraofintelligence.github.io/songline_interface/) - shared place-and-layer interface architecture.
+
+### Direct and other supported connections
+
+- [Sandworm-subterranean-systems](https://github.com/auraofintelligence/sandworm-subterranean-systems) - [public page](https://auraofintelligence.github.io/sandworm-subterranean-systems/) - explicit cross-reference.
+
+### Minjerribah digital-twin builds and explainers
+
+- [second-island](https://github.com/auraofintelligence/second-island) - [public page](https://auraofintelligence.github.io/second-island/) - earlier build; second-island is later, explicit cross-reference, ordered build lineage, shared named build family.
+- [straddie-digital-twin-builders](https://github.com/auraofintelligence/straddie-digital-twin-builders) - [public page](https://auraofintelligence.github.io/straddie-digital-twin-builders/) - explicit cross-reference, shared named build family.
+- [straddie-digital-twin-explainer](https://github.com/auraofintelligence/straddie-digital-twin-explainer) - [public page](https://auraofintelligence.github.io/straddie-digital-twin-explainer/) - explicit cross-reference, shared named build family.
+
+### Minjerribah wildlife and resilience data pathway
+
+- [bees-and-allies](https://github.com/auraofintelligence/bees-and-allies) - [public page](https://auraofintelligence.github.io/bees-and-allies/) - shared community programme.
+- [Minjerribah-Resilience](https://github.com/auraofintelligence/Minjerribah-Resilience) - [public page](https://auraofintelligence.github.io/Minjerribah-Resilience/) - explicit cross-reference, shared community programme.
+- [minjerribah-wildlife-rescue](https://github.com/auraofintelligence/minjerribah-wildlife-rescue) - [public page](https://auraofintelligence.github.io/minjerribah-wildlife-rescue/) - explicit cross-reference, shared community programme.
+- [wildlife-rescue-minjerribah](https://github.com/auraofintelligence/wildlife-rescue-minjerribah) - shared community programme.
+
+<!-- github-organisation:end -->
+
 ## Running it
 
 You need Node. There is no build step, no package install and no network access at runtime. The
